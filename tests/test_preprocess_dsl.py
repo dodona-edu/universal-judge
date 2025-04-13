@@ -18,7 +18,7 @@ from tested.nat_translation import (
     translate_yaml,
     validate_pre_dsl,
 )
-from tested.transform_json import transform_IDE, transform_json
+from tested.transform_json import transform_IDE, transform_json, transform_monolingual
 
 
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
@@ -872,9 +872,160 @@ def test_transform_executed_correct(mocker: MockerFixture):
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    transform_json(Path("schema.json"))
+    transform_json(Path("schema.json"), False, False)
 
     assert s.call_count == 25
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("multilingual-schema.json"), "w", encoding="utf-8")
+
+
+def test_json_rm_nat_lang_json_schema():
+    json_schema = {
+        "oneOf": [
+            {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/tab"}},
+            {
+                "type": "object",
+                "required": ["__tag__", "value"],
+                "properties": {
+                    "__tag__": {
+                        "type": "string",
+                        "description": "The tag used in the yaml",
+                        "const": "!natural_language",
+                    },
+                    "value": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "minItems": 1,
+                            "items": {"$ref": "#/definitions/tab"},
+                        },
+                    },
+                },
+            },
+        ]
+    }
+
+    json_schema_expected = {
+        "type": "array",
+        "minItems": 1,
+        "items": {"$ref": "#/definitions/tab"},
+    }
+
+    result = transform_monolingual(json_schema, True)
+
+    assert result == json_schema_expected
+
+
+def test_json_rm_prog_lang_json_schema():
+    json_schema = {
+        "expressionOrStatement": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "format": "tested-dsl-expression",
+                    "description": "A statement of expression in Python-like syntax as YAML string.",
+                },
+                {
+                    "type": "object",
+                    "description": "Programming-language-specific statement or expression.",
+                    "minProperties": 1,
+                    "propertyNames": {"$ref": "#/definitions/programmingLanguage"},
+                    "items": {
+                        "type": "string",
+                        "description": "A language-specific literal, which will be used verbatim.",
+                    },
+                },
+                {
+                    "type": "object",
+                    "required": ["__tag__", "value"],
+                    "properties": {
+                        "__tag__": {
+                            "type": "string",
+                            "description": "The tag used in the yaml",
+                            "const": "!programming_language",
+                        },
+                        "value": {
+                            "type": "object",
+                            "description": "Programming-language-specific statement or expression.",
+                            "minProperties": 1,
+                            "propertyNames": {
+                                "$ref": "#/definitions/programmingLanguage"
+                            },
+                            "items": {
+                                "type": "string",
+                                "description": "A language-specific literal, which will be used verbatim.",
+                            },
+                        },
+                    },
+                },
+            ]
+        },
+    }
+
+    json_schema_expected = {
+        "expressionOrStatement": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "format": "tested-dsl-expression",
+                    "description": "A statement of expression in Python-like syntax as YAML string.",
+                },
+                {
+                    "description": "Programming-language-specific statement or expression.",
+                    "minProperties": 1,
+                    "propertyNames": {"$ref": "#/definitions/programmingLanguage"},
+                    "items": {
+                        "type": "string",
+                        "description": "A language-specific literal, which will be used verbatim.",
+                    },
+                    "anyOf": [{"type": "object"}, {"type": "programming_language"}],
+                },
+            ]
+        },
+    }
+
+    result = transform_monolingual(json_schema, True)
+
+    assert result == json_schema_expected
+
+
+def test_json_schema_edge_cases():
+    json_schema = {
+        "expressionOrStatementWithNatTranslation": {},
+        "translations": {},
+        "$ref": "#/definitions/expressionOrStatementWithNatTranslation",
+        "yamlValue": {
+            "description": "A value represented as YAML.",
+            "not": {"properties": {"__tag__": {"type": "string"}}, "type": "object"},
+        },
+    }
+
+    json_schema_expected = {
+        "$ref": "#/definitions/expressionOrStatement",
+        "yamlValue": {
+            "description": "A value represented as YAML.",
+            "not": {"type": ["oracle", "expression", "programming_language"]},
+        },
+    }
+
+    result = transform_monolingual(json_schema, True)
+
+    assert result == json_schema_expected
+
+    json_schema = {
+        "yamlValue": {
+            "description": "A value represented as YAML.",
+            "not": {"properties": {"__tag__": {"type": "string"}}, "type": "object"},
+        },
+    }
+
+    json_schema_expected = {
+        "yamlValue": {
+            "description": "A value represented as YAML.",
+        }
+    }
+
+    result = transform_monolingual(json_schema, False)
+
+    assert result == json_schema_expected

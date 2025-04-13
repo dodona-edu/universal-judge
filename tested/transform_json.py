@@ -5,12 +5,14 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+
 class SpecialMap(Enum):
     NATURAL_LANGUAGE = "natural_language"
     PROGRAMMING_LANGUAGE = "programming_language"
     ORACLE = "oracle"
     EXPRESSION = "expression"
     NONE = "none"
+
 
 def map_kind(element: dict) -> SpecialMap:
     if "required" in element and "properties" in element:
@@ -19,9 +21,13 @@ def map_kind(element: dict) -> SpecialMap:
         assert isinstance(required, list)
         assert isinstance(properties, dict)
         if "__tag__" in required and "value" in required:
-            if  "__tag__" in properties and "value" in properties:
+            if "__tag__" in properties and "value" in properties:
                 tag = properties["__tag__"]
-                if isinstance(tag, dict) and "const" in tag and isinstance(tag["const"], str):
+                if (
+                    isinstance(tag, dict)
+                    and "const" in tag
+                    and isinstance(tag["const"], str)
+                ):
                     if tag["const"] == "!natural_language":
                         return SpecialMap.NATURAL_LANGUAGE
                     elif tag["const"] == "!programming_language":
@@ -32,6 +38,7 @@ def map_kind(element: dict) -> SpecialMap:
                         return SpecialMap.EXPRESSION
     return SpecialMap.NONE
 
+
 def change_prog_lang_type(element: dict, prog_lang: dict) -> dict:
     if element == prog_lang:
         ele_type = element.pop("type")
@@ -40,6 +47,7 @@ def change_prog_lang_type(element: dict, prog_lang: dict) -> dict:
             {"type": "programming_language"},
         ]
     return element
+
 
 def transform_monolingual(data: Any, strict: bool) -> Any:
     if isinstance(data, dict):
@@ -65,7 +73,9 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
             # A programming_langauge map was found. If not strict, just remove.
             # If strict, still provide the type option for the corresponding object.
             if prog_lang is not None and strict:
-                new_one_of = [change_prog_lang_type(ele, prog_lang) for ele in new_one_of]
+                new_one_of = [
+                    change_prog_lang_type(ele, prog_lang) for ele in new_one_of
+                ]
 
             if len(new_one_of) <= 1:
                 data.pop("oneOf")
@@ -83,37 +93,38 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
 
         if "$ref" in data:
             if isinstance(data["$ref"], str):
-                if data["$ref"] == "#/definitions/expressionOrStatementWithNatTranslation":
+                if (
+                    data["$ref"]
+                    == "#/definitions/expressionOrStatementWithNatTranslation"
+                ):
                     data["$ref"] = "#/definitions/expressionOrStatement"
 
         if "yamlValue" in data:
             if strict:
                 data["yamlValue"] = {
-                  "description" : "A value represented as YAML.",
-                  "not" : {
-                    "type" : [
-                      "oracle",
-                      "expression",
-                      "programming_language"
-                    ]
-                  }
+                    "description": "A value represented as YAML.",
+                    "not": {"type": ["oracle", "expression", "programming_language"]},
                 }
             else:
                 data["yamlValue"] = {
                     "description": "A value represented as YAML.",
                 }
 
-
         return {k: transform_monolingual(v, strict) for k, v in data.items()}
     elif isinstance(data, list):
-        return [transformed for ele in data if
-                (transformed := transform_monolingual(ele, strict)) != {}]
+        return [
+            transformed
+            for ele in data
+            if (transformed := transform_monolingual(ele, strict)) != {}
+        ]
     return data
 
 
 def transform_IDE(data: Any) -> Any:
     if isinstance(data, list):
-        return [transformed for ele in data if (transformed := transform_IDE(ele)) != {}]
+        return [
+            transformed for ele in data if (transformed := transform_IDE(ele)) != {}
+        ]
     elif isinstance(data, dict):
         if "return" in data:
             # This is necessary since tags aren't recognized in the Json schema.
@@ -162,7 +173,7 @@ def transform_IDE(data: Any) -> Any:
     return data
 
 
-def transform_json(json_file: Path, monolingual: bool,  strict: bool):
+def transform_json(json_file: Path, monolingual: bool, strict: bool):
     """
     This function transforms the JSON schema used in the DSL translator into
     a new JSON schema that can be used to validate the multilingual YAML in your IDE.
@@ -185,9 +196,7 @@ def transform_json(json_file: Path, monolingual: bool,  strict: bool):
         result = transform_monolingual(json_stream, strict)
         file_name = "multilingual-schema.json"
 
-    with open(
-        json_file.parent / file_name, "w", encoding="utf-8"
-    ) as f:
+    with open(json_file.parent / file_name, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
 
 
