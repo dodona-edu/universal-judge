@@ -98,13 +98,8 @@ def get_readable_input(
     3. If it is a context testcase:
         a. The stdin and the arguments.
     """
-    # We have potential files.
-    # Check if the file names are present in the string.
-    # If not, we can also stop before doing ugly things.
-    # We construct a regex, since that can be faster than checking everything.
-    simple_regex = re.compile(
-        "|".join(map(lambda x: re.escape(x.path), case.link_files))
-    )
+
+    link_files = case.link_files
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -124,18 +119,28 @@ def get_readable_input(
         # Determine the stdin
         stdin_data = case.input.stdin
         if isinstance(stdin_data, TextData):
-            stdin = stdin_data.data
+            if stdin_data.type == "file":
+                stdin = stdin_data.path
+                if stdin_data.data is not None:
+                    link_files.append(FileUrl(path=stdin, content=stdin_data.data, url=stdin_data.url))
+                else:
+                    link_files.append(FileUrl(path=stdin, url=stdin_data.url))
+            else:
+                stdin = stdin_data.data
         else:
             stdin = ""
 
         # If we have both stdin and arguments, we use a here-document.
         if case.input.arguments and stdin:
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
-                text = f"{args} << {stdin}"
+                text = f"{args} < {stdin}"
             else:
                 assert stdin[-1] == "\n", "stdin must end with a newline"
-                delimiter = _get_heredoc_token(stdin)
-                text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+                if stdin.count("\n") > 1:
+                    delimiter = _get_heredoc_token(stdin)
+                    text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+                else:
+                    text = f"{args} <<< {stdin.strip()}"
         elif stdin:
             assert not case.input.arguments
             text = stdin
@@ -156,8 +161,16 @@ def get_readable_input(
         if case.line_comment:
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
+    # We have potential files.
+    # Check if the file names are present in the string.
+    # If not, we can also stop before doing ugly things.
+    # We construct a regex, since that can be faster than checking everything.
+    simple_regex = re.compile(
+        "|".join(map(lambda x: re.escape(x.path), link_files))
+    )
+
     # If there are no files, return now. This means we don't need to do ugly stuff.
-    if not case.link_files:
+    if not link_files:
         return ExtendedMessage(description=text, format=format_), set()
 
     if not simple_regex.search(text):
@@ -169,7 +182,7 @@ def get_readable_input(
     generated_html = html.escape(text)
 
     # Map of file URLs.
-    url_map = {html.escape(x.path): x for x in case.link_files}
+    url_map = {html.escape(x.path): x for x in link_files}
 
     seen = set()
     escaped_regex = re.compile("|".join(url_map.keys()))

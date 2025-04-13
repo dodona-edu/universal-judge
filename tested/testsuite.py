@@ -246,15 +246,20 @@ def _resolve_path(working_directory, file_path):
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
-    data: str
+    data: str | None
+    path: str = ""
+    url: str = ""
     type: TextChannelType = TextChannelType.TEXT
 
     def get_data_as_string(self, working_directory: Path) -> str:
         """Get the data as a string, reading the file if necessary."""
-        if self.type == TextChannelType.TEXT:
+        if self.data is not None:
             return self.data
+
+        if self.type == TextChannelType.TEXT:
+            return ""
         elif self.type == TextChannelType.FILE:
-            file_path = _resolve_path(working_directory, self.data)
+            file_path = _resolve_path(working_directory, self.path)
             with open(file_path, "r") as file:
                 return file.read()
         else:

@@ -512,9 +512,11 @@ def _convert_text_output_channel(
     else:
         data = str(raw_data)
 
-    text_output = TextOutputChannel(data=data)
+
     if path is not None:
-        text_output.type = TextChannelType.FILE
+        text_output = TextOutputChannel(data=None, path=data, type=TextChannelType.FILE)
+    else:
+        text_output = TextOutputChannel(data=data)
 
     if isinstance(stream, str):
         text_output.oracle = GenericTextOracle(options=config)
@@ -671,11 +673,29 @@ def _convert_testcase(
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            if isinstance(testcase["stdin"], PathString):
-                stdin = TextData(data=str(testcase["stdin"]), type=TextChannelType.FILE)
+            stdin_data = testcase["stdin"]
+            data = None
+            path = ""
+            url = ""
+            if isinstance(stdin_data, str):
+                data = _ensure_trailing_newline(stdin_data)
             else:
-                assert isinstance(testcase["stdin"], str)
-                stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
+                assert isinstance(stdin_data, dict)
+                if "content" in stdin_data:
+                    content = stdin_data["content"]
+                    assert isinstance(content, str)
+                    data = _ensure_trailing_newline(content)
+
+                if "path" in stdin_data:
+                    assert "url" in stdin_data
+                    path = stdin_data["path"]
+                    url = stdin_data["url"]
+                    assert isinstance(path, str) and isinstance(url, str)
+
+            if path:
+                stdin = TextData(data=data, path=path, url=url, type=TextChannelType.FILE)
+            else:
+                stdin = TextData(data=data)
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])

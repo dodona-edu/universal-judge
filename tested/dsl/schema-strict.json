@@ -276,13 +276,57 @@
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "path",
-            "number",
-            "integer",
-            "boolean",
-            "object"
+          "oneOf": [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties" : false,
+              "required": ["content"],
+              "properties": {
+                "content": {
+                  "type" : [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "object"
+                  ],
+                  "description": "The actual content that will be used for stdin."
+                },
+                "path": {
+                  "type": "string",
+                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+                },
+                "url": {
+                  "type": "string",
+                  "format" : "uri",
+                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties" : false,
+              "required": ["path", "url"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+                },
+                "url": {
+                  "type": "string",
+                  "format" : "uri",
+                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+                }
+              }
+            }
           ]
         },
         "arguments" : {
@@ -374,13 +418,55 @@
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "path",
-            "number",
-            "integer",
-            "boolean",
-            "object"
+          "oneOf": [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "required": ["content"],
+              "properties": {
+                "content": {
+                  "type" : [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean",
+                    "object"
+                  ],
+                  "description": "The actual content that will be used for stdin."
+                },
+                "path": {
+                  "type": "string",
+                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+                },
+                "url": {
+                  "type": "string",
+                  "format" : "uri",
+                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": ["path", "url"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+                },
+                "url": {
+                  "type": "string",
+                  "format" : "uri",
+                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+                }
+              }
+            }
           ]
         },
         "arguments" : {
