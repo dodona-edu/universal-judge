@@ -1310,8 +1310,33 @@
             "$ref" : "#/definitions/programmingLanguage"
           },
           "items" : {
-            "type" : "string",
-            "description" : "A language-specific literal, which will be used verbatim."
+            "oneOf" : [
+              {
+                "type" : "string",
+                "description" : "A language-specific literal, which will be used verbatim."
+              },
+              {
+                "type" : "object",
+                "required": [
+                  "__tag__",
+                  "value"
+                ],
+                "properties" : {
+                  "__tag__": {
+                    "type" : "string",
+                    "description" : "The tag used in the yaml",
+                    "const":  "!natural_language"
+                  },
+                  "value":{
+                    "type": "object",
+                    "additionalProperties": {
+                      "type" : "string",
+                      "description" : "A language-specific literal, which will be used verbatim."
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         {
@@ -1334,8 +1359,33 @@
                 "$ref" : "#/definitions/programmingLanguage"
               },
               "items" : {
-                "type" : "string",
-                "description" : "A language-specific literal, which will be used verbatim."
+                "oneOf" : [
+                  {
+                    "type" : "string",
+                    "description" : "A language-specific literal, which will be used verbatim."
+                  },
+                  {
+                    "type" : "object",
+                    "required": [
+                      "__tag__",
+                      "value"
+                    ],
+                    "properties" : {
+                      "__tag__": {
+                        "type" : "string",
+                        "description" : "The tag used in the yaml",
+                        "const":  "!natural_language"
+                      },
+                      "value":{
+                        "type": "object",
+                        "additionalProperties": {
+                          "type" : "string",
+                          "description" : "A language-specific literal, which will be used verbatim."
+                        }
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
