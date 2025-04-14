@@ -49,7 +49,6 @@ class CustomDumper(yaml.SafeDumper):
         if "__tag__" in data:
             return dumper.represent_with_tag(data["__tag__"], data["value"])
 
-
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data
         )
