@@ -40,6 +40,12 @@ class CustomDumper(yaml.SafeDumper):
 
     @staticmethod
     def custom_representer(dumper, data):
+        """
+        Will turn the given object back into YAML.
+
+        :param dumper: The dumper to use.
+        :param data: The object to represent.
+        """
         if "__tag__" in data:
             if data["__tag__"]:
                 return dumper.represent_with_tag(data["__tag__"], data["value"])
@@ -52,7 +58,13 @@ class CustomDumper(yaml.SafeDumper):
 
 
 def construct_custom(loader, tag_suffix, node):
+    """
+    This constructor will turn the given YAML into an object that can be used for translation.
 
+    :param loader: The YAML loader.
+    :param tag_suffix: The tag that was found.
+    :param node: The node to construct.
+    """
     type2method = {
         MappingNode: loader.construct_mapping,
         ScalarNode: loader.construct_scalar,
@@ -75,6 +87,15 @@ def construct_custom(loader, tag_suffix, node):
 def translate_yaml(
     data: Any, translations: dict, language: str, env: Environment
 ) -> Any:
+    """
+    This function will translate the multilingual object.
+
+    :param data: The object to translate.
+    :param translations: The merge of all found translations maps.
+    :param language: The language to translate to.
+    :param env: The Jinja-environment to use.
+    :return: The translated object.
+    """
     if isinstance(data, dict):
         if "__tag__" in data and data["__tag__"] == "!natural_language":
             return translate_yaml(data["value"][language], translations, language, env)
@@ -100,6 +121,10 @@ def translate_yaml(
 
 
 def wrap_in_braces(value):
+    """
+    This function will provide the ability to still keep the curly bracket around the
+    translated result. Example: {{ key | braces }} => {sleutel} and {{ key }} => sleutel.
+    """
     return f"{{{value}}}"
 
 
