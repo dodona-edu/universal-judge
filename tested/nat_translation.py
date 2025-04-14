@@ -47,10 +47,8 @@ class CustomDumper(yaml.SafeDumper):
         :param data: The object to represent.
         """
         if "__tag__" in data:
-            if data["__tag__"]:
-                return dumper.represent_with_tag(data["__tag__"], data["value"])
-            else:
-                data = data["value"]
+            return dumper.represent_with_tag(data["__tag__"], data["value"])
+
 
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data
