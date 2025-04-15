@@ -95,15 +95,18 @@ def translate_yaml(
     """
     if isinstance(data, dict):
         if "__tag__" in data and data["__tag__"] == "!natural_language":
-            return translate_yaml(data["value"][language], translations, language, env)
+            value = data["value"]
+            assert language in value
+            return translate_yaml(value[language], translations, language, env)
 
         current_translations = data.pop("translations", {})
         for key, value in current_translations.items():
+            assert language in value
             current_translations[key] = value[language]
-        merged_translations = {**translations, **current_translations}
+        translations = {**translations, **current_translations}
 
         return {
-            key: translate_yaml(value, merged_translations, language, env)
+            key: translate_yaml(value, translations, language, env)
             for key, value in data.items()
         }
     elif isinstance(data, list):
