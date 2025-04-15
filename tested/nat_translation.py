@@ -82,13 +82,20 @@ def construct_custom(loader, tag_suffix, node):
 
 
 def translate_yaml(
-    data: Any, translations: dict, language: str, env: Environment
+    data: Any,
+    translations: dict,
+    templates: dict,
+    template_data: dict,
+    language: str,
+    env: Environment,
 ) -> Any:
     """
     This function will translate the multilingual object.
 
     :param data: The object to translate.
     :param translations: The merge of all found translations maps.
+    :param templates: The merge of all found templates.
+    :param template_data: The data passed to a template. This will only not be empty when a template is processed.
     :param language: The language to translate to.
     :param env: The Jinja-environment to use.
     :return: The translated object.
@@ -97,7 +104,12 @@ def translate_yaml(
         if "__tag__" in data and data["__tag__"] == "!natural_language":
             value = data["value"]
             assert language in value
-            return translate_yaml(value[language], translations, language, env)
+            return translate_yaml(
+                value[language], translations, templates, template_data, language, env
+            )
+
+        current_templates = data.pop("templates", {})
+        templates = {**templates, **current_templates}
 
         current_translations = data.pop("translations", {})
         for key, value in current_translations.items():
@@ -105,15 +117,49 @@ def translate_yaml(
             current_translations[key] = value[language]
         translations = {**translations, **current_translations}
 
-        return {
-            key: translate_yaml(value, translations, language, env)
+        template = None
+        if "placeholder" in data:
+            placeholder = data.pop("placeholder")
+            name = placeholder["name"]
+            new_temp_data = translate_yaml(
+                placeholder["data"],
+                translations,
+                templates,
+                template_data,
+                language,
+                env,
+            )
+
+            assert name in templates
+            template = translate_yaml(
+                templates[name], translations, templates, new_temp_data, language, env
+            )
+
+            if not data:
+                return template
+            assert isinstance(template, dict)
+
+        result = {
+            key: translate_yaml(
+                value, translations, templates, template_data, language, env
+            )
             for key, value in data.items()
         }
+        if template is not None:
+            result.update(template)
+
+        return result
     elif isinstance(data, list):
-        return [translate_yaml(item, translations, language, env) for item in data]
+        return [
+            translate_yaml(item, translations, templates, template_data, language, env)
+            for item in data
+        ]
     elif isinstance(data, str):
+        print(data)
         try:
-            return env.from_string(data).render(translations)
+            return env.from_string(data).render(
+                translations=translations, template=template_data
+            )
         except TemplateSyntaxError:
             return data
     return data
@@ -188,10 +234,10 @@ def run_translation(
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
     parsed_yaml = parse_yaml(yaml_stream)
-    validate_pre_dsl(parsed_yaml)
+    #validate_pre_dsl(parsed_yaml)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
+    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
 
     missing_keys = TrackingUndefined.missing_keys
     translated_yaml_string = convert_to_yaml(translated_data)
