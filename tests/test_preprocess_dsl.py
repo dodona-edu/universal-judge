@@ -24,7 +24,7 @@ from tested.transform_json import transform_IDE, transform_json, transform_monol
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     enviroment = create_enviroment()
     yaml_object = parse_yaml(yaml_str)
-    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_dsl = translate_yaml(yaml_object, {}, {}, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 
@@ -393,7 +393,7 @@ tabs:
     validate_pre_dsl(yaml_object)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_data = translate_yaml(yaml_object, {}, {}, {}, "en", enviroment)
     translated_yaml_string = convert_to_yaml(translated_data)
     _validate_dsl(_parse_yaml(translated_yaml_string))
 
@@ -595,7 +595,7 @@ tabs:
 
     environment = create_enviroment()
     parsed_yaml = parse_yaml(yaml_str)
-    translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
+    translated_dsl = translate_yaml(parsed_yaml, {}, {}, {}, "en", environment)
     translated_yaml_string = convert_to_yaml(translated_dsl)
     yaml_object = _parse_yaml(translated_yaml_string)
     assert isinstance(yaml_object, dict)

@@ -155,10 +155,9 @@ def translate_yaml(
             for item in data
         ]
     elif isinstance(data, str):
-        print(data)
         try:
             return env.from_string(data).render(
-                translations=translations, template=template_data
+                translations=translations, templates=template_data
             )
         except TemplateSyntaxError:
             return data
@@ -234,7 +233,7 @@ def run_translation(
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
     parsed_yaml = parse_yaml(yaml_stream)
-    #validate_pre_dsl(parsed_yaml)
+    # validate_pre_dsl(parsed_yaml)
 
     enviroment = create_enviroment()
     translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
