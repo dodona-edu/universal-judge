@@ -111,7 +111,6 @@ def get_readable_input(
             else:
                 stdin = stdin_data.data
 
-
     format_ = "text"  # By default, we use text as input.
     if case.description:
         if isinstance(case.description, ExtendedMessage):
@@ -120,6 +119,7 @@ def get_readable_input(
         else:
             text = case.description
     elif case.is_main_testcase():
+        assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         # Determine the command (with arguments)
@@ -164,9 +164,7 @@ def get_readable_input(
     # Check if the file names are present in the string.
     # If not, we can also stop before doing ugly things.
     # We construct a regex, since that can be faster than checking everything.
-    simple_regex = re.compile(
-        "|".join(map(lambda x: re.escape(x.path), link_files))
-    )
+    simple_regex = re.compile("|".join(map(lambda x: re.escape(x.path), link_files)))
 
     # If there are no files, return now. This means we don't need to do ugly stuff.
     if not link_files:

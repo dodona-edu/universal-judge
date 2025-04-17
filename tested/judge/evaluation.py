@@ -136,7 +136,7 @@ def _evaluate_channel(
         expected = evaluation_result.readable_expected
         expected_channel = channel
         if isinstance(output_element, OutputFileData):
-            expected_channel = output_element.path
+            expected_channel = f"File: {output_element.path}"
         out.add(StartTest(expected=expected, channel=expected_channel))
 
         # Report any messages we received.

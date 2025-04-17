@@ -512,7 +512,6 @@ def _convert_text_output_channel(
     else:
         data = str(raw_data)
 
-
     if path is not None:
         text_output = TextOutputChannel(data=None, path=data, type=TextChannelType.FILE)
     else:
@@ -693,7 +692,9 @@ def _convert_testcase(
                     assert isinstance(path, str) and isinstance(url, str)
 
             if path:
-                stdin = TextData(data=data, path=path, url=url, type=TextChannelType.FILE)
+                stdin = TextData(
+                    data=data, path=path, url=url, type=TextChannelType.FILE
+                )
             else:
                 stdin = TextData(data=data)
         else:
