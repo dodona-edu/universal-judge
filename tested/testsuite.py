@@ -783,10 +783,12 @@ class ExecutionMode(StrEnum):
     PRECOMPILATION = "batch"
     INDIVIDUAL = "context"
 
+
 @unique
 class DeprecatedUsage(StrEnum):
     INPUT_FILES = "input_files"
     OUTPUT_FILES = "output_files"
+
 
 @define
 class Suite(WithFeatures, WithFunctions):

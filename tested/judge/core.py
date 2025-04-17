@@ -10,13 +10,15 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
+    ExtendedMessage,
     Metadata,
+    Permission,
     StartContext,
     StartJudgement,
     StartTab,
     Status,
     StatusMessage,
-    report_update, ExtendedMessage, Permission,
+    report_update,
 )
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
@@ -46,7 +48,7 @@ from tested.languages.generation import (
     generate_statement,
 )
 from tested.serialisation import Statement
-from tested.testsuite import LanguageLiterals, MainInput, TextData, DeprecatedUsage
+from tested.testsuite import DeprecatedUsage, LanguageLiterals, MainInput, TextData
 
 _logger = logging.getLogger(__name__)
 
@@ -125,7 +127,6 @@ def judge(bundle: Bundle):
                 permission=Permission.STAFF,
             )
         )
-
 
     if DeprecatedUsage.OUTPUT_FILES in bundle.suite.deprecated:
         messages.append(

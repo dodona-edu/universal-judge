@@ -49,6 +49,7 @@ from tested.serialisation import (
 from tested.testsuite import (
     Context,
     CustomCheckOracle,
+    DeprecatedUsage,
     EmptyChannel,
     EvaluationFunction,
     ExceptionOutputChannel,
@@ -71,7 +72,7 @@ from tested.testsuite import (
     TextChannelType,
     TextData,
     TextOutputChannel,
-    ValueOutputChannel, DeprecatedUsage,
+    ValueOutputChannel,
 )
 from tested.utils import get_args, recursive_dict_merge
 
@@ -279,12 +280,12 @@ class DslContext:
         in a new context for the new level.
 
         :param new_level: The new object from the DSL to get information from.
-         :param workdir: The working directory where all files are located.
+        :param workdir: The working directory where all files are located.
 
         :return: A new context.
         """
         if new_level is None:
-            return self
+            return self, set()
 
         deprecated_usage = set()
         the_files = self.files
@@ -293,9 +294,14 @@ class DslContext:
             if "files" in new_level:
                 key = "files"
                 deprecated_usage.add(DeprecatedUsage.INPUT_FILES)
-            assert isinstance(new_level[key], list)
+
+            files = new_level[key]
+            assert isinstance(files, list)
             additional_files = {
-                _convert_file(f, workdir=workdir, deprecated=len(deprecated_usage) == 0) for f in new_level[key]
+                _convert_file(
+                    f, workdir=workdir, deprecated_usage=len(deprecated_usage) == 0
+                )
+                for f in files
             }
             the_files = list(set(self.files) | additional_files)
 
@@ -433,22 +439,25 @@ def _convert_value(value: YamlObject) -> Value:
     return _tested_type_to_value(tested_type)
 
 
-def _convert_file(link_file: YamlDict, workdir: Path | None, deprecated: bool) -> FileUrl:
-    path_key = "path" if deprecated else "name"
+def _convert_file(
+    link_file: YamlDict, workdir: Path | None, deprecated_usage: bool
+) -> FileUrl:
+    path_key = "path" if deprecated_usage else "name"
+    path_str = link_file[path_key]
 
-    assert isinstance(link_file[path_key], str)
+    assert isinstance(path_str, str)
     assert isinstance(link_file["url"], str)
     content = ""
     if "content" in link_file:
         content = link_file["content"]
         assert isinstance(content, str)
         if workdir is not None:
-            full_path = workdir / link_file[path_key]
+            full_path = workdir / path_str
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-    return FileUrl(path=link_file[path_key], url=link_file["url"], content=content)
+    return FileUrl(path=path_str, url=link_file["url"], content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
@@ -539,12 +548,17 @@ def _convert_text_output_channel(
             return text_output
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
+
 def _convert_file_output_channel_deprecated(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
     assert isinstance(stream, dict)
 
-    data = OutputFileData(content_type=TextChannelType.TEXT, content=str(stream["content"]), path=str(stream["location"]))
+    data = OutputFileData(
+        content_type=TextChannelType.TEXT,
+        content=str(stream["content"]),
+        path=str(stream["location"]),
+    )
 
     if "oracle" not in stream or stream["oracle"] == "builtin":
         config = context.merge_inheritable_with_specific_config(stream, config_name)
@@ -794,13 +808,16 @@ def _convert_testcase(
     else:
         the_description = None
 
-    return Testcase(
-        description=the_description,
-        input=the_input,
-        output=output,
-        link_files=context.files,
-        line_comment=line_comment,
-    ), deprecated_usage
+    return (
+        Testcase(
+            description=the_description,
+            input=the_input,
+            output=output,
+            link_files=context.files,
+            line_comment=line_comment,
+        ),
+        deprecated_usage,
+    )
 
 
 def _convert_context(
@@ -816,7 +833,9 @@ def _convert_context(
     return Context(testcases=testcases), deprecated_usage
 
 
-def _convert_tab(tab: YamlDict, context: DslContext, workdir: Path | None) -> tuple[Tab, set[DeprecatedUsage]]:
+def _convert_tab(
+    tab: YamlDict, context: DslContext, workdir: Path | None
+) -> tuple[Tab, set[DeprecatedUsage]]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -839,7 +858,9 @@ def _convert_tab(tab: YamlDict, context: DslContext, workdir: Path | None) -> tu
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts, du = _convert_dsl_list(tab["cases"], context, workdir, _convert_context)
+        contexts, du = _convert_dsl_list(
+            tab["cases"], context, workdir, _convert_context
+        )
         deprecated_usage.update(du)
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
@@ -869,7 +890,9 @@ def _convert_dsl_list(
     dsl_list: list,
     context: DslContext,
     workdir: Path | None,
-    converter: Callable[[YamlDict, DslContext, Path | None],  tuple[T, set[DeprecatedUsage]]],
+    converter: Callable[
+        [YamlDict, DslContext, Path | None], tuple[T, set[DeprecatedUsage]]
+    ],
 ) -> tuple[list[T], set[DeprecatedUsage]]:
     """
     Convert a list of YAML objects into a test suite object.
