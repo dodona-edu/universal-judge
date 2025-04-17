@@ -16,7 +16,7 @@ from tested.dodona import (
     StartTab,
     Status,
     StatusMessage,
-    report_update,
+    report_update, ExtendedMessage, Permission,
 )
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
@@ -46,7 +46,7 @@ from tested.languages.generation import (
     generate_statement,
 )
 from tested.serialisation import Statement
-from tested.testsuite import LanguageLiterals, MainInput, TextData
+from tested.testsuite import LanguageLiterals, MainInput, TextData, DeprecatedUsage
 
 _logger = logging.getLogger(__name__)
 
@@ -116,6 +116,28 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
+
+    messages = []
+    if DeprecatedUsage.INPUT_FILES in bundle.suite.deprecated:
+        messages.append(
+            ExtendedMessage(
+                f"WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead.",
+                permission=Permission.STAFF,
+            )
+        )
+
+
+    if DeprecatedUsage.OUTPUT_FILES in bundle.suite.deprecated:
+        messages.append(
+            ExtendedMessage(
+                f"WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead.",
+                permission=Permission.STAFF,
+            )
+        )
+
+    if messages:
+        collector.add_messages(messages)
+
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 

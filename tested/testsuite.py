@@ -783,12 +783,17 @@ class ExecutionMode(StrEnum):
     PRECOMPILATION = "batch"
     INDIVIDUAL = "context"
 
+@unique
+class DeprecatedUsage(StrEnum):
+    INPUT_FILES = "input_files"
+    OUTPUT_FILES = "output_files"
 
 @define
 class Suite(WithFeatures, WithFunctions):
     """General test suite, which is used to run tests of some code."""
 
     tabs: list[Tab] = field(factory=list)
+    deprecated: list[DeprecatedUsage] = field(factory=list)
     namespace: str = "submission"
 
     def get_used_features(self) -> FeatureSet:
