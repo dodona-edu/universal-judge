@@ -99,7 +99,18 @@ def get_readable_input(
         a. The stdin and the arguments.
     """
 
+    stdin = ""
     link_files = case.link_files
+    if case.is_main_testcase():
+        assert isinstance(case.input, MainInput)
+        stdin_data = case.input.stdin
+        if isinstance(stdin_data, TextData):
+            if stdin_data.type == "file":
+                stdin = stdin_data.path
+                link_files.append(FileUrl(path=stdin, url=stdin_data.url))
+            else:
+                stdin = stdin_data.data
+
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -109,7 +120,6 @@ def get_readable_input(
         else:
             text = case.description
     elif case.is_main_testcase():
-        assert isinstance(case.input, MainInput)
         # See https://rouge-ruby.github.io/docs/Rouge/Lexers/ConsoleLexer.html
         format_ = "console"
         # Determine the command (with arguments)
@@ -118,32 +128,21 @@ def get_readable_input(
         args = f"$ {command}"
         # Determine the stdin
         stdin_data = case.input.stdin
-        if isinstance(stdin_data, TextData):
-            if stdin_data.type == "file":
-                stdin = stdin_data.path
-                if stdin_data.data is not None:
-                    link_files.append(FileUrl(path=stdin, content=stdin_data.data, url=stdin_data.url))
-                else:
-                    link_files.append(FileUrl(path=stdin, url=stdin_data.url))
-            else:
-                stdin = stdin_data.data
-        else:
-            stdin = ""
 
         # If we have both stdin and arguments, we use a here-document.
-        if case.input.arguments and stdin:
+        if stdin:
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
                 text = f"{args} < {stdin}"
-            else:
+            elif case.input.arguments:
                 assert stdin[-1] == "\n", "stdin must end with a newline"
                 if stdin.count("\n") > 1:
                     delimiter = _get_heredoc_token(stdin)
                     text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
                 else:
                     text = f"{args} <<< {stdin.strip()}"
-        elif stdin:
-            assert not case.input.arguments
-            text = stdin
+            else:
+                assert not case.input.arguments
+                text = stdin
         else:
             text = args
     elif isinstance(case.input, Statement):

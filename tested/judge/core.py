@@ -344,7 +344,6 @@ def _process_results(
             # TODO: we could probably re-use the "readable_input" function here,
             #       since it only differs a bit.
             meta_statements = []
-            meta_stdin = None
             input_files = []
             for case in planned.context.testcases:
                 for file in case.link_files:
@@ -352,20 +351,14 @@ def _process_results(
                     if file.url != "":
                         file_data["url"] = file.url
 
-                    if file.content != "":
-                        file_data["content"] = file.content
                     input_files.append(file_data)
-                if case.is_main_testcase():
-                    assert isinstance(case.input, MainInput)
-                    if isinstance(case.input.stdin, TextData):
-                        meta_stdin = case.input.stdin.data
-                elif isinstance(case.input, Statement):
+                if isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
                     meta_statements.append(stmt)
                 elif isinstance(case.input, LanguageLiterals):
                     stmt = case.input.get_for(bundle.config.programming_language)
                     meta_statements.append(stmt)
-                else:
+                elif not case.is_main_testcase():
                     raise AssertionError(f"Found unknown case input type: {case.input}")
 
             if meta_statements:
@@ -381,7 +374,6 @@ def _process_results(
                 CloseContext(
                     data=Metadata(
                         statements=meta_statements,
-                        stdin=meta_stdin,
                         input_files=input_files,
                     )
                 ),

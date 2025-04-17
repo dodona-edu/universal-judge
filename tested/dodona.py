@@ -39,7 +39,6 @@ class Metadata:
     """Currently only used for the Python tutor"""
 
     statements: str | None
-    stdin: str | None
     input_files: list[dict[str, str]] | None
 
 
