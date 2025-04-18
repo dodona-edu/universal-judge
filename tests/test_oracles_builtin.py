@@ -190,7 +190,7 @@ def test_file_oracle_full_correct_with_text_content(
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
     s = mocker.spy(
-        tested.oracles.text, name="_text_comparison" # type: ignore[reportAttributeAccessIssue]
+        tested.oracles.text, name="_text_comparison"  # type: ignore[reportAttributeAccessIssue]
     )
     mock_files = [
         mocker.mock_open(read_data=content).return_value
