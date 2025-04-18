@@ -86,7 +86,9 @@ tabs:
 - tab: "Ctx"
   testcases:
   - arguments: [ "--arg", "argument" ]
-    stdin: !path "input.text"
+    stdin:
+        path: "input.text"
+        url: "media/input.text"
     stdout: !path "output.text"
     stderr: 
       content: !path "error.text"
@@ -103,12 +105,14 @@ tabs:
     assert len(context.testcases) == 1
     tc = context.testcases[0]
     assert tc.is_main_testcase()
-    assert tc.input.stdin.data == "input.text"
+    assert tc.input.stdin.path == "input.text"
+    assert tc.input.stdin.url == "media/input.text"
     assert tc.input.stdin.type == TextChannelType.FILE
+    assert tc.input.stdin.data is None
     assert tc.input.arguments == ["--arg", "argument"]
-    assert tc.output.stderr.data == "error.text"
+    assert tc.output.stderr.path == "error.text"
     assert tc.output.stderr.type == TextChannelType.FILE
-    assert tc.output.stdout.data == "output.text"
+    assert tc.output.stdout.path == "output.text"
     assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
@@ -1218,9 +1222,9 @@ def test_files_are_propagated():
     yaml_str = """
 - tab: "Config ctx"
   input_files:
-    - name: "test"
+    - path: "test"
       url: "test.md"
-    - name: "two"
+    - path: "two"
       url: "two.md"
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
@@ -1228,7 +1232,7 @@ def test_files_are_propagated():
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.337"
     input_files:
-        - name: "test"
+        - path: "test"
           url: "twooo.md"
     """
     json_str = translate_to_test_suite(yaml_str)
