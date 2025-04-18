@@ -1,12 +1,11 @@
+# type: ignore[reportAttributeAccessIssue]
 import json
 import os
 from pathlib import Path
 
 import pytest
 from jsonschema.validators import validator_for
-from pytest_mock import MockerFixture
 
-import tested
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
@@ -33,6 +32,7 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     CustomCheckOracle,
+    DeprecatedUsage,
     FileOutputChannel,
     FileUrl,
     GenericTextOracle,
@@ -43,7 +43,7 @@ from tested.testsuite import (
     TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
-    parse_test_suite, DeprecatedUsage,
+    parse_test_suite,
 )
 from tested.utils import get_args
 
@@ -788,6 +788,7 @@ def test_value_built_in_checks_implied():
         type=BasicStringTypes.TEXT, data="hallo"
     )
 
+
 def test_using_deprecated_file():
     yaml_str = f"""
         - tab: 'Test'
@@ -813,6 +814,7 @@ def test_using_deprecated_file():
     assert test.output.file.output_data[0].path == "test.txt"
     assert test.output.file.output_data[0].content == "Hello world!"
     assert test.output.file.output_data[0].content_type == TextChannelType.TEXT
+
 
 def test_using_deprecated_files():
     yaml_str = f"""
@@ -1300,6 +1302,7 @@ def test_files_are_propagated():
         FileUrl(path="test", url="test.md"),
         FileUrl(path="two", url="two.md"),
     }
+
 
 def test_input_file_created(tmp_path: Path, pytestconfig: pytest.Config):
     yaml_str = f"""
