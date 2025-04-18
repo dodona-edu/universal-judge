@@ -871,4 +871,4 @@ def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
     bundle = create_bundle(conf, sys.stdout, suite)
     actual, _ = get_readable_input(bundle, the_input)
 
-    assert actual.description == "submission hello <<< One line"
+    assert actual.description == "$ submission hello <<< One line"
