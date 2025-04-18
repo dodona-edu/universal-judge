@@ -8,6 +8,33 @@
             {
               "testcases": [
                 {
+                  "input": {
+                    "variable": "a_list",
+                    "type": "sequence",
+                    "expression": {
+                      "type": "sequence",
+                      "data": [
+                        {
+                          "type": "integer",
+                          "data": 0
+                        },
+                        {
+                          "type": "integer",
+                          "data": 1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 1
+                        },
+                        {
+                          "type": "integer",
+                          "data": 2
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
                   "output": {
                     "result": {
                       "value": {
