@@ -48,7 +48,7 @@ from tested.languages.generation import (
     generate_statement,
 )
 from tested.serialisation import Statement
-from tested.testsuite import DeprecatedUsage, LanguageLiterals, MainInput, TextData
+from tested.testsuite import DeprecatedUsage, LanguageLiterals
 
 _logger = logging.getLogger(__name__)
 

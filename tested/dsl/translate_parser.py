@@ -14,7 +14,6 @@ from jsonschema.exceptions import ValidationError
 from jsonschema.protocols import Validator
 from jsonschema.validators import extend as extend_validator
 from jsonschema.validators import validator_for
-from typing_extensions import deprecated
 
 from tested.datatypes import (
     AdvancedNumericTypes,
