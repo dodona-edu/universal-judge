@@ -461,7 +461,9 @@ def _convert_file(
         assert isinstance(content, str)
         if workdir is not None:
             full_path = workdir / path_str
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            dir_name = os.path.dirname(full_path)
+            if dir_name:
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(content)
 

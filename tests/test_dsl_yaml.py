@@ -1,10 +1,12 @@
-# type: ignore[reportAttributeAccessIssue]
 import json
+import os
 from pathlib import Path
 
 import pytest
 from jsonschema.validators import validator_for
+from pytest_mock import MockerFixture
 
+import tested
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
@@ -41,7 +43,7 @@ from tested.testsuite import (
     TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
-    parse_test_suite,
+    parse_test_suite, DeprecatedUsage,
 )
 from tested.utils import get_args
 
@@ -574,7 +576,8 @@ def test_tab_config_trickles_down_stderr():
       namespace: "solution"
   testcases:
   - arguments: [ "--arg", "argument" ]
-    stdin: "Input string"
+    stdin: 
+        content: "Input string"
     stdout: "Output string"
     stderr: "Error string"
     exit_code: 1
@@ -784,6 +787,58 @@ def test_value_built_in_checks_implied():
     assert test.output.result.value == StringType(
         type=BasicStringTypes.TEXT, data="hallo"
     )
+
+def test_using_deprecated_file():
+    yaml_str = f"""
+        - tab: 'Test'
+          contexts:
+            - testcases:
+                - statement: 'test()'
+                  file:
+                    content: "Hello world!"
+                    location: "test.txt"
+        """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    using_deprecated = suite.deprecated
+    assert DeprecatedUsage.OUTPUT_FILES in using_deprecated
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.file, FileOutputChannel)
+    assert test.output.file.output_data[0].path == "test.txt"
+    assert test.output.file.output_data[0].content == "Hello world!"
+    assert test.output.file.output_data[0].content_type == TextChannelType.TEXT
+
+def test_using_deprecated_files():
+    yaml_str = f"""
+            - tab: 'Test'
+              contexts:
+                - testcases:
+                  - expression: 'test("hello.txt")'
+                    return: "Hello world!"
+                    files:
+                      - url: "media/hello.txt"
+                        name: "hello.txt"
+            """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    using_deprecated = suite.deprecated
+    assert DeprecatedUsage.INPUT_FILES in using_deprecated
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert len(test.link_files) == 1
+    assert test.link_files[0].path == "hello.txt"
+    assert test.link_files[0].url == "media/hello.txt"
 
 
 def test_output_files_custom_check_correct():
@@ -1245,6 +1300,25 @@ def test_files_are_propagated():
         FileUrl(path="test", url="test.md"),
         FileUrl(path="two", url="two.md"),
     }
+
+def test_input_file_created(tmp_path: Path, pytestconfig: pytest.Config):
+    yaml_str = f"""
+            - tab: 'Test'
+              contexts:
+                - testcases:
+                  - expression: 'test("hello.txt")'
+                    return: "Hello world!"
+                    input_files:
+                      - url: "media/hello.txt"
+                        content: "Hello world!"
+                        path: "hello.txt"
+            """
+
+    os.chdir(tmp_path)
+    translate_to_test_suite(yaml_str)
+
+    with open("hello.txt", "r", encoding="utf-8") as f:
+        assert f.read() == "Hello world!"
 
 
 def test_newlines_are_added_to_stdout():
