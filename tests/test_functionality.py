@@ -21,11 +21,13 @@ from tested.languages.generation import get_readable_input
 from tested.testsuite import (
     Context,
     MainInput,
+    Output,
     Suite,
     Tab,
     Testcase,
     TextChannelType,
-    TextData, Output, TextOutputChannel,
+    TextData,
+    TextOutputChannel,
 )
 from tests.language_markers import (
     ALL_LANGUAGES,
@@ -854,6 +856,7 @@ def test_stdin_with_path(tmp_path: Path, pytestconfig: pytest.Config):
         == '$ submission hello &lt; <a class="file-link" target="_blank">line.txt</a>'
     )
 
+
 def test_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -872,7 +875,6 @@ def test_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
                 url="media/line.txt",
                 type=TextChannelType.FILE,
             ),
-
         ),
         output=Output(
             stdout=TextOutputChannel(
@@ -886,8 +888,8 @@ def test_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
                 path="error.txt",
                 url="media/error.txt",
                 type=TextChannelType.FILE,
-            )
-        )
+            ),
+        ),
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
@@ -897,6 +899,7 @@ def test_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
         actual.description
         == '$ submission hello &lt; <a class="file-link" target="_blank">line.txt</a> &gt; <a class="file-link" target="_blank">out.txt</a> 2&gt; <a class="file-link" target="_blank">error.txt</a>'
     )
+
 
 def test_inline_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -913,7 +916,6 @@ def test_inline_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Co
                 data="One line\n",
                 type=TextChannelType.TEXT,
             ),
-
         ),
         output=Output(
             stdout=TextOutputChannel(
@@ -927,17 +929,14 @@ def test_inline_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Co
                 path="error.txt",
                 url="media/error.txt",
                 type=TextChannelType.FILE,
-            )
-        )
+            ),
+        ),
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
     actual, _ = get_readable_input(bundle, the_input)
 
-    assert (
-        actual.description
-        == 'One line\n'
-    )
+    assert actual.description == "One line\n"
 
 
 def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
@@ -957,5 +956,3 @@ def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
     actual, _ = get_readable_input(bundle, the_input)
 
     assert actual.description == "$ submission hello <<< One line"
-
-
