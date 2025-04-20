@@ -25,7 +25,7 @@ from tested.testsuite import (
     Tab,
     Testcase,
     TextChannelType,
-    TextData,
+    TextData, Output, TextOutputChannel,
 )
 from tests.language_markers import (
     ALL_LANGUAGES,
@@ -854,6 +854,91 @@ def test_stdin_with_path(tmp_path: Path, pytestconfig: pytest.Config):
         == '$ submission hello &lt; <a class="file-link" target="_blank">line.txt</a>'
     )
 
+def test_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(
+            arguments=["hello"],
+            stdin=TextData(
+                data="One line\n",
+                path="line.txt",
+                url="media/line.txt",
+                type=TextChannelType.FILE,
+            ),
+
+        ),
+        output=Output(
+            stdout=TextOutputChannel(
+                data=None,
+                path="out.txt",
+                url="media/out.txt",
+                type=TextChannelType.FILE,
+            ),
+            stderr=TextOutputChannel(
+                data=None,
+                path="error.txt",
+                url="media/error.txt",
+                type=TextChannelType.FILE,
+            )
+        )
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert (
+        actual.description
+        == '$ submission hello &lt; <a class="file-link" target="_blank">line.txt</a> &gt; <a class="file-link" target="_blank">out.txt</a> 2&gt; <a class="file-link" target="_blank">error.txt</a>'
+    )
+
+def test_inline_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(
+            stdin=TextData(
+                data="One line\n",
+                type=TextChannelType.TEXT,
+            ),
+
+        ),
+        output=Output(
+            stdout=TextOutputChannel(
+                data=None,
+                path="out.txt",
+                url="media/out.txt",
+                type=TextChannelType.FILE,
+            ),
+            stderr=TextOutputChannel(
+                data=None,
+                path="error.txt",
+                url="media/error.txt",
+                type=TextChannelType.FILE,
+            )
+        )
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert (
+        actual.description
+        == 'One line\n'
+    )
+
 
 def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
@@ -872,3 +957,5 @@ def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
     actual, _ = get_readable_input(bundle, the_input)
 
     assert actual.description == "$ submission hello <<< One line"
+
+
