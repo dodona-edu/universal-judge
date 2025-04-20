@@ -84,12 +84,14 @@ def _get_heredoc_token(stdin: str) -> str:
         delimiter = delimiter + "N"
     return delimiter
 
+
 def append_stdin_stderr(text: str, stdout: str, stderr: str) -> str:
     if stdout:
         text += f" > {stdout}"
     if stderr:
         text += f" 2> {stderr}"
     return text
+
 
 def get_readable_input(
     bundle: Bundle, case: Testcase
@@ -120,20 +122,17 @@ def get_readable_input(
                 link_files.append(FileUrl(path=stdin, url=stdin_data.url))
             else:
                 stdin = stdin_data.data
+                assert stdin is not None
 
         if isinstance(stdout_data, TextData):
             if stdout_data.type == "file":
                 stdout = stdout_data.path
                 link_files.append(FileUrl(path=stdout, url=stdout_data.url))
-            else:
-                stdout = stdout_data.data
 
         if isinstance(stderr_data, TextData):
             if stderr_data.type == "file":
                 stderr = stderr_data.path
                 link_files.append(FileUrl(path=stderr, url=stderr_data.url))
-            else:
-                stderr = stderr_data.data
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -173,7 +172,6 @@ def get_readable_input(
         else:
             text = args
             text = append_stdin_stderr(text, stdout, stderr)
-
 
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language

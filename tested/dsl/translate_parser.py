@@ -526,12 +526,11 @@ def _convert_text_output_channel(
         assert isinstance(stream, dict)
         config = context.merge_inheritable_with_specific_config(stream, config_name)
         if "path" in stream:
-            path = stream["path"]
-            url = stream["url"]
+            path = str(stream["path"])
+            url = str(stream["url"])
 
         if "content" in stream or "data" in stream:
-            data = stream.get("content", stream.get("data"))
-
+            data = str(stream.get("content", stream.get("data")))
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True) and path is None:
@@ -539,7 +538,9 @@ def _convert_text_output_channel(
         data = _ensure_trailing_newline(str(data))
 
     if path is not None:
-        text_output = TextOutputChannel(data=data, path=path, url=url, type=TextChannelType.FILE)
+        text_output = TextOutputChannel(
+            data=data, path=path, url=url, type=TextChannelType.FILE
+        )
     else:
         text_output = TextOutputChannel(data=data)
 

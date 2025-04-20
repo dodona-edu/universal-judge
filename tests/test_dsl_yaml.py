@@ -91,9 +91,12 @@ tabs:
     stdin:
         path: "input.text"
         url: "media/input.text"
-    stdout: !path "output.text"
+    stdout:
+        path: "output.text"
+        url: "media/output.text"
     stderr: 
-      content: !path "error.text"
+        path: "error.text"
+        url: "media/error.text"
     exit_code: 1
     """
     json_str = translate_to_test_suite(yaml_str)
@@ -113,8 +116,10 @@ tabs:
     assert tc.input.stdin.data is None
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.path == "error.text"
+    assert tc.output.stderr.url == "media/error.text"
     assert tc.output.stderr.type == TextChannelType.FILE
     assert tc.output.stdout.path == "output.text"
+    assert tc.output.stdout.url == "media/output.text"
     assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
