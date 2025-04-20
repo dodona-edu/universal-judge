@@ -516,31 +516,30 @@ def _convert_text_output_channel(
 ) -> TextOutputChannel:
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
+    url = ""
     path = None
-
+    data = None
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
-        raw_data = stream
-        if isinstance(raw_data, PathString):
-            path = raw_data
+        data = stream
     else:
         assert isinstance(stream, dict)
-        raw_data = stream.get("content", stream.get("data"))
-        if not isinstance(raw_data, PathString):
-            config = context.merge_inheritable_with_specific_config(stream, config_name)
-        else:
-            config = context.config.get(config_name, dict())
-            path = raw_data
-        assert raw_data is not None
+        config = context.merge_inheritable_with_specific_config(stream, config_name)
+        if "path" in stream:
+            path = stream["path"]
+            url = stream["url"]
+
+        if "content" in stream or "data" in stream:
+            data = stream.get("content", stream.get("data"))
+
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True) and path is None:
-        data = _ensure_trailing_newline(str(raw_data))
-    else:
-        data = str(raw_data)
+        assert data is not None
+        data = _ensure_trailing_newline(str(data))
 
     if path is not None:
-        text_output = TextOutputChannel(data=None, path=data, type=TextChannelType.FILE)
+        text_output = TextOutputChannel(data=data, path=path, url=url, type=TextChannelType.FILE)
     else:
         text_output = TextOutputChannel(data=data)
 

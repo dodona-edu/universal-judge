@@ -699,6 +699,7 @@
               ]
             }
           ],
+          "additionalProperties" : false,
           "properties" : {
             "content": {
               "$ref" : "#/definitions/textualType",
@@ -717,7 +718,41 @@
         },
         {
           "type" : "object",
+          "description" : "Built-in oracle for text values.",
+          "required" : [
+            "path",
+            "url"
+          ],
+          "additionalProperties" : false,
+          "properties" : {
+            "content": {
+              "$ref" : "#/definitions/textualType",
+              "description" : "Content or relative path to the file in the `evaluation` folder of an exercise."
+            },
+            "data" : {
+              "$ref" : "#/definitions/textualType"
+            },
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            },
+            "url": {
+              "type": "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+            },
+            "oracle" : {
+              "const" : "builtin"
+            },
+            "config" : {
+              "$ref" : "#/definitions/textConfigurationOptions"
+            }
+          }
+        },
+        {
+          "type" : "object",
           "description" : "Custom oracle for text values.",
+          "additionalProperties" : false,
           "oneOf": [
             {
               "required" : [
@@ -740,6 +775,60 @@
             },
             "data" : {
               "$ref" : "#/definitions/textualType"
+            },
+            "oracle" : {
+              "const" : "custom_check"
+            },
+            "file" : {
+              "type" : "string",
+              "description" : "The path to the file containing the custom check function."
+            },
+            "name" : {
+              "type" : "string",
+              "description" : "The name of the custom check function.",
+              "default" : "evaluate"
+            },
+            "arguments" : {
+              "type" : "array",
+              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
+              "items" : {
+                "$ref" : "#/definitions/yamlValueOrPythonExpression"
+              }
+            },
+            "languages": {
+              "type" : "array",
+              "description" : "Which programming languages are supported by this oracle.",
+              "items" : {
+                "$ref" : "#/definitions/programmingLanguage"
+              }
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "description" : "Custom oracle for text values.",
+          "additionalProperties" : false,
+          "required" : [
+            "oracle",
+            "file",
+            "path",
+            "url"
+          ],
+          "properties" : {
+            "content": {
+              "$ref" : "#/definitions/textualType"
+            },
+            "data" : {
+              "$ref" : "#/definitions/textualType"
+            },
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            },
+            "url": {
+              "type": "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
             },
             "oracle" : {
               "const" : "custom_check"

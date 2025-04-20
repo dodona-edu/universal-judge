@@ -84,6 +84,12 @@ def _get_heredoc_token(stdin: str) -> str:
         delimiter = delimiter + "N"
     return delimiter
 
+def append_stdin_stderr(text: str, stdout: str, stderr: str) -> str:
+    if stdout:
+        text += f" > {stdout}"
+    if stderr:
+        text += f" 2> {stderr}"
+    return text
 
 def get_readable_input(
     bundle: Bundle, case: Testcase
@@ -100,16 +106,34 @@ def get_readable_input(
     """
 
     stdin = ""
+    stdout = ""
+    stderr = ""
     link_files = case.link_files
     if case.is_main_testcase():
         assert isinstance(case.input, MainInput)
         stdin_data = case.input.stdin
+        stdout_data = case.output.stdout
+        stderr_data = case.output.stderr
         if isinstance(stdin_data, TextData):
             if stdin_data.type == "file":
                 stdin = stdin_data.path
                 link_files.append(FileUrl(path=stdin, url=stdin_data.url))
             else:
                 stdin = stdin_data.data
+
+        if isinstance(stdout_data, TextData):
+            if stdout_data.type == "file":
+                stdout = stdout_data.path
+                link_files.append(FileUrl(path=stdout, url=stdout_data.url))
+            else:
+                stdout = stdout_data.data
+
+        if isinstance(stderr_data, TextData):
+            if stderr_data.type == "file":
+                stderr = stderr_data.path
+                link_files.append(FileUrl(path=stderr, url=stderr_data.url))
+            else:
+                stderr = stderr_data.data
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -133,6 +157,7 @@ def get_readable_input(
         if stdin:
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
                 text = f"{args} < {stdin}"
+                text = append_stdin_stderr(text, stdout, stderr)
             elif case.input.arguments:
                 assert stdin[-1] == "\n", "stdin must end with a newline"
                 if stdin.count("\n") > 1:
@@ -140,11 +165,16 @@ def get_readable_input(
                     text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
                 else:
                     text = f"{args} <<< {stdin.strip()}"
+
+                text = append_stdin_stderr(text, stdout, stderr)
             else:
                 assert not case.input.arguments
                 text = stdin
         else:
             text = args
+            text = append_stdin_stderr(text, stdout, stderr)
+
+
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
