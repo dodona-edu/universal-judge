@@ -32,21 +32,21 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
                 "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
             )
             raise e
-
-        _, ext = os.path.splitext(config.test_suite)
-        is_yaml = ext.lower() in (".yaml", ".yml")
-        if is_yaml:
-            suite = parse_dsl(textual_suite)
-        else:
-            suite = parse_test_suite(textual_suite)
-        missing_keys = []
     else:
-        translated_yaml, missing_keys = run_translation(
+        textual_suite, missing_keys = run_translation(
             Path(f"{config.resources}/{config.test_suite}"),
             language=language,
             to_file=False,
         )
-        suite = parse_dsl(translated_yaml)
+
+    _, ext = os.path.splitext(config.test_suite)
+    is_yaml = ext.lower() in (".yaml", ".yml")
+    if is_yaml:
+        suite = parse_dsl(textual_suite)
+    else:
+        suite = parse_test_suite(textual_suite)
+    missing_keys = []
+
     pack = create_bundle(
         config, judge_output, suite, translations_missing_key=missing_keys
     )
