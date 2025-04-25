@@ -307,7 +307,7 @@ class DslContext:
             assert isinstance(files, list)
             additional_files = {
                 _convert_file(
-                    f, workdir=workdir, deprecated_usage=len(deprecated_usage) == 0
+                    f, workdir=workdir, not_deprecated_usage=len(deprecated_usage) == 0
                 )
                 for f in files
             }
@@ -448,9 +448,9 @@ def _convert_value(value: YamlObject) -> Value:
 
 
 def _convert_file(
-    link_file: YamlDict, workdir: Path | None, deprecated_usage: bool
+    link_file: YamlDict, workdir: Path | None, not_deprecated_usage: bool
 ) -> FileUrl:
-    path_key = "path" if deprecated_usage else "name"
+    path_key = "path" if not_deprecated_usage else "name"
     path_str = link_file[path_key]
 
     assert isinstance(path_str, str)
