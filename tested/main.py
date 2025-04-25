@@ -3,7 +3,6 @@ Main file, responsible for running TESTed based on the input given by Dodona.
 """
 
 import os
-from pathlib import Path
 from typing import IO
 
 from tested.configs import DodonaConfig, create_bundle
