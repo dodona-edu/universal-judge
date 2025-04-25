@@ -173,6 +173,24 @@ def parse_yaml(yaml_stream: str) -> Any:
         raise_yaml_error(yaml_stream, exc)
 
 
+def run_translation_with_str(
+    yaml_stream: str, language: str, to_file: bool = True, path: Path = None
+) -> tuple[str, list]:
+    parsed_yaml = parse_yaml(yaml_stream)
+    validate_pre_dsl(parsed_yaml)
+
+    enviroment = create_enviroment()
+    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
+
+    missing_keys = TrackingUndefined.missing_keys
+    translated_yaml_string = convert_to_yaml(translated_data)
+    if to_file:
+        generate_new_yaml(path, translated_yaml_string, language)
+        return "", missing_keys
+    else:
+        return translated_yaml_string, missing_keys
+
+
 def run_translation(
     path: Path, language: str, to_file: bool = True
 ) -> tuple[str, list]:
@@ -187,19 +205,7 @@ def run_translation(
         raise e
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
-    parsed_yaml = parse_yaml(yaml_stream)
-    validate_pre_dsl(parsed_yaml)
-
-    enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
-
-    missing_keys = TrackingUndefined.missing_keys
-    translated_yaml_string = convert_to_yaml(translated_data)
-    if to_file:
-        generate_new_yaml(path, translated_yaml_string, language)
-        return "", missing_keys
-    else:
-        return translated_yaml_string, missing_keys
+    return run_translation_with_str(yaml_stream, language, to_file, path)
 
 
 if __name__ == "__main__":

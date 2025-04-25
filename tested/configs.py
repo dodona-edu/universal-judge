@@ -8,6 +8,8 @@ from typing import IO, TYPE_CHECKING, Any, Optional
 
 from attrs import define, evolve, field
 
+from tested.dodona import ExtendedMessage
+from tested.dsl.translate_parser import build_preprocessor_messages
 from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
 from tested.utils import get_identifier, smart_close
@@ -129,7 +131,7 @@ class Bundle:
     language: "Language"
     global_config: GlobalConfig
     out: IO
-    translations_missing_key: list[str] = []
+    preprocessor_messages: list[ExtendedMessage] = []
 
     @property
     def config(self) -> DodonaConfig:
@@ -236,11 +238,15 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
+
+    translations_missing_key = []
     if translations_missing_key is None:
         translations_missing_key = []
+
+    messages = build_preprocessor_messages(translations_missing_key)
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
-        translations_missing_key=translations_missing_key,
+        preprocessor_messages=messages,
     )

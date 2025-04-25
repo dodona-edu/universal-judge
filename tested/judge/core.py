@@ -118,16 +118,8 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
-    if bundle.translations_missing_key:
-        for key in bundle.translations_missing_key:
-            collector.add_messages(
-                [
-                    ExtendedMessage(
-                        f"The natural translator found the key {key}, that was not defined in the corresponding translations maps!",
-                        permission=Permission.STAFF,
-                    )
-                ]
-            )
+    if bundle.preprocessor_messages:
+        collector.add_messages(bundle.preprocessor_messages)
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 

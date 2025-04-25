@@ -28,7 +28,7 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
-from tested.dodona import ExtendedMessage
+from tested.dodona import ExtendedMessage, Permission
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
 from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
 from tested.parsing import get_converter, suite_to_json
@@ -90,6 +90,24 @@ OptionDict = dict[str, int | bool]
 YamlObject = (
     YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
 )
+
+
+def build_preprocessor_messages(
+    translations_missing_key: list[str],
+) -> list[ExtendedMessage]:
+    """
+    Build the preprocessor messages from the missing keys.
+
+    :param translations_missing_key: The missing keys.
+    :return: The preprocessor messages.
+    """
+    return [
+        ExtendedMessage(
+            f"The natural translator found the key {key}, that was not defined in the corresponding translations maps!",
+            permission=Permission.STAFF,
+        )
+        for key in translations_missing_key
+    ]
 
 
 def _convert_language_dictionary(
