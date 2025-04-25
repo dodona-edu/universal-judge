@@ -659,25 +659,44 @@
     "file" : {
       "type" : "object",
       "description" : "A file used in the test suite.",
-      "required" : [
-        "path",
-        "url"
-      ],
-      "properties" : {
-        "path" : {
-          "type" : "string",
-          "description" : "The filename, including the file extension."
+      "oneOf" : [
+        {
+          "type" : "object",
+          "description" : "A file used in the test suite.",
+          "required" : [
+            "path",
+            "url"
+          ],
+          "properties" : {
+            "path" : {
+              "type" : "string",
+              "description" : "The filename, including the file extension."
+            },
+            "url" : {
+              "type" : "string",
+              "format" : "uri",
+              "description" : "Relative path to the file in the `evaluation` folder of an exercise."
+            }
+          }
         },
-        "content" : {
-          "type" : "string",
-          "description" : "The actual content of the file."
-        },
-        "url" : {
-          "type" : "string",
-          "format" : "uri",
-          "description" : "Relative path to the file in the `description` folder of an exercise."
+        {
+          "required" : [
+            "path",
+            "content"
+          ],
+          "additionalProperties" : false,
+          "properties" : {
+            "path" : {
+              "type" : "string",
+              "description" : "The filename, including the file extension."
+            },
+            "content" : {
+              "type" : "string",
+              "description" : "The actual content of the file."
+            }
+          }
         }
-      }
+      ]
     },
     "textOutputChannel" : {
       "anyOf" : [

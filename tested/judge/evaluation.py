@@ -167,7 +167,7 @@ def evaluate_context_results(
     compilation_results: CompilationResult,
     context_dir: Path,
     collector: OutputManager,
-) -> Status | None:
+) -> tuple[Status | None, set]:
     """
     Evaluate the results for a single context.
 
@@ -198,7 +198,7 @@ def evaluate_context_results(
 
         # Finish the evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False), 0)
-        return compilation_results.status
+        return compilation_results.status, set()
 
     # There must be execution if compilation succeeded.
     assert exec_results is not None
@@ -256,6 +256,7 @@ def evaluate_context_results(
 
     # All files that will be used in this context.
     all_files = context.get_files()
+    all_seen = set()
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
@@ -264,6 +265,7 @@ def evaluate_context_results(
         readable_input, seen = get_readable_input(bundle, testcase)
         all_files = all_files - seen
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
+        all_seen.update(seen)
 
         # Get the functions
         output = testcase.output
@@ -369,10 +371,10 @@ def evaluate_context_results(
         collector.add(_link_files_message(all_files))
 
     if exec_results.timeout:
-        return Status.TIME_LIMIT_EXCEEDED
+        return Status.TIME_LIMIT_EXCEEDED, all_seen
     if exec_results.memory:
-        return Status.MEMORY_LIMIT_EXCEEDED
-    return None
+        return Status.MEMORY_LIMIT_EXCEEDED, all_seen
+    return None, all_seen
 
 
 def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:

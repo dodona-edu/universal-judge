@@ -452,10 +452,10 @@ def _convert_file(
 ) -> FileUrl:
     path_key = "path" if not_deprecated_usage else "name"
     path_str = link_file[path_key]
-
     assert isinstance(path_str, str)
-    assert isinstance(link_file["url"], str)
+
     content = ""
+    url = ""
     if "content" in link_file:
         content = link_file["content"]
         assert isinstance(content, str)
@@ -466,8 +466,12 @@ def _convert_file(
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(content)
+    else:
+        assert "url" in link_file
+        assert isinstance(link_file["url"], str)
+        url = link_file["url"]
 
-    return FileUrl(path=path_str, url=link_file["url"], content=content)
+    return FileUrl(path=path_str, url=url, content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:

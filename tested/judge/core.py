@@ -352,7 +352,7 @@ def _process_results(
         # Handle the contexts.
         collector.add(StartContext(description=planned.context.description))
 
-        continue_ = evaluate_context_results(
+        continue_, seen_files = evaluate_context_results(
             bundle,
             context=planned.context,
             exec_results=context_result,
@@ -368,13 +368,16 @@ def _process_results(
             #       since it only differs a bit.
             meta_statements = []
             input_files = []
-            for case in planned.context.testcases:
-                for file in case.link_files:
-                    file_data = {"path": file.path}
-                    if file.url != "":
-                        file_data["url"] = file.url
+            for file in seen_files:
+                file_data = {"path": file.path}
+                if file.url != "":
+                    file_data["url"] = file.url
+                elif file.content != "":
+                    file_data["content"] = file.content
 
-                    input_files.append(file_data)
+                input_files.append(file_data)
+
+            for case in planned.context.testcases:
                 if isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
                     meta_statements.append(stmt)
