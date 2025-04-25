@@ -174,7 +174,7 @@ def parse_yaml(yaml_stream: str) -> Any:
 
 
 def run_translation_with_str(
-    yaml_stream: str, language: str, to_file: bool = True, path: Path = None
+    yaml_stream: str, language: str, to_file: bool = True, path: Path | None = None
 ) -> tuple[str, list]:
     parsed_yaml = parse_yaml(yaml_stream)
     validate_pre_dsl(parsed_yaml)
@@ -184,7 +184,7 @@ def run_translation_with_str(
 
     missing_keys = TrackingUndefined.missing_keys
     translated_yaml_string = convert_to_yaml(translated_data)
-    if to_file:
+    if to_file and path is not None:
         generate_new_yaml(path, translated_yaml_string, language)
         return "", missing_keys
     else:
