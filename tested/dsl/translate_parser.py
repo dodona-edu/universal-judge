@@ -531,9 +531,12 @@ def _convert_text_output_channel(
         config = context.merge_inheritable_with_specific_config(stream, config_name)
         if "path" in stream:
             path = str(stream["path"])
-            url = str(stream["url"])
 
-        if "content" in stream or "data" in stream:
+        if "url" in stream:
+            assert "path" in stream
+            url = str(stream["url"])
+        else:
+            assert "content" in stream or "data" in stream
             data = str(stream.get("content", stream.get("data")))
 
     # Normalize the data if necessary.
@@ -743,16 +746,18 @@ def _convert_testcase(
                 data = _ensure_trailing_newline(stdin_data)
             else:
                 assert isinstance(stdin_data, dict)
+                if "path" in stdin_data:
+                    path = stdin_data["path"]
+                    assert isinstance(path, str)
+
                 if "content" in stdin_data:
                     content = stdin_data["content"]
                     assert isinstance(content, str)
                     data = _ensure_trailing_newline(content)
-
-                if "path" in stdin_data:
-                    assert "url" in stdin_data
-                    path = stdin_data["path"]
+                else:
+                    assert "url" in stdin_data and "path" in stdin_data
                     url = stdin_data["url"]
-                    assert isinstance(path, str) and isinstance(url, str)
+                    assert isinstance(url, str)
 
             if path:
                 stdin = TextData(

@@ -119,20 +119,42 @@ def get_readable_input(
         if isinstance(stdin_data, TextData):
             if stdin_data.type == "file":
                 stdin = stdin_data.path
-                link_files.append(FileUrl(path=stdin, url=stdin_data.url))
+                link_files.append(
+                    FileUrl(
+                        path=stdin,
+                        url=stdin_data.url,
+                        content=stdin_data.data if stdin_data.data is not None else "",
+                    )
+                )
             else:
                 stdin = stdin_data.data
                 assert stdin is not None
 
         if isinstance(stdout_data, TextData):
-            if stdout_data.type == "file":
+            if stdout_data.type == "file" and (stdout_data.url or stdout_data.data):
                 stdout = stdout_data.path
-                link_files.append(FileUrl(path=stdout, url=stdout_data.url))
+                link_files.append(
+                    FileUrl(
+                        path=stdout,
+                        url=stdout_data.url,
+                        content=(
+                            stdout_data.data if stdout_data.data is not None else ""
+                        ),
+                    )
+                )
 
-        if isinstance(stderr_data, TextData):
+        if isinstance(stderr_data, TextData) and (stderr_data.url or stderr_data.data):
             if stderr_data.type == "file":
                 stderr = stderr_data.path
-                link_files.append(FileUrl(path=stderr, url=stderr_data.url))
+                link_files.append(
+                    FileUrl(
+                        path=stderr,
+                        url=stderr_data.url,
+                        content=(
+                            stderr_data.data if stderr_data.data is not None else ""
+                        ),
+                    )
+                )
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -157,7 +179,7 @@ def get_readable_input(
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
                 text = f"{args} < {stdin}"
                 text = append_stdin_stderr(text, stdout, stderr)
-            elif case.input.arguments:
+            elif case.input.arguments or stdout or stderr:
                 assert stdin[-1] == "\n", "stdin must end with a newline"
                 if stdin.count("\n") > 1:
                     delimiter = _get_heredoc_token(stdin)
@@ -170,8 +192,7 @@ def get_readable_input(
                 assert not case.input.arguments
                 text = stdin
         else:
-            text = args
-            text = append_stdin_stderr(text, stdout, stderr)
+            text = append_stdin_stderr(args, stdout, stderr)
 
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language

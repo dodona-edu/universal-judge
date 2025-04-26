@@ -342,11 +342,6 @@
                 "path": {
                   "type": "string",
                   "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                },
-                "url": {
-                  "type": "string",
-                  "format" : "uri",
-                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
                 }
               }
             },
@@ -496,11 +491,6 @@
                 "path": {
                   "type": "string",
                   "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                },
-                "url": {
-                  "type": "string",
-                  "format" : "uri",
-                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
                 }
               }
             },
@@ -738,6 +728,10 @@
             "data" : {
               "$ref" : "#/definitions/textualType"
             },
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            },
             "oracle" : {
               "const" : "builtin"
             },
@@ -755,13 +749,6 @@
           ],
           "additionalProperties" : false,
           "properties" : {
-            "content": {
-              "$ref" : "#/definitions/textualType",
-              "description" : "Content or relative path to the file in the `evaluation` folder of an exercise."
-            },
-            "data" : {
-              "$ref" : "#/definitions/textualType"
-            },
             "path": {
               "type": "string",
               "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
@@ -806,6 +793,10 @@
             "data" : {
               "$ref" : "#/definitions/textualType"
             },
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            },
             "oracle" : {
               "const" : "custom_check"
             },
@@ -845,12 +836,6 @@
             "url"
           ],
           "properties" : {
-            "content": {
-              "$ref" : "#/definitions/textualType"
-            },
-            "data" : {
-              "$ref" : "#/definitions/textualType"
-            },
             "path": {
               "type": "string",
               "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
