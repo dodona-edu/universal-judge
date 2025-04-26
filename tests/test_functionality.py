@@ -936,7 +936,10 @@ def test_inline_stdin_with_stdout_stderr(tmp_path: Path, pytestconfig: pytest.Co
     bundle = create_bundle(conf, sys.stdout, suite)
     actual, _ = get_readable_input(bundle, the_input)
 
-    assert actual.description == "One line\n"
+    assert (
+        actual.description
+        == '$ submission &lt;&lt;&lt; One line &gt; <a class="file-link" target="_blank">out.txt</a> 2&gt; <a class="file-link" target="_blank">error.txt</a>'
+    )
 
 
 def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
