@@ -57,7 +57,7 @@ tabs:
     stderr: "Error string"
     exit_code: 1
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert suite.namespace == "solution"
     assert len(suite.tabs) == 1
@@ -89,7 +89,7 @@ def test_parse_ctx_exception():
   - arguments: [ "--arg", "error" ]
     exception: "Error"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 2
     tab = suite.tabs[0]
@@ -138,7 +138,7 @@ def test_parse_ctx_exception_types():
         csharp: "System.DivideByZeroException"
         python: "ZeroDivisionError"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 2
     tab = suite.tabs[0]
@@ -205,7 +205,7 @@ def test_parse_ctx_with_config():
       data: " Fail "
     """
     args = ["-a", "2.125", "1.212"]
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -278,7 +278,7 @@ def test_statements():
     - expression: 'safe.content()'
       return: !expression 'uint8(5)'
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -315,7 +315,7 @@ def test_expression_and_main():
       - expression: 'add(5, 7)'
         return: 12
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -341,7 +341,7 @@ def test_expression():
   - expression: "heir(8, 3)"
     return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -366,7 +366,7 @@ def test_expression_with_explicit_language():
       - expression: "heir(8, 3)"
         return: [ 3, 6, 9, 12, 15, 2, 7, 1, 13, 8, 16, 10, 14, 4, 11, 5 ]
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -418,7 +418,7 @@ def test_statement_with_yaml_dict():
         alpha: 5
         beta: 6
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -451,7 +451,7 @@ tabs:
     stderr: "Error string"
     exit_code: 1
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
     assert isinstance(stdout.oracle, GenericTextOracle)
@@ -481,7 +481,7 @@ tabs:
     stderr: "Error string"
     exit_code: 1
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
     assert isinstance(stdout.oracle, GenericTextOracle)
@@ -509,7 +509,7 @@ def test_tab_config_trickles_down_stdout():
     stderr: "Error string"
     exit_code: 1
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
     assert isinstance(stdout.oracle, GenericTextOracle)
@@ -537,7 +537,7 @@ def test_tab_config_trickles_down_stderr():
     stderr: "Error string"
     exit_code: 1
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
     assert isinstance(stderr.oracle, GenericTextOracle)
@@ -556,7 +556,7 @@ def test_expression_raw_return():
         - expression: 'test()'
           return: !expression '[(4, 4), (4, 3), (4, 2), (4, 1), (4, 0), (3, 0), (3, 1), (4, 1)]'
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -588,7 +588,7 @@ def test_empty_constructor(function_name, result):
         - expression: 'test()'
           return: !expression '{function_name}()'
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -618,7 +618,7 @@ def test_empty_constructor_with_param(function_name, result):
         - expression: 'test()'
           return: !expression '{function_name}([])'
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -640,7 +640,7 @@ def test_text_built_in_checks_implied():
               stdout:
                 data: "hallo"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -664,7 +664,7 @@ def test_text_built_in_checks_explicit():
                 data: "hallo"
                 oracle: "builtin"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -691,7 +691,7 @@ def test_text_custom_checks_correct():
                 name: "evaluate_test"
                 arguments: [!expression "'yes'", 5, !expression "set([5, 5])"]
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -728,7 +728,7 @@ def test_value_built_in_checks_implied():
               return: !oracle
                 value: !expression "'hallo'"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -757,7 +757,7 @@ def test_file_custom_check_correct():
                 name: "evaluate_test"
                 file: "test.py"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -785,7 +785,7 @@ def test_value_built_in_checks_explicit():
                 value: "hallo"
                 oracle: "builtin"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -814,7 +814,7 @@ def test_value_custom_checks_correct():
                 name: "evaluate_test"
                 arguments: ['yes', 5, !expression "set([5, 5])"]
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -863,7 +863,7 @@ def test_value_specific_checks_correct():
                   javascript:
                     - "js"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -931,7 +931,7 @@ def test_yaml_set_tag_is_supported():
         - expression: 'test()'
           return: !!set {5, 6}
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -974,7 +974,7 @@ def test_yaml_custom_tags_are_supported(all_types, value):
                 - expression: 'test()'
                   return: !{the_type} {json_type}
             """
-            json_str, _ = translate_to_test_suite(yaml_str)
+            json_str = translate_to_test_suite(yaml_str)
             suite = parse_test_suite(json_str)
             assert len(suite.tabs) == 1
             tab = suite.tabs[0]
@@ -1000,7 +1000,7 @@ def test_global_language_literals():
             javascript: "hello()"
             python: "hello_2()"
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -1030,7 +1030,7 @@ def test_one_language_literal():
             javascript: "hello()"
             python: "hello_2()"
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
@@ -1147,9 +1147,9 @@ def test_one_language_literal():
     ],
 )
 def test_old_and_new_names_work(old, new):
-    old_json, _ = translate_to_test_suite(old)
+    old_json = translate_to_test_suite(old)
     old_suite = parse_test_suite(old_json)
-    new_json, _ = translate_to_test_suite(new)
+    new_json = translate_to_test_suite(new)
     new_suite = parse_test_suite(new_json)
 
     assert old_suite == new_suite
@@ -1186,7 +1186,7 @@ def test_files_are_propagated():
         - name: "test"
           url: "twooo.md"
     """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     tab = suite.tabs[0]
     ctx0, ctx1 = tab.contexts
@@ -1209,7 +1209,7 @@ def test_newlines_are_added_to_stdout():
           config:
             tryFloatingPoint: true
         """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
     assert actual_stdout == "12\n"
@@ -1221,7 +1221,7 @@ def test_newlines_are_added_to_stdout():
       - arguments: [ '-a', '5', '7' ]
         stdout: "hello"
         """
-    json_str, _ = translate_to_test_suite(yaml_str2)
+    json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
     actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
     assert actual_stdout == "hello\n"
@@ -1238,7 +1238,7 @@ def test_newlines_are_added_to_stderr():
           config:
             tryFloatingPoint: true
         """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == "12\n"
@@ -1250,7 +1250,7 @@ def test_newlines_are_added_to_stderr():
       - arguments: [ '-a', '5', '7' ]
         stderr: "hello"
         """
-    json_str, _ = translate_to_test_suite(yaml_str2)
+    json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == "hello\n"
@@ -1266,7 +1266,7 @@ def test_no_duplicate_newlines_are_added():
             hello
             world
         """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
     assert actual == "hello\nworld\n"
@@ -1284,7 +1284,7 @@ def test_can_disable_normalizing_newlines():
             tryFloatingPoint: true
             normalizeTrailingNewlines: false
         """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == "12"
@@ -1298,7 +1298,7 @@ def test_empty_text_data_newlines():
       - arguments: [ '-a', '5', '7' ]
         stderr: ""
         """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
     assert actual_stderr == ""
@@ -1314,7 +1314,7 @@ tabs:
       - expression: "Numbers.oddValues(new int[]{1, 2, 3, 4, 5, 6, 7, 8})"
         return: [1, 3, 5, 7]
 """
-    json_str, _ = translate_to_test_suite(yaml_str)
+    json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
