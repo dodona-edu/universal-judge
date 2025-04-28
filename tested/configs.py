@@ -131,7 +131,7 @@ class Bundle:
     global_config: GlobalConfig
     out: IO
     preprocessor_messages: list[ExtendedMessage] = []
-    parser_messages: list[ExtendedMessage] = []
+    parser_messages: set[ExtendedMessage] = set()
 
     @property
     def config(self) -> DodonaConfig:
@@ -211,7 +211,7 @@ def create_bundle(
     suite: Suite,
     language: str | None = None,
     preprocessor_messages: list[ExtendedMessage] | None = None,
-    parser_messages: list[ExtendedMessage] | None = None,
+    parser_messages: set[ExtendedMessage] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -243,12 +243,12 @@ def create_bundle(
         preprocessor_messages = []
 
     if parser_messages is None:
-        parser_messages = []
+        parser_messages = set()
 
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
         preprocessor_messages=preprocessor_messages,
-        parser_messages=parser_messages
+        parser_messages=parser_messages,
     )

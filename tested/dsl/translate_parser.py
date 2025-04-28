@@ -30,8 +30,11 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
-from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error, \
-    build_deprecated_language_message
+from tested.dsl.dsl_errors import (
+    build_deprecated_language_message,
+    handle_dsl_validation_errors,
+    raise_yaml_error,
+)
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -528,7 +531,9 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase, set[ExtendedMessage]]:
+def _convert_testcase(
+    testcase: YamlDict, context: DslContext
+) -> tuple[Testcase, set[ExtendedMessage]]:
     messages = set()
     context = context.deepen_context(testcase)
 
@@ -650,7 +655,9 @@ def _convert_context(
     return Context(testcases=testcases), messages
 
 
-def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, set[ExtendedMessage]]:
+def _convert_tab(
+    tab: YamlDict, context: DslContext
+) -> tuple[Tab, set[ExtendedMessage]]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -665,7 +672,9 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, set[ExtendedM
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts, messages = _convert_dsl_list(tab["contexts"], context, _convert_context)
+        contexts, messages = _convert_dsl_list(
+            tab["contexts"], context, _convert_context
+        )
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
@@ -675,12 +684,16 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, set[ExtendedM
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        testcases, messages = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
+        testcases, messages = _convert_dsl_list(
+            tab["testcases"], context, _convert_testcase
+        )
         contexts = [Context(testcases=[t]) for t in testcases]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        testcases, messages = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
+        testcases, messages = _convert_dsl_list(
+            tab["scripts"], context, _convert_testcase
+        )
         contexts = [Context(testcases=[t]) for t in testcases]
 
     return Tab(name=name, contexts=contexts), messages
@@ -752,12 +765,12 @@ def parse_dsl(dsl_string: str) -> tuple[Suite, set[ExtendedMessage]]:
     return _convert_dsl(dsl_object)
 
 
-def translate_to_test_suite(dsl_string: str) -> tuple[str, set[ExtendedMessage]]:
+def translate_to_test_suite(dsl_string: str) -> str:
     """
     Convert a DSL to a test suite.
 
     :param dsl_string: The DSL.
     :return: The test suite.
     """
-    suite, messages = parse_dsl(dsl_string)
-    return suite_to_json(suite), messages
+    suite, _ = parse_dsl(dsl_string)
+    return suite_to_json(suite)

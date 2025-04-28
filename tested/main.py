@@ -19,7 +19,8 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
     :param judge_output: Where the judge output will be written to.
     :param language: The language to use to translate the test-suite.
     """
-    messages = []
+    preprocessor_messages = []
+    parse_messages = set()
     try:
         with open(f"{config.resources}/{config.test_suite}", "r") as t:
             textual_suite = t.read()
@@ -34,12 +35,20 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
         if language:
-            textual_suite, messages = apply_translations(textual_suite, language)
+            textual_suite, preprocessor_messages = apply_translations(
+                textual_suite, language
+            )
         suite, parse_messages = parse_dsl(textual_suite)
     else:
-        suite, parse_messages = parse_test_suite(textual_suite)
+        suite = parse_test_suite(textual_suite)
 
-    pack = create_bundle(config, judge_output, suite, preprocessor_messages=messages, parser_messages=parse_messages)
+    pack = create_bundle(
+        config,
+        judge_output,
+        suite,
+        preprocessor_messages=preprocessor_messages,
+        parser_messages=parse_messages,
+    )
     from .judge import judge
 
     judge(pack)
