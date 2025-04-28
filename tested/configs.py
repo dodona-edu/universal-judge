@@ -9,7 +9,6 @@ from typing import IO, TYPE_CHECKING, Any, Optional
 from attrs import define, evolve, field
 
 from tested.dodona import ExtendedMessage
-from tested.dsl.translate_parser import build_preprocessor_messages
 from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
 from tested.utils import get_identifier, smart_close
@@ -210,7 +209,7 @@ def create_bundle(
     output: IO,
     suite: Suite,
     language: str | None = None,
-    translations_missing_key: list[str] | None = None,
+    preprocessor_messages: list[ExtendedMessage] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -220,7 +219,7 @@ def create_bundle(
     :param suite: The test suite.
     :param language: Optional programming language. If None, the one from the Dodona
                      configuration will be used.
-    :param translations_missing_key: Indicator that the natural language translator
+    :param preprocessor_messages: Indicator that the natural language translator
     for the DSL key that was not defined in any translations map.
 
     :return: The configuration bundle.
@@ -238,15 +237,12 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
+    if preprocessor_messages is None:
+        preprocessor_messages = []
 
-    translations_missing_key = []
-    if translations_missing_key is None:
-        translations_missing_key = []
-
-    messages = build_preprocessor_messages(translations_missing_key)
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
-        preprocessor_messages=messages,
+        preprocessor_messages=preprocessor_messages,
     )
