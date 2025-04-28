@@ -4,6 +4,7 @@ import yaml
 from pytest_mock import MockerFixture
 
 import tested
+from tested.dodona import ExtendedMessage, Permission
 from tested.dsl.translate_parser import (
     ExpressionString,
     ReturnOracle,
@@ -14,7 +15,7 @@ from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_yaml,
-    run_translation,
+    translate_file,
     translate_yaml,
     validate_pre_dsl,
 )
@@ -443,14 +444,15 @@ tabs:
         ]
     ]
     mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_files.append(mocker.mock_open().return_value)
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    translated_yaml, _ = run_translation(Path("suite.yaml"), "en", False)
+    translated_yaml, _ = translate_file(Path("suite.yaml"), "en")
     yaml_object = parse_yaml(translated_yaml)
 
-    assert s.call_count == 0
+    assert s.call_count == 1
     assert isinstance(yaml_object, dict)
     tabs = yaml_object["tabs"]
     assert isinstance(tabs, list)
@@ -459,40 +461,6 @@ tabs:
         "expression": "count_words(results)",
         "return": "The result is 10",
     }
-
-
-def test_file_is_generated(mocker: MockerFixture):
-    s = mocker.spy(
-        tested.nat_translation, name="generate_new_yaml"  # type: ignore[reportAttributeAccessIssue]
-    )
-
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in [
-            """
-tabs:
-- tab: task3
-  testcases:
-  - statement: !natural_language
-        nl: resultaten = Proberen(10)
-        en: results = Tries(10)
-  - expression: !natural_language
-        nl: tel_woorden(resultaten)
-        en: count_words(results)
-    return: !natural_language
-        nl: Het resultaat is 10
-        en: The result is 10"""
-        ]
-    ]
-    mock_files.append(mocker.mock_open(read_data="{}").return_value)
-    mock_files.append(mocker.mock_open().return_value)
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
-
-    run_translation(Path("suite.yaml"), "en", True)
-
-    assert s.call_count == 1
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
@@ -527,10 +495,16 @@ tabs:
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    _, missing_keys = run_translation(Path("suite.yaml"), "en", True)
+    _, messages = translate_file(Path("suite.yaml"), "en")
 
-    assert missing_keys
+    assert messages
     assert s.call_count == 1
+    assert isinstance(messages[0], ExtendedMessage)
+    assert (
+        messages[0].description
+        == "The natural translator found the key ten, that was not defined in the corresponding translations maps!"
+    )
+    assert messages[0].permission == Permission.STAFF
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
@@ -639,7 +613,7 @@ key2: value2
 
 def test_run_is_correct_when_no_file():
     try:
-        run_translation(Path("suite.yaml"), "en", False)
+        translate_file(Path("suite.yaml"), "en")
     except FileNotFoundError:
         print("As expected")
     else:

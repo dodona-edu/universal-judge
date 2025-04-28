@@ -4,6 +4,8 @@ import textwrap
 import yaml
 from jsonschema.exceptions import ValidationError
 
+from tested.dodona import ExtendedMessage, Permission
+
 
 class InvalidYamlError(ValueError):
     pass
@@ -82,3 +84,42 @@ def raise_yaml_error(yaml_stream: str, exc: yaml.MarkedYAMLError):
         )
     )
     raise exc
+
+
+def build_preprocessor_messages(
+    translations_missing_key: list[str],
+) -> list[ExtendedMessage]:
+    """
+    Build the preprocessor messages from the missing keys.
+
+    :param translations_missing_key: The missing keys.
+    :return: The preprocessor messages.
+    """
+    return [
+        ExtendedMessage(
+            f"The natural translator found the key {key}, that was not defined in the corresponding translations maps!",
+            permission=Permission.STAFF,
+        )
+        for key in translations_missing_key
+    ]
+
+
+def build_translate_parser_messages(
+    using_deprecated_prog_languages: bool,
+) -> list[ExtendedMessage]:
+    """
+    Build the translate parser messages from the missing keys.
+
+    :param translations_missing_key: The missing keys.
+    :return: The translate parser messages.
+    """
+    messages = []
+
+    if using_deprecated_prog_languages:
+        messages.append(
+            ExtendedMessage(
+                f"WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!",
+                permission=Permission.STAFF,
+            )
+        )
+    return messages

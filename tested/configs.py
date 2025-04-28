@@ -8,6 +8,7 @@ from typing import IO, TYPE_CHECKING, Any, Optional
 
 from attrs import define, evolve, field
 
+from tested.dodona import ExtendedMessage
 from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
 from tested.utils import get_identifier, smart_close
@@ -129,7 +130,7 @@ class Bundle:
     language: "Language"
     global_config: GlobalConfig
     out: IO
-    translations_missing_key: list[str] = []
+    preprocessor_messages: list[ExtendedMessage] = []
 
     @property
     def config(self) -> DodonaConfig:
@@ -208,7 +209,7 @@ def create_bundle(
     output: IO,
     suite: Suite,
     language: str | None = None,
-    translations_missing_key: list[str] | None = None,
+    preprocessor_messages: list[ExtendedMessage] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -218,7 +219,7 @@ def create_bundle(
     :param suite: The test suite.
     :param language: Optional programming language. If None, the one from the Dodona
                      configuration will be used.
-    :param translations_missing_key: Indicator that the natural language translator
+    :param preprocessor_messages: Indicator that the natural language translator
     for the DSL key that was not defined in any translations map.
 
     :return: The configuration bundle.
@@ -236,11 +237,12 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
-    if translations_missing_key is None:
-        translations_missing_key = []
+    if preprocessor_messages is None:
+        preprocessor_messages = []
+
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
-        translations_missing_key=translations_missing_key,
+        preprocessor_messages=preprocessor_messages,
     )

@@ -10,9 +10,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
-    ExtendedMessage,
     Metadata,
-    Permission,
     StartContext,
     StartJudgement,
     StartTab,
@@ -20,6 +18,7 @@ from tested.dodona import (
     StatusMessage,
     report_update,
 )
+from tested.dsl.dsl_errors import build_translate_parser_messages
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
@@ -118,26 +117,14 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
-    if bundle.translations_missing_key:
-        for key in bundle.translations_missing_key:
-            collector.add_messages(
-                [
-                    ExtendedMessage(
-                        f"The natural translator found the key '{key}', that was not defined in the corresponding translations maps!",
-                        permission=Permission.STAFF,
-                    )
-                ]
-            )
+    if bundle.preprocessor_messages:
+        collector.add_messages(bundle.preprocessor_messages)
 
-    if bundle.suite.using_deprecated_prog_languages:
-        collector.add_messages(
-            [
-                ExtendedMessage(
-                    f"WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!",
-                    permission=Permission.STAFF,
-                )
-            ]
-        )
+    # TODO: In the PR of adding file usage to the DSL, other deprecation warnings were added during parsing.
+    # So I think it's a nice split to have messages from parser and from the preprocessor.
+    collector.add_messages(
+        build_translate_parser_messages(bundle.suite.using_deprecated_prog_languages)
+    )
 
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
