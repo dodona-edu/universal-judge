@@ -18,7 +18,6 @@ from tested.dodona import (
     StatusMessage,
     report_update,
 )
-from tested.dsl.dsl_errors import build_translate_parser_messages
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
@@ -120,11 +119,8 @@ def judge(bundle: Bundle):
     if bundle.preprocessor_messages:
         collector.add_messages(bundle.preprocessor_messages)
 
-    # TODO: In the PR of adding file usage to the DSL, other deprecation warnings were added during parsing.
-    # So I think it's a nice split to have messages from parser and from the preprocessor.
-    collector.add_messages(
-        build_translate_parser_messages(bundle.suite.using_deprecated_prog_languages)
-    )
+    if bundle.parser_messages:
+        collector.add_messages(bundle.parser_messages)
 
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()

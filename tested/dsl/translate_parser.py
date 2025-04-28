@@ -30,7 +30,8 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
-from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
+from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error, \
+    build_deprecated_language_message
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -527,8 +528,8 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase, bool]:
-    using_deprecated_prog_lang = False
+def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase, set[ExtendedMessage]]:
+    messages = set()
     context = context.deepen_context(testcase)
 
     # This is backwards compatability to some extend.
@@ -548,7 +549,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase
             else:
                 assert isinstance(expr_stmt, dict)
                 if not isinstance(expr_stmt, ProgrammingLanguageMap):
-                    using_deprecated_prog_lang = True
+                    messages.add(build_deprecated_language_message())
                 the_dict = expr_stmt
             the_dict = {SupportedLanguage(l): cast(str, v) for l, v in the_dict.items()}
             if "statement" in testcase:
@@ -633,23 +634,23 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> tuple[Testcase
             link_files=context.files,
             line_comment=line_comment,
         ),
-        using_deprecated_prog_lang,
+        messages,
     )
 
 
 def _convert_context(
     context: YamlDict, dsl_context: DslContext
-) -> tuple[Context, bool]:
+) -> tuple[Context, set[ExtendedMessage]]:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    testcases, deprecated_prog = _convert_dsl_list(
+    testcases, messages = _convert_dsl_list(
         raw_testcases, dsl_context, _convert_testcase
     )
-    return Context(testcases=testcases), deprecated_prog
+    return Context(testcases=testcases), messages
 
 
-def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, bool]:
+def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, set[ExtendedMessage]]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -660,33 +661,29 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> tuple[Tab, bool]:
     context = context.deepen_context(tab)
     name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
-    deprecated_prog = False
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts, val = _convert_dsl_list(tab["contexts"], context, _convert_context)
-
+        contexts, messages = _convert_dsl_list(tab["contexts"], context, _convert_context)
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts, val = _convert_dsl_list(tab["cases"], context, _convert_context)
-        deprecated_prog = deprecated_prog or val
+        contexts, messages = _convert_dsl_list(tab["cases"], context, _convert_context)
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        testcases, val = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
+        testcases, messages = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        testcases, val = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
+        testcases, messages = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
 
-    deprecated_prog = deprecated_prog or val
-    return Tab(name=name, contexts=contexts), deprecated_prog
+    return Tab(name=name, contexts=contexts), messages
 
 
 T = TypeVar("T")
@@ -695,22 +692,22 @@ T = TypeVar("T")
 def _convert_dsl_list(
     dsl_list: list,
     context: DslContext,
-    converter: Callable[[YamlDict, DslContext], tuple[T, bool]],
-) -> tuple[list[T], bool]:
+    converter: Callable[[YamlDict, DslContext], tuple[T, set[ExtendedMessage]]],
+) -> tuple[list[T], set[ExtendedMessage]]:
     """
     Convert a list of YAML objects into a test suite object.
     """
-    deprecated_prog = False
     objects = []
+    messages = set()
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        obj, val = converter(dsl_object, context)
-        deprecated_prog = deprecated_prog or val
+        obj, new_messages = converter(dsl_object, context)
+        messages.update(new_messages)
         objects.append(obj)
-    return objects, deprecated_prog
+    return objects, messages
 
 
-def _convert_dsl(dsl_object: YamlObject) -> Suite:
+def _convert_dsl(dsl_object: YamlObject) -> tuple[Suite, set[ExtendedMessage]]:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -733,20 +730,16 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
         context = evolve(context, language=language)
-    tabs, deprecated_prog = _convert_dsl_list(tab_list, context, _convert_tab)
+    tabs, messages = _convert_dsl_list(tab_list, context, _convert_tab)
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(
-            tabs=tabs,
-            namespace=namespace,
-            using_deprecated_prog_languages=deprecated_prog,
-        )
+        return Suite(tabs=tabs, namespace=namespace), messages
     else:
-        return Suite(tabs=tabs, using_deprecated_prog_languages=deprecated_prog)
+        return Suite(tabs=tabs), messages
 
 
-def parse_dsl(dsl_string: str) -> Suite:
+def parse_dsl(dsl_string: str) -> tuple[Suite, set[ExtendedMessage]]:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
@@ -759,12 +752,12 @@ def parse_dsl(dsl_string: str) -> Suite:
     return _convert_dsl(dsl_object)
 
 
-def translate_to_test_suite(dsl_string: str) -> str:
+def translate_to_test_suite(dsl_string: str) -> tuple[str, set[ExtendedMessage]]:
     """
     Convert a DSL to a test suite.
 
     :param dsl_string: The DSL.
     :return: The test suite.
     """
-    suite = parse_dsl(dsl_string)
-    return suite_to_json(suite)
+    suite, messages = parse_dsl(dsl_string)
+    return suite_to_json(suite), messages

@@ -131,6 +131,7 @@ class Bundle:
     global_config: GlobalConfig
     out: IO
     preprocessor_messages: list[ExtendedMessage] = []
+    parser_messages: list[ExtendedMessage] = []
 
     @property
     def config(self) -> DodonaConfig:
@@ -210,6 +211,7 @@ def create_bundle(
     suite: Suite,
     language: str | None = None,
     preprocessor_messages: list[ExtendedMessage] | None = None,
+    parser_messages: list[ExtendedMessage] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -219,8 +221,8 @@ def create_bundle(
     :param suite: The test suite.
     :param language: Optional programming language. If None, the one from the Dodona
                      configuration will be used.
-    :param preprocessor_messages: Indicator that the natural language translator
-    for the DSL key that was not defined in any translations map.
+    :param preprocessor_messages: Messages generated out of the preprocessor.
+    :param parser_messages: Messages generated out of the DSL-parser.
 
     :return: The configuration bundle.
     """
@@ -240,9 +242,13 @@ def create_bundle(
     if preprocessor_messages is None:
         preprocessor_messages = []
 
+    if parser_messages is None:
+        parser_messages = []
+
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
         preprocessor_messages=preprocessor_messages,
+        parser_messages=parser_messages
     )

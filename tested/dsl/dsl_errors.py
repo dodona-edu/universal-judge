@@ -104,22 +104,12 @@ def build_preprocessor_messages(
     ]
 
 
-def build_translate_parser_messages(
-    using_deprecated_prog_languages: bool,
-) -> list[ExtendedMessage]:
+def build_deprecated_language_message() -> ExtendedMessage:
     """
-    Build the translate parser messages from the missing keys.
-
-    :param translations_missing_key: The missing keys.
-    :return: The translate parser messages.
+    Builds a message for not using the '!programming_language' tag in the DSL.
+    :return: The deprecation message.
     """
-    messages = []
-
-    if using_deprecated_prog_languages:
-        messages.append(
-            ExtendedMessage(
-                f"WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!",
-                permission=Permission.STAFF,
-            )
-        )
-    return messages
+    return ExtendedMessage(
+        f"WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!",
+        permission=Permission.STAFF,
+    )

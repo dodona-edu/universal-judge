@@ -35,11 +35,11 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
     if is_yaml:
         if language:
             textual_suite, messages = apply_translations(textual_suite, language)
-        suite = parse_dsl(textual_suite)
+        suite, parse_messages = parse_dsl(textual_suite)
     else:
-        suite = parse_test_suite(textual_suite)
+        suite, parse_messages = parse_test_suite(textual_suite)
 
-    pack = create_bundle(config, judge_output, suite, preprocessor_messages=messages)
+    pack = create_bundle(config, judge_output, suite, preprocessor_messages=messages, parser_messages=parse_messages)
     from .judge import judge
 
     judge(pack)
