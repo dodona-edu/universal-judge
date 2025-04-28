@@ -19,6 +19,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
 )
+from tested.dodona import Permission
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
@@ -1326,6 +1327,59 @@ tabs:
     assert testcase.input.type == "expression"
     assert testcase.input.literals.keys() == {"java"}
 
+def test_deprecated_programming_language_map_gives_warning():
+    yaml_str = """
+    - unit: "square list"
+      cases:
+      - script:
+        - expression:
+              python: "[x * 2 for x in range(5)]"
+              javascript: "[...Array(5).keys()].map(x => x * 2)"
+          return: [0, 2, 4, 6, 8]
+            """
+    _, messages = parse_dsl(yaml_str)
+    assert messages
+    message = list(messages)[0]
+    assert message.description == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    assert message.permission == Permission.STAFF
+    assert message.format ==  "text"
+
+def test_programming_language_tag_gives_no_warning():
+    yaml_str = """
+        - unit: "square list"
+          cases:
+          - script:
+            - expression: !programming_language
+                  python: "[x * 2 for x in range(5)]"
+                  javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 2, 4, 6, 8]
+                """
+    _, messages = parse_dsl(yaml_str)
+    assert not messages
+
+def test_deprecated_programming_language_map_not_duplicate():
+    yaml_str = """
+        - unit: "square list"
+          cases:
+          - script:
+            - expression:
+                python: "[x * 2 for x in range(5)]"
+                javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 2, 4, 6, 8]
+        - unit: "cube list"
+          cases:
+          - script:
+            - expression:
+                python: "[x * 2 for x in range(5)]"
+                javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 3, 6, 9, 12]
+                """
+    _, messages = parse_dsl(yaml_str)
+    assert len(messages) == 1
+    message = list(messages)[0]
+    assert message.description == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    assert message.permission == Permission.STAFF
+    assert message.format == "text"
 
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
