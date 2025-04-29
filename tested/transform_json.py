@@ -137,6 +137,7 @@ def transform_ide(data: Any) -> Any:
             data["yamlValue"] = {
                 "description": "A value represented as YAML.",
             }
+            
 
         # This is a speciale structure for tags.
         if "required" in data and "properties" in data:
