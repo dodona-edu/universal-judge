@@ -85,7 +85,7 @@ def transform_monolingual(data: Any, strict_schema: bool) -> Any:
             else:
                 data["oneOf"] = new_one_of
 
-        # THe next changes are a few edge cases.
+        # The next changes are a few edge cases.
         if "expressionOrStatementWithNatTranslation" in data:
             data.pop("expressionOrStatementWithNatTranslation")
 
