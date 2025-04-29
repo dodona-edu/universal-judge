@@ -795,7 +795,7 @@ def test_list_json_schema():
 
 def test_transform_executed_correct(mocker: MockerFixture):
     s = mocker.spy(
-        tested.transform_json, name="transform_IDE"  # type: ignore[reportAttributeAccessIssue]
+        tested.transform_json, name="transform_ide"  # type: ignore[reportAttributeAccessIssue]
     )
 
     mock_files = [

@@ -1,12 +1,12 @@
 import json
 import os
 import sys
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 
-class SpecialMap(Enum):
+class SpecialMap(StrEnum):
     NATURAL_LANGUAGE = "natural_language"
     PROGRAMMING_LANGUAGE = "programming_language"
     ORACLE = "oracle"
@@ -202,7 +202,7 @@ def transform_json(json_file: Path, monolingual: bool, strict: bool):
         if strict:
             file_name = "schema-strict.json"
         else:
-            file_name = "multilingual-schema.json"
+            file_name = "schema.json"
 
     with open(json_file.parent / file_name, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
