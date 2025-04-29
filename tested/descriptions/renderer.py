@@ -83,7 +83,7 @@ class TestedRenderer(MarkdownRenderer):
         rendered_dsl = self.render_children(element)
 
         # Parse the DSL
-        parsed_dsl = parse_dsl(rendered_dsl)
+        parsed_dsl, _ = parse_dsl(rendered_dsl)
 
         # Get all actual tests
         tests = []

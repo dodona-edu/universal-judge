@@ -10,7 +10,12 @@ from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
-from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
+from tested.dodona import ExtendedMessage
+from tested.dsl.dsl_errors import (
+    build_preprocessor_messages,
+    handle_dsl_validation_errors,
+    raise_yaml_error,
+)
 
 
 def validate_pre_dsl(yaml_object: Any):
@@ -173,9 +178,22 @@ def parse_yaml(yaml_stream: str) -> Any:
         raise_yaml_error(yaml_stream, exc)
 
 
-def run_translation(
-    path: Path, language: str, to_file: bool = True
-) -> tuple[str, list]:
+def apply_translations(
+    yaml_stream: str, language: str
+) -> tuple[str, list[ExtendedMessage]]:
+    parsed_yaml = parse_yaml(yaml_stream)
+    validate_pre_dsl(parsed_yaml)
+
+    enviroment = create_enviroment()
+    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
+
+    missing_keys = TrackingUndefined.missing_keys
+    messages = build_preprocessor_messages(missing_keys)
+    translated_yaml_string = convert_to_yaml(translated_data)
+    return translated_yaml_string, messages
+
+
+def translate_file(path: Path, language: str) -> tuple[str, list[ExtendedMessage]]:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -187,23 +205,13 @@ def run_translation(
         raise e
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
-    parsed_yaml = parse_yaml(yaml_stream)
-    validate_pre_dsl(parsed_yaml)
-
-    enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, language, enviroment)
-
-    missing_keys = TrackingUndefined.missing_keys
-    translated_yaml_string = convert_to_yaml(translated_data)
-    if to_file:
-        generate_new_yaml(path, translated_yaml_string, language)
-        return "", missing_keys
-    else:
-        return translated_yaml_string, missing_keys
+    translated_yaml_string, messages = apply_translations(yaml_stream, language)
+    generate_new_yaml(path, translated_yaml_string, language)
+    return translated_yaml_string, messages
 
 
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
-    run_translation(Path(sys.argv[1]), sys.argv[2])
+    translate_file(Path(sys.argv[1]), sys.argv[2])

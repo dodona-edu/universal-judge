@@ -19,6 +19,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
 )
+from tested.dodona import Permission
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
@@ -1304,6 +1305,92 @@ def test_empty_text_data_newlines():
     assert actual_stderr == ""
 
 
+def test_programming_language_can_be_globally_configured():
+    yaml_str = """
+namespace: "Numbers"
+language: "java"
+tabs:
+  - tab: "Numbers.oddValues"
+    testcases:
+      - expression: "Numbers.oddValues(new int[]{1, 2, 3, 4, 5, 6, 7, 8})"
+        return: [1, 3, 5, 7]
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    testcase = context.testcases[0]
+    assert isinstance(testcase.input, LanguageLiterals)
+    assert testcase.input.type == "expression"
+    assert testcase.input.literals.keys() == {"java"}
+
+
+def test_deprecated_programming_language_map_gives_warning():
+    yaml_str = """
+    - unit: "square list"
+      cases:
+      - script:
+        - expression:
+              python: "[x * 2 for x in range(5)]"
+              javascript: "[...Array(5).keys()].map(x => x * 2)"
+          return: [0, 2, 4, 6, 8]
+            """
+    _, messages = parse_dsl(yaml_str)
+    assert messages
+    message = list(messages)[0]
+    assert (
+        message.description
+        == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    )
+    assert message.permission == Permission.STAFF
+    assert message.format == "text"
+
+
+def test_programming_language_tag_gives_no_warning():
+    yaml_str = """
+        - unit: "square list"
+          cases:
+          - script:
+            - expression: !programming_language
+                  python: "[x * 2 for x in range(5)]"
+                  javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 2, 4, 6, 8]
+                """
+    _, messages = parse_dsl(yaml_str)
+    assert not messages
+
+
+def test_deprecated_programming_language_map_not_duplicate():
+    yaml_str = """
+        - unit: "square list"
+          cases:
+          - script:
+            - expression:
+                python: "[x * 2 for x in range(5)]"
+                javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 2, 4, 6, 8]
+        - unit: "cube list"
+          cases:
+          - script:
+            - expression:
+                python: "[x * 2 for x in range(5)]"
+                javascript: "[...Array(5).keys()].map(x => x * 2)"
+              return: [0, 3, 6, 9, 12]
+                """
+    _, messages = parse_dsl(yaml_str)
+    assert len(messages) == 1
+    message = list(messages)[0]
+    assert (
+        message.description
+        == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    )
+    assert message.permission == Permission.STAFF
+    assert message.format == "text"
+
+
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
     with open(path_to_schema, "r") as schema_file:
@@ -1316,6 +1403,6 @@ def test_strict_json_schema_is_valid():
 
 
 def test_editor_json_schema_is_valid():
-    validator = load_schema_validator("schema.json")
+    validator = load_schema_validator(file="schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
