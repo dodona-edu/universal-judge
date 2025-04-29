@@ -70,7 +70,7 @@ def transform_monolingual(data: Any, strict_schema: bool) -> Any:
                                 element["type"] = "oracle"
                     new_one_of.append(element)
 
-            # A programming_langauge map was found. If not strict, just remove.
+            # A programming_language map was found. If not strict, just remove.
             # If strict, still provide the type option for the corresponding object.
             if prog_lang is not None and strict_schema:
                 new_one_of = [
@@ -85,7 +85,7 @@ def transform_monolingual(data: Any, strict_schema: bool) -> Any:
             else:
                 data["oneOf"] = new_one_of
 
-        # THe next changes are a few edge cases.
+        # The next changes are a few edge cases.
         if "expressionOrStatementWithNatTranslation" in data:
             data.pop("expressionOrStatementWithNatTranslation")
 
