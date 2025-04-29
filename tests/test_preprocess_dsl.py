@@ -1113,3 +1113,13 @@ def test_json_schema_edge_cases():
     result = transform_monolingual(json_schema, False)
 
     assert result == json_schema_expected
+
+
+def test_exception_when_file_not_found():
+
+    try:
+        transform_json(Path("test.json"), False, False)
+    except FileNotFoundError:
+        print("As expected")
+    else:
+        assert False, "Expected FileNotFoundError error"
