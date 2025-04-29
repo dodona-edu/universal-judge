@@ -964,6 +964,116 @@ def test_json_rm_prog_lang_json_schema():
     assert result == json_schema_expected
 
 
+def test_strict_json_schema_oracle():
+    json_schema = {
+        "oneOf": [
+            {"$ref": "#/definitions/yamlValueOrPythonExpression"},
+            {
+                "type": "object",
+                "required": ["__tag__", "value"],
+                "properties": {
+                    "__tag__": {
+                        "type": "string",
+                        "description": "The tag used in the yaml",
+                        "const": "!oracle",
+                    },
+                    "value": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["value"],
+                        "properties": {
+                            "oracle": {"const": "builtin"},
+                            "value": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/yamlValueOrPythonExpression"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "required": ["__tag__", "value"],
+                                        "properties": {
+                                            "__tag__": {
+                                                "type": "string",
+                                                "description": "The tag used in the yaml",
+                                                "const": "!natural_language",
+                                            },
+                                            "value": {
+                                                "type": "object",
+                                                "additionalProperties": {
+                                                    "$ref": "#/definitions/yamlValueOrPythonExpression"
+                                                },
+                                            },
+                                        },
+                                    },
+                                ]
+                            },
+                        },
+                    },
+                },
+            },
+        ]
+    }
+
+    json_schema_expected = {
+        "oneOf": [
+            {"$ref": "#/definitions/yamlValueOrPythonExpression"},
+            {
+                "type": "oracle",
+                "additionalProperties": False,
+                "required": ["value"],
+                "properties": {
+                    "oracle": {"const": "builtin"},
+                    "value": {"$ref": "#/definitions/yamlValueOrPythonExpression"},
+                },
+            },
+        ]
+    }
+
+    result = transform_monolingual(json_schema, True)
+
+    assert result == json_schema_expected
+
+
+def test_strict_json_schema_expression():
+    json_schema = {
+        "oneOf": [
+            {"$ref": "#/definitions/yamlValue"},
+            {
+                "type": "object",
+                "required": ["__tag__", "value"],
+                "properties": {
+                    "__tag__": {
+                        "type": "string",
+                        "description": "The tag used in the yaml",
+                        "const": "!expression",
+                    },
+                    "value": {
+                        "type": "string",
+                        "format": "tested-dsl-expression",
+                        "description": "An expression in Python-syntax.",
+                    },
+                },
+            },
+        ]
+    }
+
+    json_schema_expected = {
+        "oneOf": [
+            {"$ref": "#/definitions/yamlValue"},
+            {
+                "type": "expression",
+                "format": "tested-dsl-expression",
+                "description": "An expression in Python-syntax.",
+            },
+        ]
+    }
+
+    result = transform_monolingual(json_schema, True)
+    print(result)
+
+    assert result == json_schema_expected
+
+
 def test_json_schema_edge_cases():
     json_schema = {
         "expressionOrStatementWithNatTranslation": {},
