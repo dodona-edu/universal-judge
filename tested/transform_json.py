@@ -49,7 +49,7 @@ def change_prog_lang_type(element: dict, prog_lang: dict) -> dict:
     return element
 
 
-def transform_monolingual(data: Any, strict: bool) -> Any:
+def transform_monolingual(data: Any, strict_schema: bool) -> Any:
     if isinstance(data, dict):
         if "oneOf" in data:
             new_one_of = []
@@ -63,7 +63,7 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
                 elif kind != SpecialMap.NATURAL_LANGUAGE:
                     if kind == SpecialMap.EXPRESSION or kind == SpecialMap.ORACLE:
                         element = element["properties"]["value"]
-                        if strict:
+                        if strict_schema:
                             if kind == SpecialMap.EXPRESSION:
                                 element["type"] = "expression"
                             else:
@@ -72,7 +72,7 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
 
             # A programming_langauge map was found. If not strict, just remove.
             # If strict, still provide the type option for the corresponding object.
-            if prog_lang is not None and strict:
+            if prog_lang is not None and strict_schema:
                 new_one_of = [
                     change_prog_lang_type(ele, prog_lang) for ele in new_one_of
                 ]
@@ -85,6 +85,7 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
             else:
                 data["oneOf"] = new_one_of
 
+        # THe next changes are a few edge cases.
         if "expressionOrStatementWithNatTranslation" in data:
             data.pop("expressionOrStatementWithNatTranslation")
 
@@ -100,7 +101,7 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
                     data["$ref"] = "#/definitions/expressionOrStatement"
 
         if "yamlValue" in data:
-            if strict:
+            if strict_schema:
                 data["yamlValue"] = {
                     "description": "A value represented as YAML.",
                     "not": {"type": ["oracle", "expression", "programming_language"]},
@@ -110,20 +111,20 @@ def transform_monolingual(data: Any, strict: bool) -> Any:
                     "description": "A value represented as YAML.",
                 }
 
-        return {k: transform_monolingual(v, strict) for k, v in data.items()}
+        return {k: transform_monolingual(v, strict_schema) for k, v in data.items()}
     elif isinstance(data, list):
         return [
             transformed
             for ele in data
-            if (transformed := transform_monolingual(ele, strict)) != {}
+            if (transformed := transform_monolingual(ele, strict_schema)) != {}
         ]
     return data
 
 
-def transform_IDE(data: Any) -> Any:
+def transform_ide(data: Any) -> Any:
     if isinstance(data, list):
         return [
-            transformed for ele in data if (transformed := transform_IDE(ele)) != {}
+            transformed for ele in data if (transformed := transform_ide(ele)) != {}
         ]
     elif isinstance(data, dict):
         if "return" in data:
@@ -137,6 +138,7 @@ def transform_IDE(data: Any) -> Any:
                 "description": "A value represented as YAML.",
             }
 
+        # This is a speciale structure for tags.
         if "required" in data and "properties" in data:
             required = data["required"]
             properties = data["properties"]
@@ -169,7 +171,7 @@ def transform_IDE(data: Any) -> Any:
                     }
                 data = value
 
-        return {k: transform_IDE(v) for k, v in data.items()}
+        return {k: transform_ide(v) for k, v in data.items()}
     return data
 
 
@@ -179,6 +181,9 @@ def transform_json(json_file: Path, monolingual: bool, strict: bool):
     a new JSON schema that can be used to validate the multilingual YAML in your IDE.
 
     :param json_file: The path to the JSON file.
+    :param monolingual: indicator if it will generate a monolingual schema.
+    :param strict: indicator if it will generate a strict schema. This only applies
+    to monolingual transforms
     """
     _, ext = os.path.splitext(json_file)
     assert ext.lower() == ".json", f"expected a json file, got {ext}."
@@ -190,11 +195,14 @@ def transform_json(json_file: Path, monolingual: bool, strict: bool):
         raise e
 
     if not monolingual:
-        result = transform_IDE(json_stream)
+        result = transform_ide(json_stream)
         file_name = "multilingual-schema.json"
     else:
         result = transform_monolingual(json_stream, strict)
-        file_name = "multilingual-schema.json"
+        if strict:
+            file_name = "schema-strict.json"
+        else:
+            file_name = "multilingual-schema.json"
 
     with open(json_file.parent / file_name, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
