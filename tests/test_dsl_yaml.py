@@ -1327,6 +1327,7 @@ tabs:
     assert testcase.input.type == "expression"
     assert testcase.input.literals.keys() == {"java"}
 
+
 def test_deprecated_programming_language_map_gives_warning():
     yaml_str = """
     - unit: "square list"
@@ -1340,9 +1341,13 @@ def test_deprecated_programming_language_map_gives_warning():
     _, messages = parse_dsl(yaml_str)
     assert messages
     message = list(messages)[0]
-    assert message.description == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    assert (
+        message.description
+        == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    )
     assert message.permission == Permission.STAFF
-    assert message.format ==  "text"
+    assert message.format == "text"
+
 
 def test_programming_language_tag_gives_no_warning():
     yaml_str = """
@@ -1356,6 +1361,7 @@ def test_programming_language_tag_gives_no_warning():
                 """
     _, messages = parse_dsl(yaml_str)
     assert not messages
+
 
 def test_deprecated_programming_language_map_not_duplicate():
     yaml_str = """
@@ -1377,9 +1383,13 @@ def test_deprecated_programming_language_map_not_duplicate():
     _, messages = parse_dsl(yaml_str)
     assert len(messages) == 1
     message = list(messages)[0]
-    assert message.description == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    assert (
+        message.description
+        == "WARNING: You are using YAML syntax to specify statements or expressions in multiple programming languages without the `!programming_language` tag. This usage is deprecated!"
+    )
     assert message.permission == Permission.STAFF
     assert message.format == "text"
+
 
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
