@@ -33,7 +33,7 @@ def validate_pre_dsl(yaml_object: Any):
     handle_dsl_validation_errors(errors)
 
 
-class CustomDumper(yaml.SafeDumper):
+class CustomTagFormatDumper(yaml.SafeDumper):
 
     def represent_with_tag(self, tag, value):
         if isinstance(value, dict):
@@ -44,7 +44,7 @@ class CustomDumper(yaml.SafeDumper):
             return self.represent_scalar(tag, value)
 
     @staticmethod
-    def custom_representer(dumper, data):
+    def custom_tag_format_representer(dumper, data):
         """
         Will turn the given object back into YAML.
 
@@ -59,7 +59,7 @@ class CustomDumper(yaml.SafeDumper):
         )
 
 
-def construct_custom(loader, tag_suffix, node):
+def construct_custom_tag_format(loader, tag_suffix, node):
     """
     This constructor will turn the given YAML into an object that can be used for translation.
 
@@ -159,9 +159,9 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
 
 
 def convert_to_yaml(translated_data: Any) -> str:
-    CustomDumper.add_representer(dict, CustomDumper.custom_representer)
+    CustomTagFormatDumper.add_representer(dict, CustomTagFormatDumper.custom_tag_format_representer)
     return yaml.dump(
-        translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False
+        translated_data, Dumper=CustomTagFormatDumper, allow_unicode=True, sort_keys=False
     )
 
 
@@ -170,7 +170,7 @@ def parse_yaml(yaml_stream: str) -> Any:
     Parse a string or stream to YAML.
     """
     loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.SafeLoader)
-    yaml.add_multi_constructor("", construct_custom, loader)
+    yaml.add_multi_constructor("", construct_custom_tag_format, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
