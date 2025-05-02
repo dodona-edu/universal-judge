@@ -1349,6 +1349,35 @@ def test_deprecated_programming_language_map_gives_warning():
     assert message.format == "text"
 
 
+def test_programming_language_with_and_without_generate_same():
+    yaml_str = """
+    - unit: "square list"
+      cases:
+      - script:
+        - expression:
+              python: "[x * 2 for x in range(5)]"
+              javascript: "[...Array(5).keys()].map(x => x * 2)"
+          return: [0, 2, 4, 6, 8]
+            """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    print(suite)
+
+    yaml_str = """
+            - unit: "square list"
+              cases:
+              - script:
+                - expression: !programming_language
+                      python: "[x * 2 for x in range(5)]"
+                      javascript: "[...Array(5).keys()].map(x => x * 2)"
+                  return: [0, 2, 4, 6, 8]
+                    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite2 = parse_test_suite(json_str)
+    print(suite2)
+    assert suite == suite2
+
+
 def test_programming_language_tag_gives_no_warning():
     yaml_str = """
         - unit: "square list"
