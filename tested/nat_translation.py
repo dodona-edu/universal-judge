@@ -159,9 +159,14 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
 
 
 def convert_to_yaml(translated_data: Any) -> str:
-    CustomTagFormatDumper.add_representer(dict, CustomTagFormatDumper.custom_tag_format_representer)
+    CustomTagFormatDumper.add_representer(
+        dict, CustomTagFormatDumper.custom_tag_format_representer
+    )
     return yaml.dump(
-        translated_data, Dumper=CustomTagFormatDumper, allow_unicode=True, sort_keys=False
+        translated_data,
+        Dumper=CustomTagFormatDumper,
+        allow_unicode=True,
+        sort_keys=False,
     )
 
 
