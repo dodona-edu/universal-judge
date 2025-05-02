@@ -34,7 +34,8 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
     is_yaml = ext.lower() in (".yaml", ".yml")
     if is_yaml:
         if language:
-            textual_suite, messages = apply_translations(textual_suite, language)
+            textual_suite, new_messages = apply_translations(textual_suite, language)
+            messages.update(new_messages)
         suite, parse_messages = parse_dsl(textual_suite)
         messages.update(parse_messages)
     else:
