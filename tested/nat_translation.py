@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 from typing import Any, Type, cast
 
+import jinja2
 import yaml
-from jinja2 import Environment, TemplateSyntaxError, Undefined
+from jinja2 import Environment, TemplateSyntaxError, Undefined, UndefinedError
 from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
@@ -81,11 +82,47 @@ def construct_custom(loader, tag_suffix, node):
     return {"__tag__": tag_suffix, "value": data}
 
 
+def init_template(
+    template: dict,
+    translations: dict,
+    templates: dict,
+    default_template: dict,
+    parameters: dict,
+    language: str,
+    env: Environment,
+) -> dict:
+
+    # translate parameters before inserting them into the template
+    new_parameters = translate_yaml(
+        parameters,
+        translations,
+        templates,
+        default_template,
+        parameters,
+        language,
+        env,
+    )
+
+    # translate template and insert parameters
+    template = translate_yaml(
+        template,
+        translations,
+        templates,
+        default_template,
+        new_parameters,
+        language,
+        env,
+    )
+    assert isinstance(template, dict)
+    return template
+
+
 def translate_yaml(
     data: Any,
     translations: dict,
     templates: dict,
-    template_data: dict,
+    default_template: dict,
+    parameters: dict,
     language: str,
     env: Environment,
 ) -> Any:
@@ -95,18 +132,29 @@ def translate_yaml(
     :param data: The object to translate.
     :param translations: The merge of all found translations maps.
     :param templates: The merge of all found templates.
-    :param template_data: The data passed to a template. This will only not be empty when a template is processed.
+    :param default_template: The defined default template.
+    :param parameters: The data passed to a template. This will only not be empty when a template is processed.
     :param language: The language to translate to.
     :param env: The Jinja-environment to use.
     :return: The translated object.
     """
     if isinstance(data, dict):
-        if "__tag__" in data and data["__tag__"] == "!natural_language":
-            value = data["value"]
-            assert language in value
-            return translate_yaml(
-                value[language], translations, templates, template_data, language, env
-            )
+        if "__tag__" in data:
+            if data["__tag__"] == "!natural_language":
+                value = data["value"]
+                assert language in value
+                return translate_yaml(
+                    value[language],
+                    translations,
+                    templates,
+                    default_template,
+                    parameters,
+                    language,
+                    env,
+                )
+            elif data["__tag__"] == "!parameter":
+                assert data["value"] in parameters
+                return parameters[data["value"]]
 
         current_templates = data.pop("templates", {})
         templates = {**templates, **current_templates}
@@ -117,50 +165,111 @@ def translate_yaml(
             current_translations[key] = value[language]
         translations = {**translations, **current_translations}
 
-        template = None
-        if "placeholder" in data:
-            placeholder = data.pop("placeholder")
-            name = placeholder["name"]
-            new_temp_data = translate_yaml(
-                placeholder["data"],
+        if "default_template" in data:
+            assert (
+                not default_template
+            ), "Only one definition of a default template allowed!"
+            default_template = data.pop("default_template")
+
+        if "template" in data or "parameters" in data:
+            if "template" in data:
+                name = data.pop("template")
+                assert name in templates
+                template = templates[name]
+            else:
+                assert default_template
+                template = default_template
+            template = init_template(
+                template,
                 translations,
                 templates,
-                template_data,
+                default_template,
+                data.pop("parameters", {}),
                 language,
                 env,
             )
 
-            assert name in templates
-            template = translate_yaml(
-                templates[name], translations, templates, new_temp_data, language, env
-            )
+            if data:
+                # Extra specifications in data will overwrite parts of the template.
+                data = translate_yaml(
+                    data,
+                    translations,
+                    templates,
+                    default_template,
+                    parameters,
+                    language,
+                    env,
+                )
+                for key, value in data.items():
+                    template[key] = value
+            return template
 
-            if not data:
-                return template
-            assert isinstance(template, dict)
+        if "repeat" in data:
+            repeat = data.pop("repeat")
+            assert "parameters" in repeat
+            parameters = repeat["parameters"]
+            assert isinstance(parameters, list)
+
+            template = repeat.pop("case", {})
+            if "template" in repeat:
+                name = repeat.pop("template")
+                assert name in templates
+                template = templates[name]
+
+            return [
+                init_template(
+                    template,
+                    translations,
+                    templates,
+                    default_template,
+                    param_item,
+                    language,
+                    env,
+                )
+                for param_item in parameters
+            ]
 
         result = {
             key: translate_yaml(
-                value, translations, templates, template_data, language, env
+                value,
+                translations,
+                templates,
+                default_template,
+                parameters,
+                language,
+                env,
             )
             for key, value in data.items()
         }
-        if template is not None:
-            result.update(template)
-
         return result
     elif isinstance(data, list):
-        return [
-            translate_yaml(item, translations, templates, template_data, language, env)
-            for item in data
-        ]
+        result = []
+        for item in data:
+            has_repeat = isinstance(item, dict) and "repeat" in item
+            translated = translate_yaml(
+                item,
+                translations,
+                templates,
+                default_template,
+                parameters,
+                language,
+                env,
+            )
+            if has_repeat and isinstance(translated, list):
+                result.extend(translated)
+            else:
+                result.append(translated)
+        return result
     elif isinstance(data, str):
         try:
+            return env.from_string(data).render({**translations, **parameters})
+        except UndefinedError:
             return env.from_string(data).render(
-                translations=translations, templates=template_data
+                translations=translations, parameters=parameters
             )
         except TemplateSyntaxError:
             return data
+
     return data
 
 
@@ -236,7 +345,7 @@ def run_translation(
     # validate_pre_dsl(parsed_yaml)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
+    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, {}, language, enviroment)
 
     missing_keys = TrackingUndefined.missing_keys
     translated_yaml_string = convert_to_yaml(translated_data)
