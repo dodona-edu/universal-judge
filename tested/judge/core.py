@@ -370,9 +370,7 @@ def _process_results(
             input_files = []
             for file in seen_files:
                 file_data = {"path": file.path}
-                if file.url != "":
-                    file_data["url"] = file.url
-                elif file.content != "":
+                if file.content != "":
                     file_data["content"] = file.content
 
                 input_files.append(file_data)
@@ -400,7 +398,7 @@ def _process_results(
                 CloseContext(
                     data=Metadata(
                         statements=meta_statements,
-                        input_files=input_files,
+                        files=input_files,
                     )
                 ),
                 planned.context_index,

@@ -39,7 +39,7 @@ class Metadata:
     """Currently only used for the Python tutor"""
 
     statements: str | None
-    input_files: list[dict[str, str]] | None
+    files: list[dict[str, str]] | None
 
 
 Message = ExtendedMessage | str

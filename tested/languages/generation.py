@@ -122,7 +122,6 @@ def get_readable_input(
                 link_files.append(
                     FileUrl(
                         path=stdin,
-                        url=stdin_data.url,
                         content=stdin_data.data if stdin_data.data is not None else "",
                     )
                 )
@@ -136,7 +135,6 @@ def get_readable_input(
                 link_files.append(
                     FileUrl(
                         path=stdout,
-                        url=stdout_data.url,
                         content=(
                             stdout_data.data if stdout_data.data is not None else ""
                         ),
@@ -149,7 +147,6 @@ def get_readable_input(
                 link_files.append(
                     FileUrl(
                         path=stderr,
-                        url=stderr_data.url,
                         content=(
                             stderr_data.data if stderr_data.data is not None else ""
                         ),

@@ -556,7 +556,6 @@ class MainInput(WithFeatures, WithFunctions):
 class FileUrl:
     path: str
     content: str = ""
-    url: str = ""
 
 
 @ignore_field(get_converter(), "essential")
