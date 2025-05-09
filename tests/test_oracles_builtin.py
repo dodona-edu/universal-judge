@@ -339,6 +339,7 @@ def test_correct_error_actual_not_found(tmp_path: Path, pytestconfig: pytest.Con
         or result.result.human == "Bestand niet gevonden."
     )
 
+
 def test_correct_error_expected_not_found(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
