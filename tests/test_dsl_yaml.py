@@ -1338,7 +1338,8 @@ def test_deprecated_programming_language_map_gives_warning():
               javascript: "[...Array(5).keys()].map(x => x * 2)"
           return: [0, 2, 4, 6, 8]
             """
-    _, messages = parse_dsl(yaml_str)
+    data_w_messages = parse_dsl(yaml_str)
+    messages = data_w_messages.messages
     assert messages
     message = list(messages)[0]
     assert (
@@ -1388,7 +1389,8 @@ def test_programming_language_tag_gives_no_warning():
                   javascript: "[...Array(5).keys()].map(x => x * 2)"
               return: [0, 2, 4, 6, 8]
                 """
-    _, messages = parse_dsl(yaml_str)
+    data_w_messages = parse_dsl(yaml_str)
+    messages = data_w_messages.messages
     assert not messages
 
 
@@ -1409,7 +1411,8 @@ def test_deprecated_programming_language_map_not_duplicate():
                 javascript: "[...Array(5).keys()].map(x => x * 2)"
               return: [0, 3, 6, 9, 12]
                 """
-    _, messages = parse_dsl(yaml_str)
+    data_w_messages = parse_dsl(yaml_str)
+    messages = data_w_messages.messages
     assert len(messages) == 1
     message = list(messages)[0]
     assert (

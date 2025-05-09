@@ -7,8 +7,10 @@ import sys
 from collections.abc import Callable, Iterable
 from itertools import zip_longest
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, TypeGuard, TypeVar
+from typing import IO, TYPE_CHECKING, Any, Generic, TypeGuard, TypeVar
 from typing import get_args as typing_get_args
+
+from attr import define
 
 if TYPE_CHECKING:
     from tested.serialisation import Assignment
@@ -54,6 +56,12 @@ def get_identifier() -> str:
 
 K = TypeVar("K")
 T = TypeVar("T")
+
+
+@define
+class DataWithMessage(Generic[T, K]):
+    data: T
+    messages: set[K]
 
 
 def get_args(type_: Any) -> tuple[Any, ...]:
