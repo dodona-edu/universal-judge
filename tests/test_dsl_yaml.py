@@ -90,13 +90,10 @@ tabs:
   - arguments: [ "--arg", "argument" ]
     stdin:
         path: "input.text"
-        url: "media/input.text"
     stdout:
         path: "output.text"
-        url: "media/output.text"
     stderr: 
         path: "error.text"
-        url: "media/error.text"
     exit_code: 1
     """
     json_str = translate_to_test_suite(yaml_str)
@@ -111,15 +108,12 @@ tabs:
     tc = context.testcases[0]
     assert tc.is_main_testcase()
     assert tc.input.stdin.path == "input.text"
-    assert tc.input.stdin.url == "media/input.text"
     assert tc.input.stdin.type == TextChannelType.FILE
     assert tc.input.stdin.data is None
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.path == "error.text"
-    assert tc.output.stderr.url == "media/error.text"
     assert tc.output.stderr.type == TextChannelType.FILE
     assert tc.output.stdout.path == "output.text"
-    assert tc.output.stdout.url == "media/output.text"
     assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
@@ -845,7 +839,6 @@ def test_using_deprecated_files():
     assert isinstance(test.input, FunctionCall)
     assert len(test.link_files) == 1
     assert test.link_files[0].path == "hello.txt"
-    assert test.link_files[0].url == "media/hello.txt"
 
 
 def test_output_files_custom_check_correct():
@@ -1285,9 +1278,7 @@ def test_files_are_propagated():
 - tab: "Config ctx"
   input_files:
     - path: "test"
-      url: "test.md"
     - path: "two"
-      url: "two.md"
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.34"
@@ -1295,7 +1286,6 @@ def test_files_are_propagated():
     stdout: "3.337"
     input_files:
         - path: "test"
-          url: "twooo.md"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -1304,8 +1294,8 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.link_files) == {
-        FileUrl(path="test", url="test.md"),
-        FileUrl(path="two", url="two.md"),
+        FileUrl(path="test"),
+        FileUrl(path="two"),
     }
 
 
@@ -1317,8 +1307,7 @@ def test_input_file_created(tmp_path: Path, pytestconfig: pytest.Config):
                   - expression: 'test("hello.txt")'
                     return: "Hello world!"
                     input_files:
-                      - url: "media/hello.txt"
-                        content: "Hello world!"
+                      - content: "Hello world!"
                         path: "hello.txt"
             """
 
