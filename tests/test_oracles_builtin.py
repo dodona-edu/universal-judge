@@ -339,6 +339,22 @@ def test_correct_error_actual_not_found(tmp_path: Path, pytestconfig: pytest.Con
         or result.result.human == "Bestand niet gevonden."
     )
 
+def test_correct_error_expected_not_found(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(
+        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
+    )
+    channel = OutputFileData(
+        content="actual.txt",
+        path="expected.txt",
+        content_type=TextChannelType.FILE,
+    )
+    try:
+        evaluate_file(config, channel, "")
+    except ValueError:
+        print("As expected")
+    else:
+        assert False
+
 
 def test_exception_oracle_only_messages_correct(
     tmp_path: Path, pytestconfig: pytest.Config
