@@ -249,7 +249,6 @@ class TextData(WithFeatures):
 
     data: str | None
     path: str = ""
-    url: str = ""
     type: TextChannelType = TextChannelType.TEXT
 
     def get_data_as_string(self, working_directory: Path) -> str:

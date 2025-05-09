@@ -736,7 +736,6 @@ def _convert_testcase(
             stdin_data = testcase["stdin"]
             data = None
             path = ""
-            url = ""
             if isinstance(stdin_data, str):
                 data = _ensure_trailing_newline(stdin_data)
             else:
@@ -749,15 +748,9 @@ def _convert_testcase(
                     content = stdin_data["content"]
                     assert isinstance(content, str)
                     data = _ensure_trailing_newline(content)
-                else:
-                    assert "url" in stdin_data and "path" in stdin_data
-                    url = stdin_data["url"]
-                    assert isinstance(url, str)
 
             if path:
-                stdin = TextData(
-                    data=data, path=path, url=url, type=TextChannelType.FILE
-                )
+                stdin = TextData(data=data, path=path, type=TextChannelType.FILE)
             else:
                 stdin = TextData(data=data)
         else:

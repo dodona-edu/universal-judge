@@ -348,16 +348,11 @@
             {
               "type": "object",
               "additionalProperties" : false,
-              "required": ["path", "url"],
+              "required": ["path"],
               "properties": {
                 "path": {
                   "type": "string",
                   "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                },
-                "url": {
-                  "type": "string",
-                  "format" : "uri",
-                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
                 }
               }
             }

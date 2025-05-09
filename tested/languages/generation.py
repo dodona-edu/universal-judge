@@ -130,7 +130,7 @@ def get_readable_input(
                 assert stdin is not None
 
         if isinstance(stdout_data, TextData):
-            if stdout_data.type == "file" and (stdout_data.url or stdout_data.data):
+            if stdout_data.type == "file" and stdout_data.data:
                 stdout = stdout_data.path
                 link_files.append(
                     FileUrl(
@@ -141,7 +141,7 @@ def get_readable_input(
                     )
                 )
 
-        if isinstance(stderr_data, TextData) and (stderr_data.url or stderr_data.data):
+        if isinstance(stderr_data, TextData) and stderr_data.data:
             if stderr_data.type == "file":
                 stderr = stderr_data.path
                 link_files.append(
