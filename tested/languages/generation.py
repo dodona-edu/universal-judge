@@ -85,14 +85,6 @@ def _get_heredoc_token(stdin: str) -> str:
     return delimiter
 
 
-def append_stdin_stderr(text: str, stdout: str, stderr: str) -> str:
-    if stdout:
-        text += f" > {stdout}"
-    if stderr:
-        text += f" 2> {stderr}"
-    return text
-
-
 def get_readable_input(
     bundle: Bundle, case: Testcase
 ) -> tuple[ExtendedMessage, set[FileUrl]]:
@@ -108,14 +100,10 @@ def get_readable_input(
     """
 
     stdin = ""
-    stdout = ""
-    stderr = ""
     link_files = case.link_files
     if case.is_main_testcase():
         assert isinstance(case.input, MainInput)
         stdin_data = case.input.stdin
-        stdout_data = case.output.stdout
-        stderr_data = case.output.stderr
         if isinstance(stdin_data, TextData):
             if stdin_data.type == "file":
                 stdin = stdin_data.path
@@ -128,30 +116,6 @@ def get_readable_input(
             else:
                 stdin = stdin_data.data
                 assert stdin is not None
-
-        if isinstance(stdout_data, TextData):
-            if stdout_data.type == "file" and stdout_data.data:
-                stdout = stdout_data.path
-                link_files.append(
-                    FileUrl(
-                        path=stdout,
-                        content=(
-                            stdout_data.data if stdout_data.data is not None else ""
-                        ),
-                    )
-                )
-
-        if isinstance(stderr_data, TextData) and stderr_data.data:
-            if stderr_data.type == "file":
-                stderr = stderr_data.path
-                link_files.append(
-                    FileUrl(
-                        path=stderr,
-                        content=(
-                            stderr_data.data if stderr_data.data is not None else ""
-                        ),
-                    )
-                )
 
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -175,21 +139,18 @@ def get_readable_input(
         if stdin:
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
                 text = f"{args} < {stdin}"
-                text = append_stdin_stderr(text, stdout, stderr)
-            elif case.input.arguments or stdout or stderr:
+            elif case.input.arguments:
                 assert stdin[-1] == "\n", "stdin must end with a newline"
                 if stdin.count("\n") > 1:
                     delimiter = _get_heredoc_token(stdin)
                     text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
                 else:
                     text = f"{args} <<< {stdin.strip()}"
-
-                text = append_stdin_stderr(text, stdout, stderr)
             else:
                 assert not case.input.arguments
                 text = stdin
         else:
-            text = append_stdin_stderr(args, stdout, stderr)
+            text = args
 
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language

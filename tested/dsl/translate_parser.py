@@ -515,7 +515,6 @@ def _convert_text_output_channel(
 ) -> TextOutputChannel:
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
-    url = ""
     path = None
     data = None
     if isinstance(stream, str):
@@ -527,12 +526,10 @@ def _convert_text_output_channel(
         if "path" in stream:
             path = str(stream["path"])
 
-        if "url" in stream:
-            assert "path" in stream
-            url = str(stream["url"])
-        else:
-            assert "content" in stream or "data" in stream
+        if "content" in stream or "data" in stream:
             data = str(stream.get("content", stream.get("data")))
+
+        assert path or data
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True) and path is None:
@@ -540,9 +537,7 @@ def _convert_text_output_channel(
         data = _ensure_trailing_newline(str(data))
 
     if path is not None:
-        text_output = TextOutputChannel(
-            data=data, path=path, url=url, type=TextChannelType.FILE
-        )
+        text_output = TextOutputChannel(data=data, path=path, type=TextChannelType.FILE)
     else:
         text_output = TextOutputChannel(data=data)
 
