@@ -116,11 +116,8 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
-    if bundle.preprocessor_messages:
-        collector.add_messages(bundle.preprocessor_messages)
-
-    if bundle.parser_messages:
-        collector.add_messages(bundle.parser_messages)
+    if bundle.messages:
+        collector.add_messages(bundle.messages)
 
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
