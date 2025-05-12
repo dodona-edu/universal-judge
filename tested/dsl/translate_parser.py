@@ -781,5 +781,5 @@ def translate_to_test_suite(dsl_string: str) -> str:
     :param dsl_string: The DSL.
     :return: The test suite.
     """
-    suite_w_message = parse_dsl(dsl_string)
-    return suite_to_json(suite_w_message.data)
+    suite_with_message = parse_dsl(dsl_string)
+    return suite_to_json(suite_with_message.data)
