@@ -12,6 +12,8 @@ from typing import get_args as typing_get_args
 
 from attr import define
 
+from tested.dodona import ExtendedMessage
+
 if TYPE_CHECKING:
     from tested.serialisation import Assignment
 
@@ -59,9 +61,9 @@ T = TypeVar("T")
 
 
 @define
-class DataWithMessage(Generic[T, K]):
+class DataWithMessage(Generic[T]):
     data: T
-    messages: set[K]
+    messages: set[ExtendedMessage]
 
 
 def get_args(type_: Any) -> tuple[Any, ...]:

@@ -83,11 +83,11 @@ class TestedRenderer(MarkdownRenderer):
         rendered_dsl = self.render_children(element)
 
         # Parse the DSL
-        parsed_dsl_w_messages = parse_dsl(rendered_dsl)
+        parsed_dsl_with_messages = parse_dsl(rendered_dsl)
 
         # Get all actual tests
         tests = []
-        for tab in parsed_dsl_w_messages.data.tabs:
+        for tab in parsed_dsl_with_messages.data.tabs:
             for context in tab.contexts:
                 for testcase in context.testcases:
                     tests.append(testcase)

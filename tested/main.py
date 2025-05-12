@@ -36,9 +36,9 @@ def run(config: DodonaConfig, judge_output: IO, language: str | None = None):
         if language:
             textual_suite, new_messages = apply_translations(textual_suite, language)
             messages.update(new_messages)
-        suite_w_messages = parse_dsl(textual_suite)
-        messages.update(suite_w_messages.messages)
-        suite = suite_w_messages.data
+        suite_with_messages = parse_dsl(textual_suite)
+        messages.update(suite_with_messages.messages)
+        suite = suite_with_messages.data
     else:
         suite = parse_test_suite(textual_suite)
 
