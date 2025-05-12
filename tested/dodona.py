@@ -36,9 +36,10 @@ class ExtendedMessage:
 
 @define
 class Metadata:
-    """Currently only used for the Python tutor"""
+    """Currently used for the Python tutor and rendering files in Dodona."""
 
     statements: str | None
+    stdin: str | None
     files: list[dict[str, str]] | None
 
 

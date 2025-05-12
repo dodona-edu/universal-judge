@@ -5,6 +5,7 @@ from enum import StrEnum, unique
 from pathlib import Path
 from typing import Literal
 
+from exercise.opgaven.reeks07.zendmasten.preparation.outputprocessor import outputBlok
 from tested.configs import Bundle
 from tested.dodona import (
     AppendMessage,
@@ -110,18 +111,17 @@ def _evaluate_channel(
     evaluator = get_oracle(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
-    # Run the oracle.
+
     if channel == Channel.FILE and output != "ignored":
         assert isinstance(output, FileOutputChannel)
-        new_output = output.output_data
+        output_channels = output.output_data
     else:
-        new_output = [output]
+        output_channels = [output]
 
-    missing = False
-    if actual is None:
-        missing = True
+    missing = actual is None
 
-    for output_element in new_output:
+    for output_element in output_channels:
+        # Run the oracle.
         evaluation_result = evaluator(output_element, actual if actual else "")
         status = evaluation_result.result
 
@@ -129,33 +129,36 @@ def _evaluate_channel(
         is_correct = status.enum == Status.CORRECT
         should_report_case = should_show(output, channel, evaluation_result)
 
-        if not should_report_case and is_correct:
-            # We do report that a test is correct, to set the status.
-            return False
+        if should_report_case or not is_correct:
+            expected = evaluation_result.readable_expected
+            expected_channel = channel
+            if isinstance(output_element, OutputFileData):
+                expected_channel = f"file: {output_element.path}"
+            out.add(StartTest(expected=expected, channel=expected_channel))
 
-        expected = evaluation_result.readable_expected
-        expected_channel = channel
-        if isinstance(output_element, OutputFileData):
-            expected_channel = f"file: {output_element.path}"
-        out.add(StartTest(expected=expected, channel=expected_channel))
+            # Report any messages we received.
+            for message in evaluation_result.messages:
+                out.add(AppendMessage(message=message))
 
-        # Report any messages we received.
-        for message in evaluation_result.messages:
-            out.add(AppendMessage(message=message))
+            if actual is None:
+                out.add(
+                    AppendMessage(message=get_i18n_string("judge.evaluation.missing"))
+                )
+            elif should_report_case and timeout and not is_correct:
+                status.human = get_i18n_string("judge.evaluation.time-limit")
+                status.enum = Status.TIME_LIMIT_EXCEEDED
+                out.add(AppendMessage(message=status.human))
+            elif should_report_case and memory and not is_correct:
+                status.human = get_i18n_string("judge.evaluation.memory-limit")
+                status.enum = Status.TIME_LIMIT_EXCEEDED
+                out.add(AppendMessage(message=status.human))
 
-        if actual is None:
-            out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
-        elif should_report_case and timeout and not is_correct:
-            status.human = get_i18n_string("judge.evaluation.time-limit")
-            status.enum = Status.TIME_LIMIT_EXCEEDED
-            out.add(AppendMessage(message=status.human))
-        elif should_report_case and memory and not is_correct:
-            status.human = get_i18n_string("judge.evaluation.memory-limit")
-            status.enum = Status.TIME_LIMIT_EXCEEDED
-            out.add(AppendMessage(message=status.human))
-
-        # Close the test.
-        out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+            # Close the test.
+            out.add(
+                CloseTest(generated=evaluation_result.readable_actual, status=status)
+            )
+        else:
+            missing = False
 
     return missing
 

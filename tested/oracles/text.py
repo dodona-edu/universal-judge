@@ -47,9 +47,7 @@ def _file_defaults(config: OracleConfig) -> dict:
     return defaults
 
 
-def _text_comparison(
-    options: dict[str, Any], expected: str, actual: str
-) -> tuple[bool, str]:
+def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
     # Temporary variables that may modified by the evaluation options,
     # Don't modify the actual values, otherwise there maybe confusion with the
     # solution submitted by the student
@@ -68,16 +66,14 @@ def _text_comparison(
         expected_float = float(expected_eval.strip())
         if options["applyRounding"]:
             numbers = int(options["roundTo"])
+            # noinspection PyUnboundLocalVariable
             actual_float = round(actual_float, numbers)
             expected_float = round(expected_float, numbers)
-        return math.isclose(actual_float, expected_float), str(expected_float)
-
-    return actual_eval == expected_eval, expected
-
-
-def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleResult:
-
-    result, expected = _text_comparison(options, expected, actual)
+        # noinspection PyUnboundLocalVariable
+        result = math.isclose(actual_float, expected_float)
+        expected = str(expected_float)
+    else:
+        result = actual_eval == expected_eval
 
     return OracleResult(
         result=StatusMessage(enum=Status.CORRECT if result else Status.WRONG),

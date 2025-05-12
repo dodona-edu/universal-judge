@@ -314,49 +314,7 @@
           "$ref" : "#/definitions/message"
         },
         "stdin" : {
-          "description" : "Stdin for this context",
-          "oneOf": [
-            {
-              "type" : [
-                "string",
-                "number",
-                "integer",
-                "boolean"
-              ]
-            },
-            {
-              "type": "object",
-              "additionalProperties" : false,
-              "required": ["content"],
-              "properties": {
-                "content": {
-                  "type" : [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean",
-                    "object"
-                  ],
-                  "description": "The actual content that will be used for stdin."
-                },
-                "path": {
-                  "type": "string",
-                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                }
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties" : false,
-              "required": ["path"],
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                }
-              }
-            }
-          ]
+          "$ref" : "#/definitions/stdinData"
         },
         "arguments" : {
           "type" : "array",
@@ -458,54 +416,7 @@
           "$ref" : "#/definitions/message"
         },
         "stdin" : {
-          "description" : "Stdin for this context",
-          "oneOf": [
-            {
-              "type" : [
-                "string",
-                "number",
-                "integer",
-                "boolean"
-              ]
-            },
-            {
-              "type": "object",
-              "required": ["content"],
-              "additionalProperties": false,
-              "properties": {
-                "content": {
-                  "type" : [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean",
-                    "object"
-                  ],
-                  "description": "The actual content that will be used for stdin."
-                },
-                "path": {
-                  "type": "string",
-                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                }
-              }
-            },
-            {
-              "type": "object",
-              "required": ["path", "url"],
-              "additionalProperties": false,
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
-                },
-                "url": {
-                  "type": "string",
-                  "format" : "uri",
-                  "description" : "Relative path to the file in the `evaluation` folder of an exercise."
-                }
-              }
-            }
-          ]
+          "$ref" : "#/definitions/stdinData"
         },
         "arguments" : {
           "type" : "array",
@@ -591,6 +502,51 @@
         }
       }
     },
+    "stdinData" : {
+      "description" : "Stdin for this context",
+      "oneOf": [
+        {
+          "type" : [
+            "string",
+            "number",
+            "integer",
+            "boolean"
+          ]
+        },
+        {
+          "type": "object",
+          "required": ["content"],
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean",
+                "object"
+              ],
+              "description": "The actual content that will be used for stdin."
+            },
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["path"],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "The path that will be shown in the feedback. It also provides the path to the content when content isn't specified."
+            }
+          }
+        }
+      ]
+    },
     "expressionOrStatement" : {
       "oneOf" : [
         {
@@ -634,7 +590,7 @@
       "properties" : {
         "name" : {
           "type" : "string",
-          "description" : "The filename, including the file extension."
+          "description" : "The filename, including the file extension. It is also the relative path to a file in the working directory."
         },
         "url" : {
           "type" : "string",
@@ -653,7 +609,7 @@
       "properties" : {
         "path" : {
           "type" : "string",
-          "description" : "The filename, including the file extension."
+          "description" : "The filename, including the file extension. It is also the relative path to a file in the working directory."
         },
         "content" : {
           "type" : "string",
