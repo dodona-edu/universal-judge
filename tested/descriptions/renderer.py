@@ -87,7 +87,7 @@ class TestedRenderer(MarkdownRenderer):
 
         # Get all actual tests
         tests = []
-        for tab in parsed_dsl.tabs:
+        for tab in parsed_dsl.data.tabs:
             for context in tab.contexts:
                 for testcase in context.testcases:
                     tests.append(testcase)

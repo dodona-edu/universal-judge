@@ -21,13 +21,11 @@ from tested.languages.generation import get_readable_input
 from tested.testsuite import (
     Context,
     MainInput,
-    Output,
     Suite,
     Tab,
     Testcase,
     TextChannelType,
     TextData,
-    TextOutputChannel,
 )
 from tests.language_markers import (
     ALL_LANGUAGES,

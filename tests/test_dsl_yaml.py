@@ -20,6 +20,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
 )
+from tested.dodona import Permission
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
@@ -32,7 +33,6 @@ from tested.serialisation import (
 )
 from tested.testsuite import (
     CustomCheckOracle,
-    DeprecatedUsage,
     FileOutputChannel,
     FileUrl,
     GenericTextOracle,
@@ -798,10 +798,16 @@ def test_using_deprecated_file():
                     content: "Hello world!"
                     location: "test.txt"
         """
-    json_str = translate_to_test_suite(yaml_str)
-    suite = parse_test_suite(json_str)
-    using_deprecated = suite.deprecated
-    assert DeprecatedUsage.OUTPUT_FILES in using_deprecated
+    suite_with_data = parse_dsl(yaml_str)
+    suite = suite_with_data.data
+    messages = list(suite_with_data.messages)
+    assert len(messages) == 1
+    deprecated_message = messages[0]
+    assert deprecated_message.permission == Permission.STAFF
+    assert (
+        deprecated_message.description
+        == "WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead."
+    )
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
     assert len(tab.contexts) == 1
@@ -826,10 +832,16 @@ def test_using_deprecated_files():
                       - url: "media/hello.txt"
                         name: "hello.txt"
             """
-    json_str = translate_to_test_suite(yaml_str)
-    suite = parse_test_suite(json_str)
-    using_deprecated = suite.deprecated
-    assert DeprecatedUsage.INPUT_FILES in using_deprecated
+    suite_with_data = parse_dsl(yaml_str)
+    suite = suite_with_data.data
+    messages = list(suite_with_data.messages)
+    assert len(messages) == 1
+    deprecated_message = messages[0]
+    assert deprecated_message.permission == Permission.STAFF
+    assert (
+        deprecated_message.description
+        == "WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead."
+    )
     assert len(suite.tabs) == 1
     tab = suite.tabs[0]
     assert len(tab.contexts) == 1

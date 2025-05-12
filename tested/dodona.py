@@ -27,7 +27,7 @@ class Permission(StrEnum):
     ZEUS = auto()
 
 
-@define
+@define(frozen=True)
 class ExtendedMessage:
     description: str
     format: str = "text"

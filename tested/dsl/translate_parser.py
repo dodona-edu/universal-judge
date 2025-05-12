@@ -32,7 +32,7 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
-from tested.dodona import ExtendedMessage
+from tested.dodona import ExtendedMessage, Permission
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
@@ -48,7 +48,6 @@ from tested.serialisation import (
 from tested.testsuite import (
     Context,
     CustomCheckOracle,
-    DeprecatedUsage,
     EmptyChannel,
     EvaluationFunction,
     ExceptionOutputChannel,
@@ -73,7 +72,7 @@ from tested.testsuite import (
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import get_args, recursive_dict_merge
+from tested.utils import DataWithMessage, get_args, recursive_dict_merge
 
 YamlDict = dict[str, "YamlObject"]
 
@@ -282,7 +281,7 @@ class DslContext:
 
     def deepen_context(
         self, new_level: YamlDict | None, workdir: Path | None
-    ) -> tuple["DslContext", set[DeprecatedUsage]]:
+    ) -> DataWithMessage["DslContext"]:
         """
         Merge certain fields of the new object with the current context, resulting
         in a new context for the new level.
@@ -293,7 +292,7 @@ class DslContext:
         :return: A new context.
         """
         if new_level is None:
-            return self, set()
+            return DataWithMessage(data=self, messages=set())
 
         deprecated_usage = set()
         the_files = self.files
@@ -301,7 +300,12 @@ class DslContext:
             key = "input_files"
             if "files" in new_level:
                 key = "files"
-                deprecated_usage.add(DeprecatedUsage.INPUT_FILES)
+                deprecated_usage.add(
+                    ExtendedMessage(
+                        f"WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead.",
+                        permission=Permission.STAFF,
+                    )
+                )
 
             files = new_level[key]
             assert isinstance(files, list)
@@ -318,7 +322,10 @@ class DslContext:
             assert isinstance(new_level["config"], dict)
             the_config = recursive_dict_merge(the_config, new_level["config"])
 
-        return evolve(self, files=the_files, config=the_config), deprecated_usage
+        return DataWithMessage(
+            data=evolve(self, files=the_files, config=the_config),
+            messages=deprecated_usage,
+        )
 
     def merge_inheritable_with_specific_config(
         self, level: YamlDict, config_name: str
@@ -697,8 +704,10 @@ def _validate_testcase_combinations(testcase: YamlDict):
 
 def _convert_testcase(
     testcase: YamlDict, context: DslContext, workdir: Path | None
-) -> tuple[Testcase, set[DeprecatedUsage]]:
-    context, deprecated_usage = context.deepen_context(testcase, workdir)
+) -> DataWithMessage[Testcase]:
+    context_with_data = context.deepen_context(testcase, workdir)
+    context = context_with_data.data
+    deprecated_messages = context_with_data.messages
 
     # This is backwards compatability to some extend.
     # TODO: remove this at some point.
@@ -764,7 +773,12 @@ def _convert_testcase(
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (file := testcase.get("file")) is not None:
         output.file = _convert_file_output_channel_deprecated(file, context, "file")
-        deprecated_usage.add(DeprecatedUsage.OUTPUT_FILES)
+        deprecated_messages.add(
+            ExtendedMessage(
+                "WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead.",
+                permission=Permission.STAFF,
+            )
+        )
     if (file := testcase.get("output_files")) is not None:
         output.file = _convert_file_output_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
@@ -810,34 +824,39 @@ def _convert_testcase(
     else:
         the_description = None
 
-    return (
-        Testcase(
+    return DataWithMessage(
+        data=Testcase(
             description=the_description,
             input=the_input,
             output=output,
             link_files=context.files,
             line_comment=line_comment,
         ),
-        deprecated_usage,
+        messages=deprecated_messages,
     )
 
 
 def _convert_context(
     context: YamlDict, dsl_context: DslContext, workdir: Path | None
-) -> tuple[Context, set[DeprecatedUsage]]:
-    dsl_context, deprecated_usage = dsl_context.deepen_context(context, workdir)
+) -> DataWithMessage[Context]:
+    dsl_context_with_messages = dsl_context.deepen_context(context, workdir)
+    dsl_context = dsl_context_with_messages.data
+    deprecated_messages = dsl_context_with_messages.messages
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    testcases, du = _convert_dsl_list(
+    testcases = _convert_dsl_list(
         raw_testcases, dsl_context, workdir, _convert_testcase
     )
-    deprecated_usage.update(du)
-    return Context(testcases=testcases), deprecated_usage
+    deprecated_messages.update(testcases.messages)
+    return DataWithMessage(
+        data=Context(testcases=testcases.data),
+        messages=deprecated_messages,
+    )
 
 
 def _convert_tab(
     tab: YamlDict, context: DslContext, workdir: Path | None
-) -> tuple[Tab, set[DeprecatedUsage]]:
+) -> DataWithMessage[Tab]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -845,44 +864,51 @@ def _convert_tab(
     :param context: The context with config for the parent level.
     :return: A full tab.
     """
-    context, deprecated_usage = context.deepen_context(tab, workdir)
+    context_with_messages = context.deepen_context(tab, workdir)
+    context = context_with_messages.data
+    deprecated_messages = context_with_messages.messages
     name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts, du = _convert_dsl_list(
+        contexts_with_messages = _convert_dsl_list(
             tab["contexts"], context, workdir, _convert_context
         )
-        deprecated_usage.update(du)
+        contexts = contexts_with_messages.data
+        deprecated_messages.update(contexts_with_messages.messages)
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts, du = _convert_dsl_list(
+        contexts_with_messages = _convert_dsl_list(
             tab["cases"], context, workdir, _convert_context
         )
-        deprecated_usage.update(du)
+        contexts = contexts_with_messages.data
+        deprecated_messages.update(contexts_with_messages.messages)
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        testcases, du = _convert_dsl_list(
+        testcases = _convert_dsl_list(
             tab["testcases"], context, workdir, _convert_testcase
         )
-        deprecated_usage.update(du)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        deprecated_messages.update(testcases.messages)
+        contexts = [Context(testcases=[t]) for t in testcases.data]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        testcases, du = _convert_dsl_list(
+        testcases = _convert_dsl_list(
             tab["scripts"], context, workdir, _convert_testcase
         )
-        deprecated_usage.update(du)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        deprecated_messages.update(testcases.messages)
+        contexts = [Context(testcases=[t]) for t in testcases.data]
 
-    return Tab(name=name, contexts=contexts), deprecated_usage
+    return DataWithMessage(
+        data=Tab(name=name, contexts=contexts),
+        messages=deprecated_messages,
+    )
 
 
 T = TypeVar("T")
@@ -892,24 +918,27 @@ def _convert_dsl_list(
     dsl_list: list,
     context: DslContext,
     workdir: Path | None,
-    converter: Callable[
-        [YamlDict, DslContext, Path | None], tuple[T, set[DeprecatedUsage]]
-    ],
-) -> tuple[list[T], set[DeprecatedUsage]]:
+    converter: Callable[[YamlDict, DslContext, Path | None], DataWithMessage[T]],
+) -> DataWithMessage[list[T]]:
     """
     Convert a list of YAML objects into a test suite object.
     """
     objects = []
-    deprecated_usage = set()
+    deprecated_messages = set()
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        ob, du = converter(dsl_object, context, workdir)
-        deprecated_usage.update(du)
-        objects.append(ob)
-    return objects, deprecated_usage
+        ob = converter(dsl_object, context, workdir)
+        deprecated_messages.update(ob.messages)
+        objects.append(ob.data)
+    return DataWithMessage(
+        data=objects,
+        messages=deprecated_messages,
+    )
 
 
-def _convert_dsl(dsl_object: YamlObject, workdir: Path | None) -> Suite:
+def _convert_dsl(
+    dsl_object: YamlObject, workdir: Path | None
+) -> DataWithMessage[Suite]:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -920,7 +949,7 @@ def _convert_dsl(dsl_object: YamlObject, workdir: Path | None) -> Suite:
     :return: A full test suite.
     """
     context = DslContext()
-    deprecated_usage = set()
+    deprecated_messages = set()
 
     if isinstance(dsl_object, list):
         namespace = None
@@ -928,24 +957,31 @@ def _convert_dsl(dsl_object: YamlObject, workdir: Path | None) -> Suite:
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        context, du = context.deepen_context(dsl_object, workdir)
-        deprecated_usage.update(du)
+        context_with_messages = context.deepen_context(dsl_object, workdir)
+        context = context_with_messages.data
+        deprecated_messages.update(context_with_messages.messages)
         tab_list = dsl_object.get("units", dsl_object.get("tabs"))
         assert isinstance(tab_list, list)
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
         context = evolve(context, language=language)
-    tabs, du = _convert_dsl_list(tab_list, context, workdir, _convert_tab)
-    deprecated_usage.update(du)
+    tabs = _convert_dsl_list(tab_list, context, workdir, _convert_tab)
+    deprecated_messages.update(tabs.messages)
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, deprecated=list(deprecated_usage), namespace=namespace)
+        return DataWithMessage(
+            data=Suite(tabs=tabs.data, namespace=namespace),
+            messages=deprecated_messages,
+        )
     else:
-        return Suite(tabs=tabs, deprecated=list(deprecated_usage))
+        return DataWithMessage(
+            data=Suite(tabs=tabs.data),
+            messages=deprecated_messages,
+        )
 
 
-def parse_dsl(dsl_string: str, workdir: Path | None = None) -> Suite:
+def parse_dsl(dsl_string: str, workdir: Path | None = None) -> DataWithMessage[Suite]:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
@@ -968,4 +1004,4 @@ def translate_to_test_suite(dsl_string: str) -> str:
     :return: The test suite.
     """
     suite = parse_dsl(dsl_string, Path("."))
-    return suite_to_json(suite)
+    return suite_to_json(suite.data)

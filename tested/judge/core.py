@@ -10,9 +10,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
-    ExtendedMessage,
     Metadata,
-    Permission,
     StartContext,
     StartJudgement,
     StartTab,
@@ -48,7 +46,7 @@ from tested.languages.generation import (
     generate_statement,
 )
 from tested.serialisation import Statement
-from tested.testsuite import DeprecatedUsage, LanguageLiterals
+from tested.testsuite import LanguageLiterals
 
 _logger = logging.getLogger(__name__)
 
@@ -118,26 +116,8 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
-
-    messages = []
-    if DeprecatedUsage.INPUT_FILES in bundle.suite.deprecated:
-        messages.append(
-            ExtendedMessage(
-                f"WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead.",
-                permission=Permission.STAFF,
-            )
-        )
-
-    if DeprecatedUsage.OUTPUT_FILES in bundle.suite.deprecated:
-        messages.append(
-            ExtendedMessage(
-                f"WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead.",
-                permission=Permission.STAFF,
-            )
-        )
-
-    if messages:
-        collector.add_messages(messages)
+    if bundle.messages:
+        collector.add_messages(bundle.messages)
 
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
