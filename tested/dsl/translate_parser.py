@@ -30,7 +30,11 @@ from tested.datatypes import (
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
-from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
+from tested.dsl.dsl_errors import (
+    build_deprecated_language_message,
+    handle_dsl_validation_errors,
+    raise_yaml_error,
+)
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
     BooleanType,
@@ -67,7 +71,7 @@ from tested.testsuite import (
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import get_args, recursive_dict_merge
+from tested.utils import DataWithMessage, get_args, recursive_dict_merge
 
 YamlDict = dict[str, "YamlObject"]
 
@@ -86,9 +90,22 @@ class ReturnOracle(dict):
     pass
 
 
+class ProgrammingLanguageMap(dict):
+    pass
+
+
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | ProgrammingLanguageMap
 )
 
 
@@ -136,6 +153,16 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     return ReturnOracle(result)
 
 
+def _return_programming_language_map(
+    loader: yaml.Loader, node: yaml.Node
+) -> ProgrammingLanguageMap:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(
+        result, dict
+    ), f"A programming language map must be an object, got {result} which is a {type(result)}."
+    return ProgrammingLanguageMap(result)
+
+
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
@@ -146,6 +173,9 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor(
+        "!programming_language", _return_programming_language_map, loader
+    )
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -159,6 +189,10 @@ def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
 
 def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
+
+
+def is_programming_language_map(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ProgrammingLanguageMap)
 
 
 def load_schema_validator(
@@ -189,9 +223,11 @@ def load_schema_validator(
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    type_checker = (
+        original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
+        .redefine("expression", is_expression)
+        .redefine("programming_language", is_programming_language_map)
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(
         validate_tested_dsl_expression
@@ -495,7 +531,10 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
+def _convert_testcase(
+    testcase: YamlDict, context: DslContext
+) -> DataWithMessage[Testcase]:
+    messages = set()
     context = context.deepen_context(testcase)
 
     # This is backwards compatability to some extend.
@@ -511,6 +550,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
                 the_dict = {context.language: expr_stmt}
             else:
                 assert isinstance(expr_stmt, dict)
+                if not isinstance(expr_stmt, ProgrammingLanguageMap):
+                    messages.add(build_deprecated_language_message())
                 the_dict = expr_stmt
             the_dict = {SupportedLanguage(l): cast(str, v) for l, v in the_dict.items()}
             if "statement" in testcase:
@@ -587,24 +628,32 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     else:
         the_description = None
 
-    return Testcase(
-        description=the_description,
-        input=the_input,
-        output=output,
-        link_files=context.files,
-        line_comment=line_comment,
+    return DataWithMessage(
+        data=Testcase(
+            description=the_description,
+            input=the_input,
+            output=output,
+            link_files=context.files,
+            line_comment=line_comment,
+        ),
+        messages=messages,
     )
 
 
-def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
+def _convert_context(
+    context: YamlDict, dsl_context: DslContext
+) -> DataWithMessage[Context]:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
     testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
-    return Context(testcases=testcases)
+    return DataWithMessage(
+        data=Context(testcases=testcases.data),
+        messages=testcases.messages,
+    )
 
 
-def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
+def _convert_tab(tab: YamlDict, context: DslContext) -> DataWithMessage[Tab]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -619,44 +668,65 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
+        contexts_with_messages = _convert_dsl_list(
+            tab["contexts"], context, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        messages = contexts_with_messages.messages
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts = _convert_dsl_list(tab["cases"], context, _convert_context)
+        contexts_with_messages = _convert_dsl_list(
+            tab["cases"], context, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        messages = contexts_with_messages.messages
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
         testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        messages = testcases.messages
+        contexts = [Context(testcases=[t]) for t in testcases.data]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
         testcases = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        messages = testcases.messages
+        contexts = [Context(testcases=[t]) for t in testcases.data]
 
-    return Tab(name=name, contexts=contexts)
+    return DataWithMessage(
+        data=Tab(name=name, contexts=contexts),
+        messages=messages,
+    )
 
 
 T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], T]
-) -> list[T]:
+    dsl_list: list,
+    context: DslContext,
+    converter: Callable[[YamlDict, DslContext], DataWithMessage[T]],
+) -> DataWithMessage[list[T]]:
     """
     Convert a list of YAML objects into a test suite object.
     """
     objects = []
+    messages = set()
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        objects.append(converter(dsl_object, context))
-    return objects
+        obj = converter(dsl_object, context)
+        messages.update(obj.messages)
+        objects.append(obj.data)
+    return DataWithMessage(
+        data=objects,
+        messages=messages,
+    )
 
 
-def _convert_dsl(dsl_object: YamlObject) -> Suite:
+def _convert_dsl(dsl_object: YamlObject) -> DataWithMessage[Suite]:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -683,12 +753,15 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, namespace=namespace)
+        return DataWithMessage(
+            data=Suite(tabs=tabs.data, namespace=namespace),
+            messages=tabs.messages,
+        )
     else:
-        return Suite(tabs=tabs)
+        return DataWithMessage(data=Suite(tabs=tabs.data), messages=tabs.messages)
 
 
-def parse_dsl(dsl_string: str) -> Suite:
+def parse_dsl(dsl_string: str) -> DataWithMessage[Suite]:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
@@ -708,5 +781,5 @@ def translate_to_test_suite(dsl_string: str) -> str:
     :param dsl_string: The DSL.
     :return: The test suite.
     """
-    suite = parse_dsl(dsl_string)
-    return suite_to_json(suite)
+    suite_with_message = parse_dsl(dsl_string)
+    return suite_to_json(suite_with_message.data)

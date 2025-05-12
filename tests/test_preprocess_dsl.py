@@ -151,7 +151,7 @@ tabs:
           en: "tests(11)"
           nl: "testen(11)"
         return: 11
-      - expression:
+      - expression: !programming_language
           javascript: "{{animal}}_javascript(1 + 1)"
           typescript: "{{animal}}_typescript(1 + 1)"
           java: "Submission.{{animal}}_java(1 + 1)"
@@ -166,7 +166,7 @@ tabs:
   testcases:
   - expression: tests(11)
     return: 11
-  - expression:
+  - expression: !programming_language
       javascript: animals_javascript(1 + 1)
       typescript: animals_typescript(1 + 1)
       java: Submission.animals_java(1 + 1)

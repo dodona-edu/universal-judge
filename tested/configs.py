@@ -130,7 +130,7 @@ class Bundle:
     language: "Language"
     global_config: GlobalConfig
     out: IO
-    preprocessor_messages: list[ExtendedMessage] = []
+    messages: set[ExtendedMessage] = set()
 
     @property
     def config(self) -> DodonaConfig:
@@ -209,7 +209,7 @@ def create_bundle(
     output: IO,
     suite: Suite,
     language: str | None = None,
-    preprocessor_messages: list[ExtendedMessage] | None = None,
+    messages: set[ExtendedMessage] | None = None,
 ) -> Bundle:
     """
     Create a configuration bundle.
@@ -219,8 +219,7 @@ def create_bundle(
     :param suite: The test suite.
     :param language: Optional programming language. If None, the one from the Dodona
                      configuration will be used.
-    :param preprocessor_messages: Indicator that the natural language translator
-    for the DSL key that was not defined in any translations map.
+    :param messages: Messages generated out of the preprocessor and the translate parser.
 
     :return: The configuration bundle.
     """
@@ -237,12 +236,13 @@ def create_bundle(
         suite=suite,
     )
     lang_config = langs.get_language(global_config, language)
-    if preprocessor_messages is None:
-        preprocessor_messages = []
+
+    if messages is None:
+        messages = set()
 
     return Bundle(
         language=lang_config,
         global_config=global_config,
         out=output,
-        preprocessor_messages=preprocessor_messages,
+        messages=messages,
     )
