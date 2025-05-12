@@ -533,7 +533,7 @@ def _validate_testcase_combinations(testcase: YamlDict):
 
 def _convert_testcase(
     testcase: YamlDict, context: DslContext
-) -> DataWithMessage[Testcase, ExtendedMessage]:
+) -> DataWithMessage[Testcase]:
     messages = set()
     context = context.deepen_context(testcase)
 
@@ -545,10 +545,7 @@ def _convert_testcase(
     line_comment = ""
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
-        if (
-            isinstance(expr_stmt, dict | ProgrammingLanguageMap)
-            or context.language != "tested"
-        ):
+        if isinstance(expr_stmt, dict) or context.language != "tested":
             if isinstance(expr_stmt, str):
                 the_dict = {context.language: expr_stmt}
             else:
@@ -645,20 +642,18 @@ def _convert_testcase(
 
 def _convert_context(
     context: YamlDict, dsl_context: DslContext
-) -> DataWithMessage[Context, ExtendedMessage]:
+) -> DataWithMessage[Context]:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    data_w_messages = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
+    testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
     return DataWithMessage(
-        data=Context(testcases=data_w_messages.data),
-        messages=data_w_messages.messages,
+        data=Context(testcases=testcases.data),
+        messages=testcases.messages,
     )
 
 
-def _convert_tab(
-    tab: YamlDict, context: DslContext
-) -> DataWithMessage[Tab, ExtendedMessage]:
+def _convert_tab(tab: YamlDict, context: DslContext) -> DataWithMessage[Tab]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -673,31 +668,37 @@ def _convert_tab(
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        data_w_messages = _convert_dsl_list(tab["contexts"], context, _convert_context)
-        contexts = data_w_messages.data
+        contexts_with_messages = _convert_dsl_list(
+            tab["contexts"], context, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        messages = contexts_with_messages.messages
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        data_w_messages = _convert_dsl_list(tab["cases"], context, _convert_context)
-        contexts = data_w_messages.data
+        contexts_with_messages = _convert_dsl_list(
+            tab["cases"], context, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        messages = contexts_with_messages.messages
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        data_w_messages = _convert_dsl_list(
-            tab["testcases"], context, _convert_testcase
-        )
-        contexts = [Context(testcases=[t]) for t in data_w_messages.data]
+        testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
+        messages = testcases.messages
+        contexts = [Context(testcases=[t]) for t in testcases.data]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        data_w_messages = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
-        contexts = [Context(testcases=[t]) for t in data_w_messages.data]
+        testcases = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
+        messages = testcases.messages
+        contexts = [Context(testcases=[t]) for t in testcases.data]
 
     return DataWithMessage(
         data=Tab(name=name, contexts=contexts),
-        messages=data_w_messages.messages,
+        messages=messages,
     )
 
 
@@ -707,8 +708,8 @@ T = TypeVar("T")
 def _convert_dsl_list(
     dsl_list: list,
     context: DslContext,
-    converter: Callable[[YamlDict, DslContext], DataWithMessage[T, ExtendedMessage]],
-) -> DataWithMessage[list[T], ExtendedMessage]:
+    converter: Callable[[YamlDict, DslContext], DataWithMessage[T]],
+) -> DataWithMessage[list[T]]:
     """
     Convert a list of YAML objects into a test suite object.
     """
@@ -716,16 +717,16 @@ def _convert_dsl_list(
     messages = set()
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        data_w_messages = converter(dsl_object, context)
-        messages.update(data_w_messages.messages)
-        objects.append(data_w_messages.data)
+        obj = converter(dsl_object, context)
+        messages.update(obj.messages)
+        objects.append(obj.data)
     return DataWithMessage(
         data=objects,
         messages=messages,
     )
 
 
-def _convert_dsl(dsl_object: YamlObject) -> DataWithMessage[Suite, ExtendedMessage]:
+def _convert_dsl(dsl_object: YamlObject) -> DataWithMessage[Suite]:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -748,21 +749,19 @@ def _convert_dsl(dsl_object: YamlObject) -> DataWithMessage[Suite, ExtendedMessa
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
         context = evolve(context, language=language)
-    data_w_messages = _convert_dsl_list(tab_list, context, _convert_tab)
+    tabs = _convert_dsl_list(tab_list, context, _convert_tab)
 
     if namespace:
         assert isinstance(namespace, str)
         return DataWithMessage(
-            data=Suite(tabs=data_w_messages.data, namespace=namespace),
-            messages=data_w_messages.messages,
+            data=Suite(tabs=tabs.data, namespace=namespace),
+            messages=tabs.messages,
         )
     else:
-        return DataWithMessage(
-            data=Suite(tabs=data_w_messages.data), messages=data_w_messages.messages
-        )
+        return DataWithMessage(data=Suite(tabs=tabs.data), messages=tabs.messages)
 
 
-def parse_dsl(dsl_string: str) -> DataWithMessage[Suite, ExtendedMessage]:
+def parse_dsl(dsl_string: str) -> DataWithMessage[Suite]:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
