@@ -5,7 +5,6 @@ from enum import StrEnum, unique
 from pathlib import Path
 from typing import Literal
 
-from exercise.opgaven.reeks07.zendmasten.preparation.outputprocessor import outputBlok
 from tested.configs import Bundle
 from tested.dodona import (
     AppendMessage,
