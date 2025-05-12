@@ -175,6 +175,70 @@ def transform_ide(data: Any) -> Any:
     return data
 
 
+SPECIAL_CASES = ["return", "stderr", "stdout", "file", "exception", "statement", "expression"]
+SPECIAL_TYPES = ["expression", "programming_language", "oracle"]
+
+def make_tag_structure(data: Any, tag: str ="!natural_language") -> dict:
+    return {
+        "oneOf": [
+            data,
+            {
+                "type": "object",
+                "required": ["__tag__", "value"],
+                "properties": {
+                    "__tag__": {
+                        "type": "string",
+                        "description": "The tag used in the yaml",
+                        "const": tag,
+                    },
+                    "value": {"type": "object", "additionalProperties": data},
+                },
+            },
+        ]
+    }
+
+def make_translations_map() -> dict:
+    return {
+          "type" : "object",
+          "description": "Define translations in the global scope."
+    }
+
+
+def transform_json_translation(data: Any) -> Any:
+    if isinstance(data, dict):
+        if "type" in data and data["type"] != "object":
+            if data["type"] in SPECIAL_TYPES:
+                return make_tag_structure(data, f"!{data['type']}")
+            return make_tag_structure(data)
+
+        for case in SPECIAL_CASES:
+            if case in data:
+                data[case] = make_tag_structure(data[case])
+
+        if "_rootObject" in data:
+            assert "properties" in data["_rootObject"]
+            data["_rootObject"]["properties"]["translations"] = make_translations_map()
+
+        if "tab" in data and "properties" in data["tab"]:
+            data["tab"]["properties"]["translations"] = make_translations_map()
+
+        if "unit" in data and "properties" in data["unit"]:
+            data["unit"]["properties"]["translations"] = make_translations_map()
+
+        if "context" in data and "properties" in data["context"]:
+            data["context"]["properties"]["translations"] = make_translations_map()
+
+        if "case" in data and "properties" in data["case"]:
+            data["case"]["properties"]["translations"] = make_translations_map()
+
+        return {key: transform_json_translation(value) for key, value in data.items()}
+
+    if isinstance(data, list):
+        return [transform_json_translation(value) for value in data]
+    return data
+
+
+
 def transform_json(json_file: Path, monolingual: bool, strict: bool):
     """
     This function transforms the JSON schema used in the DSL translator into
@@ -211,12 +275,20 @@ def transform_json(json_file: Path, monolingual: bool, strict: bool):
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected path to multilingual json schema."
-    monolingual = False
-    strict = False
-    if n > 2:
-        assert sys.argv[2] in ("strict", "not-strict")
-        strict = sys.argv[2] == "strict"
+    jf = Path(sys.argv[1])
+    with open(jf, "r") as stream:
+        json_stream = json.load(stream)
+        res = transform_json_translation(json_stream)
+        fn = "multilingual-schema2.json"
+        with open(jf.parent / fn, "w", encoding="utf-8") as f:
+            json.dump(res, f, indent=2)
 
-        monolingual = True
-
-    transform_json(Path(sys.argv[1]), monolingual=monolingual, strict=strict)
+    # monolingual = False
+    # strict = False
+    # if n > 2:
+    #     assert sys.argv[2] in ("strict", "not-strict")
+    #     strict = sys.argv[2] == "strict"
+#
+    #     monolingual = True
+#
+    # transform_json(Path(sys.argv[1]), monolingual=monolingual, strict=strict)
