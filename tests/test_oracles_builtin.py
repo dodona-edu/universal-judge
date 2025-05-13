@@ -141,7 +141,7 @@ def test_file_oracle_full_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "actual\nactual"]
@@ -165,7 +165,7 @@ def test_file_oracle_full_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "expected\nexpected"]
@@ -190,7 +190,7 @@ def test_file_oracle_full_correct_with_text_content(
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
     s = mocker.spy(
-        tested.oracles.text, name="_text_comparison"  # type: ignore[reportAttributeAccessIssue]
+        tested.oracles.text, name="compare_text"  # type: ignore[reportAttributeAccessIssue]
     )
     mock_files = [
         mocker.mock_open(read_data=content).return_value
@@ -217,7 +217,7 @@ def test_file_oracle_line_wrong(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "actual\nactual2"]
@@ -245,7 +245,7 @@ def test_file_oracle_line_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "expected\nexpected2"]
@@ -273,7 +273,7 @@ def test_file_oracle_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -301,7 +301,7 @@ def test_file_oracle_dont_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
     )
-    s = mocker.spy(tested.oracles.text, name="_text_comparison")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
