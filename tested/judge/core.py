@@ -356,7 +356,10 @@ def _process_results(
 
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
-                    if isinstance(case.input.stdin, TextData) and case.input.stdin.data is not None:
+                    if (
+                        isinstance(case.input.stdin, TextData)
+                        and case.input.stdin.data is not None
+                    ):
                         meta_stdin = case.input.stdin.data
                 elif isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
