@@ -332,7 +332,7 @@ def _process_results(
         # Handle the contexts.
         collector.add(StartContext(description=planned.context.description))
 
-        continue_, seen_files = evaluate_context_results(
+        continue_ = evaluate_context_results(
             bundle,
             context=planned.context,
             exec_results=context_result,
@@ -342,27 +342,22 @@ def _process_results(
         )
 
         if bundle.language.supports_debug_information():
-            # TODO: this is currently very Python-specific
-            # See if we need a callback to the language modules in the future.
-            # TODO: we could probably re-use the "readable_input" function here,
-            #       since it only differs a bit.
             meta_statements = []
             input_files = []
             meta_stdin = None
-            for file in seen_files:
-                file_data = {"path": file.path}
-                if file.content != "":
-                    file_data["content"] = file.content
-
-                input_files.append(file_data)
 
             for case in planned.context.testcases:
+                for file in case.link_files:
+                    file_data = {"path": file.path}
+                    if file.content != "":
+                        file_data["content"] = file.content
+
+                    input_files.append(file_data)
+
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
-                    if isinstance(case.input.stdin, TextData):
-                        meta_stdin = case.input.stdin.get_data_as_string(
-                            bundle.config.resources
-                        )
+                    if isinstance(case.input.stdin, TextData) and case.input.stdin.data is not None:
+                        meta_stdin = case.input.stdin.data
                 elif isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
                     meta_statements.append(stmt)
