@@ -175,68 +175,98 @@ def transform_ide(data: Any) -> Any:
     return data
 
 
-SPECIAL_CASES = ["return", "stderr", "stdout", "file", "exception", "statement", "expression"]
+SPECIAL_CASES = [
+    "return",
+    "stderr",
+    "stdout",
+    "file",
+    "exception",
+    "statement",
+    "expression",
+]
 SPECIAL_TYPES = ["expression", "programming_language", "oracle"]
 
-def make_tag_structure(data: Any, tag: str ="!natural_language") -> dict:
-    return {
-        "oneOf": [
-            data,
-            {
-                "type": "object",
-                "required": ["__tag__", "value"],
-                "properties": {
-                    "__tag__": {
-                        "type": "string",
-                        "description": "The tag used in the yaml",
-                        "const": tag,
-                    },
-                    "value": {"type": "object", "additionalProperties": data},
-                },
+def flatten_one_of_stack(data: list) -> list:
+    new_one_stack = []
+    for ele in data:
+        if isinstance(ele, dict) and len(ele.keys()) == 1 and "oneOf" in ele:
+            assert isinstance(ele["oneOf"], list)
+            new_one_stack.extend(ele["oneOf"])
+        else:
+            new_one_stack.append(ele)
+    return new_one_stack
+
+
+def make_tag_structure(data: Any, data_with_inner_translations: Any = None, tag: str = "!natural_language") -> dict:
+    base = {
+        "type": "object",
+        "required": ["__tag__", "value"],
+        "properties": {
+            "__tag__": {
+                "type": "string",
+                "description": "The tag used in the yaml",
+                "const": tag,
             },
-        ]
+            "value": {"type": "object", "additionalProperties": data},
+        },
     }
+
+    if tag == "!natural_language" and data_with_inner_translations is not None:
+        return {"oneOf": [data_with_inner_translations, base]}
+
+    return base
+
 
 def make_translations_map() -> dict:
-    return {
-          "type" : "object",
-          "description": "Define translations in the global scope."
-    }
+    return {"type": "object", "description": "Define translations in the global scope."}
 
 
-def transform_json_translation(data: Any) -> Any:
+def transform_json_translation(data: Any, in_sub_def: bool) -> Any:
     if isinstance(data, dict):
-        if "type" in data and data["type"] != "object":
+        # Standard creation of the special tag structure for translations.
+        new_data = {
+            key: transform_json_translation(
+                value, in_sub_def or key == "subDefinitions"
+            )
+            for key, value in data.items()
+        }
+        if "type" in data and (data["type"] != "object" or in_sub_def):
             if data["type"] in SPECIAL_TYPES:
-                return make_tag_structure(data, f"!{data['type']}")
-            return make_tag_structure(data)
+                tag = data.pop("type")
+                new_data.pop("type")
+                # translations applied to inner part
+                tag_data_with_inner_translations = make_tag_structure(
+                    new_data,
+                    tag=f"!{tag}",
+                )
+                # translations not applied to inner part
+                tag_data = make_tag_structure(
+                    data,
+                    tag=f"!{tag}",
+                )
+                return make_tag_structure(
+                    data=tag_data,
+                    data_with_inner_translations=tag_data_with_inner_translations,
+                )
 
-        for case in SPECIAL_CASES:
-            if case in data:
-                data[case] = make_tag_structure(data[case])
+            return make_tag_structure(data, new_data)
+        data = new_data
 
-        if "_rootObject" in data:
-            assert "properties" in data["_rootObject"]
-            data["_rootObject"]["properties"]["translations"] = make_translations_map()
+        # Add the translations maps
+        targets = ["_rootObject", "tab", "unit", "context", "case"]
+        for target in targets:
+            if target in data and "properties" in data[target]:
+                data[target]["properties"]["translations"] = make_translations_map()
 
-        if "tab" in data and "properties" in data["tab"]:
-            data["tab"]["properties"]["translations"] = make_translations_map()
+        if "oneOf" in data:
+            assert isinstance(data["oneOf"], list)
+            data["oneOf"] = flatten_one_of_stack(data["oneOf"])
 
-        if "unit" in data and "properties" in data["unit"]:
-            data["unit"]["properties"]["translations"] = make_translations_map()
-
-        if "context" in data and "properties" in data["context"]:
-            data["context"]["properties"]["translations"] = make_translations_map()
-
-        if "case" in data and "properties" in data["case"]:
-            data["case"]["properties"]["translations"] = make_translations_map()
-
-        return {key: transform_json_translation(value) for key, value in data.items()}
+        return data
 
     if isinstance(data, list):
-        return [transform_json_translation(value) for value in data]
+        return [transform_json_translation(value, in_sub_def) for value in data]
     return data
-
 
 
 def transform_json(json_file: Path, monolingual: bool, strict: bool):
@@ -278,7 +308,7 @@ if __name__ == "__main__":
     jf = Path(sys.argv[1])
     with open(jf, "r") as stream:
         json_stream = json.load(stream)
-        res = transform_json_translation(json_stream)
+        res = transform_json_translation(json_stream, False)
         fn = "multilingual-schema2.json"
         with open(jf.parent / fn, "w", encoding="utf-8") as f:
             json.dump(res, f, indent=2)
@@ -289,6 +319,6 @@ if __name__ == "__main__":
     #     assert sys.argv[2] in ("strict", "not-strict")
     #     strict = sys.argv[2] == "strict"
 #
-    #     monolingual = True
+#     monolingual = True
 #
-    # transform_json(Path(sys.argv[1]), monolingual=monolingual, strict=strict)
+# transform_json(Path(sys.argv[1]), monolingual=monolingual, strict=strict)
