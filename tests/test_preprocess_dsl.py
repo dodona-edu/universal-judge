@@ -4,6 +4,7 @@ import yaml
 from pytest_mock import MockerFixture
 
 import tested
+from tested.dodona import ExtendedMessage, Permission
 from tested.dsl.translate_parser import (
     ExpressionString,
     ReturnOracle,
@@ -14,17 +15,17 @@ from tested.nat_translation import (
     convert_to_yaml,
     create_enviroment,
     parse_yaml,
-    run_translation,
+    translate_file,
     translate_yaml,
     validate_pre_dsl,
 )
-from tested.transform_json import transform_IDE, transform_json, transform_monolingual
 
 
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     enviroment = create_enviroment()
     yaml_object = parse_yaml(yaml_str)
-    translated_dsl = translate_yaml(yaml_object, {}, {}, {}, "en", enviroment)
+    validate_pre_dsl(yaml_object)
+    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 
@@ -444,14 +445,15 @@ tabs:
         ]
     ]
     mock_files.append(mocker.mock_open(read_data="{}").return_value)
+    mock_files.append(mocker.mock_open().return_value)
     mock_opener = mocker.mock_open()
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    translated_yaml, _ = run_translation(Path("suite.yaml"), "en", False)
+    translated_yaml, _ = translate_file(Path("suite.yaml"), "en")
     yaml_object = parse_yaml(translated_yaml)
 
-    assert s.call_count == 0
+    assert s.call_count == 1
     assert isinstance(yaml_object, dict)
     tabs = yaml_object["tabs"]
     assert isinstance(tabs, list)
@@ -460,40 +462,6 @@ tabs:
         "expression": "count_words(results)",
         "return": "The result is 10",
     }
-
-
-def test_file_is_generated(mocker: MockerFixture):
-    s = mocker.spy(
-        tested.nat_translation, name="generate_new_yaml"  # type: ignore[reportAttributeAccessIssue]
-    )
-
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in [
-            """
-tabs:
-- tab: task3
-  testcases:
-  - statement: !natural_language
-        nl: resultaten = Proberen(10)
-        en: results = Tries(10)
-  - expression: !natural_language
-        nl: tel_woorden(resultaten)
-        en: count_words(results)
-    return: !natural_language
-        nl: Het resultaat is 10
-        en: The result is 10"""
-        ]
-    ]
-    mock_files.append(mocker.mock_open(read_data="{}").return_value)
-    mock_files.append(mocker.mock_open().return_value)
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
-
-    run_translation(Path("suite.yaml"), "en", True)
-
-    assert s.call_count == 1
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
@@ -528,10 +496,16 @@ tabs:
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
 
-    _, missing_keys = run_translation(Path("suite.yaml"), "en", True)
+    _, messages = translate_file(Path("suite.yaml"), "en")
 
-    assert missing_keys
+    assert messages
     assert s.call_count == 1
+    assert isinstance(messages[0], ExtendedMessage)
+    assert (
+        messages[0].description
+        == "The natural translator found the key ten, that was not defined in the corresponding translations maps!"
+    )
+    assert messages[0].permission == Permission.STAFF
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(Path("suite-en.yaml"), "w", encoding="utf-8")
@@ -640,7 +614,7 @@ key2: value2
 
 def test_run_is_correct_when_no_file():
     try:
-        run_translation(Path("suite.yaml"), "en", False)
+        translate_file(Path("suite.yaml"), "en")
     except FileNotFoundError:
         print("As expected")
     else:
@@ -667,365 +641,3 @@ tabs:
     return: 11{%{{works}}
 """.strip()
     validate_natural_translate(yaml_str, translated_yml)
-
-
-def test_return_json_schema():
-    json_schema = {
-        "return": {
-            "description": "Expected return value",
-            "oneOf": [
-                {"$ref": "#/definitions/returnOutputChannel"},
-                {
-                    "type": "object",
-                    "required": ["__tag__", "value"],
-                    "properties": {
-                        "__tag__": {
-                            "type": "string",
-                            "description": "The tag used in the yaml",
-                            "const": "!natural_language",
-                        },
-                        "value": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/returnOutputChannel"
-                            },
-                        },
-                    },
-                },
-            ],
-        }
-    }
-
-    json_schema_expected = {
-        "return": {
-            "description": "Expected return value",
-            "anyOf": [
-                {"$ref": "#/definitions/returnOutputChannel"},
-                {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/returnOutputChannel"
-                    },
-                    "not": {
-                        "anyOf": [
-                            {"required": ["description"]},
-                            {"required": ["value"]},
-                            {"required": ["types"]},
-                        ]
-                    },
-                },
-            ],
-        }
-    }
-
-    result = transform_IDE(json_schema)
-
-    assert result == json_schema_expected
-
-
-def test_yaml_value_json_schema():
-    json_schema = {
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-            "not": {"properties": {"__tag__": {"type": "string"}}, "type": "object"},
-        },
-    }
-
-    json_schema_expected = {
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-        }
-    }
-
-    result = transform_IDE(json_schema)
-
-    assert result == json_schema_expected
-
-
-def test_nat_lang_json_schema():
-    json_schema = {
-        "type": "object",
-        "required": ["__tag__", "value"],
-        "properties": {
-            "__tag__": {
-                "type": "string",
-                "description": "The tag used in the yaml",
-                "const": "!natural_language",
-            },
-            "value": {"type": "object", "additionalProperties": {"type": "string"}},
-        },
-    }
-
-    json_schema_expected = {
-        "type": "object",
-        "additionalProperties": {"type": "string"},
-        "not": {
-            "anyOf": [
-                {"required": ["description"]},
-                {"required": ["value"]},
-                {"required": ["types"]},
-            ]
-        },
-    }
-
-    result = transform_IDE(json_schema)
-
-    assert result == json_schema_expected
-
-
-def test_expr_json_schema():
-    json_schema = {
-        "type": "object",
-        "required": ["__tag__", "value"],
-        "properties": {
-            "__tag__": {
-                "type": "string",
-                "description": "The tag used in the yaml",
-                "const": "!expression",
-            },
-            "value": {
-                "type": "string",
-                "format": "tested-dsl-expression",
-                "description": "An expression in Python-syntax.",
-            },
-        },
-    }
-
-    json_schema_expected = {}
-
-    result = transform_IDE(json_schema)
-
-    assert result == json_schema_expected
-
-
-def test_list_json_schema():
-    json_schema = [
-        {},
-        {
-            "type": "string",
-            "description": "A statement of expression in Python-like syntax as YAML string.",
-        },
-    ]
-
-    json_schema_expected = [
-        {
-            "type": "string",
-            "description": "A statement of expression in Python-like syntax as YAML string.",
-        }
-    ]
-
-    result = transform_IDE(json_schema)
-
-    assert result == json_schema_expected
-
-
-def test_transform_executed_correct(mocker: MockerFixture):
-    s = mocker.spy(
-        tested.transform_json, name="transform_IDE"  # type: ignore[reportAttributeAccessIssue]
-    )
-
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in [
-            """
-{        
-    "files" : {
-      "description" : "A list of files used in the test suite.",
-      "oneOf" : [
-        {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
-          }
-        },
-        {
-          "type" : "object",
-          "required": [
-            "__tag__",
-            "value"
-          ],
-          "properties" : {
-            "__tag__": {
-              "type" : "string",
-              "description" : "The tag used in the yaml",
-              "const":  "!natural_language"
-            },
-            "value":{
-              "type": "object",
-              "additionalProperties": {
-                "type" : "array",
-                "items" : {
-                  "$ref" : "#/definitions/file"
-                }
-              }
-            }
-          }
-        }
-      ]
-    }
-}"""
-        ]
-    ]
-    mock_files.append(mocker.mock_open(read_data="{}").return_value)
-    mock_files.append(mocker.mock_open().return_value)
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
-
-    transform_json(Path("schema.json"), False, False)
-
-    assert s.call_count == 25
-
-    # Check if the file was opened for writing
-    mock_opener.assert_any_call(Path("multilingual-schema.json"), "w", encoding="utf-8")
-
-
-def test_json_rm_nat_lang_json_schema():
-    json_schema = {
-        "oneOf": [
-            {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/tab"}},
-            {
-                "type": "object",
-                "required": ["__tag__", "value"],
-                "properties": {
-                    "__tag__": {
-                        "type": "string",
-                        "description": "The tag used in the yaml",
-                        "const": "!natural_language",
-                    },
-                    "value": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "array",
-                            "minItems": 1,
-                            "items": {"$ref": "#/definitions/tab"},
-                        },
-                    },
-                },
-            },
-        ]
-    }
-
-    json_schema_expected = {
-        "type": "array",
-        "minItems": 1,
-        "items": {"$ref": "#/definitions/tab"},
-    }
-
-    result = transform_monolingual(json_schema, True)
-
-    assert result == json_schema_expected
-
-
-def test_json_rm_prog_lang_json_schema():
-    json_schema = {
-        "expressionOrStatement": {
-            "oneOf": [
-                {
-                    "type": "string",
-                    "format": "tested-dsl-expression",
-                    "description": "A statement of expression in Python-like syntax as YAML string.",
-                },
-                {
-                    "type": "object",
-                    "description": "Programming-language-specific statement or expression.",
-                    "minProperties": 1,
-                    "propertyNames": {"$ref": "#/definitions/programmingLanguage"},
-                    "items": {
-                        "type": "string",
-                        "description": "A language-specific literal, which will be used verbatim.",
-                    },
-                },
-                {
-                    "type": "object",
-                    "required": ["__tag__", "value"],
-                    "properties": {
-                        "__tag__": {
-                            "type": "string",
-                            "description": "The tag used in the yaml",
-                            "const": "!programming_language",
-                        },
-                        "value": {
-                            "type": "object",
-                            "description": "Programming-language-specific statement or expression.",
-                            "minProperties": 1,
-                            "propertyNames": {
-                                "$ref": "#/definitions/programmingLanguage"
-                            },
-                            "items": {
-                                "type": "string",
-                                "description": "A language-specific literal, which will be used verbatim.",
-                            },
-                        },
-                    },
-                },
-            ]
-        },
-    }
-
-    json_schema_expected = {
-        "expressionOrStatement": {
-            "oneOf": [
-                {
-                    "type": "string",
-                    "format": "tested-dsl-expression",
-                    "description": "A statement of expression in Python-like syntax as YAML string.",
-                },
-                {
-                    "description": "Programming-language-specific statement or expression.",
-                    "minProperties": 1,
-                    "propertyNames": {"$ref": "#/definitions/programmingLanguage"},
-                    "items": {
-                        "type": "string",
-                        "description": "A language-specific literal, which will be used verbatim.",
-                    },
-                    "anyOf": [{"type": "object"}, {"type": "programming_language"}],
-                },
-            ]
-        },
-    }
-
-    result = transform_monolingual(json_schema, True)
-
-    assert result == json_schema_expected
-
-
-def test_json_schema_edge_cases():
-    json_schema = {
-        "expressionOrStatementWithNatTranslation": {},
-        "translations": {},
-        "$ref": "#/definitions/expressionOrStatementWithNatTranslation",
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-            "not": {"properties": {"__tag__": {"type": "string"}}, "type": "object"},
-        },
-    }
-
-    json_schema_expected = {
-        "$ref": "#/definitions/expressionOrStatement",
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-            "not": {"type": ["oracle", "expression", "programming_language"]},
-        },
-    }
-
-    result = transform_monolingual(json_schema, True)
-
-    assert result == json_schema_expected
-
-    json_schema = {
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-            "not": {"properties": {"__tag__": {"type": "string"}}, "type": "object"},
-        },
-    }
-
-    json_schema_expected = {
-        "yamlValue": {
-            "description": "A value represented as YAML.",
-        }
-    }
-
-    result = transform_monolingual(json_schema, False)
-
-    assert result == json_schema_expected

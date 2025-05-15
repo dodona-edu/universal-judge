@@ -11,7 +11,12 @@ from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
 
-from tested.dsl.dsl_errors import handle_dsl_validation_errors, raise_yaml_error
+from tested.dodona import ExtendedMessage
+from tested.dsl.dsl_errors import (
+    build_preprocessor_messages,
+    handle_dsl_validation_errors,
+    raise_yaml_error,
+)
 
 
 def validate_pre_dsl(yaml_object: Any):
@@ -29,7 +34,7 @@ def validate_pre_dsl(yaml_object: Any):
     handle_dsl_validation_errors(errors)
 
 
-class CustomDumper(yaml.SafeDumper):
+class CustomTagFormatDumper(yaml.SafeDumper):
 
     def represent_with_tag(self, tag, value):
         if isinstance(value, dict):
@@ -40,7 +45,7 @@ class CustomDumper(yaml.SafeDumper):
             return self.represent_scalar(tag, value)
 
     @staticmethod
-    def custom_representer(dumper, data):
+    def custom_tag_format_representer(dumper, data):
         """
         Will turn the given object back into YAML.
 
@@ -55,7 +60,7 @@ class CustomDumper(yaml.SafeDumper):
         )
 
 
-def construct_custom(loader, tag_suffix, node):
+def construct_custom_tag_format(loader, tag_suffix, node):
     """
     This constructor will turn the given YAML into an object that can be used for translation.
 
@@ -291,9 +296,14 @@ def generate_new_yaml(yaml_path: Path, yaml_string: str, language: str):
 
 
 def convert_to_yaml(translated_data: Any) -> str:
-    CustomDumper.add_representer(dict, CustomDumper.custom_representer)
+    CustomTagFormatDumper.add_representer(
+        dict, CustomTagFormatDumper.custom_tag_format_representer
+    )
     return yaml.dump(
-        translated_data, Dumper=CustomDumper, allow_unicode=True, sort_keys=False
+        translated_data,
+        Dumper=CustomTagFormatDumper,
+        allow_unicode=True,
+        sort_keys=False,
     )
 
 
@@ -302,7 +312,7 @@ def parse_yaml(yaml_stream: str) -> Any:
     Parse a string or stream to YAML.
     """
     loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.SafeLoader)
-    yaml.add_multi_constructor("", construct_custom, loader)
+    yaml.add_multi_constructor("", construct_custom_tag_format, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -310,9 +320,22 @@ def parse_yaml(yaml_stream: str) -> Any:
         raise_yaml_error(yaml_stream, exc)
 
 
-def run_translation(
-    path: Path, language: str, to_file: bool = True
-) -> tuple[str, list]:
+def apply_translations(
+    yaml_stream: str, language: str
+) -> tuple[str, list[ExtendedMessage]]:
+    parsed_yaml = parse_yaml(yaml_stream)
+    validate_pre_dsl(parsed_yaml)
+
+    enviroment = create_enviroment()
+    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
+
+    missing_keys = TrackingUndefined.missing_keys
+    messages = build_preprocessor_messages(missing_keys)
+    translated_yaml_string = convert_to_yaml(translated_data)
+    return translated_yaml_string, messages
+
+
+def translate_file(path: Path, language: str) -> tuple[str, list[ExtendedMessage]]:
     try:
         with open(path, "r") as stream:
             yaml_stream = stream.read()
@@ -324,23 +347,13 @@ def run_translation(
         raise e
     _, ext = os.path.splitext(path)
     assert ext.lower() in (".yaml", ".yml"), f"expected a yaml file, got {ext}."
-    parsed_yaml = parse_yaml(yaml_stream)
-    # validate_pre_dsl(parsed_yaml)
-
-    enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
-
-    missing_keys = TrackingUndefined.missing_keys
-    translated_yaml_string = convert_to_yaml(translated_data)
-    if to_file:
-        generate_new_yaml(path, translated_yaml_string, language)
-        return "", missing_keys
-    else:
-        return translated_yaml_string, missing_keys
+    translated_yaml_string, messages = apply_translations(yaml_stream, language)
+    generate_new_yaml(path, translated_yaml_string, language)
+    return translated_yaml_string, messages
 
 
 if __name__ == "__main__":
     n = len(sys.argv)
     assert n > 1, "Expected atleast two argument (path to yaml file and language)."
 
-    run_translation(Path(sys.argv[1]), sys.argv[2])
+    translate_file(Path(sys.argv[1]), sys.argv[2])
