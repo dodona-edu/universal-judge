@@ -1,10 +1,11 @@
+import copy
 import json
 import os
 import sys
 from pathlib import Path
 from typing import Any
 
-SPECIAL_TYPES = ["expression", "programming_language", "oracle"]
+SPECIAL_TYPES = ["expression", "programming_language", "oracle", "parameter"]
 
 
 def transform_non_strict(data: Any) -> Any:
@@ -97,10 +98,18 @@ def flatten_one_of_stack(data: list) -> list:
     return new_one_stack
 
 
-def make_tag_structure(
-    data: Any, data_with_inner_translations: Any = None, tag: str = "!natural_language"
-) -> dict:
+def make_parameter_type_structure(data: dict) -> dict:
+    return {
+        "anyOf": [
+            {"type": "parameter", "description": "The key of the parameter."},
+            data,
+        ]
+    }
 
+
+def make_tag_structure(
+    data: dict, data_with_inner_translations: Any = None, tag: str = "!natural_language"
+) -> dict:
     base = {
         "type": "object",
         "required": ["__tag__", "value"],
@@ -113,10 +122,10 @@ def make_tag_structure(
         },
     }
 
-    if tag in ["!oracle", "!programming_language", "!expression"]:
+    if tag in ["!oracle", "!programming_language", "!expression", "!parameter"]:
         base["properties"]["value"] = data
         base["properties"]["value"]["type"] = "object"
-        if tag == "!expression":
+        if tag in ["!expression", "!parameter"]:
             base["properties"]["value"]["type"] = "string"
 
     elif tag == "!natural_language":
@@ -131,23 +140,34 @@ def make_tag_structure(
 
 
 def make_translations_map() -> dict:
-    return {"type": "object", "description": "Define translations in the global scope."}
+    return {"type": "object", "description": "Define translations."}
+
+
+def make_templates_map() -> dict:
+    return {
+        "type": "object",
+        "description": "Define templates.",
+        "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates",
+        },
+    }
 
 
 def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
     if isinstance(data, dict):
-        # Standard creation of the special tag structure for translations.
         new_data = {
             key: transform_json_preprocessor(
                 value, in_sub_def or key == "subDefinitions"
             )
             for key, value in data.items()
         }
+        # Standard creation of the special tag structure for translations and templates.
         if (
             "type" in data
             and (data["type"] != "object" or in_sub_def)
             and data["type"] not in ["boolean", "integer"]
         ):
+            # Adding support for the other tags.
             if data["type"] in SPECIAL_TYPES:
                 tag = data.pop("type")
                 new_data.pop("type")
@@ -174,6 +194,7 @@ def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
         for target in targets:
             if target in data and "properties" in data[target]:
                 data[target]["properties"]["translations"] = make_translations_map()
+                data[target]["properties"]["templates"] = make_templates_map()
 
         # Flatten the oneOf structures
         if "oneOf" in data:
@@ -185,6 +206,21 @@ def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
             data["yamlValueOrPythonExpression"] = {
                 "oneOf": [
                     {"$ref": "#/subDefinitions/yamlValue"},
+                    {
+                        "type": "object",
+                        "required": ["__tag__", "value"],
+                        "properties": {
+                            "__tag__": {
+                                "type": "string",
+                                "description": "The tag used in the yaml",
+                                "const": "!parameter",
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "The key of the parameter.",
+                            },
+                        },
+                    },
                     {
                         "type": "object",
                         "required": ["__tag__", "value"],
@@ -225,6 +261,74 @@ def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
     return data
 
 
+def add_templates(data: dict) -> dict:
+    assert "definitions" in data and isinstance(data["definitions"], dict)
+    # Addition for adding templates to the json-schema
+    testcase = data["definitions"].get("testcase", {})
+    if testcase:
+        assert "properties" in testcase
+        testcase_without_templates = copy.deepcopy(testcase)
+        testcase_without_templates["properties"]["arguments"] = (
+            make_parameter_type_structure(
+                testcase_without_templates["properties"]["arguments"]
+            )
+        )
+        data["definitions"]["testcase_without_templates"] = testcase_without_templates
+
+        testcase["properties"]["template"] = {
+            "type": "string",
+            "description": "Name of the template to insert.",
+        }
+        testcase["properties"]["parameters"] = {
+            "type": "object",
+            "description": "The parameters that are to be inserted into the template.",
+            "additionalProperties": {
+                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+            },
+        }
+        testcase["properties"]["repeat"] = {
+            "type": "object",
+            "description": "A certain loop that will generate test cases with the given parameters and template.",
+            "required": ["template", "parameters"],
+            "properties": {
+                "template": {
+                    "type": "string",
+                    "description": "Name of the template to insert.",
+                },
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "The parameters that are to be inserted into the template.",
+                        "additionalProperties": {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        },
+                    },
+                },
+            },
+        }
+
+        data["definitions"]["testcase"] = testcase
+    return data
+
+
+def add_parameter_type(data: Any) -> Any:
+    if isinstance(data, dict):
+        if "type" in data:
+            type_value = data["type"]
+            if (
+                isinstance(type_value, list)
+                and any(t in ["boolean", "integer"] for t in type_value)
+            ) or type_value in ["boolean", "integer"]:
+                # Adding support for "!parameter" tag.
+                return make_parameter_type_structure(data)
+        return {k: add_parameter_type(v) for k, v in data.items()}
+
+    if isinstance(data, list):
+        return [add_parameter_type(value) for value in data]
+    return data
+
+
 def transform_json(json_file: Path, multilingual: bool, ide: bool):
     """
     This function transforms the JSON schema used in the DSL translator into
@@ -247,7 +351,9 @@ def transform_json(json_file: Path, multilingual: bool, ide: bool):
         result = transform_non_strict(json_stream)
         file_name = "schema.json"
     else:
-        result = transform_json_preprocessor(json_stream, False)
+        stream_with_templates = add_templates(json_stream)
+        stream_with_templates_and_param = add_parameter_type(stream_with_templates)
+        result = transform_json_preprocessor(stream_with_templates_and_param, False)
         if ide:
             result = transform_ide(result)
             file_name = "multilingual-schema.json"

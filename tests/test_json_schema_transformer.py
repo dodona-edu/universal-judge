@@ -173,42 +173,16 @@ def test_transform_executed_correct(mocker: MockerFixture):
         mocker.mock_open(read_data=content).return_value
         for content in [
             """
-{        
-    "files": {
-      "oneOf": [
-        {
+{
+    "definitions": {
+        "files": {
           "description": "A list of files used in the test suite.",
           "type": "array",
           "items": {
             "$ref": "#/subDefinitions/file"
           }
-        },
-        {
-          "type": "object",
-          "required": [
-            "__tag__",
-            "value"
-          ],
-          "properties": {
-            "__tag__": {
-              "type": "string",
-              "description": "The tag used in the yaml",
-              "const": "!natural_language"
-            },
-            "value": {
-              "type": "object",
-              "additionalProperties": {
-                "description": "A list of files used in the test suite.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/subDefinitions/file"
-                }
-              }
-            }
-          }
         }
-      ]
-    }
+    }        
 }"""
         ]
     ]
@@ -220,7 +194,7 @@ def test_transform_executed_correct(mocker: MockerFixture):
 
     transform_json(Path("schema.json"), True, False)
 
-    assert s.call_count == 25
+    assert s.call_count == 7
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(
@@ -491,6 +465,21 @@ def test_json_schema_expression():
         "yamlValueOrPythonExpression": {
             "oneOf": [
                 {"$ref": "#/subDefinitions/yamlValue"},
+                {
+                    "type": "object",
+                    "required": ["__tag__", "value"],
+                    "properties": {
+                        "__tag__": {
+                            "type": "string",
+                            "description": "The tag used in the yaml",
+                            "const": "!parameter",
+                        },
+                        "value": {
+                            "type": "string",
+                            "description": "The key of the parameter.",
+                        },
+                    },
+                },
                 {
                     "type": "object",
                     "required": ["__tag__", "value"],

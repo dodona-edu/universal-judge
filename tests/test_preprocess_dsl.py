@@ -24,7 +24,7 @@ from tested.nat_translation import (
 def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     enviroment = create_enviroment()
     yaml_object = parse_yaml(yaml_str)
-    # validate_pre_dsl(yaml_object)
+    validate_pre_dsl(yaml_object)
     translated_dsl = translate_yaml(yaml_object, {}, {}, {}, "en", enviroment)
     translated_yaml = convert_to_yaml(translated_dsl)
     print(translated_yaml)

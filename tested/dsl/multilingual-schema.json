@@ -139,7 +139,14 @@
         },
         "translations": {
           "type": "object",
-          "description": "Define translations in the global scope."
+          "description": "Define translations."
+        },
+        "templates": {
+          "type": "object",
+          "description": "Define templates.",
+          "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates"
+          }
         }
       }
     },
@@ -271,8 +278,46 @@
           ]
         },
         "hidden": {
-          "type": "boolean",
-          "description": "Defines if the unit/tab is hidden for the student or not"
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "description": "Defines if the unit/tab is hidden for the student or not"
+            }
+          ]
         },
         "tab": {
           "oneOf": [
@@ -317,7 +362,14 @@
         },
         "translations": {
           "type": "object",
-          "description": "Define translations in the global scope."
+          "description": "Define translations."
+        },
+        "templates": {
+          "type": "object",
+          "description": "Define templates.",
+          "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates"
+          }
         }
       },
       "oneOf": [
@@ -391,8 +443,46 @@
           ]
         },
         "hidden": {
-          "type": "boolean",
-          "description": "Defines if the unit/tab is hidden for the student or not"
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "boolean",
+              "description": "Defines if the unit/tab is hidden for the student or not"
+            }
+          ]
         },
         "unit": {
           "oneOf": [
@@ -437,7 +527,14 @@
         },
         "translations": {
           "type": "object",
-          "description": "Define translations in the global scope."
+          "description": "Define translations."
+        },
+        "templates": {
+          "type": "object",
+          "description": "Define templates.",
+          "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates"
+          }
         }
       },
       "oneOf": [
@@ -589,7 +686,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "#/definitions/script"
+            "$ref": "#/definitions/testcase"
           }
         },
         {
@@ -598,7 +695,7 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/definitions/script"
+              "$ref": "#/definitions/testcase"
             }
           },
           "not": {
@@ -709,7 +806,14 @@
         },
         "translations": {
           "type": "object",
-          "description": "Define translations in the global scope."
+          "description": "Define translations."
+        },
+        "templates": {
+          "type": "object",
+          "description": "Define templates.",
+          "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates"
+          }
         }
       }
     },
@@ -799,7 +903,14 @@
         },
         "translations": {
           "type": "object",
-          "description": "Define translations in the global scope."
+          "description": "Define translations."
+        },
+        "templates": {
+          "type": "object",
+          "description": "Define templates.",
+          "additionalProperties": {
+            "$ref": "#/definitions/testcase_without_templates"
+          }
         }
       }
     },
@@ -812,46 +923,84 @@
           "$ref": "#/subDefinitions/message"
         },
         "stdin": {
-          "oneOf": [
+          "anyOf": [
             {
-              "description": "Stdin for this context",
-              "type": [
-                "string",
-                "number",
-                "integer",
-                "boolean"
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
               ]
             },
             {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Stdin for this context",
-                "type": [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
+              "oneOf": [
+                {
+                  "description": "Stdin for this context",
+                  "type": [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Stdin for this context",
+                    "type": [
+                      "string",
+                      "number",
+                      "integer",
+                      "boolean"
                     ]
                   },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
                     ]
                   }
-                ]
-              }
+                }
+              ]
             }
           ]
         },
@@ -861,44 +1010,82 @@
               "description": "Array of program call arguments",
               "type": "array",
               "items": {
-                "oneOf": [
+                "anyOf": [
                   {
-                    "type": [
-                      "string",
-                      "number",
-                      "integer",
-                      "boolean"
+                    "oneOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": [
+                                "description"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "value"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "types"
+                              ]
+                            }
+                          ]
+                        }
+                      }
                     ]
                   },
                   {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": [
-                        "string",
-                        "number",
-                        "integer",
-                        "boolean"
-                      ]
-                    },
-                    "not": {
-                      "anyOf": [
-                        {
-                          "required": [
-                            "description"
+                    "oneOf": [
+                      {
+                        "type": [
+                          "string",
+                          "number",
+                          "integer",
+                          "boolean"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean"
                           ]
                         },
-                        {
-                          "required": [
-                            "value"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "types"
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": [
+                                "description"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "value"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "types"
+                              ]
+                            }
                           ]
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 ]
               }
@@ -909,11 +1096,19 @@
                 "description": "Array of program call arguments",
                 "type": "array",
                 "items": {
-                  "type": [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
+                  "anyOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": [
+                        "string",
+                        "number",
+                        "integer",
+                        "boolean"
+                      ]
+                    }
                   ]
                 }
               },
@@ -1008,70 +1203,297 @@
           "$ref": "#/subDefinitions/fileOutputChannel"
         },
         "exit_code": {
-          "type": "integer",
-          "description": "Expected exit code for the run"
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "integer",
+              "description": "Expected exit code for the run"
+            }
+          ]
+        },
+        "template": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Name of the template to insert."
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "description": "Name of the template to insert."
+              },
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "types"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "parameters": {
+          "type": "object",
+          "description": "The parameters that are to be inserted into the template.",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                },
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "description"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "types"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "repeat": {
+          "type": "object",
+          "description": "A certain loop that will generate test cases with the given parameters and template.",
+          "required": [
+            "template",
+            "parameters"
+          ],
+          "properties": {
+            "template": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Name of the template to insert."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "description": "Name of the template to insert."
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "description": "The parameters that are to be inserted into the template.",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "The parameters that are to be inserted into the template.",
+                      "additionalProperties": {
+                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     },
-    "script": {
+    "testcase_without_templates": {
       "type": "object",
-      "description": "An individual test (script) for a statement or expression",
+      "description": "An individual test for a statement or expression",
+      "additionalProperties": false,
       "properties": {
         "description": {
           "$ref": "#/subDefinitions/message"
         },
         "stdin": {
-          "oneOf": [
+          "anyOf": [
             {
-              "description": "Stdin for this context",
-              "type": [
-                "string",
-                "number",
-                "integer",
-                "boolean"
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
               ]
             },
             {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Stdin for this context",
-                "type": [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "arguments": {
-          "oneOf": [
-            {
-              "description": "Array of program call arguments",
-              "type": "array",
-              "items": {
-                "oneOf": [
-                  {
+              "oneOf": [
+                {
+                  "description": "Stdin for this context",
+                  "type": [
+                    "string",
+                    "number",
+                    "integer",
+                    "boolean"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Stdin for this context",
                     "type": [
                       "string",
                       "number",
@@ -1079,72 +1501,195 @@
                       "boolean"
                     ]
                   },
-                  {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": [
-                        "string",
-                        "number",
-                        "integer",
-                        "boolean"
-                      ]
-                    },
-                    "not": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "arguments": {
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "oneOf": [
+                {
+                  "description": "Array of program call arguments",
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "oneOf": [
+                          {
+                            "description": "The key of the parameter.",
+                            "type": "string"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "oneOf": [
+                          {
+                            "type": [
+                              "string",
+                              "number",
+                              "integer",
+                              "boolean"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": [
+                                "string",
+                                "number",
+                                "integer",
+                                "boolean"
+                              ]
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Array of program call arguments",
+                    "type": "array",
+                    "items": {
                       "anyOf": [
                         {
-                          "required": [
-                            "description"
-                          ]
+                          "description": "The key of the parameter.",
+                          "type": "string"
                         },
                         {
-                          "required": [
-                            "value"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "types"
+                          "type": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean"
                           ]
                         }
                       ]
                     }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
                   }
-                ]
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Array of program call arguments",
-                "type": "array",
-                "items": {
-                  "type": [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
-                  ]
                 }
-              },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
+              ]
             }
           ]
         },
@@ -1217,8 +1762,46 @@
           "$ref": "#/subDefinitions/fileOutputChannel"
         },
         "exit_code": {
-          "type": "integer",
-          "description": "Expected exit code for the run"
+          "anyOf": [
+            {
+              "oneOf": [
+                {
+                  "description": "The key of the parameter.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "integer",
+              "description": "Expected exit code for the run"
+            }
+          ]
         }
       }
     }
@@ -1348,6 +1931,10 @@
       "oneOf": [
         {
           "$ref": "#/subDefinitions/yamlValue"
+        },
+        {
+          "type": "string",
+          "description": "The key of the parameter."
         },
         {
           "type": "string",
@@ -3527,32 +4114,298 @@
           "minProperties": 1,
           "properties": {
             "applyRounding": {
-              "description": "Apply rounding when comparing as float",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Apply rounding when comparing as float",
+                  "type": "boolean"
+                }
+              ]
             },
             "caseInsensitive": {
-              "description": "Ignore case when comparing strings",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Ignore case when comparing strings",
+                  "type": "boolean"
+                }
+              ]
             },
             "ignoreWhitespace": {
-              "description": "Ignore trailing whitespace",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Ignore trailing whitespace",
+                  "type": "boolean"
+                }
+              ]
             },
             "normalizeTrailingNewlines": {
-              "description": "Normalize trailing newlines",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Normalize trailing newlines",
+                  "type": "boolean"
+                }
+              ]
             },
             "roundTo": {
-              "description": "The number of decimals to round at, when applying the rounding on floats",
-              "type": "integer"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "The number of decimals to round at, when applying the rounding on floats",
+                  "type": "integer"
+                }
+              ]
             },
             "tryFloatingPoint": {
-              "description": "Try comparing text as floating point numbers",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Try comparing text as floating point numbers",
+                  "type": "boolean"
+                }
+              ]
             },
             "hideExpected": {
-              "description": "Hide the expected value in feedback (default: false), not recommended to use!",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Hide the expected value in feedback (default: false), not recommended to use!",
+                  "type": "boolean"
+                }
+              ]
             }
           }
         },
@@ -3564,32 +4417,88 @@
             "minProperties": 1,
             "properties": {
               "applyRounding": {
-                "description": "Apply rounding when comparing as float",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Apply rounding when comparing as float",
+                    "type": "boolean"
+                  }
+                ]
               },
               "caseInsensitive": {
-                "description": "Ignore case when comparing strings",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Ignore case when comparing strings",
+                    "type": "boolean"
+                  }
+                ]
               },
               "ignoreWhitespace": {
-                "description": "Ignore trailing whitespace",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Ignore trailing whitespace",
+                    "type": "boolean"
+                  }
+                ]
               },
               "normalizeTrailingNewlines": {
-                "description": "Normalize trailing newlines",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Normalize trailing newlines",
+                    "type": "boolean"
+                  }
+                ]
               },
               "roundTo": {
-                "description": "The number of decimals to round at, when applying the rounding on floats",
-                "type": "integer"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "The number of decimals to round at, when applying the rounding on floats",
+                    "type": "integer"
+                  }
+                ]
               },
               "tryFloatingPoint": {
-                "description": "Try comparing text as floating point numbers",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Try comparing text as floating point numbers",
+                    "type": "boolean"
+                  }
+                ]
               },
               "hideExpected": {
-                "description": "Hide the expected value in feedback (default: false), not recommended to use!",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Hide the expected value in feedback (default: false), not recommended to use!",
+                    "type": "boolean"
+                  }
+                ]
               }
             }
           },
@@ -3709,46 +4618,84 @@
       ]
     },
     "textualType": {
-      "oneOf": [
+      "anyOf": [
         {
-          "description": "Simple textual value, converted to string.",
-          "type": [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf": [
+            {
+              "description": "The key of the parameter.",
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "description": "The key of the parameter.",
+                "type": "string"
+              },
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "types"
+                    ]
+                  }
+                ]
+              }
+            }
           ]
         },
         {
-          "type": "object",
-          "additionalProperties": {
-            "description": "Simple textual value, converted to string.",
-            "type": [
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
-          "not": {
-            "anyOf": [
-              {
-                "required": [
-                  "description"
+          "oneOf": [
+            {
+              "description": "Simple textual value, converted to string.",
+              "type": [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "description": "Simple textual value, converted to string.",
+                "type": [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean"
                 ]
               },
-              {
-                "required": [
-                  "value"
-                ]
-              },
-              {
-                "required": [
-                  "types"
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "types"
+                    ]
+                  }
                 ]
               }
-            ]
-          }
+            }
+          ]
         }
       ]
     },
