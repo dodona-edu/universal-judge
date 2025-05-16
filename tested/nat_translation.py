@@ -98,24 +98,12 @@ def init_template(
 
     # translate parameters before inserting them into the template
     new_parameters = translate_yaml(
-        parameters,
-        translations,
-        templates,
-        parameters,
-        language,
-        env,
-        True
+        parameters, translations, templates, parameters, language, env, True
     )
 
     # translate template and insert parameters
     template = translate_yaml(
-        template,
-        translations,
-        templates,
-        new_parameters,
-        language,
-        env,
-        True
+        template, translations, templates, new_parameters, language, env, True
     )
     assert isinstance(template, dict)
     return template
@@ -139,6 +127,7 @@ def translate_yaml(
     :param parameters: The data passed to a template. This will only not be empty when a template is processed.
     :param language: The language to translate to.
     :param env: The Jinja-environment to use.
+    :param inside_templates: Indicator if a template is being processed.
     :return: The translated object.
     """
     if isinstance(data, dict):
@@ -153,6 +142,7 @@ def translate_yaml(
                     parameters,
                     language,
                     env,
+                    inside_templates,
                 )
             elif data["__tag__"] == "!parameter":
                 assert data["value"] in parameters
@@ -168,13 +158,15 @@ def translate_yaml(
         translations = {**translations, **current_translations}
 
         if "template" in data or "parameters" in data:
-            assert parameters == inside_templates, "A template was defined inside another template. This is not allowed!"
+            assert (
+                parameters == inside_templates
+            ), "A template was defined inside another template. This is not allowed!"
             if "template" in data:
                 name = data.pop("template")
                 assert name in templates
                 template = templates[name]
             else:
-                raise "Found parameter without specifying template!"
+                raise ValueError("Found parameter without specifying template!")
             template = init_template(
                 template,
                 translations,
@@ -193,13 +185,16 @@ def translate_yaml(
                     parameters,
                     language,
                     env,
+                    inside_templates,
                 )
                 for key, value in data.items():
                     template[key] = value
             return template
 
         if "repeat" in data:
-            assert parameters == inside_templates, "A repeat was defined inside another template. This is not allowed!"
+            assert (
+                parameters == inside_templates
+            ), "A repeat was defined inside another template. This is not allowed!"
             repeat = data.pop("repeat")
             assert "parameters" in repeat
             parameters = repeat["parameters"]
@@ -230,6 +225,7 @@ def translate_yaml(
                 parameters,
                 language,
                 env,
+                inside_templates,
             )
             for key, value in data.items()
         }
@@ -245,6 +241,7 @@ def translate_yaml(
                 parameters,
                 language,
                 env,
+                inside_templates,
             )
             if has_repeat and isinstance(translated, list):
                 result.extend(translated)
@@ -252,7 +249,9 @@ def translate_yaml(
                 result.append(translated)
         return result
     elif isinstance(data, str):
-        assert len(set(translations.keys()).intersection(set(parameters.keys()))) == 0, "Found a key in the translations map that is the same as inside a template. Please try to avoid this!"
+        assert (
+            len(set(translations.keys()).intersection(set(parameters.keys()))) == 0
+        ), "Found a key in the translations map that is the same as inside a template. Please try to avoid this!"
         try:
             return env.from_string(data).render({**translations, **parameters})
         except TemplateSyntaxError:
