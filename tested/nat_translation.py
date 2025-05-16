@@ -4,9 +4,8 @@ import sys
 from pathlib import Path
 from typing import Any, Type, cast
 
-import jinja2
 import yaml
-from jinja2 import Environment, TemplateSyntaxError, Undefined, UndefinedError
+from jinja2 import Environment, TemplateSyntaxError, Undefined
 from jsonschema.protocols import Validator
 from jsonschema.validators import validator_for
 from yaml.nodes import MappingNode, ScalarNode, SequenceNode
@@ -159,7 +158,7 @@ def translate_yaml(
 
         if "template" in data or "parameters" in data:
             assert (
-                parameters == inside_templates
+                not parameters and not inside_templates
             ), "A template was defined inside another template. This is not allowed!"
             if "template" in data:
                 name = data.pop("template")
@@ -193,7 +192,7 @@ def translate_yaml(
 
         if "repeat" in data:
             assert (
-                parameters == inside_templates
+                not parameters and not inside_templates
             ), "A repeat was defined inside another template. This is not allowed!"
             repeat = data.pop("repeat")
             assert "parameters" in repeat
