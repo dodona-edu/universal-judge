@@ -7,6 +7,8 @@ from tested.transform_json import (
     transform_ide,
     transform_json,
     transform_json_preprocessor,
+    add_templates,
+    add_parameter_type,
 )
 
 
@@ -501,6 +503,149 @@ def test_json_schema_expression():
     }
 
     result = transform_json_preprocessor(json_schema, True)
+    assert result == json_schema_expected
+
+
+def test_add_templates():
+    json_schema = {
+        "definitions": {
+            "testcase": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "arguments": {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {"type": ["string", "number", "integer", "boolean"]},
+                    },
+                }
+            }
+        }
+    }
+
+    json_schema_expected = {
+        "definitions": {
+            "testcase": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "arguments": {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {"type": ["string", "number", "integer", "boolean"]},
+                    },
+                    "template": {
+                        "type": "string",
+                        "description": "Name of the template to insert.",
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "description": "The parameters that are to be inserted into the template.",
+                        "additionalProperties": {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        },
+                    },
+                    "repeat": {
+                        "type": "object",
+                        "description": "A certain loop that will generate test cases with the given parameters and template.",
+                        "required": ["template", "parameters"],
+                        "properties": {
+                            "template": {
+                                "type": "string",
+                                "description": "Name of the template to insert.",
+                            },
+                            "parameters": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "description": "The parameters that are to be inserted into the template.",
+                                    "additionalProperties": {
+                                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+            "testcase_without_templates": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "arguments": {
+                        "anyOf": [
+                            {
+                                "type": "parameter",
+                                "description": "The key of the parameter.",
+                            },
+                            {
+                                "description": "Array of program call arguments",
+                                "type": "array",
+                                "items": {
+                                    "type": ["string", "number", "integer", "boolean"]
+                                },
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+    }
+
+    result = add_templates(json_schema)
+    assert result == json_schema_expected
+
+
+def test_add_parameters_type():
+    json_schema = {
+        "stdin": {
+            "description": "Stdin for this context",
+            "type": ["string", "number", "integer", "boolean"],
+        },
+        "exit_code": {
+            "type": "integer",
+            "description": "Expected exit code for the run",
+        },
+    }
+
+    json_schema_expected = {
+        "stdin": {
+            "anyOf": [
+                {"type": "parameter", "description": "The key of the parameter."},
+                {
+                    "description": "Stdin for this context",
+                    "type": ["string", "number", "integer", "boolean"],
+                },
+            ]
+        },
+        "exit_code": {
+            "anyOf": [
+                {"type": "parameter", "description": "The key of the parameter."},
+                {"type": "integer", "description": "Expected exit code for the run"},
+            ]
+        },
+    }
+
+    result = add_parameter_type(json_schema)
+    print(result)
     assert result == json_schema_expected
 
 
