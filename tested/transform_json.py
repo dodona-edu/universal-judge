@@ -26,7 +26,7 @@ def transform_non_strict(data: Any) -> Any:
                 data["type"] = "string"
             elif data["type"] == "oracle":
                 data["type"] = "object"
-            elif data["programming_language"]:
+            elif data["type"] == "programming_language":
                 return {}
 
         return {k: transform_non_strict(v) for k, v in data.items()}

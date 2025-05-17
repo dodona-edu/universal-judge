@@ -7,6 +7,7 @@ from tested.transform_json import (
     transform_ide,
     transform_json,
     transform_json_for_preprocessor_validation,
+    transform_non_strict,
 )
 
 
@@ -345,6 +346,55 @@ def test_prog_lang_json_schema_structure():
     assert result == json_schema_expected
 
 
+def test_transform_ide_edge_cases():
+    json_schema = {
+        "oneOf": [
+            {
+                "type": "object",
+                "required": ["__tag__", "value"],
+                "properties": {
+                    "__tag__": {
+                        "type": "string",
+                        "description": "The tag used in the yaml",
+                        "const": "!natural_language",
+                    },
+                    "value": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "required": ["__tag__", "value"],
+                            "properties": {
+                                "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!programming_language",
+                                },
+                                "value": {
+                                    "description": "Programming-language-specific statement or expression.",
+                                    "minProperties": 1,
+                                    "propertyNames": {
+                                        "$ref": "#/subDefinitions/programmingLanguage"
+                                    },
+                                    "items": {
+                                        "type": "string",
+                                        "description": "A language-specific literal, which will be used verbatim.",
+                                    },
+                                    "type": "object",
+                                },
+                            },
+                        },
+                    },
+                },
+            }
+        ]
+    }
+
+    json_schema_expected = {}
+
+    result = transform_ide(json_schema)
+    assert result == json_schema_expected
+
+
 def test_json_schema_oracle():
     json_schema = {
         "type": "oracle",
@@ -445,6 +495,65 @@ def test_json_schema_oracle():
     assert result == json_schema_expected
 
 
+def test_translations_added_in_correct_places():
+    json_schema = {
+        "_rootObject": {"properties": {}},
+        "tab": {"properties": {}},
+        "unit": {"properties": {}},
+        "context": {"properties": {}},
+        "case": {"properties": {}},
+        "testcase": {"properties": {}},
+    }
+
+    json_schema_expected = {
+        "_rootObject": {
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "description": "Define translations in the global scope.",
+                }
+            }
+        },
+        "tab": {
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "description": "Define translations in the global scope.",
+                }
+            }
+        },
+        "unit": {
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "description": "Define translations in the global scope.",
+                }
+            }
+        },
+        "context": {
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "description": "Define translations in the global scope.",
+                }
+            }
+        },
+        "case": {
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "description": "Define translations in the global scope.",
+                }
+            }
+        },
+        "testcase": {"properties": {}},
+    }
+
+    result = transform_json_for_preprocessor_validation(json_schema, True)
+
+    assert result == json_schema_expected
+
+
 def test_json_schema_expression():
     json_schema = {
         "yamlValueOrPythonExpression": {
@@ -503,6 +612,59 @@ def test_json_schema_yaml_value():
 
     result = transform_json_for_preprocessor_validation(json_schema, False)
 
+    assert result == json_schema_expected
+
+
+def test_transform_non_strict():
+    json_schema = {
+        "oneOf": [
+            {
+                "type": "expression",
+                "format": "tested-dsl-expression",
+                "description": "An expression in Python-syntax.",
+            },
+            {
+                "type": "oracle",
+                "additionalProperties": False,
+                "required": ["value"],
+                "properties": {
+                    "oracle": {"const": "builtin"},
+                    "value": {"$ref": "#/subDefinitions/yamlValueOrPythonExpression"},
+                },
+            },
+            {
+                "type": "programming_language",
+                "description": "Programming-language-specific statement or expression.",
+                "minProperties": 1,
+                "propertyNames": {"$ref": "#/subDefinitions/programmingLanguage"},
+                "items": {
+                    "type": "string",
+                    "description": "A language-specific literal, which will be used verbatim.",
+                },
+            },
+        ]
+    }
+
+    json_schema_expected = {
+        "oneOf": [
+            {
+                "type": "string",
+                "format": "tested-dsl-expression",
+                "description": "An expression in Python-syntax.",
+            },
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["value"],
+                "properties": {
+                    "oracle": {"const": "builtin"},
+                    "value": {"$ref": "#/subDefinitions/yamlValueOrPythonExpression"},
+                },
+            },
+        ]
+    }
+
+    result = transform_non_strict(json_schema)
     assert result == json_schema_expected
 
 
