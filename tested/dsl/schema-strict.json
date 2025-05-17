@@ -1,293 +1,297 @@
 {
-  "$id" : "tested:dsl:schema7",
-  "$schema" : "http://json-schema.org/draft-07/schema#",
-  "title" : "TESTed-DSL",
-  "oneOf" : [
+  "$id": "tested:dsl:schema7",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TESTed-DSL",
+  "oneOf": [
     {
-      "$ref" : "#/definitions/_rootObject"
+      "$ref": "#/definitions/_rootObject"
     },
     {
-      "$ref" : "#/definitions/_tabList"
+      "$ref": "#/definitions/_tabList"
     },
     {
-      "$ref" : "#/definitions/_unitList"
+      "$ref": "#/definitions/_unitList"
     }
   ],
-  "definitions" : {
-    "_rootObject" : {
-      "type" : "object",
-      "oneOf" : [
+  "definitions": {
+    "_rootObject": {
+      "type": "object",
+      "oneOf": [
         {
-          "required" : [
+          "required": [
             "tabs"
           ],
-          "not" : {
-            "required" : [
+          "not": {
+            "required": [
               "units"
             ]
           }
         },
         {
-          "required" : [
+          "required": [
             "units"
           ],
-          "not" : {
-            "required" : [
+          "not": {
+            "required": [
               "tabs"
             ]
           }
         }
       ],
-      "properties" : {
-        "files" : {
-          "description" : "A list of files used in the test suite.",
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+      "properties": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "namespace" : {
-          "type" : "string",
-          "description" : "Namespace of the submitted solution, in `snake_case`"
+        "namespace": {
+          "type": "string",
+          "description": "Namespace of the submitted solution, in `snake_case`"
         },
-        "tabs" : {
-          "$ref" : "#/definitions/_tabList"
+        "tabs": {
+          "$ref": "#/definitions/_tabList"
         },
-        "units" : {
-          "$ref" : "#/definitions/_unitList"
+        "units": {
+          "$ref": "#/definitions/_unitList"
         },
-        "language" : {
-          "description" : "Indicate that all code is in a specific language.",
-          "oneOf" : [
+        "language": {
+          "description": "Indicate that all code is in a specific language.",
+          "oneOf": [
             {
-              "$ref" : "#/definitions/programmingLanguage"
+              "$ref": "#/subDefinitions/programmingLanguage"
             },
             {
-              "const" : "tested"
+              "const": "tested"
             }
           ]
         },
-        "definitions" : {
-          "description" : "Define hashes to use elsewhere.",
-          "type" : "object"
+        "definitions": {
+          "description": "Define hashes to use elsewhere.",
+          "type": "object"
         },
         "config": {
-          "$ref": "#/definitions/inheritableConfigObject"
+          "$ref": "#/subDefinitions/inheritableConfigObject"
         }
       }
     },
-    "_tabList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/tab"
+    "_tabList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/tab"
       }
     },
-    "_unitList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/unit"
+    "_unitList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/unit"
       }
     },
-    "tab" : {
-      "type" : "object",
-      "description" : "A tab in the test suite.",
-      "required" : [
+    "tab": {
+      "type": "object",
+      "description": "A tab in the test suite.",
+      "required": [
         "tab"
       ],
-      "properties" : {
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+      "properties": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "hidden" : {
-          "type" : "boolean",
-          "description" : "Defines if the unit/tab is hidden for the student or not"
+        "hidden": {
+          "type": "boolean",
+          "description": "Defines if the unit/tab is hidden for the student or not"
         },
-        "tab" : {
-          "type" : "string",
-          "description" : "The name of this tab."
+        "tab": {
+          "description": "The name of this tab.",
+          "type": "string"
         },
-        "definitions" : {
-          "description" : "Define objects to use elsewhere.",
-          "type" : "object"
+        "definitions": {
+          "description": "Define objects to use elsewhere.",
+          "type": "object"
         },
         "config": {
-          "$ref": "#/definitions/inheritableConfigObject"
+          "$ref": "#/subDefinitions/inheritableConfigObject"
         }
       },
-      "oneOf" : [
+      "oneOf": [
         {
-          "required" : [
+          "required": [
             "contexts"
           ],
-          "properties" : {
-            "contexts" : {
-              "$ref" : "#/definitions/_contextList"
+          "properties": {
+            "contexts": {
+              "$ref": "#/definitions/_contextList"
             }
           }
         },
         {
-          "required" : [
+          "required": [
             "testcases"
           ],
-          "properties" : {
-            "testcases" : {
-              "$ref" : "#/definitions/_testcaseList"
+          "properties": {
+            "testcases": {
+              "$ref": "#/definitions/_testcaseList"
             }
           }
         }
       ]
     },
-    "unit" : {
-      "type" : "object",
-      "description" : "A unit in the test suite.",
-      "required" : [
+    "unit": {
+      "type": "object",
+      "description": "A unit in the test suite.",
+      "required": [
         "unit"
       ],
-      "properties" : {
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+      "properties": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "hidden" : {
-          "type" : "boolean",
-          "description" : "Defines if the unit/tab is hidden for the student or not"
+        "hidden": {
+          "type": "boolean",
+          "description": "Defines if the unit/tab is hidden for the student or not"
         },
-        "unit" : {
-          "type" : "string",
-          "description" : "The name of this tab."
+        "unit": {
+          "description": "The name of this tab.",
+          "type": "string"
         },
-        "definitions" : {
-          "description" : "Define objects to use elsewhere.",
-          "type" : "object"
+        "definitions": {
+          "description": "Define objects to use elsewhere.",
+          "type": "object"
         },
         "config": {
-          "$ref": "#/definitions/inheritableConfigObject"
+          "$ref": "#/subDefinitions/inheritableConfigObject"
         }
       },
-      "oneOf" : [
+      "oneOf": [
         {
-          "required" : [
+          "required": [
             "cases"
           ],
-          "properties" : {
-            "cases" : {
-              "$ref" : "#/definitions/_caseList"
+          "properties": {
+            "cases": {
+              "$ref": "#/definitions/_caseList"
             }
           }
         },
         {
-          "required" : [
+          "required": [
             "scripts"
           ],
-          "properties" : {
-            "scripts" : {
-              "$ref" : "#/definitions/_scriptList"
+          "properties": {
+            "scripts": {
+              "$ref": "#/definitions/_scriptList"
             }
           }
         }
       ]
     },
-    "_contextList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/context"
+    "_contextList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/context"
       }
     },
-    "_caseList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/case"
+    "_caseList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/case"
       }
     },
-    "_testcaseList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/testcase"
+    "_testcaseList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/testcase"
       }
     },
-    "_scriptList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/definitions/script"
+    "_scriptList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/script"
       }
     },
-    "context" : {
-      "type" : "object",
-      "description" : "A set of testcase in the same context.",
-      "required" : [
+    "context": {
+      "type": "object",
+      "description": "A set of testcase in the same context.",
+      "required": [
         "testcases"
       ],
-      "properties" : {
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+      "properties": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "context" : {
-          "type" : "string",
-          "description" : "Description of this context."
+        "context": {
+          "type": "string",
+          "description": "Description of this context."
         },
-        "testcases" : {
-          "$ref" : "#/definitions/_testcaseList"
+        "testcases": {
+          "$ref": "#/definitions/_testcaseList"
         }
       }
     },
-    "case" : {
-      "type" : "object",
-      "description" : "A test case.",
-      "required" : [
+    "case": {
+      "type": "object",
+      "description": "A test case.",
+      "required": [
         "script"
       ],
-      "properties" : {
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+      "properties": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "context" : {
-          "type" : "string",
-          "description" : "Description of this context."
+        "context": {
+          "type": "string",
+          "description": "Description of this context."
         },
-        "script" : {
-          "$ref" : "#/definitions/_scriptList"
+        "script": {
+          "$ref": "#/definitions/_scriptList"
         }
       }
     },
-    "testcase" : {
-      "type" : "object",
-      "description" : "An individual test for a statement or expression",
-      "additionalProperties" : false,
-      "properties" : {
-        "description" : {
-          "$ref" : "#/definitions/message"
+    "testcase": {
+      "type": "object",
+      "description": "An individual test for a statement or expression",
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "$ref": "#/subDefinitions/message"
         },
-        "stdin" : {
-          "description" : "Stdin for this context",
-          "type" : [
+        "stdin": {
+          "description": "Stdin for this context",
+          "type": [
             "string",
             "number",
             "integer",
             "boolean"
           ]
         },
-        "arguments" : {
-          "type" : "array",
-          "description" : "Array of program call arguments",
-          "items" : {
-            "type" : [
+        "arguments": {
+          "description": "Array of program call arguments",
+          "type": "array",
+          "items": {
+            "type": [
               "string",
               "number",
               "integer",
@@ -295,95 +299,68 @@
             ]
           }
         },
-        "statement" : {
-          "description" : "The statement to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+        "statement": {
+          "description": "The statement to evaluate.",
+          "$ref": "#/subDefinitions/expressionOrStatement"
         },
-        "expression" : {
-          "description" : "The expression to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+        "expression": {
+          "description": "The expression to evaluate.",
+          "$ref": "#/subDefinitions/expressionOrStatement"
         },
-        "exception" : {
-          "description" : "Expected exception message",
-          "oneOf" : [
-            {
-              "type" : "string",
-              "description" : "Message of the expected exception."
-            },
-            {
-              "type" : "object",
-              "required" : [
-                "types"
-              ],
-              "properties" : {
-                "message" : {
-                  "type" : "string",
-                  "description" : "Message of the expected exception."
-                },
-                "types" : {
-                  "minProperties" : 1,
-                  "description" : "Language mapping of expected exception types.",
-                  "type" : "object",
-                  "propertyNames" : {
-                    "$ref" : "#/definitions/programmingLanguage"
-                  },
-                  "items" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            }
-          ]
+        "exception": {
+          "description": "Expected exception message",
+          "$ref": "#/subDefinitions/exceptionChannel"
         },
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
           }
         },
-        "return" : {
-          "description" : "Expected return value",
-          "$ref" : "#/definitions/returnOutputChannel"
+        "return": {
+          "description": "Expected return value",
+          "$ref": "#/subDefinitions/returnOutputChannel"
         },
-        "stderr" : {
-          "description" : "Expected output at stderr",
-          "$ref" : "#/definitions/textOutputChannel"
+        "stderr": {
+          "description": "Expected output at stderr",
+          "$ref": "#/subDefinitions/textOutputChannel"
         },
-        "stdout" : {
-          "description" : "Expected output at stdout",
-          "$ref" : "#/definitions/textOutputChannel"
+        "stdout": {
+          "description": "Expected output at stdout",
+          "$ref": "#/subDefinitions/textOutputChannel"
         },
         "file": {
-          "description" : "Expected files generated by the submission.",
-          "$ref" : "#/definitions/fileOutputChannel"
+          "description": "Expected files generated by the submission.",
+          "$ref": "#/subDefinitions/fileOutputChannel"
         },
-        "exit_code" : {
-          "type" : "integer",
-          "description" : "Expected exit code for the run"
+        "exit_code": {
+          "type": "integer",
+          "description": "Expected exit code for the run"
         }
       }
     },
-    "script" : {
-      "type" : "object",
-      "description" : "An individual test (script) for a statement or expression",
-      "properties" : {
-        "description" : {
-          "$ref" : "#/definitions/message"
+    "script": {
+      "type": "object",
+      "description": "An individual test (script) for a statement or expression",
+      "properties": {
+        "description": {
+          "$ref": "#/subDefinitions/message"
         },
-        "stdin" : {
-          "description" : "Stdin for this context",
-          "type" : [
+        "stdin": {
+          "description": "Stdin for this context",
+          "type": [
             "string",
             "number",
             "integer",
             "boolean"
           ]
         },
-        "arguments" : {
-          "type" : "array",
-          "description" : "Array of program call arguments",
-          "items" : {
-            "type" : [
+        "arguments": {
+          "description": "Array of program call arguments",
+          "type": "array",
+          "items": {
+            "type": [
               "string",
               "number",
               "integer",
@@ -391,189 +368,207 @@
             ]
           }
         },
-        "statement" : {
-          "description" : "The statement to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+        "statement": {
+          "description": "The statement to evaluate.",
+          "$ref": "#/subDefinitions/expressionOrStatement"
         },
-        "expression" : {
-          "description" : "The expression to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+        "expression": {
+          "description": "The expression to evaluate.",
+          "$ref": "#/subDefinitions/expressionOrStatement"
         },
-        "exception" : {
-          "description" : "Expected exception message",
-          "oneOf" : [
+        "exception": {
+          "description": "Expected exception message",
+          "$ref": "#/subDefinitions/exceptionChannel"
+        },
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
+          }
+        },
+        "return": {
+          "description": "Expected return value",
+          "$ref": "#/subDefinitions/returnOutputChannel"
+        },
+        "stderr": {
+          "description": "Expected output at stderr",
+          "$ref": "#/subDefinitions/textOutputChannel"
+        },
+        "stdout": {
+          "description": "Expected output at stdout",
+          "$ref": "#/subDefinitions/textOutputChannel"
+        },
+        "file": {
+          "description": "Expected files generated by the submission.",
+          "$ref": "#/subDefinitions/fileOutputChannel"
+        },
+        "exit_code": {
+          "type": "integer",
+          "description": "Expected exit code for the run"
+        }
+      }
+    }
+  },
+  "subDefinitions" : {
+    "expressionOrStatement": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "tested-dsl-expression",
+          "description": "A statement of expression in Python-like syntax as YAML string."
+        },
+        {
+          "anyOf": [
             {
-              "type" : "string",
-              "description" : "Message of the expected exception."
+              "type": "object",
+              "description": "Programming-language-specific statement or expression.",
+              "minProperties": 1,
+              "propertyNames": {
+                "$ref": "#/subDefinitions/programmingLanguage"
+              },
+              "items": {
+                "type": "string",
+                "description": "A language-specific literal, which will be used verbatim."
+              }
             },
             {
-              "type" : "object",
-              "required" : [
-                "types"
-              ],
-              "properties" : {
-                "message" : {
-                  "type" : "string",
-                  "description" : "Message of the expected exception."
-                },
-                "types" : {
-                  "minProperties" : 1,
-                  "description" : "Language mapping of expected exception types.",
-                  "type" : "object",
-                  "propertyNames" : {
-                    "$ref" : "#/definitions/programmingLanguage"
-                  },
-                  "items" : {
-                    "type" : "string"
-                  }
-                }
+              "type": "programming_language",
+              "description": "Programming-language-specific statement or expression.",
+              "minProperties": 1,
+              "propertyNames": {
+                "$ref": "#/subDefinitions/programmingLanguage"
+              },
+              "items": {
+                "type": "string",
+                "description": "A language-specific literal, which will be used verbatim."
               }
             }
           ]
-        },
-        "files" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/file"
-          }
-        },
-        "return" : {
-          "description" : "Expected return value",
-          "$ref" : "#/definitions/returnOutputChannel"
-        },
-        "stderr" : {
-          "description" : "Expected output at stderr",
-          "$ref" : "#/definitions/textOutputChannel"
-        },
-        "stdout" : {
-          "description" : "Expected output at stdout",
-          "$ref" : "#/definitions/textOutputChannel"
-        },
-        "exit_code" : {
-          "type" : "integer",
-          "description" : "Expected exit code for the run"
-        }
-      }
-    },
-    "expressionOrStatement" : {
-      "oneOf" : [
-        {
-          "type" : "string",
-          "format" : "tested-dsl-expression",
-          "description" : "A statement of expression in Python-like syntax as YAML string."
-        },
-        {
-          "description" : "Programming-language-specific statement or expression.",
-          "anyOf": [
-            {
-              "type": "object"
-            },
-            {
-              "type": "programming_language"
-            }
-          ],
-          "type" : "object",
-          "minProperties" : 1,
-          "propertyNames" : {
-            "$ref" : "#/definitions/programmingLanguage"
-          },
-          "items" : {
-            "type" : "string",
-            "description" : "A language-specific literal, which will be used verbatim."
-          }
         }
       ]
     },
-    "yamlValueOrPythonExpression" : {
-      "oneOf" : [
+    "yamlValueOrPythonExpression": {
+      "oneOf": [
         {
-          "$ref" : "#/definitions/yamlValue"
+          "$ref": "#/subDefinitions/yamlValue"
         },
         {
-          "type" : "expression",
-          "format" : "tested-dsl-expression",
-          "description" : "An expression in Python-syntax."
+          "type": "expression",
+          "format": "tested-dsl-expression",
+          "description": "An expression in Python-syntax."
         }
       ]
     },
-    "file" : {
-      "type" : "object",
-      "description" : "A file used in the test suite.",
-      "required" : [
+    "file": {
+      "type": "object",
+      "description": "A file used in the test suite.",
+      "required": [
         "name",
         "url"
       ],
-      "properties" : {
-        "name" : {
-          "type" : "string",
-          "description" : "The filename, including the file extension."
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The filename, including the file extension."
         },
-        "url" : {
-          "type" : "string",
-          "format" : "uri",
-          "description" : "Relative path to the file in the `description` folder of an exercise."
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Relative path to the file in the `description` folder of an exercise."
         }
       }
     },
-    "textOutputChannel" : {
-      "anyOf" : [
+    "exceptionChannel": {
+      "oneOf": [
         {
-          "$ref" : "#/definitions/textualType"
+          "type": "string",
+          "description": "Message of the expected exception."
         },
         {
-          "type" : "object",
-          "description" : "Built-in oracle for text values.",
-          "required" : [
+          "type": "object",
+          "required": [
+            "types"
+          ],
+          "properties": {
+            "message": {
+              "description": "Message of the expected exception.",
+              "type": "string"
+            },
+            "types": {
+              "minProperties": 1,
+              "description": "Language mapping of expected exception types.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/subDefinitions/programmingLanguage"
+              },
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "textOutputChannel": {
+      "anyOf": [
+        {
+          "$ref": "#/subDefinitions/textualType"
+        },
+        {
+          "type": "object",
+          "description": "Built-in oracle for text values.",
+          "required": [
             "data"
           ],
-          "properties" : {
-            "data" : {
-              "$ref" : "#/definitions/textualType"
+          "properties": {
+            "data": {
+              "$ref": "#/subDefinitions/textualType"
             },
-            "oracle" : {
-              "const" : "builtin"
+            "oracle": {
+              "const": "builtin"
             },
-            "config" : {
-              "$ref" : "#/definitions/textConfigurationOptions"
+            "config": {
+              "$ref": "#/subDefinitions/textConfigurationOptions"
             }
           }
         },
         {
-          "type" : "object",
-          "description" : "Custom oracle for text values.",
-          "required" : [
+          "type": "object",
+          "description": "Custom oracle for text values.",
+          "required": [
             "oracle",
             "file",
             "data"
           ],
-          "properties" : {
-            "data" : {
-              "$ref" : "#/definitions/textualType"
+          "properties": {
+            "data": {
+              "$ref": "#/subDefinitions/textualType"
             },
-            "oracle" : {
-              "const" : "custom_check"
+            "oracle": {
+              "const": "custom_check"
             },
-            "file" : {
-              "type" : "string",
-              "description" : "The path to the file containing the custom check function."
+            "file": {
+              "type": "string",
+              "description": "The path to the file containing the custom check function."
             },
-            "name" : {
-              "type" : "string",
-              "description" : "The name of the custom check function.",
-              "default" : "evaluate"
+            "name": {
+              "type": "string",
+              "description": "The name of the custom check function.",
+              "default": "evaluate"
             },
-            "arguments" : {
-              "type" : "array",
-              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-              "items" : {
-                "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "arguments": {
+              "type": "array",
+              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+              "items": {
+                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
               }
             },
             "languages": {
-              "type" : "array",
-              "description" : "Which programming languages are supported by this oracle.",
-              "items" : {
-                "$ref" : "#/definitions/programmingLanguage"
+              "type": "array",
+              "description": "Which programming languages are supported by this oracle.",
+              "items": {
+                "$ref": "#/subDefinitions/programmingLanguage"
               }
             }
           }
@@ -581,202 +576,202 @@
       ]
     },
     "fileOutputChannel": {
-      "anyOf" : [
+      "anyOf": [
         {
-          "type" : "object",
-          "description" : "Built-in oracle for files.",
-          "required" : [
+          "type": "object",
+          "description": "Built-in oracle for files.",
+          "required": [
             "content",
             "location"
           ],
-          "properties" : {
-            "content" : {
-              "type" : "string",
-              "description" : "Path to the file containing the expected contents, relative to the evaluation directory."
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "Path to the file containing the expected contents, relative to the evaluation directory."
             },
-            "location" : {
-              "type" : "string",
-              "description" : "Path to where the file generated by the submission should go."
+            "location": {
+              "type": "string",
+              "description": "Path to where the file generated by the submission should go."
             },
-            "oracle" : {
-              "const" : "builtin"
+            "oracle": {
+              "const": "builtin"
             },
-            "config" : {
-              "$ref" : "#/definitions/fileConfigurationOptions"
+            "config": {
+              "$ref": "#/subDefinitions/fileConfigurationOptions"
             }
           }
         },
         {
-          "type" : "object",
-          "description" : "Custom oracle for file values.",
-          "required" : [
+          "type": "object",
+          "description": "Custom oracle for file values.",
+          "required": [
             "oracle",
             "content",
             "location",
             "file"
           ],
-          "properties" : {
-            "oracle" : {
-              "const" : "custom_check"
+          "properties": {
+            "oracle": {
+              "const": "custom_check"
             },
-            "content" : {
-              "type" : "string",
-              "description" : "Path to the file containing the expected contents, relative to the evaluation directory."
+            "content": {
+              "type": "string",
+              "description": "Path to the file containing the expected contents, relative to the evaluation directory."
             },
-            "location" : {
-              "type" : "string",
-              "description" : "Path to where the file generated by the submission should go."
+            "location": {
+              "type": "string",
+              "description": "Path to where the file generated by the submission should go."
             },
-            "file" : {
-              "type" : "string",
-              "description" : "The path to the file containing the custom check function."
+            "file": {
+              "type": "string",
+              "description": "The path to the file containing the custom check function."
             },
-            "name" : {
-              "type" : "string",
-              "description" : "The name of the custom check function.",
-              "default" : "evaluate"
+            "name": {
+              "type": "string",
+              "description": "The name of the custom check function.",
+              "default": "evaluate"
             },
-            "arguments" : {
-              "type" : "array",
-              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-              "items" : {
-                "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "arguments": {
+              "type": "array",
+              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+              "items": {
+                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
               }
             },
             "languages": {
-              "type" : "array",
-              "description" : "Which programming languages are supported by this oracle.",
-              "items" : {
-                "$ref" : "#/definitions/programmingLanguage"
+              "type": "array",
+              "description": "Which programming languages are supported by this oracle.",
+              "items": {
+                "$ref": "#/subDefinitions/programmingLanguage"
               }
             }
           }
         }
       ]
     },
-    "returnOutputChannel" : {
-      "oneOf" : [
+    "returnOutputChannel": {
+      "oneOf": [
         {
-          "$ref" : "#/definitions/yamlValueOrPythonExpression"
+          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
         },
         {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
+          "type": "oracle",
+          "additionalProperties": false,
+          "required": [
             "value"
           ],
-          "properties" : {
-            "oracle" : {
-              "const" : "builtin"
+          "properties": {
+            "oracle": {
+              "const": "builtin"
             },
-            "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "value": {
+              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
             }
           }
         },
         {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
+          "type": "oracle",
+          "additionalProperties": false,
+          "required": [
             "value",
             "oracle",
             "file"
           ],
-          "properties" : {
-            "oracle" : {
-              "const" : "custom_check"
+          "properties": {
+            "oracle": {
+              "const": "custom_check"
             },
-            "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "value": {
+              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
             },
-            "file" : {
-              "type" : "string",
-              "description" : "The path to the file containing the custom check function."
+            "file": {
+              "type": "string",
+              "description": "The path to the file containing the custom check function."
             },
-            "name" : {
-              "type" : "string",
-              "description" : "The name of the custom check function.",
-              "default" : "evaluate"
+            "name": {
+              "type": "string",
+              "description": "The name of the custom check function.",
+              "default": "evaluate"
             },
-            "arguments" : {
-              "type" : "array",
-              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-              "items" : {
-                "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "arguments": {
+              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+              "type": "array",
+              "items": {
+                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
               }
             },
             "languages": {
-              "type" : "array",
-              "description" : "Which programming languages are supported by this oracle.",
-              "items" : {
-                "$ref" : "#/definitions/programmingLanguage"
+              "type": "array",
+              "description": "Which programming languages are supported by this oracle.",
+              "items": {
+                "$ref": "#/subDefinitions/programmingLanguage"
               }
             }
           }
         },
         {
-          "type" : "oracle",
-          "additionalProperties" : false,
-          "required" : [
+          "type": "oracle",
+          "additionalProperties": false,
+          "required": [
             "oracle",
             "functions"
           ],
-          "properties" : {
-            "oracle" : {
-              "const" : "specific_check"
+          "properties": {
+            "oracle": {
+              "const": "specific_check"
             },
-            "functions" : {
-              "minProperties" : 1,
-              "description" : "Language mapping of oracle functions.",
-              "type" : "object",
-              "propertyNames" : {
-                "$ref" : "#/definitions/programmingLanguage"
+            "functions": {
+              "minProperties": 1,
+              "description": "Language mapping of oracle functions.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/subDefinitions/programmingLanguage"
               },
-              "items" : {
-                "type" : "object",
-                "required" : [
+              "items": {
+                "type": "object",
+                "required": [
                   "file"
                 ],
-                "properties" : {
-                  "file" : {
-                    "type" : "string",
-                    "description" : "The path to the file containing the custom check function."
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "The path to the file containing the custom check function."
                   },
-                  "name" : {
-                    "type" : "string",
-                    "description" : "The name of the custom check function.",
-                    "default" : "evaluate"
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the custom check function.",
+                    "default": "evaluate"
                   }
                 }
               }
             },
-            "arguments" : {
-              "minProperties" : 1,
-              "description" : "Language mapping of oracle arguments.",
-              "type" : "object",
-              "propertyNames" : {
-                "$ref" : "#/definitions/programmingLanguage"
+            "arguments": {
+              "minProperties": 1,
+              "description": "Language mapping of oracle arguments.",
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/subDefinitions/programmingLanguage"
               },
-              "items" : {
-                "type" : "array",
-                "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-                "items" : {
-                  "type" : "string",
-                  "description" : "A language-specific literal, which will be used verbatim."
+              "items": {
+                "type": "array",
+                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                "items": {
+                  "type": "string",
+                  "description": "A language-specific literal, which will be used verbatim."
                 }
               }
             },
-            "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "value": {
+              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
             }
           }
         }
       ]
     },
-    "programmingLanguage" : {
-      "type" : "string",
-      "description" : "One of the programming languages supported by TESTed.",
-      "enum" : [
+    "programmingLanguage": {
+      "type": "string",
+      "description": "One of the programming languages supported by TESTed.",
+      "enum": [
         "bash",
         "c",
         "haskell",
@@ -790,96 +785,99 @@
         "cpp"
       ]
     },
-    "message" : {
-      "oneOf" : [
+    "message": {
+      "oneOf": [
         {
-          "type" : "string",
-          "description" : "A simple message to display."
+          "type": "string",
+          "description": "A simple message to display."
         },
         {
-          "type" : "object",
-          "required" : [
+          "type": "object",
+          "required": [
             "description"
           ],
-          "properties" : {
-            "description" : {
-              "type" : "string",
-              "description" : "The message to display."
+          "properties": {
+            "description": {
+              "description": "The message to display.",
+              "type": "string"
             },
-            "format" : {
-              "type" : "string",
-              "default" : "text",
-              "description" : "The format of the message, either a programming language, 'text' or 'html'."
+            "format": {
+              "type": "string",
+              "default": "text",
+              "description": "The format of the message, either a programming language, 'text' or 'html'."
             }
           }
         }
       ]
     },
-    "textConfigurationOptions" : {
-      "type" : "object",
-      "description" : "Configuration properties for textual comparison and to configure if the expected value should be hidden or not",
-      "minProperties" : 1,
-      "properties" : {
-        "applyRounding" : {
-          "description" : "Apply rounding when comparing as float",
-          "type" : "boolean"
+    "textConfigurationOptions": {
+      "type": "object",
+      "description": "Configuration properties for textual comparison and to configure if the expected value should be hidden or not",
+      "minProperties": 1,
+      "properties": {
+        "applyRounding": {
+          "description": "Apply rounding when comparing as float",
+          "type": "boolean"
         },
-        "caseInsensitive" : {
-          "description" : "Ignore case when comparing strings",
-          "type" : "boolean"
+        "caseInsensitive": {
+          "description": "Ignore case when comparing strings",
+          "type": "boolean"
         },
-        "ignoreWhitespace" : {
-          "description" : "Ignore trailing whitespace",
-          "type" : "boolean"
+        "ignoreWhitespace": {
+          "description": "Ignore trailing whitespace",
+          "type": "boolean"
         },
-        "normalizeTrailingNewlines" : {
-          "description" : "Normalize trailing newlines",
-          "type" : "boolean"
+        "normalizeTrailingNewlines": {
+          "description": "Normalize trailing newlines",
+          "type": "boolean"
         },
-        "roundTo" : {
-          "description" : "The number of decimals to round at, when applying the rounding on floats",
-          "type" : "integer"
+        "roundTo": {
+          "description": "The number of decimals to round at, when applying the rounding on floats",
+          "type": "integer"
         },
-        "tryFloatingPoint" : {
-          "description" : "Try comparing text as floating point numbers",
-          "type" : "boolean"
+        "tryFloatingPoint": {
+          "description": "Try comparing text as floating point numbers",
+          "type": "boolean"
         },
-        "hideExpected" : {
-          "description" : "Hide the expected value in feedback (default: false), not recommended to use!",
-          "type" : "boolean"
+        "hideExpected": {
+          "description": "Hide the expected value in feedback (default: false), not recommended to use!",
+          "type": "boolean"
         }
       }
     },
     "fileConfigurationOptions": {
-      "anyOf" : [
+      "anyOf": [
         {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref": "#/subDefinitions/textConfigurationOptions"
         },
         {
-          "type" : "object",
-          "properties" : {
+          "type": "object",
+          "properties": {
             "mode": {
-              "type" : "string",
-              "enum" : ["full", "line"],
-              "default" : "full"
+              "type": "string",
+              "enum": [
+                "full",
+                "line"
+              ],
+              "default": "full"
             }
           }
         }
       ]
     },
-    "textualType" : {
-      "description" : "Simple textual value, converted to string.",
-      "type" : [
+    "textualType": {
+      "description": "Simple textual value, converted to string.",
+      "type": [
         "string",
         "number",
         "integer",
         "boolean"
       ]
     },
-    "yamlValue" : {
-      "description" : "A value represented as YAML.",
-      "not" : {
-        "type" : [
+    "yamlValue": {
+      "description": "A value represented as YAML.",
+      "not": {
+        "type": [
           "oracle",
           "expression",
           "programming_language"
@@ -888,15 +886,15 @@
     },
     "inheritableConfigObject": {
       "type": "object",
-      "properties" : {
+      "properties": {
         "stdout": {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref": "#/subDefinitions/textConfigurationOptions"
         },
         "stderr": {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref": "#/subDefinitions/textConfigurationOptions"
         },
         "file": {
-          "$ref" : "#/definitions/fileConfigurationOptions"
+          "$ref": "#/subDefinitions/fileConfigurationOptions"
         }
       }
     }
