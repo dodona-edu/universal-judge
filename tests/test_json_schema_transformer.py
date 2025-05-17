@@ -4,11 +4,11 @@ from pytest_mock import MockerFixture
 
 import tested
 from tested.transform_json import (
+    add_parameter_type,
+    add_templates,
     transform_ide,
     transform_json,
-    transform_json_preprocessor,
-    add_templates,
-    add_parameter_type,
+    transform_json_for_preprocessor_validation,
 )
 
 
@@ -236,7 +236,7 @@ def test_nat_lang_json_schema_structure():
         ]
     }
 
-    result = transform_json_preprocessor(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema, False)
 
     assert result == json_schema_expected
 
@@ -344,7 +344,7 @@ def test_prog_lang_json_schema_structure():
         }
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
 
     assert result == json_schema_expected
 
@@ -444,7 +444,7 @@ def test_json_schema_oracle():
         ]
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
 
     assert result == json_schema_expected
 
@@ -502,7 +502,7 @@ def test_json_schema_expression():
         }
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
     assert result == json_schema_expected
 
 
@@ -663,7 +663,7 @@ def test_json_schema_yaml_value():
         },
     }
 
-    result = transform_json_preprocessor(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema, False)
 
     assert result == json_schema_expected
 
