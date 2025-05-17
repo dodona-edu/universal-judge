@@ -166,7 +166,7 @@ def test_list_json_schema():
 
 def test_transform_executed_correct(mocker: MockerFixture):
     s = mocker.spy(
-        tested.transform_json, name="transform_json_preprocessor"  # type: ignore[reportAttributeAccessIssue]
+        tested.transform_json, name="transform_json_for_preprocessor_validation"  # type: ignore[reportAttributeAccessIssue]
     )
 
     mock_files = [
@@ -175,39 +175,11 @@ def test_transform_executed_correct(mocker: MockerFixture):
             """
 {        
     "files": {
-      "oneOf": [
-        {
-          "description": "A list of files used in the test suite.",
-          "type": "array",
-          "items": {
-            "$ref": "#/subDefinitions/file"
-          }
-        },
-        {
-          "type": "object",
-          "required": [
-            "__tag__",
-            "value"
-          ],
-          "properties": {
-            "__tag__": {
-              "type": "string",
-              "description": "The tag used in the yaml",
-              "const": "!natural_language"
-            },
-            "value": {
-              "type": "object",
-              "additionalProperties": {
-                "description": "A list of files used in the test suite.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/subDefinitions/file"
-                }
-              }
-            }
-          }
-        }
-      ]
+      "description": "A list of files used in the test suite.",
+      "type": "array",
+      "items": {
+        "$ref": "#/subDefinitions/file"
+      }
     }
 }"""
         ]
@@ -220,7 +192,7 @@ def test_transform_executed_correct(mocker: MockerFixture):
 
     transform_json(Path("schema.json"), True, False)
 
-    assert s.call_count == 25
+    assert s.call_count == 6
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(
