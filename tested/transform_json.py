@@ -169,7 +169,8 @@ def make_templates_map() -> dict:
 
 def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> Any:
     """
-    This function is responsible for transforming the JSON-schema such that translations are supported.
+    This function will start with the result of add_parameter_type.
+    It is responsible for transforming the JSON-schema such that translations and templates are supported.
     It also uses a special structure for tags in the YAML that is used in the preprocessing step.
 
     :param data: The data to transform.
@@ -287,6 +288,13 @@ def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> A
 
 
 def add_templates(data: dict) -> dict:
+    """
+    This function will start by a new definition for a single testcase and add templates to the existing definition.
+    The new definition for a testcase will be used to specify a testcase inside a template.
+
+    :param data: The data to transform.
+    :return: The transformed data.
+    """
     assert "definitions" in data and isinstance(data["definitions"], dict)
     # Addition for adding templates to the json-schema
     testcase = data["definitions"].get("testcase", {})
@@ -338,6 +346,13 @@ def add_templates(data: dict) -> dict:
 
 
 def add_parameter_type(data: Any) -> Any:
+    """
+    This function will start with the result of add_templates and add the potential to use the type
+    parameter in specific places.
+
+    :param data: The data to transform.
+    :return: The transformed data.
+    """
     if isinstance(data, dict):
         if "type" in data:
             type_value = data["type"]
