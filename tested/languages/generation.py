@@ -85,9 +85,7 @@ def _get_heredoc_token(stdin: str) -> str:
     return delimiter
 
 
-def get_readable_input(
-    bundle: Bundle, case: Testcase
-) -> tuple[ExtendedMessage, set[FileUrl]]:
+def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
     """
     Get human-readable input for a testcase. This function will use, in
     order of availability:
@@ -167,47 +165,14 @@ def get_readable_input(
         if case.line_comment:
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
-    # We have potential files.
-    # Check if the file names are present in the string.
-    # If not, we can also stop before doing ugly things.
-    # We construct a regex, since that can be faster than checking everything.
-    simple_regex = re.compile("|".join(map(lambda x: re.escape(x.path), link_files)))
-
-    # If there are no files, return now. This means we don't need to do ugly stuff.
-    if not link_files:
-        return ExtendedMessage(description=text, format=format_), set()
-
-    if not simple_regex.search(text):
-        # There is no match, so bail now.
-        return ExtendedMessage(description=text, format=format_), set()
-
-    # Now we need to do ugly stuff.
-    # Begin by compiling the HTML that will be displayed.
-    generated_html = html.escape(text)
-
-    # Map of file URLs.
-    url_map = {html.escape(x.path): x for x in link_files}
-
-    seen = set()
-    escaped_regex = re.compile("|".join(url_map.keys()))
-
-    # Replaces the match with the corresponding link.
-    def replace_link(match: Match) -> str:
-        filename = match.group()
-        the_file = url_map[filename]
-        the_replacement = f'<a class="file-link" target="_blank">{filename}</a>'
-        seen.add(the_file)
-        return the_replacement
-
-    generated_html = escaped_regex.sub(replace_link, generated_html)
-    return ExtendedMessage(description=generated_html, format="html"), seen
+    return ExtendedMessage(description=text, format=format_)
 
 
 def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
     testcases = context.testcases
     for testcase in testcases:
-        result, _ = get_readable_input(bundle, testcase)
+        result = get_readable_input(bundle, testcase)
         if result.description:
             return result
 
