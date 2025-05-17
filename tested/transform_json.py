@@ -8,6 +8,12 @@ SPECIAL_TYPES = ["expression", "programming_language", "oracle"]
 
 
 def transform_non_strict(data: Any) -> Any:
+    """
+    This function is responsible for transforming the strict JSON-schema into its non-strict form.
+
+    :param data: The data to transform.
+    :return: The transformed data.
+    """
     if isinstance(data, list):
         return [
             transformed
@@ -20,7 +26,7 @@ def transform_non_strict(data: Any) -> Any:
                 data["type"] = "string"
             elif data["type"] == "oracle":
                 data["type"] = "object"
-            else:
+            elif data["programming_language"]:
                 return {}
 
         return {k: transform_non_strict(v) for k, v in data.items()}
@@ -28,6 +34,14 @@ def transform_non_strict(data: Any) -> Any:
 
 
 def transform_ide(data: Any) -> Any:
+    """
+    This function will work from the result of transform_json_for_preprocessor_validation.
+    It will transform the JSON-schema into a non-strict form that does not use the special form
+    for tags. This way the JSON-schema can be used in the IDE to help the developer write correct DSL.
+
+    :param data: The data to transform.
+    :return: The transformed data.
+    """
     if isinstance(data, list):
         return [
             transformed for ele in data if (transformed := transform_ide(ele)) != {}
@@ -134,11 +148,19 @@ def make_translations_map() -> dict:
     return {"type": "object", "description": "Define translations in the global scope."}
 
 
-def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
+def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> Any:
+    """
+    This function is responsible for transforming the JSON-schema such that translations are supported.
+    It also uses a special structure for tags in the YAML that is used in the preprocessing step.
+
+    :param data: The data to transform.
+    :param in_sub_def: Indicates if the sub-definition are being processed.
+    :return: The transformed data.
+    """
     if isinstance(data, dict):
         # Standard creation of the special tag structure for translations.
         new_data = {
-            key: transform_json_preprocessor(
+            key: transform_json_for_preprocessor_validation(
                 value, in_sub_def or key == "subDefinitions"
             )
             for key, value in data.items()
@@ -221,7 +243,10 @@ def transform_json_preprocessor(data: Any, in_sub_def: bool) -> Any:
         return data
 
     if isinstance(data, list):
-        return [transform_json_preprocessor(value, in_sub_def) for value in data]
+        return [
+            transform_json_for_preprocessor_validation(value, in_sub_def)
+            for value in data
+        ]
     return data
 
 
@@ -247,7 +272,7 @@ def transform_json(json_file: Path, multilingual: bool, ide: bool):
         result = transform_non_strict(json_stream)
         file_name = "schema.json"
     else:
-        result = transform_json_preprocessor(json_stream, False)
+        result = transform_json_for_preprocessor_validation(json_stream, False)
         if ide:
             result = transform_ide(result)
             file_name = "multilingual-schema.json"

@@ -6,7 +6,7 @@ import tested
 from tested.transform_json import (
     transform_ide,
     transform_json,
-    transform_json_preprocessor,
+    transform_json_for_preprocessor_validation,
 )
 
 
@@ -260,7 +260,7 @@ def test_nat_lang_json_schema_structure():
         ]
     }
 
-    result = transform_json_preprocessor(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema, False)
 
     assert result == json_schema_expected
 
@@ -368,7 +368,7 @@ def test_prog_lang_json_schema_structure():
         }
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
 
     assert result == json_schema_expected
 
@@ -468,7 +468,7 @@ def test_json_schema_oracle():
         ]
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
 
     assert result == json_schema_expected
 
@@ -511,7 +511,7 @@ def test_json_schema_expression():
         }
     }
 
-    result = transform_json_preprocessor(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema, True)
     assert result == json_schema_expected
 
 
@@ -529,7 +529,7 @@ def test_json_schema_yaml_value():
         },
     }
 
-    result = transform_json_preprocessor(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema, False)
 
     assert result == json_schema_expected
 
