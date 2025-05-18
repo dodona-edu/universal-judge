@@ -1,6 +1,4 @@
-import html
 import logging
-from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
 from typing import Literal
@@ -42,7 +40,6 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutput,
     FileOutputChannel,
-    FileUrl,
     IgnoredChannel,
     OutputChannel,
     OutputFileData,

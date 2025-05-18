@@ -2,15 +2,9 @@
 Translates items from the test suite into the actual programming language.
 """
 
-import html
-import json
 import logging
-import re
 import shlex
-import urllib.parse
-from collections.abc import Iterable
 from pathlib import Path
-from re import Match
 from typing import TYPE_CHECKING, TypeAlias
 
 from pygments import highlight
@@ -29,15 +23,12 @@ from tested.languages.preparation import (
     prepare_execution_unit,
     prepare_expression,
 )
-from tested.parsing import get_converter
 from tested.serialisation import Expression, Statement, VariableType
 from tested.testsuite import (
     Context,
-    FileUrl,
     LanguageLiterals,
     MainInput,
     Testcase,
-    TextChannelType,
     TextData,
 )
 from tested.utils import is_statement_strict
@@ -96,25 +87,6 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
     3. If it is a context testcase:
         a. The stdin and the arguments.
     """
-
-    stdin = ""
-    link_files = case.link_files
-    if case.is_main_testcase():
-        assert isinstance(case.input, MainInput)
-        stdin_data = case.input.stdin
-        if isinstance(stdin_data, TextData):
-            if stdin_data.type == "file":
-                stdin = stdin_data.path
-                link_files.append(
-                    FileUrl(
-                        path=stdin,
-                        content=stdin_data.data if stdin_data.data is not None else "",
-                    )
-                )
-            else:
-                stdin = stdin_data.data
-                assert stdin is not None
-
     format_ = "text"  # By default, we use text as input.
     if case.description:
         if isinstance(case.description, ExtendedMessage):
@@ -132,6 +104,13 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
         args = f"$ {command}"
         # Determine the stdin
         stdin_data = case.input.stdin
+        stdin = ""
+        if isinstance(stdin_data, TextData):
+            if stdin_data.type == "file":
+                stdin = stdin_data.path
+            else:
+                stdin = stdin_data.data
+                assert stdin is not None
 
         # If we have both stdin and arguments, we use a here-document.
         if stdin:

@@ -341,19 +341,21 @@ def _process_results(
             compilation_results=compilation_results,
         )
 
+        input_files = []
+        for case in planned.context.testcases:
+            for file in case.link_files:
+                file_data = {"path": file.path}
+                if file.content != "":
+                    file_data["content"] = file.content
+                input_files.append(file_data)
+        if not input_files:
+            input_files = None
+
         if bundle.language.supports_debug_information():
             meta_statements = []
-            input_files = []
             meta_stdin = None
 
             for case in planned.context.testcases:
-                for file in case.link_files:
-                    file_data = {"path": file.path}
-                    if file.content != "":
-                        file_data["content"] = file.content
-
-                    input_files.append(file_data)
-
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
                     if (
@@ -388,7 +390,12 @@ def _process_results(
                 planned.context_index,
             )
         else:
-            collector.add(CloseContext(), planned.context_index)
+            collector.add(
+                CloseContext(
+                    data=Metadata(files=input_files, stdin=None, statements=None)
+                ),
+                planned.context_index,
+            )
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_, currently_open_tab
 

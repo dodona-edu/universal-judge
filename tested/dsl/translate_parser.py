@@ -715,6 +715,7 @@ def _convert_testcase(
         testcase["expression"] = testcase.pop("statement")
 
     line_comment = ""
+    stdin_file = None
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
         if isinstance(expr_stmt, dict) or context.language != "tested":
@@ -754,6 +755,10 @@ def _convert_testcase(
                     data = _ensure_trailing_newline(content)
 
             if path:
+                stdin_file = FileUrl(
+                    path=path,
+                    content=data if data is not None else "",
+                )
                 stdin = TextData(data=data, path=path, type=TextChannelType.FILE)
             else:
                 stdin = TextData(data=data)
@@ -824,12 +829,16 @@ def _convert_testcase(
     else:
         the_description = None
 
+    link_files = context.files
+    if stdin_file is not None:
+        link_files = list(set(link_files) | {stdin_file})
+
     return DataWithMessage(
         data=Testcase(
             description=the_description,
             input=the_input,
             output=output,
-            link_files=context.files,
+            link_files=link_files,
             line_comment=line_comment,
         ),
         messages=deprecated_messages,
