@@ -24,13 +24,7 @@ from tested.languages.preparation import (
     prepare_expression,
 )
 from tested.serialisation import Expression, Statement, VariableType
-from tested.testsuite import (
-    Context,
-    LanguageLiterals,
-    MainInput,
-    Testcase,
-    TextData,
-)
+from tested.testsuite import Context, LanguageLiterals, MainInput, Testcase, TextData
 from tested.utils import is_statement_strict
 
 if TYPE_CHECKING:
