@@ -1,7 +1,7 @@
 """
 Translates items from the test suite into the actual programming language.
 """
-
+import time
 import logging
 import shlex
 from pathlib import Path
@@ -81,6 +81,7 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
     3. If it is a context testcase:
         a. The stdin and the arguments.
     """
+    #start_time = time.time()
     format_ = "text"  # By default, we use text as input.
     if case.description:
         if isinstance(case.description, ExtendedMessage):
@@ -138,6 +139,8 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
         if case.line_comment:
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
+    #end_time = time.time()
+    #print("time generation", end_time - start_time)
     return ExtendedMessage(description=text, format=format_)
 
 
