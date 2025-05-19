@@ -6,7 +6,7 @@ from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Literal, Type, TypeVar, cast
-#import time
+
 import yaml
 from attrs import define, evolve, field
 from jsonschema import TypeChecker
@@ -1002,11 +1002,7 @@ def parse_dsl(dsl_string: str, workdir: Path | None = None) -> DataWithMessage[S
     dsl_object = _parse_yaml(dsl_string)
     _validate_dsl(dsl_object)
 
-    #start_time = time.time()
-    res = _convert_dsl(dsl_object, workdir)
-    #end_time = time.time()
-    #print("time conversion", end_time - start_time)
-    return res
+    return _convert_dsl(dsl_object, workdir)
 
 
 def translate_to_test_suite(dsl_string: str) -> str:

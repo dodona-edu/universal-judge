@@ -1,5 +1,4 @@
 import logging
-import time
 from enum import StrEnum, unique
 from pathlib import Path
 from typing import Literal
@@ -117,7 +116,6 @@ def _evaluate_channel(
 
     missing = actual is None
 
-    #start_time = time.time()
     for output_element in output_channels:
         # Run the oracle.
         evaluation_result = evaluator(output_element, actual if actual else "")
@@ -158,8 +156,6 @@ def _evaluate_channel(
         else:
             missing = False
 
-    #end_time = time.time()
-    #print("time evaluation", end_time - start_time)
     return missing
 
 
