@@ -134,13 +134,13 @@ def make_tag_structure(data: dict, tag: str = "!natural_language") -> dict:
         },
     }
 
-    if tag in ["!oracle", "!programming_language", "!expression", "!parameter"]:
+    if tag != "!natural_language":
         base["properties"]["value"] = data
         base["properties"]["value"]["type"] = "object"
         if tag in ["!expression", "!parameter"]:
             base["properties"]["value"]["type"] = "string"
 
-    elif tag == "!natural_language":
+    else:
         base["properties"]["value"] = {
             "type": "object",
             "additionalProperties": data,
