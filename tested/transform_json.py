@@ -167,14 +167,13 @@ def make_templates_map() -> dict:
     }
 
 
-def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> Any:
+def transform_json_for_preprocessor_validation(data: Any) -> Any:
     """
     This function will start with the result of add_parameter_type.
     It is responsible for transforming the JSON-schema such that translations and templates are supported.
     It also uses a special structure for tags in the YAML that is used in the preprocessing step.
 
     :param data: The data to transform.
-    :param in_sub_def: Indicates if the sub-definition are being processed.
     :return: The transformed data.
     """
     if isinstance(data, dict):
@@ -187,9 +186,7 @@ def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> A
 
         new_data = {
             key: (
-                transform_json_for_preprocessor_validation(
-                    value, in_sub_def or key == "subDefinitions"
-                )
+                transform_json_for_preprocessor_validation(value)
                 if key != "translations" and key != "templates"
                 else value
             )
@@ -281,10 +278,7 @@ def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> A
         return data
 
     if isinstance(data, list):
-        return [
-            transform_json_for_preprocessor_validation(value, in_sub_def)
-            for value in data
-        ]
+        return [transform_json_for_preprocessor_validation(value) for value in data]
     return data
 
 
@@ -395,7 +389,7 @@ def transform_json(json_file: Path, multilingual: bool, ide: bool):
         stream_with_templates = add_templates(json_stream)
         stream_with_templates_and_param = add_parameter_type(stream_with_templates)
         result = transform_json_for_preprocessor_validation(
-            stream_with_templates_and_param, False
+            stream_with_templates_and_param
         )
         if ide:
             result = transform_ide(result)
