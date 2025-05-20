@@ -178,18 +178,26 @@ def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> A
     :return: The transformed data.
     """
     if isinstance(data, dict):
+        # Add the translations and templates maps
+        targets = ["_rootObject", "tab", "unit", "context", "case"]
+        for target in targets:
+            if target in data and "properties" in data[target]:
+                data[target]["properties"]["translations"] = make_translations_map()
+                data[target]["properties"]["templates"] = make_templates_map()
+
         new_data = {
-            key: transform_json_for_preprocessor_validation(
-                value, in_sub_def or key == "subDefinitions"
+            key: (
+                transform_json_for_preprocessor_validation(
+                    value, in_sub_def or key == "subDefinitions"
+                )
+                if key != "translations" and key != "templates"
+                else value
             )
             for key, value in data.items()
         }
+
         # Standard creation of the special tag structure for translations and templates.
-        if (
-            "type" in data
-            and (data["type"] != "object" or in_sub_def)
-            and data["type"] not in ["boolean", "integer"]
-        ):
+        if "type" in data and data["type"] not in ["boolean", "integer"]:
             # Adding support for the other tags.
             if data["type"] in SPECIAL_TYPES:
                 tag = data.pop("type")
@@ -211,13 +219,6 @@ def transform_json_for_preprocessor_validation(data: Any, in_sub_def: bool) -> A
 
             return make_tag_structure(data, new_data)
         data = new_data
-
-        # Add the translations maps
-        targets = ["_rootObject", "tab", "unit", "context", "case"]
-        for target in targets:
-            if target in data and "properties" in data[target]:
-                data[target]["properties"]["translations"] = make_translations_map()
-                data[target]["properties"]["templates"] = make_templates_map()
 
         # Flatten the oneOf structures
         if "oneOf" in data:
