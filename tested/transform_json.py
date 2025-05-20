@@ -121,9 +121,7 @@ def make_parameter_type_structure(data: dict) -> dict:
     }
 
 
-def make_tag_structure(
-    data: dict, data_with_inner_translations: Any = None, tag: str = "!natural_language"
-) -> dict:
+def make_tag_structure(data: dict, tag: str = "!natural_language") -> dict:
     base = {
         "type": "object",
         "required": ["__tag__", "value"],
@@ -147,8 +145,6 @@ def make_tag_structure(
             "type": "object",
             "additionalProperties": data,
         }
-        if data_with_inner_translations is not None:
-            return {"oneOf": [data_with_inner_translations, base]}
 
     return base
 
@@ -200,21 +196,12 @@ def transform_json_for_preprocessor_validation(data: Any) -> Any:
                 tag = data.pop("type")
                 new_data.pop("type")
                 # translations applied to inner part
-                tag_data_with_inner_translations = make_tag_structure(
-                    new_data,
-                    tag=f"!{tag}",
-                )
+                new_data = make_tag_structure(new_data, tag=f"!{tag}")
                 # translations not applied to inner part
-                tag_data = make_tag_structure(
-                    data,
-                    tag=f"!{tag}",
-                )
-                return make_tag_structure(
-                    data=tag_data,
-                    data_with_inner_translations=tag_data_with_inner_translations,
-                )
+                data = make_tag_structure(data, tag=f"!{tag}")
 
-            return make_tag_structure(data, new_data)
+            result = make_tag_structure(data)
+            return {"oneOf": [new_data, result]}
         data = new_data
 
         # Flatten the oneOf structures
@@ -274,7 +261,12 @@ def transform_json_for_preprocessor_validation(data: Any) -> Any:
             "$ref" in data
             and data["$ref"] == "#/subDefinitions/yamlValueOrPythonExpression"
         ):
-            data = make_tag_structure(data, data)
+            data = {
+                "oneOf": [
+                    {"$ref": "#/subDefinitions/yamlValueOrPythonExpression"},
+                    make_tag_structure(data),
+                ]
+            }
         return data
 
     if isinstance(data, list):
