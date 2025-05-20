@@ -358,8 +358,8 @@ def add_parameter_type(data: Any) -> Any:
             type_value = data["type"]
             if (
                 isinstance(type_value, list)
-                and any(t in ["boolean", "integer"] for t in type_value)
-            ) or type_value in ["boolean", "integer"]:
+                and any(t in ["boolean", "integer", "number"] for t in type_value)
+            ) or type_value in ["boolean", "integer", "number"]:
                 # Adding support for "!parameter" tag.
                 return make_parameter_type_structure(data)
         return {k: add_parameter_type(v) for k, v in data.items()}
