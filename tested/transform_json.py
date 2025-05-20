@@ -194,7 +194,7 @@ def transform_json_for_preprocessor_validation(data: Any) -> Any:
         }
 
         # Standard creation of the special tag structure for translations and templates.
-        if "type" in data and data["type"] not in ["boolean", "integer"]:
+        if "type" in data and data["type"] not in ["boolean", "integer", "number"]:
             # Adding support for the other tags.
             if data["type"] in SPECIAL_TYPES:
                 tag = data.pop("type")
