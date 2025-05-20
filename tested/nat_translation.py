@@ -96,19 +96,19 @@ def init_template(
 ) -> dict:
 
     # translate parameters before inserting them into the template
-    new_parameters = translate_yaml(
+    new_parameters = translate_yaml_and_initialize_templates(
         parameters, translations, templates, parameters, language, env, True
     )
 
     # translate template and insert parameters
-    template = translate_yaml(
+    template = translate_yaml_and_initialize_templates(
         template, translations, templates, new_parameters, language, env, True
     )
     assert isinstance(template, dict)
     return template
 
 
-def translate_yaml(
+def translate_yaml_and_initialize_templates(
     data: Any,
     translations: dict,
     templates: dict,
@@ -118,7 +118,7 @@ def translate_yaml(
     inside_templates: bool = False,
 ) -> Any:
     """
-    This function will translate the multilingual object.
+    This function will translate the multilingual object and initialize the templates.
 
     :param data: The object to translate.
     :param translations: The merge of all found translations maps.
@@ -134,7 +134,7 @@ def translate_yaml(
             if data["__tag__"] == "!natural_language":
                 value = data["value"]
                 assert language in value
-                return translate_yaml(
+                return translate_yaml_and_initialize_templates(
                     value[language],
                     translations,
                     templates,
@@ -181,7 +181,7 @@ def translate_yaml(
             if data:
                 print(data)
                 # Extra specifications in data will overwrite parts of the template.
-                data = translate_yaml(
+                data = translate_yaml_and_initialize_templates(
                     data,
                     translations,
                     templates,
@@ -221,7 +221,7 @@ def translate_yaml(
             ]
 
         result = {
-            key: translate_yaml(
+            key: translate_yaml_and_initialize_templates(
                 value,
                 translations,
                 templates,
@@ -237,7 +237,7 @@ def translate_yaml(
         result = []
         for item in data:
             has_repeat = isinstance(item, dict) and "repeat" in item
-            translated = translate_yaml(
+            translated = translate_yaml_and_initialize_templates(
                 item,
                 translations,
                 templates,
@@ -329,7 +329,9 @@ def apply_translations(
     validate_pre_dsl(parsed_yaml)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(parsed_yaml, {}, {}, {}, language, enviroment)
+    translated_data = translate_yaml_and_initialize_templates(
+        parsed_yaml, {}, {}, {}, language, enviroment
+    )
 
     missing_keys = TrackingUndefined.missing_keys
     messages = build_preprocessor_messages(missing_keys)
