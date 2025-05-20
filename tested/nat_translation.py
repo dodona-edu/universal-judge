@@ -160,6 +160,9 @@ def translate_yaml(
             assert (
                 not parameters and not inside_templates
             ), "A template was defined inside another template. This is not allowed!"
+            assert (
+                "repeat" not in data
+            ), "A repeat was defined alongside a template. This is not allowed!"
             if "template" in data:
                 name = data.pop("template")
                 assert name in templates
@@ -176,6 +179,7 @@ def translate_yaml(
             )
 
             if data:
+                print(data)
                 # Extra specifications in data will overwrite parts of the template.
                 data = translate_yaml(
                     data,
