@@ -181,7 +181,6 @@ def translate_yaml_and_initialize_templates(
             )
 
             if data:
-                print(data)
                 # Extra specifications in data will overwrite parts of the template.
                 data = translate_yaml_and_initialize_templates(
                     data,
