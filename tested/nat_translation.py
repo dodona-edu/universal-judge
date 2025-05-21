@@ -145,7 +145,7 @@ def translate_yaml_and_initialize_templates(
                 )
             elif data["__tag__"] == "!parameter":
                 assert (
-                    data["value"] in parameters
+                    data["value"] in parameters and inside_templates
                 ), "You are using the !parameter tag outside a template or the specified parameter does not exist."
                 return parameters[data["value"]]
 
