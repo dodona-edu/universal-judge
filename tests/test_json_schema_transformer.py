@@ -518,12 +518,7 @@ def test_add_templates():
                     "expression": {
                         "description": "The expression to evaluate.",
                         "$ref": "#/subDefinitions/expressionOrStatement",
-                    },
-                    "arguments": {
-                        "description": "Array of program call arguments",
-                        "type": "array",
-                        "items": {"type": ["string", "number", "integer", "boolean"]},
-                    },
+                    }
                 }
             }
         }
@@ -540,11 +535,6 @@ def test_add_templates():
                     "expression": {
                         "description": "The expression to evaluate.",
                         "$ref": "#/subDefinitions/expressionOrStatement",
-                    },
-                    "arguments": {
-                        "description": "Array of program call arguments",
-                        "type": "array",
-                        "items": {"type": ["string", "number", "integer", "boolean"]},
                     },
                     "template": {
                         "type": "string",
@@ -589,22 +579,7 @@ def test_add_templates():
                     "expression": {
                         "description": "The expression to evaluate.",
                         "$ref": "#/subDefinitions/expressionOrStatement",
-                    },
-                    "arguments": {
-                        "anyOf": [
-                            {
-                                "type": "parameter",
-                                "description": "The key of the parameter.",
-                            },
-                            {
-                                "description": "Array of program call arguments",
-                                "type": "array",
-                                "items": {
-                                    "type": ["string", "number", "integer", "boolean"]
-                                },
-                            },
-                        ]
-                    },
+                    }
                 }
             },
         }

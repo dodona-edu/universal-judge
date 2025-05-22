@@ -1512,132 +1512,170 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "description": "Array of program call arguments",
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "oneOf": [
-                          {
-                            "description": "The key of the parameter.",
-                            "type": "string"
-                          },
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "description": "The key of the parameter.",
-                              "type": "string"
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
-                            }
-                          }
-                        ]
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
                       },
-                      {
-                        "oneOf": [
+                      "not": {
+                        "anyOf": [
                           {
-                            "type": [
-                              "string",
-                              "number",
-                              "integer",
-                              "boolean"
+                            "required": [
+                              "description"
                             ]
                           },
                           {
-                            "type": "object",
-                            "additionalProperties": {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Array of program call arguments",
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "oneOf": [
+                              {
+                                "description": "The key of the parameter.",
+                                "type": "string"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "description": "The key of the parameter.",
+                                  "type": "string"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "oneOf": [
+                              {
+                                "type": [
+                                  "string",
+                                  "number",
+                                  "integer",
+                                  "boolean"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean"
+                                  ]
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            },
+                            {
                               "type": [
                                 "string",
                                 "number",
                                 "integer",
                                 "boolean"
                               ]
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
                             }
+                          ]
+                        }
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
                           }
                         ]
                       }
-                    ]
-                  }
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": {
-                    "description": "Array of program call arguments",
-                    "type": "array",
-                    "items": {
-                      "anyOf": [
-                        {
-                          "description": "The key of the parameter.",
-                          "type": "string"
-                        },
-                        {
-                          "type": [
-                            "string",
-                            "number",
-                            "integer",
-                            "boolean"
-                          ]
-                        }
-                      ]
                     }
-                  },
-                  "not": {
-                    "anyOf": [
-                      {
-                        "required": [
-                          "description"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "value"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "types"
-                        ]
-                      }
-                    ]
-                  }
+                  ]
                 }
               ]
             },
@@ -2086,24 +2124,32 @@
                 ]
               },
               "arguments": {
-                "description": "Array of program call arguments",
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "description": "The key of the parameter.",
-                      "type": "string"
-                    },
-                    {
-                      "type": [
-                        "string",
-                        "number",
-                        "integer",
-                        "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Array of program call arguments",
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        {
+                          "type": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean"
+                          ]
+                        }
                       ]
                     }
-                  ]
-                }
+                  }
+                ]
               },
               "statement": {
                 "description": "The statement to evaluate.",
@@ -3325,71 +3371,109 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      "oneOf": [
+                        {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "description": "The key of the parameter.",
+                            "type": "string"
                           },
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
-                            }
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
                           }
-                        ]
-                      }
+                        }
+                      ]
                     },
                     {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
-                      },
-                      "not": {
-                        "anyOf": [
-                          {
-                            "required": [
-                              "description"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "value"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "types"
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
                             ]
                           }
-                        ]
-                      }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
                     }
                   ]
                 },
@@ -3462,11 +3546,19 @@
                     "default": "evaluate"
                   },
                   "arguments": {
-                    "type": "array",
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
+                    "anyOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      }
+                    ]
                   },
                   "languages": {
                     "type": "array",
@@ -3791,71 +3883,109 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      "oneOf": [
+                        {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "description": "The key of the parameter.",
+                            "type": "string"
                           },
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
-                            }
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
                           }
-                        ]
-                      }
+                        }
+                      ]
                     },
                     {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
-                      },
-                      "not": {
-                        "anyOf": [
-                          {
-                            "required": [
-                              "description"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "value"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "types"
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
                             ]
                           }
-                        ]
-                      }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
                     }
                   ]
                 },
@@ -3934,11 +4064,19 @@
                     "default": "evaluate"
                   },
                   "arguments": {
-                    "type": "array",
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
+                    "anyOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      }
+                    ]
                   },
                   "languages": {
                     "type": "array",
@@ -4198,71 +4336,109 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                  "type": "array",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
                       },
-                      {
-                        "type": "object",
-                        "additionalProperties": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        },
-                        "not": {
-                          "anyOf": [
-                            {
-                              "required": [
-                                "description"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "value"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "types"
-                              ]
-                            }
-                          ]
-                        }
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
                       }
-                    ]
-                  }
+                    }
+                  ]
                 },
                 {
-                  "type": "object",
-                  "additionalProperties": {
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
-                  },
-                  "not": {
-                    "anyOf": [
-                      {
-                        "required": [
-                          "description"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "value"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "types"
+                  "oneOf": [
+                    {
+                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
                         ]
                       }
-                    ]
-                  }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               ]
             },
@@ -4335,11 +4511,19 @@
                 "default": "evaluate"
               },
               "arguments": {
-                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                }
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                    }
+                  }
+                ]
               },
               "languages": {
                 "type": "array",
@@ -4562,124 +4746,162 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "minProperties": 1,
-                  "description": "Language mapping of oracle arguments.",
-                  "type": "object",
-                  "propertyNames": {
-                    "$ref": "#/subDefinitions/programmingLanguage"
-                  },
-                  "items": {
-                    "oneOf": [
-                      {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "oneOf": [
-                            {
-                              "type": "string",
-                              "description": "A language-specific literal, which will be used verbatim."
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": {
-                                "type": "string",
-                                "description": "A language-specific literal, which will be used verbatim."
-                              },
-                              "not": {
-                                "anyOf": [
-                                  {
-                                    "required": [
-                                      "description"
-                                    ]
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "minProperties": 1,
+                      "description": "Language mapping of oracle arguments.",
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "#/subDefinitions/programmingLanguage"
+                      },
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "oneOf": [
+                                {
+                                  "type": "string",
+                                  "description": "A language-specific literal, which will be used verbatim."
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string",
+                                    "description": "A language-specific literal, which will be used verbatim."
                                   },
-                                  {
-                                    "required": [
-                                      "value"
-                                    ]
-                                  },
-                                  {
-                                    "required": [
-                                      "types"
+                                  "not": {
+                                    "anyOf": [
+                                      {
+                                        "required": [
+                                          "description"
+                                        ]
+                                      },
+                                      {
+                                        "required": [
+                                          "value"
+                                        ]
+                                      },
+                                      {
+                                        "required": [
+                                          "types"
+                                        ]
+                                      }
                                     ]
                                   }
-                                ]
-                              }
+                                }
+                              ]
                             }
-                          ]
-                        }
-                      },
-                      {
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "array",
+                              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                              "items": {
+                                "type": "string",
+                                "description": "A language-specific literal, which will be used verbatim."
+                              }
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "minProperties": 1,
+                        "description": "Language mapping of oracle arguments.",
                         "type": "object",
-                        "additionalProperties": {
+                        "propertyNames": {
+                          "$ref": "#/subDefinitions/programmingLanguage"
+                        },
+                        "items": {
                           "type": "array",
                           "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
                           "items": {
                             "type": "string",
                             "description": "A language-specific literal, which will be used verbatim."
                           }
-                        },
-                        "not": {
-                          "anyOf": [
-                            {
-                              "required": [
-                                "description"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "value"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "types"
-                              ]
-                            }
-                          ]
                         }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": {
-                    "minProperties": 1,
-                    "description": "Language mapping of oracle arguments.",
-                    "type": "object",
-                    "propertyNames": {
-                      "$ref": "#/subDefinitions/programmingLanguage"
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "type": "string",
-                        "description": "A language-specific literal, which will be used verbatim."
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
                       }
                     }
-                  },
-                  "not": {
-                    "anyOf": [
-                      {
-                        "required": [
-                          "description"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "value"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "types"
-                        ]
-                      }
-                    ]
-                  }
+                  ]
                 }
               ]
             },
@@ -4756,20 +4978,28 @@
                 }
               },
               "arguments": {
-                "minProperties": 1,
-                "description": "Language mapping of oracle arguments.",
-                "type": "object",
-                "propertyNames": {
-                  "$ref": "#/subDefinitions/programmingLanguage"
-                },
-                "items": {
-                  "type": "array",
-                  "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                  "items": {
-                    "type": "string",
-                    "description": "A language-specific literal, which will be used verbatim."
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "minProperties": 1,
+                    "description": "Language mapping of oracle arguments.",
+                    "type": "object",
+                    "propertyNames": {
+                      "$ref": "#/subDefinitions/programmingLanguage"
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                      "items": {
+                        "type": "string",
+                        "description": "A language-specific literal, which will be used verbatim."
+                      }
+                    }
                   }
-                }
+                ]
               },
               "value": {
                 "$ref": "#/subDefinitions/yamlValueOrPythonExpression"

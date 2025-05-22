@@ -1456,15 +1456,42 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "description": "Array of program call arguments",
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "oneOf": [
-                          {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties": {
+                        "__tag__": {
+                          "type": "string",
+                          "description": "The tag used in the yaml",
+                          "const": "!parameter"
+                        },
+                        "value": {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties": {
+                        "__tag__": {
+                          "type": "string",
+                          "description": "The tag used in the yaml",
+                          "const": "!natural_language"
+                        },
+                        "value": {
+                          "type": "object",
+                          "additionalProperties": {
                             "type": "object",
                             "required": [
                               "__tag__",
@@ -1481,69 +1508,140 @@
                                 "type": "string"
                               }
                             }
-                          },
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Array of program call arguments",
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
                           {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
-                              },
-                              "value": {
+                            "oneOf": [
+                              {
                                 "type": "object",
-                                "additionalProperties": {
-                                  "type": "object",
-                                  "required": [
-                                    "__tag__",
-                                    "value"
-                                  ],
-                                  "properties": {
-                                    "__tag__": {
-                                      "type": "string",
-                                      "description": "The tag used in the yaml",
-                                      "const": "!parameter"
-                                    },
-                                    "value": {
-                                      "description": "The key of the parameter.",
-                                      "type": "string"
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!parameter"
+                                  },
+                                  "value": {
+                                    "description": "The key of the parameter.",
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "type": "object",
+                                      "required": [
+                                        "__tag__",
+                                        "value"
+                                      ],
+                                      "properties": {
+                                        "__tag__": {
+                                          "type": "string",
+                                          "description": "The tag used in the yaml",
+                                          "const": "!parameter"
+                                        },
+                                        "value": {
+                                          "description": "The key of the parameter.",
+                                          "type": "string"
+                                        }
+                                      }
                                     }
                                   }
                                 }
                               }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "oneOf": [
-                          {
-                            "type": [
-                              "string",
-                              "number",
-                              "integer",
-                              "boolean"
                             ]
                           },
                           {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
+                            "oneOf": [
+                              {
+                                "type": [
+                                  "string",
+                                  "number",
+                                  "integer",
+                                  "boolean"
+                                ]
                               },
-                              "value": {
+                              {
                                 "type": "object",
-                                "additionalProperties": {
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "type": [
+                                        "string",
+                                        "number",
+                                        "integer",
+                                        "boolean"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "__tag__",
+                        "value"
+                      ],
+                      "properties": {
+                        "__tag__": {
+                          "type": "string",
+                          "description": "The tag used in the yaml",
+                          "const": "!natural_language"
+                        },
+                        "value": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "description": "Array of program call arguments",
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "description": "The key of the parameter.",
+                                  "type": "string"
+                                },
+                                {
                                   "type": [
                                     "string",
                                     "number",
@@ -1551,50 +1649,13 @@
                                     "boolean"
                                   ]
                                 }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "object",
-                  "required": [
-                    "__tag__",
-                    "value"
-                  ],
-                  "properties": {
-                    "__tag__": {
-                      "type": "string",
-                      "description": "The tag used in the yaml",
-                      "const": "!natural_language"
-                    },
-                    "value": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "description": "Array of program call arguments",
-                        "type": "array",
-                        "items": {
-                          "anyOf": [
-                            {
-                              "description": "The key of the parameter.",
-                              "type": "string"
-                            },
-                            {
-                              "type": [
-                                "string",
-                                "number",
-                                "integer",
-                                "boolean"
                               ]
                             }
-                          ]
+                          }
                         }
                       }
                     }
-                  }
+                  ]
                 }
               ]
             },
@@ -2033,24 +2094,32 @@
                     ]
                   },
                   "arguments": {
-                    "description": "Array of program call arguments",
-                    "type": "array",
-                    "items": {
-                      "anyOf": [
-                        {
-                          "description": "The key of the parameter.",
-                          "type": "string"
-                        },
-                        {
-                          "type": [
-                            "string",
-                            "number",
-                            "integer",
-                            "boolean"
+                    "anyOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            },
+                            {
+                              "type": [
+                                "string",
+                                "number",
+                                "integer",
+                                "boolean"
+                              ]
+                            }
                           ]
                         }
-                      ]
-                    }
+                      }
+                    ]
                   },
                   "statement": {
                     "description": "The statement to evaluate.",
@@ -3378,61 +3447,122 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
-                              },
-                              "value": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!parameter"
+                            },
+                            "value": {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
                                 "type": "object",
-                                "additionalProperties": {
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!parameter"
+                                  },
+                                  "value": {
+                                    "description": "The key of the parameter.",
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "array",
+                                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                                "items": {
                                   "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
                                 }
                               }
                             }
                           }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "required": [
-                        "__tag__",
-                        "value"
-                      ],
-                      "properties": {
-                        "__tag__": {
-                          "type": "string",
-                          "description": "The tag used in the yaml",
-                          "const": "!natural_language"
-                        },
-                        "value": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "array",
-                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                            "items": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            }
-                          }
                         }
-                      }
+                      ]
                     }
                   ]
                 },
@@ -3512,11 +3642,19 @@
                         "default": "evaluate"
                       },
                       "arguments": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
+                        "anyOf": [
+                          {
+                            "description": "The key of the parameter.",
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          }
+                        ]
                       },
                       "languages": {
                         "type": "array",
@@ -3789,61 +3927,122 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
-                              },
-                              "value": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!parameter"
+                            },
+                            "value": {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
                                 "type": "object",
-                                "additionalProperties": {
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!parameter"
+                                  },
+                                  "value": {
+                                    "description": "The key of the parameter.",
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "array",
+                                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                                "items": {
                                   "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
                                 }
                               }
                             }
                           }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "required": [
-                        "__tag__",
-                        "value"
-                      ],
-                      "properties": {
-                        "__tag__": {
-                          "type": "string",
-                          "description": "The tag used in the yaml",
-                          "const": "!natural_language"
-                        },
-                        "value": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "type": "array",
-                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                            "items": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            }
-                          }
                         }
-                      }
+                      ]
                     }
                   ]
                 },
@@ -3929,11 +4128,19 @@
                         "default": "evaluate"
                       },
                       "arguments": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
+                        "anyOf": [
+                          {
+                            "description": "The key of the parameter.",
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          }
+                        ]
                       },
                       "languages": {
                         "type": "array",
@@ -4186,61 +4393,122 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "type": "array",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
-                              },
-                              "value": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!parameter"
+                            },
+                            "value": {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
                                 "type": "object",
-                                "additionalProperties": {
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!parameter"
+                                  },
+                                  "value": {
+                                    "description": "The key of the parameter.",
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                                "type": "array",
+                                "items": {
                                   "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
                                 }
                               }
                             }
                           }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "required": [
-                        "__tag__",
-                        "value"
-                      ],
-                      "properties": {
-                        "__tag__": {
-                          "type": "string",
-                          "description": "The tag used in the yaml",
-                          "const": "!natural_language"
-                        },
-                        "value": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                            "type": "array",
-                            "items": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            }
-                          }
                         }
-                      }
+                      ]
                     }
                   ]
                 },
@@ -4334,11 +4602,19 @@
                         "default": "evaluate"
                       },
                       "arguments": {
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
+                        "anyOf": [
+                          {
+                            "description": "The key of the parameter.",
+                            "type": "string"
+                          },
+                          {
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          }
+                        ]
                       },
                       "languages": {
                         "type": "array",
@@ -4538,64 +4814,158 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "minProperties": 1,
-                      "description": "Language mapping of oracle arguments.",
-                      "type": "object",
-                      "propertyNames": {
-                        "$ref": "#/subDefinitions/programmingLanguage"
-                      },
-                      "items": {
-                        "oneOf": [
-                          {
-                            "type": "array",
-                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                            "items": {
-                              "oneOf": [
-                                {
-                                  "type": "string",
-                                  "description": "A language-specific literal, which will be used verbatim."
-                                },
-                                {
-                                  "type": "object",
-                                  "required": [
-                                    "__tag__",
-                                    "value"
-                                  ],
-                                  "properties": {
-                                    "__tag__": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!parameter"
+                            },
+                            "value": {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!parameter"
+                                  },
+                                  "value": {
+                                    "description": "The key of the parameter.",
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "minProperties": 1,
+                          "description": "Language mapping of oracle arguments.",
+                          "type": "object",
+                          "propertyNames": {
+                            "$ref": "#/subDefinitions/programmingLanguage"
+                          },
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "array",
+                                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                                "items": {
+                                  "oneOf": [
+                                    {
                                       "type": "string",
-                                      "description": "The tag used in the yaml",
-                                      "const": "!natural_language"
+                                      "description": "A language-specific literal, which will be used verbatim."
                                     },
-                                    "value": {
+                                    {
                                       "type": "object",
-                                      "additionalProperties": {
+                                      "required": [
+                                        "__tag__",
+                                        "value"
+                                      ],
+                                      "properties": {
+                                        "__tag__": {
+                                          "type": "string",
+                                          "description": "The tag used in the yaml",
+                                          "const": "!natural_language"
+                                        },
+                                        "value": {
+                                          "type": "object",
+                                          "additionalProperties": {
+                                            "type": "string",
+                                            "description": "A language-specific literal, which will be used verbatim."
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "object",
+                                "required": [
+                                  "__tag__",
+                                  "value"
+                                ],
+                                "properties": {
+                                  "__tag__": {
+                                    "type": "string",
+                                    "description": "The tag used in the yaml",
+                                    "const": "!natural_language"
+                                  },
+                                  "value": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "type": "array",
+                                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                                      "items": {
                                         "type": "string",
                                         "description": "A language-specific literal, which will be used verbatim."
                                       }
                                     }
                                   }
                                 }
-                              ]
-                            }
-                          },
-                          {
-                            "type": "object",
-                            "required": [
-                              "__tag__",
-                              "value"
-                            ],
-                            "properties": {
-                              "__tag__": {
-                                "type": "string",
-                                "description": "The tag used in the yaml",
-                                "const": "!natural_language"
-                              },
-                              "value": {
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "__tag__",
+                            "value"
+                          ],
+                          "properties": {
+                            "__tag__": {
+                              "type": "string",
+                              "description": "The tag used in the yaml",
+                              "const": "!natural_language"
+                            },
+                            "value": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "minProperties": 1,
+                                "description": "Language mapping of oracle arguments.",
                                 "type": "object",
-                                "additionalProperties": {
+                                "propertyNames": {
+                                  "$ref": "#/subDefinitions/programmingLanguage"
+                                },
+                                "items": {
                                   "type": "array",
                                   "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
                                   "items": {
@@ -4606,41 +4976,8 @@
                               }
                             }
                           }
-                        ]
-                      }
-                    },
-                    {
-                      "type": "object",
-                      "required": [
-                        "__tag__",
-                        "value"
-                      ],
-                      "properties": {
-                        "__tag__": {
-                          "type": "string",
-                          "description": "The tag used in the yaml",
-                          "const": "!natural_language"
-                        },
-                        "value": {
-                          "type": "object",
-                          "additionalProperties": {
-                            "minProperties": 1,
-                            "description": "Language mapping of oracle arguments.",
-                            "type": "object",
-                            "propertyNames": {
-                              "$ref": "#/subDefinitions/programmingLanguage"
-                            },
-                            "items": {
-                              "type": "array",
-                              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                              "items": {
-                                "type": "string",
-                                "description": "A language-specific literal, which will be used verbatim."
-                              }
-                            }
-                          }
                         }
-                      }
+                      ]
                     }
                   ]
                 },
@@ -4738,20 +5075,28 @@
                         }
                       },
                       "arguments": {
-                        "minProperties": 1,
-                        "description": "Language mapping of oracle arguments.",
-                        "type": "object",
-                        "propertyNames": {
-                          "$ref": "#/subDefinitions/programmingLanguage"
-                        },
-                        "items": {
-                          "type": "array",
-                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                          "items": {
-                            "type": "string",
-                            "description": "A language-specific literal, which will be used verbatim."
+                        "anyOf": [
+                          {
+                            "description": "The key of the parameter.",
+                            "type": "string"
+                          },
+                          {
+                            "minProperties": 1,
+                            "description": "Language mapping of oracle arguments.",
+                            "type": "object",
+                            "propertyNames": {
+                              "$ref": "#/subDefinitions/programmingLanguage"
+                            },
+                            "items": {
+                              "type": "array",
+                              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                              "items": {
+                                "type": "string",
+                                "description": "A language-specific literal, which will be used verbatim."
+                              }
+                            }
                           }
-                        }
+                        ]
                       },
                       "value": {
                         "$ref": "#/subDefinitions/yamlValueOrPythonExpression"

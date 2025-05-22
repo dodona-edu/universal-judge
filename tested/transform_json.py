@@ -287,13 +287,7 @@ def add_templates(data: dict) -> dict:
     testcase = data["definitions"].get("testcase", {})
     if testcase:
         assert "properties" in testcase
-        testcase_without_templates = copy.deepcopy(testcase)
-        testcase_without_templates["properties"]["arguments"] = (
-            make_parameter_type_structure(
-                testcase_without_templates["properties"]["arguments"]
-            )
-        )
-        data["definitions"]["testcase_without_templates"] = testcase_without_templates
+        data["definitions"]["testcase_without_templates"] = copy.deepcopy(testcase)
 
         testcase["properties"]["template"] = {
             "type": "string",
@@ -349,6 +343,9 @@ def add_parameter_type(data: Any) -> Any:
             ) or type_value in ["boolean", "integer", "number"]:
                 # Adding support for "!parameter" tag.
                 return make_parameter_type_structure(data)
+
+        if "arguments" in data:
+            data["arguments"] = make_parameter_type_structure(data["arguments"])
         return {k: add_parameter_type(v) for k, v in data.items()}
 
     if isinstance(data, list):
