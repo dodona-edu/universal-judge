@@ -518,7 +518,7 @@ def test_add_templates():
                     "expression": {
                         "description": "The expression to evaluate.",
                         "$ref": "#/subDefinitions/expressionOrStatement",
-                    }
+                    },
                 }
             }
         }
@@ -579,7 +579,7 @@ def test_add_templates():
                     "expression": {
                         "description": "The expression to evaluate.",
                         "$ref": "#/subDefinitions/expressionOrStatement",
-                    }
+                    },
                 }
             },
         }
