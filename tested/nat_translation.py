@@ -221,7 +221,7 @@ def translate_yaml_and_initialize_templates(
                 for param_item in parameters
             ]
 
-        result = {
+        return {
             key: translate_yaml_and_initialize_templates(
                 value,
                 translations,
@@ -233,7 +233,6 @@ def translate_yaml_and_initialize_templates(
             )
             for key, value in data.items()
         }
-        return result
     elif isinstance(data, list):
         result = []
         for item in data:
