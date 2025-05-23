@@ -376,7 +376,7 @@
           }
         },
         "input_files" : {
-          "description" : "A list of files used in the test suite.",
+          "description" : "A list of input files used in the expressions, statements, arguments and descriptions of the test suite.",
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/file"

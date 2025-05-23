@@ -54,9 +54,9 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     ExpectedException,
     FileOutputChannel,
-    FileUrl,
     GenericTextOracle,
     IgnoredChannel,
+    InputFile,
     LanguageLiterals,
     LanguageSpecificOracle,
     MainInput,
@@ -275,7 +275,7 @@ class DslContext:
     - The "files" property, which is a list of files.
     """
 
-    files: list[FileUrl] = field(factory=list)
+    files: list[InputFile] = field(factory=list)
     config: dict[str, dict] = field(factory=dict)
     language: SupportedLanguage | Literal["tested"] = "tested"
 
@@ -310,7 +310,7 @@ class DslContext:
             files = new_level[key]
             assert isinstance(files, list)
             additional_files = {
-                _convert_file(
+                _convert_input_file(
                     f, workdir=workdir, not_deprecated_usage=len(deprecated_usage) == 0
                 )
                 for f in files
@@ -454,16 +454,16 @@ def _convert_value(value: YamlObject) -> Value:
     return _tested_type_to_value(tested_type)
 
 
-def _convert_file(
-    link_file: YamlDict, workdir: Path | None, not_deprecated_usage: bool
-) -> FileUrl:
+def _convert_input_file(
+    input_file: YamlDict, workdir: Path | None, not_deprecated_usage: bool
+) -> InputFile:
     path_key = "path" if not_deprecated_usage else "name"
-    path_str = link_file[path_key]
+    path_str = input_file[path_key]
     assert isinstance(path_str, str)
 
     content = ""
-    if "content" in link_file:
-        content = link_file["content"]
+    if "content" in input_file:
+        content = input_file["content"]
         assert isinstance(content, str)
         if workdir is not None:
             full_path = workdir / path_str
@@ -473,7 +473,7 @@ def _convert_file(
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-    return FileUrl(path=path_str, content=content)
+    return InputFile(path=path_str, content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
@@ -755,7 +755,7 @@ def _convert_testcase(
                     data = _ensure_trailing_newline(content)
 
             if path:
-                stdin_file = FileUrl(
+                stdin_file = InputFile(
                     path=path,
                     content=data if data is not None else "",
                 )

@@ -34,9 +34,9 @@ from tested.serialisation import (
 from tested.testsuite import (
     CustomCheckOracle,
     FileOutputChannel,
-    FileUrl,
     GenericTextOracle,
     GenericValueOracle,
+    InputFile,
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
@@ -1306,8 +1306,8 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.link_files) == {
-        FileUrl(path="test"),
-        FileUrl(path="two"),
+        InputFile(path="test"),
+        InputFile(path="two"),
     }
 
 

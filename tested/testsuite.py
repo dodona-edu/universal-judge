@@ -552,7 +552,7 @@ class MainInput(WithFeatures, WithFunctions):
 
 
 @define(frozen=True)
-class FileUrl:
+class InputFile:
     path: str
     content: str = ""
 
@@ -581,7 +581,7 @@ class Testcase(WithFeatures, WithFunctions):
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
     output: Output = field(factory=Output)
-    link_files: list[FileUrl] = field(factory=list)
+    link_files: list[InputFile] = field(factory=list)
     line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
@@ -689,7 +689,7 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> set[FileUrl]:
+    def get_files(self) -> set[InputFile]:
         all_files = set()
         for t in self.testcases:
             all_files = all_files.union(t.link_files)
