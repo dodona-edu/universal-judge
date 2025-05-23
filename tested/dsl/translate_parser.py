@@ -595,14 +595,14 @@ def _convert_file_output_channel_deprecated(
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
 
 
-def _convert_file_output_channel(
-    stream: YamlObject, context: DslContext, config_name: str
+def _convert_output_file_channel(
+    output_files: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
 
     file_data = []
-    data = stream
-    if isinstance(stream, dict):
-        data = stream["data"]
+    data = output_files
+    if isinstance(output_files, dict):
+        data = output_files["data"]
     assert isinstance(data, list)
 
     for item in data:
@@ -623,11 +623,11 @@ def _convert_file_output_channel(
         )
 
     if (
-        not isinstance(stream, dict)
-        or "oracle" not in stream
-        or stream["oracle"] == "builtin"
+        not isinstance(output_files, dict)
+        or "oracle" not in output_files
+        or output_files["oracle"] == "builtin"
     ):
-        level = {} if not isinstance(stream, dict) else stream
+        level = {} if not isinstance(output_files, dict) else output_files
         config = context.merge_inheritable_with_specific_config(level, config_name)
         if "mode" not in config:
             config["mode"] = "full"
@@ -640,12 +640,12 @@ def _convert_file_output_channel(
             output_data=file_data,
             oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
         )
-    elif stream["oracle"] == "custom_check":
+    elif output_files["oracle"] == "custom_check":
         return FileOutputChannel(
             output_data=file_data,
-            oracle=_convert_custom_check_oracle(stream),
+            oracle=_convert_custom_check_oracle(output_files),
         )
-    raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+    raise TypeError(f"Unknown file oracle type: {output_files['oracle']}")
 
 
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
@@ -785,7 +785,7 @@ def _convert_testcase(
             )
         )
     if (file := testcase.get("output_files")) is not None:
-        output.file = _convert_file_output_channel(file, context, "output_files")
+        output.file = _convert_output_file_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
@@ -829,16 +829,16 @@ def _convert_testcase(
     else:
         the_description = None
 
-    link_files = context.files
+    input_files = context.files
     if stdin_file is not None:
-        link_files = list(set(link_files) | {stdin_file})
+        input_files = list(set(input_files) | {stdin_file})
 
     return DataWithMessage(
         data=Testcase(
             description=the_description,
             input=the_input,
             output=output,
-            link_files=link_files,
+            link_files=input_files,
             line_comment=line_comment,
         ),
         messages=deprecated_messages,

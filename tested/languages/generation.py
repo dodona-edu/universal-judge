@@ -78,7 +78,7 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
     1. A description on the testcase.
     2. If it is a normal testcase:
         a. A function expression or generate_statement.
-    3. If it is a context testcase:
+    3. If it is a context testcase (main-testcase):
         a. The stdin and the arguments.
     """
     format_ = "text"  # By default, we use text as input.
@@ -106,7 +106,7 @@ def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
                 stdin = stdin_data.data
                 assert stdin is not None
 
-        # If we have both stdin and arguments, we use a here-document.
+        # If we have both stdin and arguments, we use a here-document or here-string.
         if stdin:
             if isinstance(stdin_data, TextData) and stdin_data.type == "file":
                 text = f"{args} < {stdin}"
