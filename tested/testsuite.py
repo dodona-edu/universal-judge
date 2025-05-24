@@ -581,7 +581,7 @@ class Testcase(WithFeatures, WithFunctions):
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
     output: Output = field(factory=Output)
-    link_files: list[InputFile] = field(factory=list)
+    input_files: list[InputFile] = field(factory=list)
     line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
@@ -692,7 +692,7 @@ class Context(WithFeatures, WithFunctions):
     def get_files(self) -> set[InputFile]:
         all_files = set()
         for t in self.testcases:
-            all_files = all_files.union(t.link_files)
+            all_files = all_files.union(t.input_files)
         return all_files
 
 

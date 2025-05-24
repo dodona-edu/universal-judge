@@ -838,7 +838,7 @@ def _convert_testcase(
             description=the_description,
             input=the_input,
             output=output,
-            link_files=input_files,
+            input_files=input_files,
             line_comment=line_comment,
         ),
         messages=deprecated_messages,

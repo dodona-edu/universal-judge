@@ -849,8 +849,8 @@ def test_using_deprecated_files():
     assert len(testcases) == 1
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
-    assert len(test.link_files) == 1
-    assert test.link_files[0].path == "hello.txt"
+    assert len(test.input_files) == 1
+    assert test.input_files[0].path == "hello.txt"
 
 
 def test_output_files_custom_check_correct():
@@ -1305,7 +1305,7 @@ def test_files_are_propagated():
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
-    assert set(test0.link_files) == {
+    assert set(test0.input_files) == {
         InputFile(path="test"),
         InputFile(path="two"),
     }

@@ -343,7 +343,7 @@ def _process_results(
 
         input_files = []
         for case in planned.context.testcases:
-            for file in case.link_files:
+            for file in case.input_files:
                 file_data = {"path": file.path}
                 if file.content != "":
                     file_data["content"] = file.content
