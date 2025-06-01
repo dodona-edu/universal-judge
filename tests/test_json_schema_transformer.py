@@ -4,6 +4,8 @@ from pytest_mock import MockerFixture
 
 import tested
 from tested.transform_json import (
+    add_parameter_type,
+    add_templates,
     transform_ide,
     transform_json,
     transform_json_for_preprocessor_validation,
@@ -174,14 +176,16 @@ def test_transform_executed_correct(mocker: MockerFixture):
         mocker.mock_open(read_data=content).return_value
         for content in [
             """
-{        
-    "files": {
-      "description": "A list of files used in the test suite.",
-      "type": "array",
-      "items": {
-        "$ref": "#/subDefinitions/file"
-      }
-    }
+{
+    "definitions": {
+        "files": {
+          "description": "A list of files used in the test suite.",
+          "type": "array",
+          "items": {
+            "$ref": "#/subDefinitions/file"
+          }
+        }
+    }        
 }"""
         ]
     ]
@@ -193,7 +197,7 @@ def test_transform_executed_correct(mocker: MockerFixture):
 
     transform_json(Path("schema.json"), True, False)
 
-    assert s.call_count == 6
+    assert s.call_count == 7
 
     # Check if the file was opened for writing
     mock_opener.assert_any_call(
@@ -233,7 +237,7 @@ def test_nat_lang_json_schema_structure():
         ]
     }
 
-    result = transform_json_for_preprocessor_validation(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema)
 
     assert result == json_schema_expected
 
@@ -341,7 +345,7 @@ def test_prog_lang_json_schema_structure():
         }
     }
 
-    result = transform_json_for_preprocessor_validation(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema)
 
     assert result == json_schema_expected
 
@@ -490,7 +494,7 @@ def test_json_schema_oracle():
         ]
     }
 
-    result = transform_json_for_preprocessor_validation(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema)
 
     assert result == json_schema_expected
 
@@ -579,6 +583,21 @@ def test_json_schema_expression():
                         "__tag__": {
                             "type": "string",
                             "description": "The tag used in the yaml",
+                            "const": "!parameter",
+                        },
+                        "value": {
+                            "type": "string",
+                            "description": "The key of the parameter.",
+                        },
+                    },
+                },
+                {
+                    "type": "object",
+                    "required": ["__tag__", "value"],
+                    "properties": {
+                        "__tag__": {
+                            "type": "string",
+                            "description": "The tag used in the yaml",
                             "const": "!expression",
                         },
                         "value": {
@@ -592,7 +611,125 @@ def test_json_schema_expression():
         }
     }
 
-    result = transform_json_for_preprocessor_validation(json_schema, True)
+    result = transform_json_for_preprocessor_validation(json_schema)
+    assert result == json_schema_expected
+
+
+def test_add_templates():
+    json_schema = {
+        "definitions": {
+            "testcase": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                }
+            }
+        }
+    }
+
+    json_schema_expected = {
+        "definitions": {
+            "testcase": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "template": {
+                        "type": "string",
+                        "description": "Name of the template to insert.",
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "description": "The parameters that are to be inserted into the template.",
+                        "additionalProperties": {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        },
+                    },
+                    "repeat": {
+                        "type": "object",
+                        "description": "A certain loop that will generate test cases with the given parameters and template.",
+                        "required": ["template", "parameters"],
+                        "properties": {
+                            "template": {
+                                "type": "string",
+                                "description": "Name of the template to insert.",
+                            },
+                            "parameters": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "description": "The parameters that are to be inserted into the template.",
+                                    "additionalProperties": {
+                                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }
+            },
+            "testcase_without_templates": {
+                "properties": {
+                    "statement": {
+                        "description": "The statement to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                    "expression": {
+                        "description": "The expression to evaluate.",
+                        "$ref": "#/subDefinitions/expressionOrStatement",
+                    },
+                }
+            },
+        }
+    }
+
+    result = add_templates(json_schema)
+    assert result == json_schema_expected
+
+
+def test_add_parameters_type():
+    json_schema = {
+        "stdin": {
+            "description": "Stdin for this context",
+            "type": ["string", "number", "integer", "boolean"],
+        },
+        "exit_code": {
+            "type": "integer",
+            "description": "Expected exit code for the run",
+        },
+    }
+
+    json_schema_expected = {
+        "stdin": {
+            "anyOf": [
+                {"type": "parameter", "description": "The key of the parameter."},
+                {
+                    "description": "Stdin for this context",
+                    "type": ["string", "number", "integer", "boolean"],
+                },
+            ]
+        },
+        "exit_code": {
+            "anyOf": [
+                {"type": "parameter", "description": "The key of the parameter."},
+                {"type": "integer", "description": "Expected exit code for the run"},
+            ]
+        },
+    }
+
+    result = add_parameter_type(json_schema)
+    print(result)
     assert result == json_schema_expected
 
 
@@ -610,7 +747,7 @@ def test_json_schema_yaml_value():
         },
     }
 
-    result = transform_json_for_preprocessor_validation(json_schema, False)
+    result = transform_json_for_preprocessor_validation(json_schema)
 
     assert result == json_schema_expected
 

@@ -16,7 +16,7 @@ from tested.nat_translation import (
     create_enviroment,
     parse_yaml,
     translate_file,
-    translate_yaml,
+    translate_yaml_and_initialize_templates,
     validate_pre_dsl,
 )
 
@@ -25,7 +25,9 @@ def validate_natural_translate(yaml_str: str, translated_yaml_str: str):
     enviroment = create_enviroment()
     yaml_object = parse_yaml(yaml_str)
     validate_pre_dsl(yaml_object)
-    translated_dsl = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_dsl = translate_yaml_and_initialize_templates(
+        yaml_object, {}, {}, {}, "en", enviroment
+    )
     translated_yaml = convert_to_yaml(translated_dsl)
     assert translated_yaml.strip() == translated_yaml_str
 
@@ -353,6 +355,206 @@ units:
     validate_natural_translate(yaml_str, translated_yaml_str)
 
 
+def test_normal_template():
+    yaml_str = """
+tabs:
+  - tab: 'animals'
+    templates:
+      animal_IO:
+        expression:
+          java: "Submission.animals({{ input }})"
+          python: "animals({{ input }})"
+        return: "{{ output }}"
+    testcases:
+      - template:  "animal_IO"
+        parameters:
+           input: "Sardines"
+           output: "fish"
+      - template: "animal_IO"
+        parameters:
+           input: "Whale"
+           output: "mammal"
+        return: "mammal (not a fish)"
+    """.strip()
+    translated_yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression:
+      java: Submission.animals(Sardines)
+      python: animals(Sardines)
+    return: fish
+  - expression:
+      java: Submission.animals(Whale)
+      python: animals(Whale)
+    return: mammal (not a fish)
+    """.strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+
+def test_normal_repeat():
+    yaml_str = """
+templates:
+  one_name:
+    stdin: |-
+      1
+      {{ name }}
+    stdout: "{{ username }}"
+units:
+- unit: IO
+  scripts:
+    - template: one_name
+      parameters:
+        name: Graham Chapman
+        username: gchap
+    - repeat:
+        template: one_name
+        parameters:
+          - name: John Cleese
+            username: jclee
+          - name: Terry Gilliam
+            username: tgill
+          - name: Eric Idle
+            username: eidle
+          - name: Terry Jones
+            username: tjone
+          - name: Michael Palin
+            username: mpali
+    """.strip()
+    translated_yaml_str = """
+units:
+- unit: IO
+  scripts:
+  - stdin: '1
+
+      Graham Chapman'
+    stdout: gchap
+  - stdin: '1
+
+      John Cleese'
+    stdout: jclee
+  - stdin: '1
+
+      Terry Gilliam'
+    stdout: tgill
+  - stdin: '1
+
+      Eric Idle'
+    stdout: eidle
+  - stdin: '1
+
+      Terry Jones'
+    stdout: tjone
+  - stdin: '1
+
+      Michael Palin'
+    stdout: mpali
+    """.strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+
+def test_templates_with_translations_wrong():
+    yaml_str = """
+translations:
+  animals:
+    en: "animals"
+    nl: "dieren"
+tabs:
+  - tab: '{{ animals }}'
+    templates:
+      animal_IO:
+        expression:
+          java: "Submission.{{ animals }}({{ animals }})"
+          python: "{{animals}}({{ animals }})"
+        return: "{{ output }}"
+    testcases:
+      - template: "animal_IO"
+        parameters:
+          animals: "Sardines"
+          output: "fish"
+        """.strip()
+    try:
+        validate_natural_translate(yaml_str, "")
+    except AssertionError as e:
+        assert (
+            repr(e)
+            == "AssertionError('Found a key in the translations map that is the same as inside a template. Please try to avoid this!')"
+        )
+    else:
+        assert False
+
+
+def test_templates_with_translations_correct():
+    yaml_str = """
+translations:
+  animals:
+    en: "animals"
+    nl: "dieren"
+tabs:
+  - tab: '{{ animals }}'
+    templates:
+      animal_IO:
+        expression:
+          java: "Submission.{{ animals }}({{ input }})"
+          python: "{{animals}}({{ input }})"
+        return: "{{ output }}"
+    testcases:
+      - template: "animal_IO"
+        parameters:
+          input: "Sardines"
+          output: "fish"
+    """.strip()
+    translated_yaml_str = """
+tabs:
+- tab: animals
+  testcases:
+  - expression:
+      java: Submission.animals(Sardines)
+      python: animals(Sardines)
+    return: fish
+    """.strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+
+def test_non_string_parameter():
+    yaml_str = """
+templates:
+  calculator_IO:
+    expression: "calculator('{{ expr }}')"
+    return: !parameter "result"
+  calculator_IO_non_int:
+    expression: "calculator('{{ expr }}', string)"
+    return: "{{ result }}"
+tabs:
+  - tab: 'calculator'
+    testcases:
+      - template: "calculator_IO"
+        parameters:
+          expr: "2 + 10"
+          result: 12
+      - template: "calculator_IO"
+        parameters:
+          expr: "4 * 13"
+          result: 52
+      - template: "calculator_IO_non_int"
+        parameters:
+          expr: "4 * 13"
+          result: 52
+        """.strip()
+    translated_yaml_str = """
+tabs:
+- tab: calculator
+  testcases:
+  - expression: calculator('2 + 10')
+    return: 12
+  - expression: calculator('4 * 13')
+    return: 52
+  - expression: calculator('4 * 13', string)
+    return: '52'
+        """.strip()
+    validate_natural_translate(yaml_str, translated_yaml_str)
+
+
 def test_validation():
     yaml_str = """
 translations:
@@ -394,7 +596,9 @@ tabs:
     validate_pre_dsl(yaml_object)
 
     enviroment = create_enviroment()
-    translated_data = translate_yaml(yaml_object, {}, "en", enviroment)
+    translated_data = translate_yaml_and_initialize_templates(
+        yaml_object, {}, {}, {}, "en", enviroment
+    )
     translated_yaml_string = convert_to_yaml(translated_data)
     _validate_dsl(_parse_yaml(translated_yaml_string))
 
@@ -569,7 +773,9 @@ tabs:
 
     environment = create_enviroment()
     parsed_yaml = parse_yaml(yaml_str)
-    translated_dsl = translate_yaml(parsed_yaml, {}, "en", environment)
+    translated_dsl = translate_yaml_and_initialize_templates(
+        parsed_yaml, {}, {}, {}, "en", environment
+    )
     translated_yaml_string = convert_to_yaml(translated_dsl)
     yaml_object = _parse_yaml(translated_yaml_string)
     assert isinstance(yaml_object, dict)

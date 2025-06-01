@@ -15,133 +15,269 @@
   ],
   "definitions": {
     "_rootObject": {
-      "type": "object",
       "oneOf": [
         {
-          "required": [
-            "tabs"
-          ],
-          "not": {
-            "required": [
-              "units"
-            ]
-          }
-        },
-        {
-          "required": [
-            "units"
-          ],
-          "not": {
-            "required": [
-              "tabs"
-            ]
-          }
-        }
-      ],
-      "properties": {
-        "files": {
+          "type": "object",
           "oneOf": [
             {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
+              "required": [
+                "tabs"
+              ],
+              "not": {
+                "required": [
+                  "units"
+                ]
               }
             },
             {
+              "required": [
+                "units"
+              ],
+              "not": {
+                "required": [
+                  "tabs"
+                ]
+              }
+            }
+          ],
+          "properties": {
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "namespace": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Namespace of the submitted solution, in `snake_case`"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "description": "Namespace of the submitted solution, in `snake_case`"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "tabs": {
+              "$ref": "#/definitions/_tabList"
+            },
+            "units": {
+              "$ref": "#/definitions/_unitList"
+            },
+            "language": {
+              "description": "Indicate that all code is in a specific language.",
+              "oneOf": [
+                {
+                  "$ref": "#/subDefinitions/programmingLanguage"
+                },
+                {
+                  "const": "tested"
+                }
+              ]
+            },
+            "definitions": {
+              "oneOf": [
+                {
+                  "description": "Define hashes to use elsewhere.",
+                  "type": "object"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Define hashes to use elsewhere.",
+                    "type": "object"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "config": {
+              "$ref": "#/subDefinitions/inheritableConfigObject"
+            },
+            "translations": {
               "type": "object",
+              "description": "Define translations."
+            },
+            "templates": {
+              "type": "object",
+              "description": "Define templates.",
               "additionalProperties": {
+                "$ref": "#/definitions/testcase_without_templates"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "oneOf": [
+              {
+                "required": [
+                  "tabs"
+                ],
+                "not": {
+                  "required": [
+                    "units"
+                  ]
+                }
+              },
+              {
+                "required": [
+                  "units"
+                ],
+                "not": {
+                  "required": [
+                    "tabs"
+                  ]
+                }
+              }
+            ],
+            "properties": {
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "namespace": {
-          "oneOf": [
-            {
-              "type": "string",
-              "description": "Namespace of the submitted solution, in `snake_case`"
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              "namespace": {
                 "type": "string",
                 "description": "Namespace of the submitted solution, in `snake_case`"
               },
-              "not": {
-                "anyOf": [
+              "tabs": {
+                "$ref": "#/definitions/_tabList"
+              },
+              "units": {
+                "$ref": "#/definitions/_unitList"
+              },
+              "language": {
+                "description": "Indicate that all code is in a specific language.",
+                "oneOf": [
                   {
-                    "required": [
-                      "description"
-                    ]
+                    "$ref": "#/subDefinitions/programmingLanguage"
                   },
                   {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+                    "const": "tested"
                   }
                 ]
+              },
+              "definitions": {
+                "description": "Define hashes to use elsewhere.",
+                "type": "object"
+              },
+              "config": {
+                "$ref": "#/subDefinitions/inheritableConfigObject"
+              },
+              "translations": {
+                "type": "object",
+                "description": "Define translations."
+              },
+              "templates": {
+                "type": "object",
+                "description": "Define templates.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testcase_without_templates"
+                }
               }
             }
-          ]
-        },
-        "tabs": {
-          "$ref": "#/definitions/_tabList"
-        },
-        "units": {
-          "$ref": "#/definitions/_unitList"
-        },
-        "language": {
-          "description": "Indicate that all code is in a specific language.",
-          "oneOf": [
-            {
-              "$ref": "#/subDefinitions/programmingLanguage"
-            },
-            {
-              "const": "tested"
-            }
-          ]
-        },
-        "definitions": {
-          "description": "Define hashes to use elsewhere.",
-          "type": "object"
-        },
-        "config": {
-          "$ref": "#/subDefinitions/inheritableConfigObject"
-        },
-        "translations": {
-          "type": "object",
-          "description": "Define translations in the global scope."
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     },
     "_tabList": {
       "oneOf": [
@@ -224,241 +360,587 @@
       ]
     },
     "tab": {
-      "type": "object",
-      "description": "A tab in the test suite.",
-      "required": [
-        "tab"
-      ],
-      "properties": {
-        "files": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A tab in the test suite.",
+          "required": [
+            "tab"
+          ],
+          "properties": {
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "hidden": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "boolean",
+                  "description": "Defines if the unit/tab is hidden for the student or not"
+                }
+              ]
+            },
+            "tab": {
+              "oneOf": [
+                {
+                  "description": "The name of this tab.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The name of this tab.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "definitions": {
+              "oneOf": [
+                {
+                  "description": "Define objects to use elsewhere.",
+                  "type": "object"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Define objects to use elsewhere.",
+                    "type": "object"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "config": {
+              "$ref": "#/subDefinitions/inheritableConfigObject"
+            },
+            "translations": {
+              "type": "object",
+              "description": "Define translations."
+            },
+            "templates": {
+              "type": "object",
+              "description": "Define templates.",
+              "additionalProperties": {
+                "$ref": "#/definitions/testcase_without_templates"
+              }
+            }
+          },
           "oneOf": [
             {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
+              "required": [
+                "contexts"
+              ],
+              "properties": {
+                "contexts": {
+                  "$ref": "#/definitions/_contextList"
+                }
               }
             },
             {
-              "type": "object",
-              "additionalProperties": {
+              "required": [
+                "testcases"
+              ],
+              "properties": {
+                "testcases": {
+                  "$ref": "#/definitions/_testcaseList"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "A tab in the test suite.",
+            "required": [
+              "tab"
+            ],
+            "properties": {
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
+              "hidden": {
                 "anyOf": [
                   {
-                    "required": [
-                      "description"
-                    ]
+                    "description": "The key of the parameter.",
+                    "type": "string"
                   },
                   {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+                    "type": "boolean",
+                    "description": "Defines if the unit/tab is hidden for the student or not"
                   }
                 ]
-              }
-            }
-          ]
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "Defines if the unit/tab is hidden for the student or not"
-        },
-        "tab": {
-          "oneOf": [
-            {
-              "description": "The name of this tab.",
-              "type": "string"
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              },
+              "tab": {
                 "description": "The name of this tab.",
                 "type": "string"
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+              "definitions": {
+                "description": "Define objects to use elsewhere.",
+                "type": "object"
+              },
+              "config": {
+                "$ref": "#/subDefinitions/inheritableConfigObject"
+              },
+              "translations": {
+                "type": "object",
+                "description": "Define translations."
+              },
+              "templates": {
+                "type": "object",
+                "description": "Define templates.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testcase_without_templates"
+                }
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "contexts"
+                ],
+                "properties": {
+                  "contexts": {
+                    "$ref": "#/definitions/_contextList"
                   }
+                }
+              },
+              {
+                "required": [
+                  "testcases"
+                ],
+                "properties": {
+                  "testcases": {
+                    "$ref": "#/definitions/_testcaseList"
+                  }
+                }
+              }
+            ]
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
                 ]
               }
-            }
-          ]
-        },
-        "definitions": {
-          "description": "Define objects to use elsewhere.",
-          "type": "object"
-        },
-        "config": {
-          "$ref": "#/subDefinitions/inheritableConfigObject"
-        },
-        "translations": {
-          "type": "object",
-          "description": "Define translations in the global scope."
-        }
-      },
-      "oneOf": [
-        {
-          "required": [
-            "contexts"
-          ],
-          "properties": {
-            "contexts": {
-              "$ref": "#/definitions/_contextList"
-            }
-          }
-        },
-        {
-          "required": [
-            "testcases"
-          ],
-          "properties": {
-            "testcases": {
-              "$ref": "#/definitions/_testcaseList"
-            }
+            ]
           }
         }
       ]
     },
     "unit": {
-      "type": "object",
-      "description": "A unit in the test suite.",
-      "required": [
-        "unit"
-      ],
-      "properties": {
-        "files": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A unit in the test suite.",
+          "required": [
+            "unit"
+          ],
+          "properties": {
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "hidden": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "boolean",
+                  "description": "Defines if the unit/tab is hidden for the student or not"
+                }
+              ]
+            },
+            "unit": {
+              "oneOf": [
+                {
+                  "description": "The name of this tab.",
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "The name of this tab.",
+                    "type": "string"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "definitions": {
+              "oneOf": [
+                {
+                  "description": "Define objects to use elsewhere.",
+                  "type": "object"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "Define objects to use elsewhere.",
+                    "type": "object"
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "config": {
+              "$ref": "#/subDefinitions/inheritableConfigObject"
+            },
+            "translations": {
+              "type": "object",
+              "description": "Define translations."
+            },
+            "templates": {
+              "type": "object",
+              "description": "Define templates.",
+              "additionalProperties": {
+                "$ref": "#/definitions/testcase_without_templates"
+              }
+            }
+          },
           "oneOf": [
             {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
+              "required": [
+                "cases"
+              ],
+              "properties": {
+                "cases": {
+                  "$ref": "#/definitions/_caseList"
+                }
               }
             },
             {
-              "type": "object",
-              "additionalProperties": {
+              "required": [
+                "scripts"
+              ],
+              "properties": {
+                "scripts": {
+                  "$ref": "#/definitions/_scriptList"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "A unit in the test suite.",
+            "required": [
+              "unit"
+            ],
+            "properties": {
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
+              "hidden": {
                 "anyOf": [
                   {
-                    "required": [
-                      "description"
-                    ]
+                    "description": "The key of the parameter.",
+                    "type": "string"
                   },
                   {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+                    "type": "boolean",
+                    "description": "Defines if the unit/tab is hidden for the student or not"
                   }
                 ]
-              }
-            }
-          ]
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "Defines if the unit/tab is hidden for the student or not"
-        },
-        "unit": {
-          "oneOf": [
-            {
-              "description": "The name of this tab.",
-              "type": "string"
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              },
+              "unit": {
                 "description": "The name of this tab.",
                 "type": "string"
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+              "definitions": {
+                "description": "Define objects to use elsewhere.",
+                "type": "object"
+              },
+              "config": {
+                "$ref": "#/subDefinitions/inheritableConfigObject"
+              },
+              "translations": {
+                "type": "object",
+                "description": "Define translations."
+              },
+              "templates": {
+                "type": "object",
+                "description": "Define templates.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testcase_without_templates"
+                }
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "cases"
+                ],
+                "properties": {
+                  "cases": {
+                    "$ref": "#/definitions/_caseList"
                   }
+                }
+              },
+              {
+                "required": [
+                  "scripts"
+                ],
+                "properties": {
+                  "scripts": {
+                    "$ref": "#/definitions/_scriptList"
+                  }
+                }
+              }
+            ]
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
                 ]
               }
-            }
-          ]
-        },
-        "definitions": {
-          "description": "Define objects to use elsewhere.",
-          "type": "object"
-        },
-        "config": {
-          "$ref": "#/subDefinitions/inheritableConfigObject"
-        },
-        "translations": {
-          "type": "object",
-          "description": "Define translations in the global scope."
-        }
-      },
-      "oneOf": [
-        {
-          "required": [
-            "cases"
-          ],
-          "properties": {
-            "cases": {
-              "$ref": "#/definitions/_caseList"
-            }
-          }
-        },
-        {
-          "required": [
-            "scripts"
-          ],
-          "properties": {
-            "scripts": {
-              "$ref": "#/definitions/_scriptList"
-            }
+            ]
           }
         }
       ]
@@ -589,7 +1071,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "#/definitions/script"
+            "$ref": "#/definitions/testcase"
           }
         },
         {
@@ -598,7 +1080,7 @@
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/definitions/script"
+              "$ref": "#/definitions/testcase"
             }
           },
           "not": {
@@ -624,255 +1106,369 @@
       ]
     },
     "context": {
-      "type": "object",
-      "description": "A set of testcase in the same context.",
-      "required": [
-        "testcases"
-      ],
-      "properties": {
-        "files": {
-          "oneOf": [
-            {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
-              }
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A set of testcase in the same context.",
+          "required": [
+            "testcases"
+          ],
+          "properties": {
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
             },
-            {
+            "context": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Description of this context."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "description": "Description of this context."
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "testcases": {
+              "$ref": "#/definitions/_testcaseList"
+            },
+            "translations": {
               "type": "object",
+              "description": "Define translations."
+            },
+            "templates": {
+              "type": "object",
+              "description": "Define templates.",
               "additionalProperties": {
+                "$ref": "#/definitions/testcase_without_templates"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "A set of testcase in the same context.",
+            "required": [
+              "testcases"
+            ],
+            "properties": {
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "context": {
-          "oneOf": [
-            {
-              "type": "string",
-              "description": "Description of this context."
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              "context": {
                 "type": "string",
                 "description": "Description of this context."
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
+              "testcases": {
+                "$ref": "#/definitions/_testcaseList"
+              },
+              "translations": {
+                "type": "object",
+                "description": "Define translations."
+              },
+              "templates": {
+                "type": "object",
+                "description": "Define templates.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testcase_without_templates"
+                }
               }
             }
-          ]
-        },
-        "testcases": {
-          "$ref": "#/definitions/_testcaseList"
-        },
-        "translations": {
-          "type": "object",
-          "description": "Define translations in the global scope."
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     },
     "case": {
-      "type": "object",
-      "description": "A test case.",
-      "required": [
-        "script"
-      ],
-      "properties": {
-        "files": {
-          "oneOf": [
-            {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
-              }
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "A test case.",
+          "required": [
+            "script"
+          ],
+          "properties": {
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
             },
-            {
+            "context": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Description of this context."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "description": "Description of this context."
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "script": {
+              "$ref": "#/definitions/_scriptList"
+            },
+            "translations": {
               "type": "object",
+              "description": "Define translations."
+            },
+            "templates": {
+              "type": "object",
+              "description": "Define templates.",
               "additionalProperties": {
+                "$ref": "#/definitions/testcase_without_templates"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "A test case.",
+            "required": [
+              "script"
+            ],
+            "properties": {
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "context": {
-          "oneOf": [
-            {
-              "type": "string",
-              "description": "Description of this context."
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              "context": {
                 "type": "string",
                 "description": "Description of this context."
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
+              "script": {
+                "$ref": "#/definitions/_scriptList"
+              },
+              "translations": {
+                "type": "object",
+                "description": "Define translations."
+              },
+              "templates": {
+                "type": "object",
+                "description": "Define templates.",
+                "additionalProperties": {
+                  "$ref": "#/definitions/testcase_without_templates"
+                }
               }
             }
-          ]
-        },
-        "script": {
-          "$ref": "#/definitions/_scriptList"
-        },
-        "translations": {
-          "type": "object",
-          "description": "Define translations in the global scope."
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     },
     "testcase": {
-      "type": "object",
-      "description": "An individual test for a statement or expression",
-      "additionalProperties": false,
-      "properties": {
-        "description": {
-          "$ref": "#/subDefinitions/message"
-        },
-        "stdin": {
-          "oneOf": [
-            {
-              "description": "Stdin for this context",
-              "type": [
-                "string",
-                "number",
-                "integer",
-                "boolean"
-              ]
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "An individual test for a statement or expression",
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "$ref": "#/subDefinitions/message"
             },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Stdin for this context",
-                "type": [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "arguments": {
-          "oneOf": [
-            {
-              "description": "Array of program call arguments",
-              "type": "array",
-              "items": {
-                "oneOf": [
-                  {
-                    "type": [
-                      "string",
-                      "number",
-                      "integer",
-                      "boolean"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": {
+            "stdin": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Stdin for this context",
                       "type": [
                         "string",
                         "number",
@@ -880,208 +1476,837 @@
                         "boolean"
                       ]
                     },
-                    "not": {
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "Stdin for this context",
+                        "type": [
+                          "string",
+                          "number",
+                          "integer",
+                          "boolean"
+                        ]
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "arguments": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Array of program call arguments",
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "oneOf": [
+                              {
+                                "description": "The key of the parameter.",
+                                "type": "string"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "description": "The key of the parameter.",
+                                  "type": "string"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "oneOf": [
+                              {
+                                "type": [
+                                  "string",
+                                  "number",
+                                  "integer",
+                                  "boolean"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean"
+                                  ]
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            },
+                            {
+                              "type": [
+                                "string",
+                                "number",
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "statement": {
+              "description": "The statement to evaluate.",
+              "$ref": "#/subDefinitions/expressionOrStatement"
+            },
+            "expression": {
+              "description": "The expression to evaluate.",
+              "$ref": "#/subDefinitions/expressionOrStatement"
+            },
+            "exception": {
+              "description": "Expected exception message",
+              "$ref": "#/subDefinitions/exceptionChannel"
+            },
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "return": {
+              "description": "Expected return value",
+              "$ref": "#/subDefinitions/returnOutputChannel"
+            },
+            "stderr": {
+              "description": "Expected output at stderr",
+              "$ref": "#/subDefinitions/textOutputChannel"
+            },
+            "stdout": {
+              "description": "Expected output at stdout",
+              "$ref": "#/subDefinitions/textOutputChannel"
+            },
+            "file": {
+              "description": "Expected files generated by the submission.",
+              "$ref": "#/subDefinitions/fileOutputChannel"
+            },
+            "exit_code": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "description": "Expected exit code for the run"
+                }
+              ]
+            },
+            "template": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "description": "Name of the template to insert."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "description": "Name of the template to insert."
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "description": "The parameters that are to be inserted into the template.",
+                  "additionalProperties": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        },
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": [
+                                "description"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "value"
+                              ]
+                            },
+                            {
+                              "required": [
+                                "types"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "description": "The parameters that are to be inserted into the template.",
+                    "additionalProperties": {
+                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "repeat": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "description": "A certain loop that will generate test cases with the given parameters and template.",
+                  "required": [
+                    "template",
+                    "parameters"
+                  ],
+                  "properties": {
+                    "template": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "description": "Name of the template to insert."
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "string",
+                            "description": "Name of the template to insert."
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "description": "The parameters that are to be inserted into the template.",
+                                "additionalProperties": {
+                                  "oneOf": [
+                                    {
+                                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "additionalProperties": {
+                                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                      },
+                                      "not": {
+                                        "anyOf": [
+                                          {
+                                            "required": [
+                                              "description"
+                                            ]
+                                          },
+                                          {
+                                            "required": [
+                                              "value"
+                                            ]
+                                          },
+                                          {
+                                            "required": [
+                                              "types"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "object",
+                                  "description": "The parameters that are to be inserted into the template.",
+                                  "additionalProperties": {
+                                    "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                  }
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "The parameters that are to be inserted into the template.",
+                              "additionalProperties": {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              }
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "description": "A certain loop that will generate test cases with the given parameters and template.",
+                    "required": [
+                      "template",
+                      "parameters"
+                    ],
+                    "properties": {
+                      "template": {
+                        "type": "string",
+                        "description": "Name of the template to insert."
+                      },
+                      "parameters": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "The parameters that are to be inserted into the template.",
+                          "additionalProperties": {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "An individual test for a statement or expression",
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "$ref": "#/subDefinitions/message"
+              },
+              "stdin": {
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Stdin for this context",
+                    "type": [
+                      "string",
+                      "number",
+                      "integer",
+                      "boolean"
+                    ]
+                  }
+                ]
+              },
+              "arguments": {
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Array of program call arguments",
+                    "type": "array",
+                    "items": {
                       "anyOf": [
                         {
-                          "required": [
-                            "description"
-                          ]
+                          "description": "The key of the parameter.",
+                          "type": "string"
                         },
                         {
-                          "required": [
-                            "value"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "types"
+                          "type": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean"
                           ]
                         }
                       ]
                     }
                   }
                 ]
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Array of program call arguments",
-                "type": "array",
-                "items": {
-                  "type": [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
-                  ]
-                }
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "statement": {
-          "description": "The statement to evaluate.",
-          "$ref": "#/subDefinitions/expressionOrStatement"
-        },
-        "expression": {
-          "description": "The expression to evaluate.",
-          "$ref": "#/subDefinitions/expressionOrStatement"
-        },
-        "exception": {
-          "description": "Expected exception message",
-          "$ref": "#/subDefinitions/exceptionChannel"
-        },
-        "files": {
-          "oneOf": [
-            {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              "statement": {
+                "description": "The statement to evaluate.",
+                "$ref": "#/subDefinitions/expressionOrStatement"
+              },
+              "expression": {
+                "description": "The expression to evaluate.",
+                "$ref": "#/subDefinitions/expressionOrStatement"
+              },
+              "exception": {
+                "description": "Expected exception message",
+                "$ref": "#/subDefinitions/exceptionChannel"
+              },
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
+              "return": {
+                "description": "Expected return value",
+                "$ref": "#/subDefinitions/returnOutputChannel"
+              },
+              "stderr": {
+                "description": "Expected output at stderr",
+                "$ref": "#/subDefinitions/textOutputChannel"
+              },
+              "stdout": {
+                "description": "Expected output at stdout",
+                "$ref": "#/subDefinitions/textOutputChannel"
+              },
+              "file": {
+                "description": "Expected files generated by the submission.",
+                "$ref": "#/subDefinitions/fileOutputChannel"
+              },
+              "exit_code": {
                 "anyOf": [
                   {
-                    "required": [
-                      "description"
-                    ]
+                    "description": "The key of the parameter.",
+                    "type": "string"
                   },
                   {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+                    "type": "integer",
+                    "description": "Expected exit code for the run"
                   }
                 ]
+              },
+              "template": {
+                "type": "string",
+                "description": "Name of the template to insert."
+              },
+              "parameters": {
+                "type": "object",
+                "description": "The parameters that are to be inserted into the template.",
+                "additionalProperties": {
+                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                }
+              },
+              "repeat": {
+                "type": "object",
+                "description": "A certain loop that will generate test cases with the given parameters and template.",
+                "required": [
+                  "template",
+                  "parameters"
+                ],
+                "properties": {
+                  "template": {
+                    "type": "string",
+                    "description": "Name of the template to insert."
+                  },
+                  "parameters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "The parameters that are to be inserted into the template.",
+                      "additionalProperties": {
+                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      }
+                    }
+                  }
+                }
               }
             }
-          ]
-        },
-        "return": {
-          "description": "Expected return value",
-          "$ref": "#/subDefinitions/returnOutputChannel"
-        },
-        "stderr": {
-          "description": "Expected output at stderr",
-          "$ref": "#/subDefinitions/textOutputChannel"
-        },
-        "stdout": {
-          "description": "Expected output at stdout",
-          "$ref": "#/subDefinitions/textOutputChannel"
-        },
-        "file": {
-          "description": "Expected files generated by the submission.",
-          "$ref": "#/subDefinitions/fileOutputChannel"
-        },
-        "exit_code": {
-          "type": "integer",
-          "description": "Expected exit code for the run"
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     },
-    "script": {
-      "type": "object",
-      "description": "An individual test (script) for a statement or expression",
-      "properties": {
-        "description": {
-          "$ref": "#/subDefinitions/message"
-        },
-        "stdin": {
-          "oneOf": [
-            {
-              "description": "Stdin for this context",
-              "type": [
-                "string",
-                "number",
-                "integer",
-                "boolean"
-              ]
+    "testcase_without_templates": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "An individual test for a statement or expression",
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "$ref": "#/subDefinitions/message"
             },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Stdin for this context",
-                "type": [
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "arguments": {
-          "oneOf": [
-            {
-              "description": "Array of program call arguments",
-              "type": "array",
-              "items": {
-                "oneOf": [
-                  {
-                    "type": [
-                      "string",
-                      "number",
-                      "integer",
-                      "boolean"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": {
+            "stdin": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Stdin for this context",
                       "type": [
                         "string",
                         "number",
@@ -1089,138 +2314,446 @@
                         "boolean"
                       ]
                     },
-                    "not": {
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "Stdin for this context",
+                        "type": [
+                          "string",
+                          "number",
+                          "integer",
+                          "boolean"
+                        ]
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "arguments": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "description": "Array of program call arguments",
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "oneOf": [
+                              {
+                                "description": "The key of the parameter.",
+                                "type": "string"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "description": "The key of the parameter.",
+                                  "type": "string"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "oneOf": [
+                              {
+                                "type": [
+                                  "string",
+                                  "number",
+                                  "integer",
+                                  "boolean"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean"
+                                  ]
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "Array of program call arguments",
+                        "type": "array",
+                        "items": {
+                          "anyOf": [
+                            {
+                              "description": "The key of the parameter.",
+                              "type": "string"
+                            },
+                            {
+                              "type": [
+                                "string",
+                                "number",
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "statement": {
+              "description": "The statement to evaluate.",
+              "$ref": "#/subDefinitions/expressionOrStatement"
+            },
+            "expression": {
+              "description": "The expression to evaluate.",
+              "$ref": "#/subDefinitions/expressionOrStatement"
+            },
+            "exception": {
+              "description": "Expected exception message",
+              "$ref": "#/subDefinitions/exceptionChannel"
+            },
+            "files": {
+              "oneOf": [
+                {
+                  "description": "A list of files used in the test suite.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/subDefinitions/file"
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "description": "A list of files used in the test suite.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/file"
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "description"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "value"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "types"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "return": {
+              "description": "Expected return value",
+              "$ref": "#/subDefinitions/returnOutputChannel"
+            },
+            "stderr": {
+              "description": "Expected output at stderr",
+              "$ref": "#/subDefinitions/textOutputChannel"
+            },
+            "stdout": {
+              "description": "Expected output at stdout",
+              "$ref": "#/subDefinitions/textOutputChannel"
+            },
+            "file": {
+              "description": "Expected files generated by the submission.",
+              "$ref": "#/subDefinitions/fileOutputChannel"
+            },
+            "exit_code": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "description": "Expected exit code for the run"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "An individual test for a statement or expression",
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "$ref": "#/subDefinitions/message"
+              },
+              "stdin": {
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Stdin for this context",
+                    "type": [
+                      "string",
+                      "number",
+                      "integer",
+                      "boolean"
+                    ]
+                  }
+                ]
+              },
+              "arguments": {
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Array of program call arguments",
+                    "type": "array",
+                    "items": {
                       "anyOf": [
                         {
-                          "required": [
-                            "description"
-                          ]
+                          "description": "The key of the parameter.",
+                          "type": "string"
                         },
                         {
-                          "required": [
-                            "value"
-                          ]
-                        },
-                        {
-                          "required": [
-                            "types"
+                          "type": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean"
                           ]
                         }
                       ]
                     }
                   }
                 ]
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
-                "description": "Array of program call arguments",
-                "type": "array",
-                "items": {
-                  "type": [
-                    "string",
-                    "number",
-                    "integer",
-                    "boolean"
-                  ]
-                }
               },
-              "not": {
-                "anyOf": [
-                  {
-                    "required": [
-                      "description"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "statement": {
-          "description": "The statement to evaluate.",
-          "$ref": "#/subDefinitions/expressionOrStatement"
-        },
-        "expression": {
-          "description": "The expression to evaluate.",
-          "$ref": "#/subDefinitions/expressionOrStatement"
-        },
-        "exception": {
-          "description": "Expected exception message",
-          "$ref": "#/subDefinitions/exceptionChannel"
-        },
-        "files": {
-          "oneOf": [
-            {
-              "description": "A list of files used in the test suite.",
-              "type": "array",
-              "items": {
-                "$ref": "#/subDefinitions/file"
-              }
-            },
-            {
-              "type": "object",
-              "additionalProperties": {
+              "statement": {
+                "description": "The statement to evaluate.",
+                "$ref": "#/subDefinitions/expressionOrStatement"
+              },
+              "expression": {
+                "description": "The expression to evaluate.",
+                "$ref": "#/subDefinitions/expressionOrStatement"
+              },
+              "exception": {
+                "description": "Expected exception message",
+                "$ref": "#/subDefinitions/exceptionChannel"
+              },
+              "files": {
                 "description": "A list of files used in the test suite.",
                 "type": "array",
                 "items": {
                   "$ref": "#/subDefinitions/file"
                 }
               },
-              "not": {
+              "return": {
+                "description": "Expected return value",
+                "$ref": "#/subDefinitions/returnOutputChannel"
+              },
+              "stderr": {
+                "description": "Expected output at stderr",
+                "$ref": "#/subDefinitions/textOutputChannel"
+              },
+              "stdout": {
+                "description": "Expected output at stdout",
+                "$ref": "#/subDefinitions/textOutputChannel"
+              },
+              "file": {
+                "description": "Expected files generated by the submission.",
+                "$ref": "#/subDefinitions/fileOutputChannel"
+              },
+              "exit_code": {
                 "anyOf": [
                   {
-                    "required": [
-                      "description"
-                    ]
+                    "description": "The key of the parameter.",
+                    "type": "string"
                   },
                   {
-                    "required": [
-                      "value"
-                    ]
-                  },
-                  {
-                    "required": [
-                      "types"
-                    ]
+                    "type": "integer",
+                    "description": "Expected exit code for the run"
                   }
                 ]
               }
             }
-          ]
-        },
-        "return": {
-          "description": "Expected return value",
-          "$ref": "#/subDefinitions/returnOutputChannel"
-        },
-        "stderr": {
-          "description": "Expected output at stderr",
-          "$ref": "#/subDefinitions/textOutputChannel"
-        },
-        "stdout": {
-          "description": "Expected output at stdout",
-          "$ref": "#/subDefinitions/textOutputChannel"
-        },
-        "file": {
-          "description": "Expected files generated by the submission.",
-          "$ref": "#/subDefinitions/fileOutputChannel"
-        },
-        "exit_code": {
-          "type": "integer",
-          "description": "Expected exit code for the run"
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "description"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "types"
+                ]
+              }
+            ]
+          }
         }
-      }
+      ]
     }
   },
   "subDefinitions": {
@@ -1348,6 +2881,10 @@
       "oneOf": [
         {
           "$ref": "#/subDefinitions/yamlValue"
+        },
+        {
+          "type": "string",
+          "description": "The key of the parameter."
         },
         {
           "type": "string",
@@ -1834,71 +3371,109 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      "oneOf": [
+                        {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "description": "The key of the parameter.",
+                            "type": "string"
                           },
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
-                            }
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
                           }
-                        ]
-                      }
+                        }
+                      ]
                     },
                     {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
-                      },
-                      "not": {
-                        "anyOf": [
-                          {
-                            "required": [
-                              "description"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "value"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "types"
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
                             ]
                           }
-                        ]
-                      }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
                     }
                   ]
                 },
@@ -1971,11 +3546,19 @@
                     "default": "evaluate"
                   },
                   "arguments": {
-                    "type": "array",
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
+                    "anyOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      }
+                    ]
                   },
                   "languages": {
                     "type": "array",
@@ -2300,71 +3883,109 @@
                   ]
                 },
                 "arguments": {
-                  "oneOf": [
+                  "anyOf": [
                     {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                      "oneOf": [
+                        {
+                          "description": "The key of the parameter.",
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "description": "The key of the parameter.",
+                            "type": "string"
                           },
-                          {
-                            "type": "object",
-                            "additionalProperties": {
-                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                            },
-                            "not": {
-                              "anyOf": [
-                                {
-                                  "required": [
-                                    "description"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "value"
-                                  ]
-                                },
-                                {
-                                  "required": [
-                                    "types"
-                                  ]
-                                }
-                              ]
-                            }
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
                           }
-                        ]
-                      }
+                        }
+                      ]
                     },
                     {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        }
-                      },
-                      "not": {
-                        "anyOf": [
-                          {
-                            "required": [
-                              "description"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "value"
-                            ]
-                          },
-                          {
-                            "required": [
-                              "types"
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                                },
+                                "not": {
+                                  "anyOf": [
+                                    {
+                                      "required": [
+                                        "description"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "value"
+                                      ]
+                                    },
+                                    {
+                                      "required": [
+                                        "types"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
                             ]
                           }
-                        ]
-                      }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "description"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "types"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
                     }
                   ]
                 },
@@ -2443,11 +4064,19 @@
                     "default": "evaluate"
                   },
                   "arguments": {
-                    "type": "array",
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
+                    "anyOf": [
+                      {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      }
+                    ]
                   },
                   "languages": {
                     "type": "array",
@@ -2707,71 +4336,109 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                  "type": "array",
-                  "items": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
                       },
-                      {
-                        "type": "object",
-                        "additionalProperties": {
-                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                        },
-                        "not": {
-                          "anyOf": [
-                            {
-                              "required": [
-                                "description"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "value"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "types"
-                              ]
-                            }
-                          ]
-                        }
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
                       }
-                    ]
-                  }
+                    }
+                  ]
                 },
                 {
-                  "type": "object",
-                  "additionalProperties": {
-                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                    }
-                  },
-                  "not": {
-                    "anyOf": [
-                      {
-                        "required": [
-                          "description"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "value"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "types"
+                  "oneOf": [
+                    {
+                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
                         ]
                       }
-                    ]
-                  }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                        }
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
                 }
               ]
             },
@@ -2844,11 +4511,19 @@
                 "default": "evaluate"
               },
               "arguments": {
-                "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
-                }
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
+                    }
+                  }
+                ]
               },
               "languages": {
                 "type": "array",
@@ -3071,124 +4746,162 @@
               ]
             },
             "arguments": {
-              "oneOf": [
+              "anyOf": [
                 {
-                  "minProperties": 1,
-                  "description": "Language mapping of oracle arguments.",
-                  "type": "object",
-                  "propertyNames": {
-                    "$ref": "#/subDefinitions/programmingLanguage"
-                  },
-                  "items": {
-                    "oneOf": [
-                      {
-                        "type": "array",
-                        "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                        "items": {
-                          "oneOf": [
-                            {
-                              "type": "string",
-                              "description": "A language-specific literal, which will be used verbatim."
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": {
-                                "type": "string",
-                                "description": "A language-specific literal, which will be used verbatim."
-                              },
-                              "not": {
-                                "anyOf": [
-                                  {
-                                    "required": [
-                                      "description"
-                                    ]
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "minProperties": 1,
+                      "description": "Language mapping of oracle arguments.",
+                      "type": "object",
+                      "propertyNames": {
+                        "$ref": "#/subDefinitions/programmingLanguage"
+                      },
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "array",
+                            "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                            "items": {
+                              "oneOf": [
+                                {
+                                  "type": "string",
+                                  "description": "A language-specific literal, which will be used verbatim."
+                                },
+                                {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "string",
+                                    "description": "A language-specific literal, which will be used verbatim."
                                   },
-                                  {
-                                    "required": [
-                                      "value"
-                                    ]
-                                  },
-                                  {
-                                    "required": [
-                                      "types"
+                                  "not": {
+                                    "anyOf": [
+                                      {
+                                        "required": [
+                                          "description"
+                                        ]
+                                      },
+                                      {
+                                        "required": [
+                                          "value"
+                                        ]
+                                      },
+                                      {
+                                        "required": [
+                                          "types"
+                                        ]
+                                      }
                                     ]
                                   }
-                                ]
-                              }
+                                }
+                              ]
                             }
-                          ]
-                        }
-                      },
-                      {
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "array",
+                              "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                              "items": {
+                                "type": "string",
+                                "description": "A language-specific literal, which will be used verbatim."
+                              }
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": [
+                                    "description"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "value"
+                                  ]
+                                },
+                                {
+                                  "required": [
+                                    "types"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "minProperties": 1,
+                        "description": "Language mapping of oracle arguments.",
                         "type": "object",
-                        "additionalProperties": {
+                        "propertyNames": {
+                          "$ref": "#/subDefinitions/programmingLanguage"
+                        },
+                        "items": {
                           "type": "array",
                           "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
                           "items": {
                             "type": "string",
                             "description": "A language-specific literal, which will be used verbatim."
                           }
-                        },
-                        "not": {
-                          "anyOf": [
-                            {
-                              "required": [
-                                "description"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "value"
-                              ]
-                            },
-                            {
-                              "required": [
-                                "types"
-                              ]
-                            }
-                          ]
                         }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": {
-                    "minProperties": 1,
-                    "description": "Language mapping of oracle arguments.",
-                    "type": "object",
-                    "propertyNames": {
-                      "$ref": "#/subDefinitions/programmingLanguage"
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                      "items": {
-                        "type": "string",
-                        "description": "A language-specific literal, which will be used verbatim."
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
                       }
                     }
-                  },
-                  "not": {
-                    "anyOf": [
-                      {
-                        "required": [
-                          "description"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "value"
-                        ]
-                      },
-                      {
-                        "required": [
-                          "types"
-                        ]
-                      }
-                    ]
-                  }
+                  ]
                 }
               ]
             },
@@ -3265,20 +4978,28 @@
                 }
               },
               "arguments": {
-                "minProperties": 1,
-                "description": "Language mapping of oracle arguments.",
-                "type": "object",
-                "propertyNames": {
-                  "$ref": "#/subDefinitions/programmingLanguage"
-                },
-                "items": {
-                  "type": "array",
-                  "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
-                  "items": {
-                    "type": "string",
-                    "description": "A language-specific literal, which will be used verbatim."
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "minProperties": 1,
+                    "description": "Language mapping of oracle arguments.",
+                    "type": "object",
+                    "propertyNames": {
+                      "$ref": "#/subDefinitions/programmingLanguage"
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "List of YAML (or tagged expression) values to use as arguments to the function.",
+                      "items": {
+                        "type": "string",
+                        "description": "A language-specific literal, which will be used verbatim."
+                      }
+                    }
                   }
-                }
+                ]
               },
               "value": {
                 "$ref": "#/subDefinitions/yamlValueOrPythonExpression"
@@ -3527,32 +5248,298 @@
           "minProperties": 1,
           "properties": {
             "applyRounding": {
-              "description": "Apply rounding when comparing as float",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Apply rounding when comparing as float",
+                  "type": "boolean"
+                }
+              ]
             },
             "caseInsensitive": {
-              "description": "Ignore case when comparing strings",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Ignore case when comparing strings",
+                  "type": "boolean"
+                }
+              ]
             },
             "ignoreWhitespace": {
-              "description": "Ignore trailing whitespace",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Ignore trailing whitespace",
+                  "type": "boolean"
+                }
+              ]
             },
             "normalizeTrailingNewlines": {
-              "description": "Normalize trailing newlines",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Normalize trailing newlines",
+                  "type": "boolean"
+                }
+              ]
             },
             "roundTo": {
-              "description": "The number of decimals to round at, when applying the rounding on floats",
-              "type": "integer"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "The number of decimals to round at, when applying the rounding on floats",
+                  "type": "integer"
+                }
+              ]
             },
             "tryFloatingPoint": {
-              "description": "Try comparing text as floating point numbers",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Try comparing text as floating point numbers",
+                  "type": "boolean"
+                }
+              ]
             },
             "hideExpected": {
-              "description": "Hide the expected value in feedback (default: false), not recommended to use!",
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "description": "The key of the parameter.",
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "description": "The key of the parameter.",
+                        "type": "string"
+                      },
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "description"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "value"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "types"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Hide the expected value in feedback (default: false), not recommended to use!",
+                  "type": "boolean"
+                }
+              ]
             }
           }
         },
@@ -3564,32 +5551,88 @@
             "minProperties": 1,
             "properties": {
               "applyRounding": {
-                "description": "Apply rounding when comparing as float",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Apply rounding when comparing as float",
+                    "type": "boolean"
+                  }
+                ]
               },
               "caseInsensitive": {
-                "description": "Ignore case when comparing strings",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Ignore case when comparing strings",
+                    "type": "boolean"
+                  }
+                ]
               },
               "ignoreWhitespace": {
-                "description": "Ignore trailing whitespace",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Ignore trailing whitespace",
+                    "type": "boolean"
+                  }
+                ]
               },
               "normalizeTrailingNewlines": {
-                "description": "Normalize trailing newlines",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Normalize trailing newlines",
+                    "type": "boolean"
+                  }
+                ]
               },
               "roundTo": {
-                "description": "The number of decimals to round at, when applying the rounding on floats",
-                "type": "integer"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "The number of decimals to round at, when applying the rounding on floats",
+                    "type": "integer"
+                  }
+                ]
               },
               "tryFloatingPoint": {
-                "description": "Try comparing text as floating point numbers",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Try comparing text as floating point numbers",
+                    "type": "boolean"
+                  }
+                ]
               },
               "hideExpected": {
-                "description": "Hide the expected value in feedback (default: false), not recommended to use!",
-                "type": "boolean"
+                "anyOf": [
+                  {
+                    "description": "The key of the parameter.",
+                    "type": "string"
+                  },
+                  {
+                    "description": "Hide the expected value in feedback (default: false), not recommended to use!",
+                    "type": "boolean"
+                  }
+                ]
               }
             }
           },
@@ -3709,46 +5752,84 @@
       ]
     },
     "textualType": {
-      "oneOf": [
+      "anyOf": [
         {
-          "description": "Simple textual value, converted to string.",
-          "type": [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf": [
+            {
+              "description": "The key of the parameter.",
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "description": "The key of the parameter.",
+                "type": "string"
+              },
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "types"
+                    ]
+                  }
+                ]
+              }
+            }
           ]
         },
         {
-          "type": "object",
-          "additionalProperties": {
-            "description": "Simple textual value, converted to string.",
-            "type": [
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
-          "not": {
-            "anyOf": [
-              {
-                "required": [
-                  "description"
+          "oneOf": [
+            {
+              "description": "Simple textual value, converted to string.",
+              "type": [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": {
+                "description": "Simple textual value, converted to string.",
+                "type": [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean"
                 ]
               },
-              {
-                "required": [
-                  "value"
-                ]
-              },
-              {
-                "required": [
-                  "types"
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "description"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "value"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "types"
+                    ]
+                  }
                 ]
               }
-            ]
-          }
+            }
+          ]
         }
       ]
     },
