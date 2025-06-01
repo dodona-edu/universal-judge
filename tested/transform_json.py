@@ -302,7 +302,7 @@ def add_templates(data: dict) -> dict:
         }
         testcase["properties"]["repeat"] = {
             "type": "object",
-            "description": "A certain loop that will generate test cases with the given parameters and template.",
+            "description": "A loop to generate test cases with the given parameters and template.",
             "required": ["template", "parameters"],
             "properties": {
                 "template": {
