@@ -173,6 +173,8 @@ def sorted_no_duplicates(
     key: Callable[[T], K] = lambda x: x,
     recursive_key: Callable[[K], K] | None = None,
 ) -> list[T]:
+    from functools import cmp_to_key
+
     # Order functions
     def type_order(x: Any, y: Any) -> int:
         """
@@ -233,86 +235,31 @@ def sorted_no_duplicates(
             return int(x < y) - int(x > y)  # type: ignore
         except TypeError:
             # These types cannot be compared, so fallback to string comparison.
-            return str(x) < str(y)
+            return int(str(x) < str(y)) - int(str(x) > str(y))
 
-    # Sort functions, custom implementation needed for efficient recursive ordering
-    # of values that have different types
-    def insertion_sort(list_t: list[T], start: int, end: int) -> list[T]:
-        """
-        Insertion sort
-        :param list_t: list to sort
-        :param start: start of range to sort
-        :param end: end of range to sort
-        :return: the list itself
-        """
-        for i in range(start + 1, end):
-            j = i - 1
-            item = list_t[i]
-            item_key = key(item)
-            while j >= start and order(key(list_t[j]), item_key) < 0:
-                list_t[j + 1] = list_t[j]
-                j -= 1
-            list_t[j + 1] = item
-        return list_t
+    # Use Python's built-in sorted with cmp_to_key for performance.
+    # We negate the order result because `order` returns 1 for x < y,
+    # but cmp expects -1 for x < y.
+    wrapped_key = cmp_to_key(lambda x, y: -order(x, y))
 
-    def merge(to_list: list[T], from_list: list[T], start: int, middle: int, end: int):
-        """
-        Merge two sorted sublist to sorted list
+    sorted_iter = sorted(iterable, key=lambda x: wrapped_key(key(x)))
 
-        :param to_list: output list
-        :param from_list: input list
-        :param start: start of first half
-        :param middle: end of first half, start of second half
-        :param end: end of second half
-        :return: No return value
-        """
-        i, j, k = start, middle, start
-        while i < middle and j < end:
-            if order(key(from_list[i]), key(from_list[j])) > 0:
-                to_list[k] = from_list[i]
-                i += 1
-            else:
-                to_list[k] = from_list[j]
-                j += 1
-            k += 1
-        if i < middle:
-            to_list[k:end] = from_list[i:middle]
-        else:
-            to_list[k:end] = from_list[j:end]
+    # Filter out duplicates
+    no_dup = []
+    if not sorted_iter:
+        return no_dup
 
-    def timsort(list_t: list[T], timgroup: int = 32) -> list[T]:
-        """
-        Time sort algorithm
-        :param list_t: the modifiable list to sort
-        :param timgroup: the number of elements to sort with insertion sort
-        :return: The sort list
-        """
-        len_list_t = len(list_t)
-        for i in range(0, len_list_t, timgroup):
-            insertion_sort(list_t, i, min(i + timgroup, len_list_t))
-        copy = list(list_t)
-        while timgroup < len_list_t:
-            for start in range(0, len_list_t, 2 * timgroup):
-                middle = min(len_list_t, start + timgroup)
-                end = min(len_list_t, start + 2 * timgroup)
-                merge(list_t, copy, start, middle, end)
-            list_t, copy = copy, list_t
-            timgroup *= 2
-        return copy
+    last_v = sorted_iter[0]
+    last_key_val = key(last_v)
+    no_dup.append(last_v)
 
-    # Sort and filterout duplicates
-    first, last_key, no_dup, list_iter = True, None, [], list(iterable)
-    for v in timsort(list_iter):
-        if not first:
-            key_v = key(v)
-            if order(key_v, last_key) == 0:
-                continue
-            else:
-                no_dup.append(v)
-                last_key = key_v
-        else:
-            first, last_key = False, key(v)
+    for v in sorted_iter[1:]:
+        key_v = key(v)
+        if order(key_v, last_key_val) != 0:
             no_dup.append(v)
+            last_key_val = key_v
+            last_v = v
+
     return no_dup
 
 
