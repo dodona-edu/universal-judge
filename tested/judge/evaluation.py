@@ -246,7 +246,7 @@ def evaluate_context_results(
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
-        _logger.debug(f"Evaluating testcase {i}")
+        _logger.debug("Evaluating testcase %s", i)
 
         readable_input, seen = get_readable_input(bundle, testcase)
         all_files = all_files - seen

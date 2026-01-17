@@ -171,7 +171,7 @@ def judge(bundle: Bundle):
     else:
         max_workers = 1
 
-    _logger.debug(f"Executing with {max_workers} workers")
+    _logger.debug("Executing with %s workers", max_workers)
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         remaining_time = plan.remaining_time()
@@ -186,7 +186,7 @@ def judge(bundle: Bundle):
                 execution_dir,
             ) in enumerate(results):
                 planned_unit = plan.units[i]
-                _logger.debug(f"Processing results for execution unit {i}")
+                _logger.debug("Processing results for execution unit %s", i)
                 result_status, currently_open_tab = _process_results(
                     bundle=bundle,
                     unit=planned_unit,
@@ -259,7 +259,7 @@ def _generate_files(
     common_dir = Path(bundle.config.workdir, f"common")
     common_dir.mkdir()
 
-    _logger.debug(f"Generating files in common directory {common_dir}")
+    _logger.debug("Generating files in common directory %s", common_dir)
 
     # Copy dependencies
     dependency_paths = bundle.language.path_to_dependencies()
@@ -278,7 +278,7 @@ def _generate_files(
     execution_names = []
     # Generate the files for each execution.
     for execution_unit in execution_plan:
-        _logger.debug(f"Generating file for execution {execution_unit.name}")
+        _logger.debug("Generating file for execution %s", execution_unit.name)
         generated, evaluators = generate_execution(
             bundle=bundle, destination=common_dir, execution_unit=execution_unit
         )
@@ -286,7 +286,7 @@ def _generate_files(
         # Copy functions to the directory.
         for evaluator in evaluators:
             source = Path(bundle.config.resources) / evaluator
-            _logger.debug(f"Copying oracle from {source} to {common_dir}")
+            _logger.debug("Copying oracle from %s to %s", source, common_dir)
             shutil.copy2(source, common_dir)
 
         dependencies.extend(evaluators)

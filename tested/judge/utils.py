@@ -123,14 +123,14 @@ def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> li
                 all_files or bundle.language.is_source_file(origin)
             ):
                 source_files.append(str(dst / origin.name))
-                _logger.debug(f"Copying {origin} to {dst}")
+                _logger.debug("Copying %s to %s", origin, dst)
                 shutil.copy2(origin, dst)
             elif (
                 origin.is_dir()
                 and not file.startswith(EXECUTION_PREFIX)
                 and file != "common"
             ):
-                _logger.debug(f"Iterate subdir {dst / file}")
+                _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
 
     recursive_copy(bundle.config.workdir, destination)
