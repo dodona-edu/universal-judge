@@ -219,7 +219,7 @@ def evaluate(
     assert isinstance(channel, OracleOutputChannel)
     assert isinstance(channel.oracle, CustomCheckOracle)
 
-    _logger.debug(f"Programmed oracle for output {actual_str}")
+    _logger.debug("Programmed oracle for output %s", actual_str)
 
     # Convert the expected item to a Value, which is then passed to the
     # oracle for evaluation.
@@ -241,9 +241,9 @@ def evaluate(
         )
 
     _logger.debug(
-        f"Calling programmed evaluation with params:\n"
-        f"expected: {expected}\n"
-        f"actual: {actual}"
+        "Calling programmed evaluation with params:\nexpected: %s\nactual: %s",
+        expected,
+        actual,
     )
     context = OracleContext(
         expected=expected,

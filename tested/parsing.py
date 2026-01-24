@@ -38,12 +38,12 @@ def unstructure_decimal(obj: Decimal) -> str:
 def structure_every_union(to_convert: Any, the_type: type) -> Any:
     from tested.serialisation import Identifier
 
-    _logger.debug(f"=== Finding type for {to_convert}, from {the_type}...")
+    _logger.debug("=== Finding type for %s, from %s...", to_convert, the_type)
     if to_convert is None and type(None) in get_args(the_type):
         _logger.debug("Yes: found None.")
         return None
     if isinstance(to_convert, bool) and bool in get_args(the_type):
-        _logger.debug(f"Yes: found boolean: {to_convert}.")
+        _logger.debug("Yes: found boolean: %s.", to_convert)
         return to_convert
 
     for possible_class in get_args(the_type):
@@ -61,10 +61,10 @@ def structure_every_union(to_convert: Any, the_type: type) -> Any:
             if possible_class is Identifier:
                 assert isinstance(to_convert, str)
             result = _suite_converter.structure(to_convert, possible_class)
-            _logger.debug(f"{debug_message} accepted.")
+            _logger.debug("%s accepted.", debug_message)
             return result
         except Exception:
-            _logger.debug(f"{debug_message} rejected.")
+            _logger.debug("%s rejected.", debug_message)
     raise TypeError(
         f"{to_convert} could not be converted into a {the_type}. Check the syntax or file a bug."
     )
