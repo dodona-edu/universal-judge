@@ -38,7 +38,6 @@ from tested.testsuite import (
     MainInput,
     Testcase,
     TextData,
-    TextChannelType,
 )
 from tested.utils import is_statement_strict
 
@@ -129,8 +128,8 @@ def get_readable_input(
         args = f"$ {command}"
         # Determine the stdin
         if isinstance(case.input.stdin, TextData):
-            if case.input.stdin.type == TextChannelType.FILE:
-                stdin = Path(case.input.stdin.data)
+            if case.input.stdin.path is not None:
+                stdin = Path(case.input.stdin.path)
             else:
                 stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:

@@ -226,12 +226,6 @@ class LanguageSpecificOracle:
             raise ValueError("At least one language-specific oracle is required.")
 
 
-@unique
-class TextChannelType(StrEnum):
-    TEXT = "text"  # Literal values
-    FILE = "file"  # Path to a file
-
-
 def _resolve_path(working_directory, file_path):
     """
     Resolve a path to an absolute path. Relative paths will be resolved against
@@ -244,29 +238,58 @@ def _resolve_path(working_directory, file_path):
 
 
 @define
+class ContentPath:
+    path: str
+
+
+def _data_to_content_converter(data: str | None, full: Any) -> str | ContentPath | None:
+    if isinstance(data, str):
+        if full.get("type") == "file":
+            return ContentPath(path=data)
+        return data
+
+    return data
+
+
+@custom_fallback_field(
+    get_converter(), {"data": ("content", _data_to_content_converter)}
+)
+@ignore_field(get_converter(), "type")
+@define
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
-    data: str
-    type: TextChannelType = TextChannelType.TEXT
+    content: ContentPath | str
+
+    # For input files: The filename shown in the description.
+    # For output files: The filename the student is expected to generate.
+    # For stdin: The filename shown in the description (e.g. "< hello.txt").
+    # For stdout/stderr: None
+    path: str | None = None
 
     def get_data_as_string(self, working_directory: Path) -> str:
-        """Get the data as a string, reading the file if necessary."""
-        if self.type == TextChannelType.TEXT:
-            return self.data
-        elif self.type == TextChannelType.FILE:
-            file_path = _resolve_path(working_directory, self.data)
+        if isinstance(self.content, ContentPath):
+            file_path = _resolve_path(working_directory, self.content.path)
             with open(file_path, "r") as file:
                 return file.read()
         else:
-            raise AssertionError(f"Unknown enum type {self.type}")
+            # In this case we would need to generate a file in the workdir
+            # with this content, but forbid this for now.
+            assert (
+                self.path is None
+            ), "Dynamically generating files is not yet supported."
+            return self.content
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
 
 
+@custom_fallback_field(
+    get_converter(), {"data": ("content", _data_to_content_converter)}
+)
 @fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
+@ignore_field(get_converter(), "type")
 @define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
@@ -672,7 +695,7 @@ class Context(WithFeatures, WithFunctions):
         return all_files
 
 
-def _runs_to_tab_converter(runs: list | None):
+def _runs_to_tab_converter(runs: list | None, _):
     assert isinstance(runs, list), "The field 'runs' must be a list."
     contexts = []
     for run in runs:

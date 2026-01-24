@@ -8,7 +8,7 @@ a single converter for all, both the serialization and suite.
 import logging
 from collections.abc import Callable
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from cattrs import Converter
 from cattrs.gen import make_dict_structure_fn
@@ -133,7 +133,7 @@ def fallback_field(converter_arg: Converter, old_to_new_field: dict[str, str]):
 
 def custom_fallback_field(
     converter_arg: Converter,
-    old_to_new_field: dict[str, tuple[str, Callable[[Any], Any]]],
+    old_to_new_field: dict[str, tuple[str, Callable[[Any, Optional[Any]], Any]]],
 ):
     def decorator(cls):
         struct = make_dict_structure_fn(
@@ -147,7 +147,7 @@ def custom_fallback_field(
                         raise ValueError(
                             f"You cannot use {new_name} and {k} simultaneously. Migrate to {new_name}."
                         )
-                    d[new_name] = mapper(d[k])
+                    d[new_name] = mapper(d[k], d)
 
             return struct(d, cl)
 
