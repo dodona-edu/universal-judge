@@ -258,7 +258,6 @@ def sorted_no_duplicates(
         if order(key_v, last_key_val) != 0:
             no_dup.append(v)
             last_key_val = key_v
-            last_v = v
 
     return no_dup
 
