@@ -232,7 +232,7 @@ def _resolve_path(working_directory, file_path):
         return path.abspath(path.join(working_directory, file_path))
 
 
-@define
+@define(frozen=True)
 class ContentPath:
     path: str
 
@@ -266,12 +266,12 @@ class TextData(WithFeatures):
             with open(file_path, "r") as file:
                 return file.read()
         else:
-            # In this case we would need to generate a file in the workdir
-            # with this content, but forbid this for now.
-            assert (
-                self.path is None
-            ), "Dynamically generating files is not yet supported."
             return self.content
+
+    def is_dynamically_generated(self) -> bool:
+        return self.path is not None and not (
+            isinstance(self.content, ContentPath) and self.content.path == self.path
+        )
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING

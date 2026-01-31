@@ -13,7 +13,7 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.conventionalize import execution_name
 from tested.languages.language import FileFilter
-from tested.testsuite import Context, EmptyChannel, MainInput
+from tested.testsuite import ContentPath, Context, EmptyChannel, MainInput
 
 
 @define
@@ -31,6 +31,12 @@ class PlannedContext:
     context: Context
     tab_index: int
     context_index: int
+
+
+@define(frozen=True)
+class DynamicallyGeneratedFile:
+    path: str
+    content: ContentPath | str
 
 
 @define
@@ -55,6 +61,27 @@ class PlannedExecutionUnit:
 
     def has_exit_testcase(self) -> bool:
         return self.contexts[-1].context.has_exit_testcase()
+
+    def get_dynamically_generated_files(self) -> DynamicallyGeneratedFile | None:
+        if not self.has_main_testcase():
+            return None
+
+        stdin = cast(MainInput, self.contexts[0].context.testcases[0].input).stdin
+
+        if stdin == EmptyChannel.NONE:
+            return None
+
+        if not stdin.is_dynamically_generated():
+            return None
+
+        # For type checking, in the future should be removable.
+        if stdin.path is None:
+            return None
+
+        return DynamicallyGeneratedFile(
+            path=stdin.path,
+            content=stdin.content,
+        )
 
 
 @define
