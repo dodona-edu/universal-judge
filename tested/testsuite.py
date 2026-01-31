@@ -278,10 +278,12 @@ class TextData(WithFeatures):
 
 
 @fallback_field(
-    {"data": ("content", _data_to_content_converter), "evaluator": "oracle"}
+    {
+        "data": ("content", _data_to_content_converter),
+        "evaluator": "oracle",
+    }
 )
-@ignore_field("show_expected")
-@ignore_field("type")
+@ignore_field("show_expected", "type")
 @define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
