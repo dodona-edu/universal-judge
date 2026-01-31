@@ -24,12 +24,7 @@ from tested.features import (
     WithFeatures,
     combine_features,
 )
-from tested.parsing import (
-    custom_fallback_field,
-    fallback_field,
-    get_converter,
-    ignore_field,
-)
+from tested.parsing import fallback_field, ignore_field
 from tested.serialisation import (
     Expression,
     FunctionCall,
@@ -181,7 +176,7 @@ class CustomCheckOracle:
             raise ValueError("At least one language is required.")
 
 
-@fallback_field(get_converter(), {"evaluators": "functions"})
+@fallback_field({"evaluators": "functions"})
 @define
 class LanguageSpecificOracle:
     """
@@ -251,10 +246,8 @@ def _data_to_content_converter(data: str | None, full: Any) -> str | ContentPath
     return data
 
 
-@custom_fallback_field(
-    get_converter(), {"data": ("content", _data_to_content_converter)}
-)
-@ignore_field(get_converter(), "type")
+@fallback_field({"data": ("content", _data_to_content_converter)})
+@ignore_field("type")
 @define
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
@@ -284,12 +277,11 @@ class TextData(WithFeatures):
         return NOTHING
 
 
-@custom_fallback_field(
-    get_converter(), {"data": ("content", _data_to_content_converter)}
+@fallback_field(
+    {"data": ("content", _data_to_content_converter), "evaluator": "oracle"}
 )
-@fallback_field(get_converter(), {"evaluator": "oracle"})
-@ignore_field(get_converter(), "show_expected")
-@ignore_field(get_converter(), "type")
+@ignore_field("show_expected")
+@ignore_field("type")
 @define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
@@ -297,8 +289,8 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
-@fallback_field(get_converter(), {"evaluator": "oracle"})
-@ignore_field(get_converter(), "show_expected")
+@fallback_field({"evaluator": "oracle"})
+@ignore_field("show_expected")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
@@ -318,8 +310,8 @@ class FileOutputChannel(WithFeatures):
             return file.read()
 
 
-@fallback_field(get_converter(), {"evaluator": "oracle"})
-@ignore_field(get_converter(), "show_expected")
+@fallback_field({"evaluator": "oracle"})
+@ignore_field("show_expected")
 @define
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
@@ -380,8 +372,8 @@ class ExpectedException(WithFeatures):
             return type_
 
 
-@fallback_field(get_converter(), {"evaluator": "oracle"})
-@ignore_field(get_converter(), "show_expected")
+@fallback_field({"evaluator": "oracle"})
+@ignore_field("show_expected")
 @define
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
@@ -401,7 +393,7 @@ class ExceptionOutputChannel(WithFeatures):
             raise ValueError("The generic oracle needs a channel exception.")
 
 
-@ignore_field(get_converter(), "show_expected")
+@ignore_field("show_expected")
 @define
 class ExitCodeOutputChannel(WithFeatures):
     """Handles exit codes."""
@@ -556,7 +548,7 @@ class FileUrl:
     name: str
 
 
-@ignore_field(get_converter(), "essential")
+@ignore_field("essential")
 @define
 class Testcase(WithFeatures, WithFunctions):
     """
@@ -641,7 +633,7 @@ class Testcase(WithFeatures, WithFunctions):
 Code = dict[str, TextData]
 
 
-@ignore_field(get_converter(), "link_files")
+@ignore_field("link_files")
 @define
 class Context(WithFeatures, WithFunctions):
     """
@@ -707,7 +699,7 @@ def _runs_to_tab_converter(runs: list | None, _):
     return contexts
 
 
-@custom_fallback_field(get_converter(), {"runs": ("contexts", _runs_to_tab_converter)})
+@fallback_field({"runs": ("contexts", _runs_to_tab_converter)})
 @define
 class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
