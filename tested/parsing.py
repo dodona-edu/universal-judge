@@ -43,6 +43,7 @@ def unstructure_decimal(obj: Decimal) -> str:
 
 def structure_every_union(to_convert: Any, the_type: Any) -> Any:
     from tested.serialisation import Identifier
+    from tested.testsuite import ContentPath
 
     _logger.debug(f"=== Finding type for {to_convert}, from {the_type}...")
     if to_convert is None and type(None) in get_args(the_type):
@@ -50,6 +51,9 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
         return None
     if isinstance(to_convert, bool) and bool in get_args(the_type):
         _logger.debug(f"Yes: found boolean: {to_convert}.")
+        return to_convert
+    if isinstance(to_convert, ContentPath) and ContentPath in get_args(the_type):
+        _logger.debug(f"Yes: found content path: {to_convert}.")
         return to_convert
 
     for possible_class in get_args(the_type):
