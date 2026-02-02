@@ -74,7 +74,6 @@ class OracleResult:
 
 
 @fallback_field(
-    get_converter(),
     {
         "readableExpected": "readable_expected",
         "readableActual": "readable_actual",
