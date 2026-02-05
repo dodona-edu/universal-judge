@@ -77,6 +77,8 @@ def run_cppcheck(
                     continue
                 row = int(el.attrib.get("line", "1")) - 1 + config.source_offset
                 col = int(el.attrib.get("column", "1")) - 1
+                if col < 0:
+                    col = None
                 break
             annotations.append(
                 AnnotateCode(
