@@ -105,7 +105,10 @@
         },
         "hidden" : {
           "type" : "boolean",
-          "description" : "Defines if the unit/tab is hidden for the student or not"
+          "description" : "Tab is only shown if it has tests that failed"
+        },
+        "permission": {
+          "$ref" : "#/definitions/permission"
         },
         "tab" : {
           "type" : "string",
@@ -140,6 +143,14 @@
             }
           }
         }
+      ]
+    },
+    "permission": {
+      "type" : "string",
+      "description" : "One of the permission levels supported by Dodona",
+      "enum" : [
+        "student",
+        "staff"
       ]
     },
     "unit" : {
