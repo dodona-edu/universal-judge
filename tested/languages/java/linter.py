@@ -76,6 +76,9 @@ def run_checkstyle(
             external = None
             if source:
                 external = f'https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace(".", "/")}.html'
+            column = int(error_element.attrib.get("column", "1")) - 1
+            if column < 0:
+                column = None
             annotations.append(
                 AnnotateCode(
                     row=int(error_element.attrib.get("line", "1"))
@@ -83,7 +86,7 @@ def run_checkstyle(
                     + config.source_offset,
                     text=message,
                     externalUrl=external,
-                    column=int(error_element.attrib.get("column", "1")) - 1,
+                    column=column,
                     type=message_categories.get(
                         error_element.attrib.get("severity", "warning"),
                         Severity.WARNING,
