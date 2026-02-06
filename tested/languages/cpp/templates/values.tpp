@@ -63,7 +63,13 @@ std::string to_json_value(const T& value) {
     } else if constexpr (std::is_same_v<T, std::string>) {
         return "\"" + escape(value) + "\"";
     } else if constexpr (std::is_same_v<T, char>) {
-        return "\"" + std::string(1, value) + "\"";
+        if ((unsigned char) value > 127) {
+            unsigned char upper = ((unsigned char) value) / 16;
+            unsigned char lower = ((unsigned char) value) % 16;
+            return "\"0x" + std::string(1, upper < 10 ? upper + '0' : upper - 10 + 'A')  + std::string(1, lower < 10 ? upper + '0' : lower - 10 + 'A') + "\"";
+        } else {
+            return "\"" + std::string(1, value) + "\"";
+        }
     } else if constexpr (std::is_same_v<T, bool>) {
         return value ? "true" : "false";
     } else if constexpr (std::is_same_v<T, std::nullptr_t>) {

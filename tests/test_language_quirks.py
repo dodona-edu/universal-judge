@@ -40,6 +40,20 @@ def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "cpp",
+        tmp_path,
+        "one.tson",
+        "wrong-signature",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+
+
 def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test: string = foo()"
     cpp = LANGUAGES["cpp"](pytestconfig)
