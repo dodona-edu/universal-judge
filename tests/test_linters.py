@@ -28,6 +28,24 @@ def test_cppcheck_c(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     assert len(updates.find_all("annotate-code")) > 0
 
 
+@pytest.mark.parametrize("config", _get_config_options("c"))
+def test_cppcheck_c_bad_column(
+    tmp_path: Path, config: dict, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "c",
+        tmp_path,
+        "one.tson",
+        "bad-column-cppcheck",
+        config,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) > 0
+
+
 @pytest.mark.parametrize("config", _get_config_options("cpp"))
 def test_cppcheck(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
