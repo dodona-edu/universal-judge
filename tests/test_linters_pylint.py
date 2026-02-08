@@ -35,9 +35,15 @@ def test_pylint_error(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
+
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.ERROR
     assert "undefined-variable" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 11
+    assert annotations[0]["columns"] == 18
 
 
 def test_pylint_warning(tmp_path: Path, pytestconfig: pytest.Config):
@@ -54,8 +60,13 @@ def test_pylint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.WARNING
     assert "unused-import" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 9
 
 
 def test_pylint_convention(tmp_path: Path, pytestconfig: pytest.Config):
@@ -90,8 +101,13 @@ def test_pylint_refactor(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.INFO
     assert "too-many-arguments" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 21
 
 
 def test_pylint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):

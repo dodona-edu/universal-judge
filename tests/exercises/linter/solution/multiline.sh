@@ -1,3 +1,3 @@
 #!/bin/bash
 echo ${some_var:-"default
-value"}
+value"} "hallo"

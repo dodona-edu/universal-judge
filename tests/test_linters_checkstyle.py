@@ -37,9 +37,21 @@ def test_checkstyle_warning(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 3
-    for annotation in annotations:
-        assert annotation["type"] == Severity.ERROR
-        assert "checkstyle.sourceforge.io" in annotation["externalUrl"]
+
+    assert annotations[0]["type"] == Severity.ERROR
+    assert "MagicNumberCheck" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 2
+    assert annotations[0]["column"] == 16
+
+    assert annotations[1]["type"] == Severity.ERROR
+    assert "ParenPadCheck" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 3
+    assert annotations[1]["column"] == 26
+
+    assert annotations[2]["type"] == Severity.ERROR
+    assert "ParenPadCheck" in annotations[2]["externalUrl"]
+    assert annotations[2]["row"] == 3
+    assert annotations[2]["column"] == 30
 
 
 def test_checkstyle_custom_config(tmp_path: Path, pytestconfig: pytest.Config):

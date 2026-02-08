@@ -39,8 +39,14 @@ def test_cppcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
     # cppcheck flags arrayIndexOutOfBounds as error
     # It also flags unreadVariable as style for the same line in my tests
     assert len(annotations) == 2
-    assert any(a["type"] == Severity.ERROR for a in annotations)
-    assert any(a["type"] == Severity.INFO for a in annotations)
+
+    assert annotations[0]["type"] == Severity.ERROR
+    assert annotations[0]["row"] == 2
+    assert annotations[0]["column"] == 5
+
+    assert annotations[1]["type"] == Severity.INFO
+    assert annotations[1]["row"] == 2
+    assert annotations[1]["column"] == 9
 
 
 def test_cppcheck_warning(tmp_path: Path, pytestconfig: pytest.Config):
@@ -57,7 +63,10 @@ def test_cppcheck_warning(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.WARNING
+    assert annotations[0]["row"] == 3
+    assert annotations[0]["column"] == 4
 
 
 def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
@@ -74,7 +83,14 @@ def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 2
-    assert all(a["type"] == Severity.INFO for a in annotations)
+
+    assert annotations[0]["type"] == Severity.INFO
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["column"] == 8
+
+    assert annotations[1]["type"] == Severity.INFO
+    assert annotations[1]["row"] == 1
+    assert annotations[1]["column"] == 10
 
 
 def test_cppcheck_bad_output(
@@ -130,5 +146,11 @@ def test_cppcheck_cpp_error(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 2
-    assert any(a["type"] == Severity.ERROR for a in annotations)
-    assert any(a["type"] == Severity.INFO for a in annotations)
+
+    assert annotations[0]["type"] == Severity.ERROR
+    assert annotations[0]["row"] == 2
+    assert annotations[0]["column"] == 5
+
+    assert annotations[1]["type"] == Severity.INFO
+    assert annotations[1]["row"] == 2
+    assert annotations[1]["column"] == 9

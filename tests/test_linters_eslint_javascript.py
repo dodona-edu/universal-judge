@@ -38,9 +38,19 @@ def test_eslint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     annotations = updates.find_all("annotate-code")
 
     assert len(annotations) == 2
-    assert all(a["type"] == Severity.WARNING for a in annotations)
-    assert any("no-var" in a["externalUrl"] for a in annotations)
-    assert any("semi" in a["externalUrl"] for a in annotations)
+
+    assert annotations[0]["type"] == Severity.WARNING
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 10
+    assert "no-var" in annotations[0]["externalUrl"]
+
+    assert annotations[1]["type"] == Severity.WARNING
+    assert annotations[1]["row"] == 1
+    assert annotations[1]["rows"] == 2
+    assert annotations[1]["column"] == 14
+    assert "semi" in annotations[1]["externalUrl"]
 
 
 def test_eslint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
@@ -107,6 +117,16 @@ def test_eslint_multiline(tmp_path: Path, pytestconfig: pytest.Config):
     annotations = updates.find_all("annotate-code")
 
     assert len(annotations) == 2
-    no_var = next(a for a in annotations if "no-var" in a["externalUrl"])
-    assert no_var["row"] == 5
-    assert no_var["rows"] == 2
+
+    assert annotations[0]["type"] == Severity.WARNING
+    assert "no-var" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 5
+    assert annotations[0]["rows"] == 3
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 3
+
+    assert annotations[1]["type"] == Severity.WARNING
+    assert "semi" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 7
+    assert annotations[1]["rows"] == 2
+    assert annotations[1]["column"] == 3

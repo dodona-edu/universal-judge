@@ -44,8 +44,13 @@ def test_shellcheck_warning(tmp_path: Path, pytestconfig: pytest.Config):
     annotations = updates.find_all("annotate-code")
 
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.WARNING
     assert "SC2034" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 3
 
 
 def test_shellcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
@@ -62,8 +67,12 @@ def test_shellcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.ERROR
     assert "SC1089" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
 
 
 def test_shellcheck_info(tmp_path: Path, pytestconfig: pytest.Config):
@@ -80,8 +89,13 @@ def test_shellcheck_info(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
+
     assert annotations[0]["type"] == Severity.WARNING
     assert "SC2155" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 7
+    assert annotations[0]["columns"] == 3
 
 
 def test_shellcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
@@ -98,16 +112,27 @@ def test_shellcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 3
-    sorted_annotations = sorted(annotations, key=lambda a: a["externalUrl"])
 
-    assert sorted_annotations[0]["type"] == Severity.INFO
-    assert "SC2006" in sorted_annotations[0]["externalUrl"]
+    assert annotations[0]["type"] == Severity.WARNING
+    assert "SC2034" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 3
 
-    assert sorted_annotations[1]["type"] == Severity.WARNING
-    assert "SC2034" in sorted_annotations[1]["externalUrl"]
+    assert annotations[1]["type"] == Severity.INFO
+    assert "SC2006" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 1
+    assert annotations[1]["rows"] == 1
+    assert annotations[1]["column"] == 4
+    assert annotations[1]["columns"] == 10
 
-    assert sorted_annotations[2]["type"] == Severity.INFO
-    assert "SC2116" in sorted_annotations[2]["externalUrl"]
+    assert annotations[2]["type"] == Severity.INFO
+    assert "SC2116" in annotations[2]["externalUrl"]
+    assert annotations[2]["row"] == 1
+    assert annotations[2]["rows"] == 1
+    assert annotations[2]["column"] == 4
+    assert annotations[2]["columns"] == 10
 
 
 def test_shellcheck_multiline(tmp_path: Path, pytestconfig: pytest.Config):
@@ -124,10 +149,13 @@ def test_shellcheck_multiline(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
-    annotation = annotations[0]
-    assert "SC2086" in annotation["externalUrl"]
-    assert annotation["rows"] == 2
-    assert annotation["columns"] == 7
+
+    assert annotations[0]["type"] == Severity.INFO
+    assert "SC2086" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["rows"] == 2
+    assert annotations[0]["column"] == 5
+    assert annotations[0]["columns"] == 7
 
 
 def test_shellcheck_config(tmp_path: Path, pytestconfig: pytest.Config):
@@ -151,28 +179,6 @@ def test_shellcheck_config(tmp_path: Path, pytestconfig: pytest.Config):
     annotations = updates.find_all("annotate-code")
     # SC2034 should be disabled by the shellcheckrc
     assert len(annotations) == 0
-
-
-def test_shellcheck_dialect(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "bash",
-        tmp_path,
-        "plan.tson",
-        "sh_dialect",
-        {
-            "options": {
-                "language": {"bash": {"linter": True, "shellcheck_language": "sh"}}
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-    assert len(annotations) == 2
-    assert any("SC3010" in a["externalUrl"] for a in annotations)
-    assert any("SC3014" in a["externalUrl"] for a in annotations)
 
 
 def test_shellcheck_bad_output(

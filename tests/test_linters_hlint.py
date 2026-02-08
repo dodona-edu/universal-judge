@@ -41,6 +41,9 @@ def test_hlint_warning(tmp_path: Path, pytestconfig: pytest.Config, language: st
     assert len(annotations) == 1
     assert annotations[0]["type"] == Severity.WARNING
     assert "Redundant bracket" in annotations[0]["text"]
+    assert annotations[0]["row"] == 2
+    assert annotations[0]["column"] == 13
+    assert annotations[0]["columns"] == 19
 
 
 @pytest.mark.parametrize("language", ["haskell", "runhaskell"])
@@ -59,6 +62,9 @@ def test_hlint_multiline(tmp_path: Path, pytestconfig: pytest.Config, language: 
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 1
     assert annotations[0]["rows"] == 3
+    assert annotations[0]["row"] == 1
+    assert annotations[0]["column"] == 4
+    assert annotations[0]["columns"] == 14
 
 
 @pytest.mark.parametrize("language", ["haskell", "runhaskell"])

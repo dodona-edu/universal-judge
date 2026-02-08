@@ -37,23 +37,30 @@ def test_eslint_typescript_warning(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
 
-    # Expectations based on manual run:
     # 1. no-var (WARNING)
     # 2. @typescript-eslint/no-unused-vars (ERROR)
     # 3. semi (WARNING)
     assert len(annotations) == 3
-    assert any(
-        a["type"] == Severity.WARNING and "no-var" in a["externalUrl"]
-        for a in annotations
-    )
-    assert any(
-        a["type"] == Severity.ERROR and "no-unused-vars" in a["externalUrl"]
-        for a in annotations
-    )
-    assert any(
-        a["type"] == Severity.WARNING and "semi" in a["externalUrl"]
-        for a in annotations
-    )
+
+    assert annotations[0]["type"] == Severity.WARNING
+    assert "no-var" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 10
+
+    assert annotations[1]["type"] == Severity.ERROR
+    assert "no-unused-vars" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 0
+    assert annotations[1]["rows"] == 1
+    assert annotations[1]["column"] == 4
+    assert annotations[1]["columns"] == 1
+
+    assert annotations[2]["type"] == Severity.WARNING
+    assert "semi" in annotations[2]["externalUrl"]
+    assert annotations[2]["row"] == 2
+    assert annotations[2]["rows"] == 2
+    assert annotations[2]["column"] == 14
 
 
 def test_eslint_typescript_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
@@ -78,18 +85,21 @@ def test_eslint_typescript_custom_config(tmp_path: Path, pytestconfig: pytest.Co
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
-
-    # Custom config has semi: off and no-var: error
-    # Also has @typescript-eslint/recommended which includes no-unused-vars (error)
     assert len(annotations) == 2
-    assert any(
-        a["type"] == Severity.ERROR and "no-var" in a["externalUrl"]
-        for a in annotations
-    )
-    assert any(
-        a["type"] == Severity.ERROR and "no-unused-vars" in a["externalUrl"]
-        for a in annotations
-    )
+
+    assert annotations[0]["type"] == Severity.ERROR
+    assert "no-var" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 10
+
+    assert annotations[1]["type"] == Severity.ERROR
+    assert "no-unused-vars" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 0
+    assert annotations[1]["rows"] == 1
+    assert annotations[1]["column"] == 4
+    assert annotations[1]["columns"] == 1
 
 
 def test_eslint_typescript_bad_output(
@@ -131,9 +141,18 @@ def test_eslint_typescript_multiline(tmp_path: Path, pytestconfig: pytest.Config
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
 
-    # no-var should span lines 1 to 4
-    # there is also a no-unused-vars for 'y'
     assert len(annotations) == 2
-    no_var = next(a for a in annotations if "no-var" in a["externalUrl"])
-    assert no_var["row"] == 0
-    assert no_var["rows"] == 3
+
+    assert annotations[0]["type"] == Severity.WARNING
+    assert "no-var" in annotations[0]["externalUrl"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 4
+    assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 2
+
+    assert annotations[1]["type"] == Severity.ERROR
+    assert "no-unused-vars" in annotations[1]["externalUrl"]
+    assert annotations[1]["row"] == 0
+    assert annotations[1]["rows"] == 1
+    assert annotations[1]["column"] == 4
+    assert annotations[1]["columns"] == 1

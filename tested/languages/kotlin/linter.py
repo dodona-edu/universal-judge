@@ -5,6 +5,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -92,15 +93,19 @@ def run_ktlint(
                 )
                 message += f" ({rule})"
 
-            column = error.get("column", 1) - 1
-            if column < 0:
-                column = None
+            position = get_linter_position(
+                raw_start_row=error.get("line"),
+                source_offset=config.source_offset,
+                raw_end_row=None,
+                raw_start_column=error.get("column"),
+                raw_end_column=None,
+            )
+
             annotations.append(
-                AnnotateCode(
-                    row=error.get("line", 1) - 1 + config.source_offset,
+                annotation_from_position(
+                    position=position,
                     text=message,
-                    externalUrl=external_url,
-                    column=column,
+                    external_url=external_url,
                     type=Severity.INFO,
                 )
             )

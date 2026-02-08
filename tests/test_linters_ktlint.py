@@ -37,14 +37,17 @@ def test_ktlint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
 
-    # standard:no-wildcard-imports and standard:no-trailing-spaces
-    # standard:filename should be disabled by default editorconfig
     assert len(annotations) == 2
-    assert all(a["type"] == Severity.INFO for a in annotations)
-    assert any("no-wildcard-imports" in a["text"] for a in annotations)
-    assert any("no-trailing-spaces" in a["text"] for a in annotations)
+
+    assert annotations[0]["type"] == Severity.INFO
+    assert "no-wildcard-imports" in annotations[0]["text"]
     assert annotations[0]["row"] == 0
+    assert annotations[0]["column"] == 0
+
+    assert annotations[1]["type"] == Severity.INFO
+    assert "no-trailing-spaces" in annotations[1]["text"]
     assert annotations[1]["row"] == 4
+    assert annotations[1]["column"] == 17
 
 
 def test_ktlint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
@@ -70,12 +73,17 @@ def test_ktlint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
 
-    # no-wildcard-imports disabled, but standard:filename is enabled (because we override editorconfig)
-    # and no-trailing-spaces is still there.
     assert len(annotations) == 2
-    assert any("filename" in a["text"] for a in annotations)
-    assert any("no-trailing-spaces" in a["text"] for a in annotations)
-    assert not any("no-wildcard-imports" in a["text"] for a in annotations)
+
+    assert annotations[0]["type"] == Severity.INFO
+    assert "filename" in annotations[0]["text"]
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["column"] == 0
+
+    assert annotations[1]["type"] == Severity.INFO
+    assert "no-trailing-spaces" in annotations[1]["text"]
+    assert annotations[1]["row"] == 4
+    assert annotations[1]["column"] == 17
 
 
 def test_ktlint_bad_output(
