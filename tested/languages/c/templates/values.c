@@ -9,25 +9,35 @@
 // Escape string characters
 // Idea: https://stackoverflow.com/questions/3201451/how-to-convert-a-c-string-into-its-escaped-version-in-c
 char* escape(const char* buffer){
-    int i,j;
-    int l = strlen(buffer) + 1;
-    char esc_char[]= { '\a','\b','\f','\n','\r','\t','\v','\\','\"'};
-    char essc_str[]= {  'a', 'b', 'f', 'n', 'r', 't', 'v','\\','\"'};
-    char *dest = (char*) calloc(l*2, sizeof(char));
+    int l = strlen(buffer);
+    char esc_char[]= { '\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"' };
+    char essc_str[]= {  'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"' };
+    char *dest = (char*) calloc(l * 4 + 1, sizeof(char));
     char *ptr = dest;
-    for(i=0;i<l;i++){
-        for(j=0; j< 9 ;j++){
-            if( buffer[i]==esc_char[j] ){
-              *ptr++ = '\\';
-              *ptr++ = essc_str[j];
-                 break;
+    for (int i = 0; i < l; i++) {
+        if (((unsigned char) buffer[i]) > 127) {
+            unsigned char value = (unsigned char) buffer[i];
+            *ptr++ = '0';
+            *ptr++ = 'x';
+            char upper = value / 16;
+            *ptr++ = upper < 10 ? upper + '0' : upper - 10 + 'A';
+            char lower = value % 16;
+            *ptr++ = lower < 10 ? lower + '0' : lower - 10 + 'A';
+        } else {
+            int j = 0;
+            for (; j < 9; j++) {
+                if (buffer[i] == esc_char[j]) {
+                    *ptr++ = '\\';
+                    *ptr++ = essc_str[j];
+                    break;
+                }
+            }
+            if (j >= 9) {
+                *ptr++ = buffer[i];
             }
         }
-        if(j >= 9) {
-            *ptr++ = buffer[i];
-        }
     }
-    *ptr='\0';
+    *ptr = '\0';
     return dest;
 }
 
@@ -42,7 +52,6 @@ void write_char(FILE* out, char value) {
     char* result = escape(buffer);
     fprintf(out, asString, result);
     free(result);
-
 }
 
 void write_signed_char(FILE* out, signed char value) {
