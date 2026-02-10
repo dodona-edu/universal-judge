@@ -45,6 +45,7 @@ from tested.serialisation import (
     Value,
 )
 from tested.testsuite import (
+    ContentPath,
     Context,
     CustomCheckOracle,
     EmptyChannel,
@@ -88,9 +89,22 @@ class ReturnOracle(dict):
     pass
 
 
+class ContentPathString(str):
+    pass
+
+
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | ContentPathString
 )
 
 
@@ -138,6 +152,12 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     return ReturnOracle(result)
 
 
+def _return_path(loader: yaml.Loader, node: yaml.Node) -> ContentPathString:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(result, str), f"A path must be a string, got {result}"
+    return ContentPathString(result)
+
+
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
@@ -148,6 +168,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!path", _return_path, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -187,6 +208,10 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
 
+def is_path(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ContentPathString)
+
+
 def load_schema_validator(
     dsl_object: YamlObject = None, file: str = "schema-strict.json"
 ) -> Validator:
@@ -215,9 +240,13 @@ def load_schema_validator(
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    type_checker = original_validator.TYPE_CHECKER.redefine_many(
+        {
+            "oracle": is_oracle,
+            "expression": is_expression,
+            "path": is_path,
+        }
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(
         validate_tested_dsl_expression
@@ -469,16 +498,16 @@ def _convert_text_output_channel(
         data = raw_data
 
     if isinstance(stream, str):
-        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+        return TextOutputChannel(content=data, oracle=GenericTextOracle(options=config))
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
             return TextOutputChannel(
-                data=data, oracle=GenericTextOracle(options=config)
+                content=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
             return TextOutputChannel(
-                data=data, oracle=_convert_custom_check_oracle(stream)
+                content=data, oracle=_convert_custom_check_oracle(stream)
             )
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
@@ -599,8 +628,33 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            assert isinstance(testcase["stdin"], str)
-            stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
+            if isinstance(testcase["stdin"], dict):
+                stdin_object = testcase["stdin"]
+                raw_content = stdin_object.get("content")
+                raw_path = stdin_object.get("path")
+
+                if isinstance(raw_content, ContentPathString):
+                    file_content = ContentPath(path=raw_content)
+                elif isinstance(raw_content, str):
+                    file_content = _ensure_trailing_newline(raw_content)
+                elif isinstance(raw_path, str):
+                    file_content = ContentPath(path=raw_path)
+                else:
+                    assert (
+                        False
+                    ), f"Invalid stdin content is required but got {type(raw_content)}"
+
+                assert raw_path is None or isinstance(
+                    raw_path, str
+                ), "Path must be a string if given."
+
+                file_path = raw_path
+            else:
+                assert isinstance(testcase["stdin"], str)
+                file_content = _ensure_trailing_newline(testcase["stdin"])
+                file_path = None
+
+            stdin = TextData(content=file_content, path=file_path)
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
