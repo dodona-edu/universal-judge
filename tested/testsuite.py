@@ -247,15 +247,19 @@ def _resolve_path(working_directory, file_path):
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
-    data: str
+    data: str | None
+    path: str = ""
     type: TextChannelType = TextChannelType.TEXT
 
     def get_data_as_string(self, working_directory: Path) -> str:
         """Get the data as a string, reading the file if necessary."""
-        if self.type == TextChannelType.TEXT:
+        if self.data is not None:
             return self.data
+
+        if self.type == TextChannelType.TEXT:
+            return ""
         elif self.type == TextChannelType.FILE:
-            file_path = _resolve_path(working_directory, self.data)
+            file_path = _resolve_path(working_directory, self.path)
             with open(file_path, "r") as file:
                 return file.read()
         else:
@@ -274,14 +278,23 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
+@define(frozen=True)
+class OutputFileData:
+    content_type: TextChannelType
+    content: str
+    path: str
+    oracle: GenericTextOracle | CustomCheckOracle = field(
+        factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
+    )
+
+
 @fallback_field(get_converter(), {"evaluator": "oracle"})
 @ignore_field(get_converter(), "show_expected")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    expected_path: str  # Path to the file to compare to.
-    actual_path: str  # Path to the generated file (by the user code)
+    output_data: list[OutputFileData]
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -290,9 +303,16 @@ class FileOutputChannel(WithFeatures):
         return NOTHING
 
     def get_data_as_string(self, resources: Path) -> str:
-        file_path = _resolve_path(resources, self.expected_path)
-        with open(file_path, "r") as file:
-            return file.read()
+        file_content = []
+        for i in range(len(self.output_data)):
+            output_data = self.output_data[i]
+            if output_data.content_type == TextChannelType.FILE:
+                file_path = _resolve_path(resources, output_data.content)
+                with open(file_path, "r") as file:
+                    file_content.append(f"{file.read()}")
+            else:
+                file_content.append(f"{output_data.content[i]}")
+        return "\n".join(file_content)
 
 
 @fallback_field(get_converter(), {"evaluator": "oracle"})
@@ -412,7 +432,11 @@ class IgnoredChannel(WithFeatures, StrEnum):
 SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
 OracleOutputChannel = Union[
-    TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
+    TextOutputChannel,
+    FileOutputChannel,
+    OutputFileData,
+    ValueOutputChannel,
+    ExceptionOutputChannel,
 ]
 
 NormalOutputChannel = OracleOutputChannel | ExitCodeOutputChannel
@@ -528,9 +552,9 @@ class MainInput(WithFeatures, WithFunctions):
 
 
 @define(frozen=True)
-class FileUrl:
-    url: str
-    name: str
+class InputFile:
+    path: str
+    content: str = ""
 
 
 @ignore_field(get_converter(), "essential")
@@ -557,7 +581,7 @@ class Testcase(WithFeatures, WithFunctions):
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
     output: Output = field(factory=Output)
-    link_files: list[FileUrl] = field(factory=list)
+    input_files: list[InputFile] = field(factory=list)
     line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
@@ -665,10 +689,10 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> set[FileUrl]:
+    def get_files(self) -> set[InputFile]:
         all_files = set()
         for t in self.testcases:
-            all_files = all_files.union(t.link_files)
+            all_files = all_files.union(t.input_files)
         return all_files
 
 

@@ -29,11 +29,14 @@ def run(config: DodonaConfig, judge_output: IO):
 
     _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")
+    messages = set()
     if is_yaml:
-        suite = parse_dsl(textual_suite)
+        suite_with_message = parse_dsl(textual_suite, config.workdir)
+        messages = suite_with_message.messages
+        suite = suite_with_message.data
     else:
         suite = parse_test_suite(textual_suite)
-    pack = create_bundle(config, judge_output, suite)
+    pack = create_bundle(config, judge_output, suite, messages=messages)
     from .judge import judge
 
     judge(pack)
