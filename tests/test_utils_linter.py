@@ -88,7 +88,11 @@ def test_get_linter_position_multi_line_0based():
 
 def test_get_linter_position_invalid_rows():
     result = get_linter_position(
-        raw_start_row=5, source_offset=0, raw_end_row=3, raw_start_column=None, raw_end_column=None
+        raw_start_row=5,
+        source_offset=0,
+        raw_end_row=3,
+        raw_start_column=None,
+        raw_end_column=None,
     )
     assert result.rows is None
 
