@@ -553,6 +553,7 @@ class Testcase(WithFeatures, WithFunctions):
     Do note that the first and last testcase may be the same if there is only
     one testcase present.
     """
+    __test__ = False  # Prevent pytest warning
 
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
