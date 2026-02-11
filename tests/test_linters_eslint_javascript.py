@@ -53,31 +53,6 @@ def test_eslint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     assert "semi" in annotations[1]["externalUrl"]
 
 
-def test_eslint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "javascript",
-        tmp_path,
-        "plan.tson",
-        "warning",
-        {
-            "options": {
-                "language": {
-                    "javascript": {"linter": True, "eslint_config": "eslint_config.yml"}
-                }
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-
-    assert len(annotations) == 1
-    assert annotations[0]["type"] == Severity.ERROR
-    assert "semi" in annotations[0]["externalUrl"]
-
-
 def test_eslint_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):

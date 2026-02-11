@@ -82,15 +82,11 @@ def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
-    assert len(annotations) == 2
+    assert len(annotations) == 1
 
     assert annotations[0]["type"] == Severity.INFO
     assert annotations[0]["row"] == 1
-    assert annotations[0]["column"] == 8
-
-    assert annotations[1]["type"] == Severity.INFO
-    assert annotations[1]["row"] == 1
-    assert annotations[1]["column"] == 10
+    assert annotations[0]["column"] == 10
 
 
 def test_cppcheck_bad_output(

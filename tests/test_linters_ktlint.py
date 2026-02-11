@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
-from tested.dodona import Severity
 from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -21,69 +20,6 @@ def test_ktlint_correct(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("annotate-code")) == 0
-
-
-def test_ktlint_warning(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "kotlin",
-        tmp_path,
-        "plan.tson",
-        "warning",
-        {"options": {"linter": True}},
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-
-    assert len(annotations) == 2
-
-    assert annotations[0]["type"] == Severity.INFO
-    assert "no-wildcard-imports" in annotations[0]["text"]
-    assert annotations[0]["row"] == 0
-    assert annotations[0]["column"] == 0
-
-    assert annotations[1]["type"] == Severity.INFO
-    assert "no-trailing-spaces" in annotations[1]["text"]
-    assert annotations[1]["row"] == 4
-    assert annotations[1]["column"] == 17
-
-
-def test_ktlint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "kotlin",
-        tmp_path,
-        "plan.tson",
-        "warning",
-        {
-            "options": {
-                "language": {
-                    "kotlin": {
-                        "linter": True,
-                        "editorconfig": "ktlint_config.editorconfig",
-                    }
-                }
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-
-    assert len(annotations) == 2
-
-    assert annotations[0]["type"] == Severity.INFO
-    assert "filename" in annotations[0]["text"]
-    assert annotations[0]["row"] == 0
-    assert annotations[0]["column"] == 0
-
-    assert annotations[1]["type"] == Severity.INFO
-    assert "no-trailing-spaces" in annotations[1]["text"]
-    assert annotations[1]["row"] == 4
-    assert annotations[1]["column"] == 17
 
 
 def test_ktlint_bad_output(

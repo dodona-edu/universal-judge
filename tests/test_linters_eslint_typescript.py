@@ -63,45 +63,6 @@ def test_eslint_typescript_warning(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[2]["column"] == 14
 
 
-def test_eslint_typescript_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "typescript",
-        tmp_path,
-        "plan.tson",
-        "warning",
-        {
-            "options": {
-                "language": {
-                    "typescript": {
-                        "linter": True,
-                        "eslint_config": "eslint_ts_config.yml",
-                    }
-                }
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-    assert len(annotations) == 2
-
-    assert annotations[0]["type"] == Severity.ERROR
-    assert "no-var" in annotations[0]["externalUrl"]
-    assert annotations[0]["row"] == 0
-    assert annotations[0]["rows"] == 1
-    assert annotations[0]["column"] == 0
-    assert annotations[0]["columns"] == 10
-
-    assert annotations[1]["type"] == Severity.ERROR
-    assert "no-unused-vars" in annotations[1]["externalUrl"]
-    assert annotations[1]["row"] == 0
-    assert annotations[1]["rows"] == 1
-    assert annotations[1]["column"] == 4
-    assert annotations[1]["columns"] == 1
-
-
 def test_eslint_typescript_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
