@@ -6,6 +6,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ message_categories = {
 
 
 def run_shellcheck(
-    config: DodonaConfig, remaining: float, language: str = "bash"
+    config: DodonaConfig, remaining: float
 ) -> tuple[list[Message], list[AnnotateCode]]:
     """
     Calls shellcheck to annotate submitted source code and adds resulting score and
@@ -40,7 +41,7 @@ def run_shellcheck(
             "-f",
             "json1",
             "-s",
-            language,
+            "bash",
             str(submission.absolute()),
         ],
     )
@@ -80,28 +81,25 @@ def run_shellcheck(
         external = None
         if code:
             external = f"https://github.com/koalaman/shellcheck/wiki/SC{code}"
-        start_row = shellcheck_object.get("line", 1)
-        end_row = shellcheck_object.get("endLine")
-        rows = end_row + 1 - start_row if end_row else None
-        start_col = shellcheck_object.get("column", 1)
-        end_col = shellcheck_object.get("endColumn")
-        cols = end_col - start_col if end_col else None
-        if cols and cols < 1:
-            cols = 1
+
+        position = get_linter_position(
+            raw_start_row=shellcheck_object.get("line"),
+            source_offset=config.source_offset,
+            raw_end_row=shellcheck_object.get("endLine"),
+            raw_start_column=shellcheck_object.get("column"),
+            raw_end_column=shellcheck_object.get("endColumn"),
+            end_column_inclusive=False,
+        )
+
         annotations.append(
-            AnnotateCode(
-                row=start_row + config.source_offset - 1,
-                rows=rows,
+            annotation_from_position(
+                position=position,
                 text=text,
-                externalUrl=external,
-                column=start_col - 1,
-                columns=cols,
                 type=message_categories.get(
                     shellcheck_object.get("level", "warning"), Severity.WARNING
                 ),
+                external_url=external,
             )
         )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations
