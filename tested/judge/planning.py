@@ -62,26 +62,37 @@ class PlannedExecutionUnit:
     def has_exit_testcase(self) -> bool:
         return self.contexts[-1].context.has_exit_testcase()
 
-    def get_dynamically_generated_files(self) -> DynamicallyGeneratedFile | None:
-        if not self.has_main_testcase():
-            return None
+    def get_dynamically_generated_files(self) -> list[DynamicallyGeneratedFile]:
+        generated_files = set()
 
-        stdin = cast(MainInput, self.contexts[0].context.testcases[0].input).stdin
+        for context in self.contexts:
+            for testcase in context.context.testcases:
+                if (
+                    isinstance(testcase.input, MainInput)
+                    and testcase.input.stdin != EmptyChannel.NONE
+                    and testcase.input.stdin.is_dynamically_generated()
+                    and testcase.input.stdin.path is not None
+                ):
+                    generated_files.add(
+                        DynamicallyGeneratedFile(
+                            path=testcase.input.stdin.path,
+                            content=testcase.input.stdin.content,
+                        )
+                    )
 
-        if stdin == EmptyChannel.NONE:
-            return None
+                for input_file in testcase.input_files:
+                    if (
+                        input_file.is_dynamically_generated()
+                        and input_file.path is not None
+                    ):
+                        generated_files.add(
+                            DynamicallyGeneratedFile(
+                                path=input_file.path,
+                                content=input_file.content,
+                            )
+                        )
 
-        if not stdin.is_dynamically_generated():
-            return None
-
-        # For type checking, in the future should be removable.
-        if stdin.path is None:
-            return None
-
-        return DynamicallyGeneratedFile(
-            path=stdin.path,
-            content=stdin.content,
-        )
+        return sorted(generated_files, key=lambda f: (f.path, f.content))
 
 
 @define

@@ -183,8 +183,8 @@ def set_up_unit(
         destination.hardlink_to(origin)
 
     # Create dynamically generated files if necessary.
-    dynamically_generated_file = unit.get_dynamically_generated_files()
-    if dynamically_generated_file is not None:
+    dynamically_generated_files = unit.get_dynamically_generated_files()
+    for dynamically_generated_file in dynamically_generated_files:
         destination = execution_dir / dynamically_generated_file.path
 
         if isinstance(dynamically_generated_file.content, ContentPath):

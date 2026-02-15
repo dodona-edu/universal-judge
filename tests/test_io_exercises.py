@@ -34,15 +34,15 @@ def test_io_exercise_stdin(language: str, tmp_path: Path, pytestconfig: pytest.C
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_io_exercise_stdin_dynamic_file(
+def test_io_exercise_input_dynamic_file(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "plan-dynamic.yaml", "correct"
+        pytestconfig, "echo", language, tmp_path, "plan-dynamic.yaml", "correct-files"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 4
+    assert updates.find_status_enum() == ["correct"] * 6
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
