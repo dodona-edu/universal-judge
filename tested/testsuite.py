@@ -248,7 +248,7 @@ def _data_to_content_converter(data: str | None, full: Any) -> str | ContentPath
 
 @fallback_field({"data": ("content", _data_to_content_converter)})
 @ignore_field("type")
-@define
+@define(frozen=True)
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
@@ -284,7 +284,7 @@ class TextData(WithFeatures):
     }
 )
 @ignore_field("show_expected", "type")
-@define
+@define(frozen=True)
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
 
@@ -550,6 +550,25 @@ class FileUrl:
     name: str
 
 
+def _file_url_to_text_data_converter(value: Any, _: Any) -> list[dict]:
+    if isinstance(value, list):
+        converted = []
+
+        for item in value:
+            if "name" in item and "url" in item:
+                converted.append(
+                    {
+                        "path": item["name"],
+                        "content": ContentPath(path=item["url"]),
+                    }
+                )
+
+        return converted
+    else:
+        return []
+
+
+@fallback_field({"link_files": ("input_files", _file_url_to_text_data_converter)})
 @ignore_field("essential")
 @define
 class Testcase(WithFeatures, WithFunctions):
@@ -574,7 +593,7 @@ class Testcase(WithFeatures, WithFunctions):
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
     output: Output = field(factory=Output)
-    link_files: list[FileUrl] = field(factory=list)
+    input_files: list[TextData] = field(factory=list)
     line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
@@ -604,7 +623,7 @@ class Testcase(WithFeatures, WithFunctions):
             EmptyChannel.NONE,
             IgnoredChannel.IGNORED,
         ):
-            raise ValueError("You cannot expected a return value from a statement.")
+            raise ValueError("You cannot expect a return value from a statement.")
 
     def is_main_testcase(self):
         return isinstance(self.input, MainInput)
@@ -682,10 +701,10 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> set[FileUrl]:
+    def get_files(self) -> set[TextData]:
         all_files = set()
         for t in self.testcases:
-            all_files = all_files.union(t.link_files)
+            all_files = all_files.union(t.input_files)
         return all_files
 
 

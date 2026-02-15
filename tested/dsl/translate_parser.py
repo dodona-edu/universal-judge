@@ -597,6 +597,35 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
+def _convert_text_data(stream: YamlDict) -> TextData:
+    raw_content = stream.get("content")
+    raw_path = stream.get("path")
+
+    if isinstance(raw_content, ContentPathString):
+        file_content = ContentPath(path=raw_content)
+    elif isinstance(raw_content, str):
+        file_content = _ensure_trailing_newline(raw_content)
+    elif isinstance(raw_path, str):
+        file_content = ContentPath(path=raw_path)
+    else:
+        assert (
+            False
+        ), f"Invalid text data content is required but got {type(raw_content)}"
+
+    assert raw_path is None or isinstance(
+        raw_path, str
+    ), "Path must be a string if given."
+    file_path = raw_path
+
+    return TextData(content=file_content, path=file_path)
+
+
+def _convert_text_data_required_path(stream: YamlDict) -> TextData:
+    text_data = _convert_text_data(stream)
+    assert text_data.path is not None, "Path is required"
+    return TextData(content=text_data.content, path=text_data.path)
+
+
 def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     context = context.deepen_context(testcase)
 
@@ -630,37 +659,31 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         if "stdin" in testcase:
             if isinstance(testcase["stdin"], dict):
                 stdin_object = testcase["stdin"]
-                raw_content = stdin_object.get("content")
-                raw_path = stdin_object.get("path")
-
-                if isinstance(raw_content, ContentPathString):
-                    file_content = ContentPath(path=raw_content)
-                elif isinstance(raw_content, str):
-                    file_content = _ensure_trailing_newline(raw_content)
-                elif isinstance(raw_path, str):
-                    file_content = ContentPath(path=raw_path)
-                else:
-                    assert (
-                        False
-                    ), f"Invalid stdin content is required but got {type(raw_content)}"
-
-                assert raw_path is None or isinstance(
-                    raw_path, str
-                ), "Path must be a string if given."
-
-                file_path = raw_path
+                stdin = _convert_text_data(stdin_object)
             else:
                 assert isinstance(testcase["stdin"], str)
                 file_content = _ensure_trailing_newline(testcase["stdin"])
-                file_path = None
-
-            stdin = TextData(content=file_content, path=file_path)
+                stdin = TextData(content=file_content, path=None)
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
         assert isinstance(arguments, list)
         the_input = MainInput(stdin=stdin, arguments=arguments)
         return_channel = None
+
+    if "input_files" in testcase:
+        assert isinstance(testcase["input_files"], list)
+
+        input_files = []
+        for file_object in testcase["input_files"]:
+            input_files.append(_convert_text_data_required_path(file_object))
+    elif len(context.files) > 0:  # Backwards compatibility.
+        input_files = [
+            TextData(content=ContentPath(path=file.url), path=file.name)
+            for file in context.files
+        ]
+    else:
+        input_files = []
 
     output = Output()
 
@@ -718,7 +741,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         description=the_description,
         input=the_input,
         output=output,
-        link_files=context.files,
+        input_files=input_files,
         line_comment=line_comment,
     )
 

@@ -17,3 +17,17 @@
         path: "input.txt"
         content: "This is overwritten."
       stdout: "This is overwritten."
+    - stdin:
+        path: "input.txt"
+        content: "This is overwritten."
+      input_files:
+        - path: "input2.txt"
+          content: "This is overwritten AGAIN."
+      stdout: "This is overwritten AGAIN."
+    - stdin: "fallback"
+      input_files:
+        - path: "input2.txt"
+          content: "First file"
+        - path: "other.txt"
+          content: "Second file"
+      stdout: "First file"

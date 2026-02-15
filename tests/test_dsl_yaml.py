@@ -39,6 +39,7 @@ from tested.testsuite import (
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
+    TextData,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -1193,9 +1194,9 @@ def test_files_are_propagated():
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
-    assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+    assert set(test0.input_files) == {
+        TextData(path="test", content=ContentPath("test.md")),
+        TextData(path="two", content=ContentPath("two.md")),
     }
 
 
@@ -1400,3 +1401,50 @@ tabs:
 
     assert stdin_def.path == "hello.txt"
     assert stdin_def.content == "hello\n"
+
+
+def test_input_files_new_format():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "InputFiles"
+    testcases:
+      - expression: "test()"
+        input_files:
+          - path: "data.txt"
+            content: "hello"
+          - path: "config.json"
+            content: !path "configs/test.json"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert len(testcase.input_files) == 2
+    assert testcase.input_files[0].path == "data.txt"
+    assert testcase.input_files[0].content == "hello\n"
+    assert testcase.input_files[1].path == "config.json"
+    assert testcase.input_files[1].content.path == "configs/test.json"
+
+
+def test_input_files_missing_path_fails():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "InputFiles"
+    testcases:
+      - expression: "test()"
+        input_files:
+          - content: "hello"
+    """
+    with pytest.raises(ExceptionGroup) as excinfo:
+        translate_to_test_suite(yaml_str)
+
+    def check_error(exc):
+        if "path" in str(exc):
+            return True
+        if isinstance(exc, ExceptionGroup):
+            return any(check_error(e) for e in exc.exceptions)
+        return False
+
+    assert check_error(excinfo.value)

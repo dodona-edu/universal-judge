@@ -192,3 +192,34 @@ def test_reverse_decorator_order():
     # If ignore runs first, this should fail because "new" is missing.
     with pytest.raises(Exception):
         get_converter().structure(data, ReverseOrderTest)
+
+
+def test_testcase_legacy_link_files():
+    # A testcase with a dummy input and a legacy "link_files" field.
+    data = {
+        "input": {"arguments": [], "main_call": True},
+        "link_files": [
+            {"url": "path/to/data.txt", "name": "data.txt"},
+            {"url": "another/path.json", "name": "data.json"},
+        ],
+    }
+
+    # Parse the data into a Testcase object.
+    result = get_converter().structure(data, Testcase)
+
+    # Verify the 'input_files' field is correctly populated.
+    assert len(result.input_files) == 2
+
+    # Check the first file.
+    file1 = result.input_files[0]
+    assert isinstance(file1, TextData)
+    assert file1.path == "data.txt"
+    assert isinstance(file1.content, ContentPath)
+    assert file1.content.path == "path/to/data.txt"
+
+    # Check the second file.
+    file2 = result.input_files[1]
+    assert isinstance(file2, TextData)
+    assert file2.path == "data.json"
+    assert isinstance(file2.content, ContentPath)
+    assert file2.content.path == "another/path.json"
