@@ -73,6 +73,7 @@ def test_shellcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[0]["row"] == 1
     assert annotations[0]["rows"] == 1
     assert annotations[0]["column"] == 0
+    assert annotations[0]["columns"] == 0
 
 
 def test_shellcheck_info(tmp_path: Path, pytestconfig: pytest.Config):

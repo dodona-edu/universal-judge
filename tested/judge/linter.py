@@ -118,7 +118,7 @@ def get_linter_position(
             columns = source_end_column - source_start_column + column_adjustment
 
         # Ignore invalid columns calculations
-        columns = None if columns < 1 else columns
+        columns = None if columns < 0 else columns
 
     return AnnotationLocation(row, rows, column, columns)
 

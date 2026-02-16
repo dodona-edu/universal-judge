@@ -89,10 +89,7 @@
               "type": "integer",
               "minimum": 1
             },
-            "columns": {
-              "type": "integer",
-              "minimum": 1
-            }
+            "columns": { "type": "integer" }
         }
     },
     "escalate-status": {

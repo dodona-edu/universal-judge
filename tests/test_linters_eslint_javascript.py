@@ -50,6 +50,7 @@ def test_eslint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[1]["row"] == 1
     assert annotations[1]["rows"] == 2
     assert annotations[1]["column"] == 14
+    assert annotations[1]["columns"] == 0
     assert "semi" in annotations[1]["externalUrl"]
 
 
@@ -105,3 +106,4 @@ def test_eslint_multiline(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[1]["row"] == 7
     assert annotations[1]["rows"] == 2
     assert annotations[1]["column"] == 3
+    assert annotations[1]["columns"] == 0

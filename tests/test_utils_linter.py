@@ -186,7 +186,7 @@ def test_get_linter_position_multi_line_zero_column():
         raw_start_column=1,
         raw_end_column=0,
     )
-    assert result == AnnotationLocation(row=0, rows=2, column=0, columns=None)
+    assert result == AnnotationLocation(row=0, rows=2, column=0, columns=0)
 
 
 def test_get_linter_position_start_column_zero_1based():
@@ -197,7 +197,7 @@ def test_get_linter_position_start_column_zero_1based():
         raw_start_column=2,
         raw_end_column=1,
     )
-    assert result == AnnotationLocation(row=0, rows=1, column=1, columns=None)
+    assert result == AnnotationLocation(row=0, rows=1, column=1, columns=0)
 
 
 def test_get_linter_position_multi_line_exclusive_1based():

@@ -61,6 +61,7 @@ def test_eslint_typescript_warning(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[2]["row"] == 2
     assert annotations[2]["rows"] == 2
     assert annotations[2]["column"] == 14
+    assert annotations[2]["columns"] == 0
 
 
 def test_eslint_typescript_bad_output(
