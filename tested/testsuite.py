@@ -24,7 +24,12 @@ from tested.features import (
     WithFeatures,
     combine_features,
 )
-from tested.parsing import fallback_field, ignore_field
+from tested.parsing import (
+    custom_fallback_field,
+    fallback_field,
+    get_converter,
+    ignore_field,
+)
 from tested.serialisation import (
     Expression,
     FunctionCall,
@@ -176,7 +181,7 @@ class CustomCheckOracle:
             raise ValueError("At least one language is required.")
 
 
-@fallback_field({"evaluators": "functions"})
+@fallback_field(get_converter(), {"evaluators": "functions"})
 @define
 class LanguageSpecificOracle:
     """
@@ -221,6 +226,12 @@ class LanguageSpecificOracle:
             raise ValueError("At least one language-specific oracle is required.")
 
 
+@unique
+class TextChannelType(StrEnum):
+    TEXT = "text"  # Literal values
+    FILE = "file"  # Path to a file
+
+
 def _resolve_path(working_directory, file_path):
     """
     Resolve a path to an absolute path. Relative paths will be resolved against
@@ -232,58 +243,30 @@ def _resolve_path(working_directory, file_path):
         return path.abspath(path.join(working_directory, file_path))
 
 
-@define(frozen=True)
-class ContentPath:
-    path: str
-
-
-def _data_to_content_converter(data: str | None, full: Any) -> str | ContentPath | None:
-    if isinstance(data, str):
-        if full.get("type") == "file":
-            return ContentPath(path=data)
-        return data
-
-    return data
-
-
-@fallback_field({"data": ("content", _data_to_content_converter)})
-@ignore_field("type")
 @define
 class TextData(WithFeatures):
     """Describes textual data: either directly or in a file."""
 
-    content: ContentPath | str
-
-    # For input files: The filename shown in the description.
-    # For output files: The filename the student is expected to generate.
-    # For stdin: The filename shown in the description (e.g. "< hello.txt").
-    # For stdout/stderr: None
-    path: str | None = None
+    data: str
+    type: TextChannelType = TextChannelType.TEXT
 
     def get_data_as_string(self, working_directory: Path) -> str:
-        if isinstance(self.content, ContentPath):
-            file_path = _resolve_path(working_directory, self.content.path)
+        """Get the data as a string, reading the file if necessary."""
+        if self.type == TextChannelType.TEXT:
+            return self.data
+        elif self.type == TextChannelType.FILE:
+            file_path = _resolve_path(working_directory, self.data)
             with open(file_path, "r") as file:
                 return file.read()
         else:
-            return self.content
-
-    def is_dynamically_generated(self) -> bool:
-        return self.path is not None and not (
-            isinstance(self.content, ContentPath) and self.content.path == self.path
-        )
+            raise AssertionError(f"Unknown enum type {self.type}")
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
 
 
-@fallback_field(
-    {
-        "data": ("content", _data_to_content_converter),
-        "evaluator": "oracle",
-    }
-)
-@ignore_field("show_expected", "type")
+@fallback_field(get_converter(), {"evaluator": "oracle"})
+@ignore_field(get_converter(), "show_expected")
 @define
 class TextOutputChannel(TextData):
     """Describes the output for textual channels."""
@@ -291,8 +274,8 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
-@fallback_field({"evaluator": "oracle"})
-@ignore_field("show_expected")
+@fallback_field(get_converter(), {"evaluator": "oracle"})
+@ignore_field(get_converter(), "show_expected")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
@@ -312,8 +295,8 @@ class FileOutputChannel(WithFeatures):
             return file.read()
 
 
-@fallback_field({"evaluator": "oracle"})
-@ignore_field("show_expected")
+@fallback_field(get_converter(), {"evaluator": "oracle"})
+@ignore_field(get_converter(), "show_expected")
 @define
 class ValueOutputChannel(WithFeatures):
     """Handles return values of function calls."""
@@ -374,8 +357,8 @@ class ExpectedException(WithFeatures):
             return type_
 
 
-@fallback_field({"evaluator": "oracle"})
-@ignore_field("show_expected")
+@fallback_field(get_converter(), {"evaluator": "oracle"})
+@ignore_field(get_converter(), "show_expected")
 @define
 class ExceptionOutputChannel(WithFeatures):
     """Handles exceptions caused by the submission."""
@@ -395,7 +378,7 @@ class ExceptionOutputChannel(WithFeatures):
             raise ValueError("The generic oracle needs a channel exception.")
 
 
-@ignore_field("show_expected")
+@ignore_field(get_converter(), "show_expected")
 @define
 class ExitCodeOutputChannel(WithFeatures):
     """Handles exit codes."""
@@ -550,7 +533,7 @@ class FileUrl:
     name: str
 
 
-@ignore_field("essential")
+@ignore_field(get_converter(), "essential")
 @define
 class Testcase(WithFeatures, WithFunctions):
     """
@@ -635,7 +618,7 @@ class Testcase(WithFeatures, WithFunctions):
 Code = dict[str, TextData]
 
 
-@ignore_field("link_files")
+@ignore_field(get_converter(), "link_files")
 @define
 class Context(WithFeatures, WithFunctions):
     """
@@ -689,7 +672,7 @@ class Context(WithFeatures, WithFunctions):
         return all_files
 
 
-def _runs_to_tab_converter(runs: list | None, _):
+def _runs_to_tab_converter(runs: list | None):
     assert isinstance(runs, list), "The field 'runs' must be a list."
     contexts = []
     for run in runs:
@@ -701,7 +684,7 @@ def _runs_to_tab_converter(runs: list | None, _):
     return contexts
 
 
-@fallback_field({"runs": ("contexts", _runs_to_tab_converter)})
+@custom_fallback_field(get_converter(), {"runs": ("contexts", _runs_to_tab_converter)})
 @define
 class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""

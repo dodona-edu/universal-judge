@@ -783,7 +783,7 @@ def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Co
     )
     the_input = Testcase(
         input=MainInput(
-            arguments=["hello"], stdin=TextData(content="One line\nSecond line\n")
+            arguments=["hello"], stdin=TextData(data="One line\nSecond line\n")
         )
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
@@ -806,9 +806,7 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
         "top-level-output",
     )
     the_input = Testcase(
-        input=MainInput(
-            arguments=["hello"], stdin=TextData(content="One line\nSTDIN\n")
-        )
+        input=MainInput(arguments=["hello"], stdin=TextData(data="One line\nSTDIN\n"))
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)

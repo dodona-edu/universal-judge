@@ -128,16 +128,12 @@ def get_readable_input(
         args = f"$ {command}"
         # Determine the stdin
         if isinstance(case.input.stdin, TextData):
-            if case.input.stdin.path is not None:
-                stdin = Path(case.input.stdin.path)
-            else:
-                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
 
-        if stdin and isinstance(stdin, Path):
-            text = f"${args} < {stdin}"
-        elif case.input.arguments and stdin:
+        # If we have both stdin and arguments, we use a here-document.
+        if case.input.arguments and stdin:
             assert stdin[-1] == "\n", "stdin must end with a newline"
             delimiter = _get_heredoc_token(stdin)
             text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
