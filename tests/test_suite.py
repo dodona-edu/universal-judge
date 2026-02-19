@@ -89,7 +89,7 @@ def test_input_deprecated_attribute_is_accepted():
     """
     result = get_converter().loads(scheme, MainInput)
     assert isinstance(result.stdin, TextData)
-    assert result.stdin.content == "input-1"
+    assert result.stdin.data == "input-1"
 
 
 def test_text_show_expected_is_accepted():
@@ -101,7 +101,7 @@ def test_text_show_expected_is_accepted():
     }
     """
     result = get_converter().loads(scheme, TextOutputChannel)
-    assert result.content == "hallo"
+    assert result.data == "hallo"
 
 
 def test_file_show_expected_is_accepted():

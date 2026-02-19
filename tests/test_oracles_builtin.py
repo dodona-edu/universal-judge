@@ -46,7 +46,7 @@ def oracle_config(
 
 def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
-    channel = TextOutputChannel(content="expected")
+    channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -60,7 +60,7 @@ def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_text_oracle_whitespace(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": True})
-    channel = TextOutputChannel(content="expected")
+    channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "expected      ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -74,7 +74,7 @@ def test_text_oracle_whitespace(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"caseInsensitive": True})
-    channel = TextOutputChannel(content="expected")
+    channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "Expected")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -90,7 +90,7 @@ def test_text_oracle_combination(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"caseInsensitive": True, "ignoreWhitespace": True}
     )
-    channel = TextOutputChannel(content="expected")
+    channel = TextOutputChannel(data="expected")
     result = evaluate_text(config, channel, "Expected     ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -106,7 +106,7 @@ def test_text_oracle_rounding(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"tryFloatingPoint": True, "applyRounding": True}
     )
-    channel = TextOutputChannel(content="1.333")
+    channel = TextOutputChannel(data="1.333")
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.333"
@@ -124,7 +124,7 @@ def test_text_oracle_round_to(tmp_path: Path, pytestconfig: pytest.Config):
         pytestconfig,
         {"tryFloatingPoint": True, "applyRounding": True, "roundTo": 1},
     )
-    channel = TextOutputChannel(content="1.3")
+    channel = TextOutputChannel(data="1.3")
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.3"
