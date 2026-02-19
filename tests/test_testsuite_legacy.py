@@ -192,3 +192,9 @@ def test_reverse_decorator_order():
     # If ignore runs first, this should fail because "new" is missing.
     with pytest.raises(Exception):
         get_converter().structure(data, ReverseOrderTest)
+
+
+def test_stdin_coercion():
+    data = {"type": "text", "data": 500000}
+    result = get_converter().structure(data, TextOutputChannel)
+    assert result.content == "500000"

@@ -237,13 +237,15 @@ class ContentPath:
     path: str
 
 
-def _data_to_content_converter(data: str | None, full: Any) -> str | ContentPath | None:
-    if isinstance(data, str):
-        if full.get("type") == "file":
-            return ContentPath(path=data)
-        return data
+def _data_to_content_converter(data: Any, full: Any) -> str | ContentPath | None:
+    if data is None:
+        return None
 
-    return data
+    if full.get("type") == "file":
+        return ContentPath(path=str(data))
+
+    # Some exercises rely on coercion :(, so we need to accept everything here.
+    return str(data)
 
 
 @fallback_field({"data": ("content", _data_to_content_converter)})
