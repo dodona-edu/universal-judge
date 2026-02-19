@@ -24,6 +24,28 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig: pytest.Config)
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_stdin(language: str, tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_stdin_dynamic_file(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "plan-dynamic.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 4
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
     result = execute_config(conf)
