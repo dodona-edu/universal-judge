@@ -324,7 +324,7 @@ def _process_results(
                 collector.add(CloseTab(), currently_open_tab)
             currently_open_tab = currently_open_tab + 1
             tab = bundle.suite.tabs[currently_open_tab]
-            collector.add(StartTab(title=tab.name, hidden=tab.hidden))
+            collector.add(StartTab(title=tab.name, hidden=tab.hidden, permission=tab.permission))
 
         # Handle the contexts.
         collector.add(StartContext(description=planned.context.description))

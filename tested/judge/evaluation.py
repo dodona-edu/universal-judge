@@ -487,7 +487,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 
     for tab in bundle.suite.tabs[tab_start:]:
         if context_start == 0 and testcase_start == 0:
-            collector.add(StartTab(title=tab.name, hidden=tab.hidden))
+            collector.add(StartTab(title=tab.name, hidden=tab.hidden, permission=tab.permission))
         assert tab.contexts
         for context in tab.contexts[context_start:]:
             updates: list[Update] = [

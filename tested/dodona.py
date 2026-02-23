@@ -17,15 +17,7 @@ from typing import IO, Literal, Union
 from attrs import define
 from cattrs.preconf.json import make_converter
 
-
-@unique
-class Permission(StrEnum):
-    """To which level of user this message is visible."""
-
-    STAFF = auto()
-    STUDENT = auto()
-    ZEUS = auto()
-
+from testsuite import Permission
 
 @define
 class ExtendedMessage:
