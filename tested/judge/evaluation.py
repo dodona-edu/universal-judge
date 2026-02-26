@@ -1,5 +1,6 @@
 import html
 import logging
+import urllib.parse
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
@@ -370,8 +371,9 @@ def link_files_message(
     for link_file in link_files:
         # TODO: handle inline files somehow.
         if link_file.path is not None and isinstance(link_file.content, ContentPath):
+            the_url = urllib.parse.quote(link_file.content.path)
             link_list.append(
-                f'<a href="{link_file.content.path}" class="file-link" target="_blank">'
+                f'<a href="{the_url}" class="file-link" target="_blank">'
                 f'<span class="code">{html.escape(link_file.path)}</span></a>'
             )
 
