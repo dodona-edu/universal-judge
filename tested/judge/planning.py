@@ -92,7 +92,13 @@ class PlannedExecutionUnit:
                             )
                         )
 
-        return sorted(generated_files, key=lambda f: (f.path, f.content))
+        return sorted(
+            generated_files,
+            key=lambda f: (
+                f.path,
+                f.content.path if isinstance(f.content, ContentPath) else f.content,
+            ),
+        )
 
 
 @define
