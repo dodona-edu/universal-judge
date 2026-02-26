@@ -381,7 +381,7 @@ def link_files_message(
     file_list_str = get_i18n_string(
         "judge.evaluation.files", count=len(link_list), files=file_list
     )
-    description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
+    description = f"<div class='contains-file'><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     return AppendMessage(message=message)
 
