@@ -112,41 +112,57 @@ def _evaluate_channel(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
     # Run the oracle.
-    evaluation_result = evaluator(output, actual if actual else "")
-    status = evaluation_result.result
+    # The file oracle produces multiple results if comparing multiple files.
+    evaluation_results = evaluator(output, actual if actual else "")
+    evaluation_results = (
+        [evaluation_results]
+        if not isinstance(evaluation_results, list)
+        else evaluation_results
+    )
 
-    # Decide if we should show this channel or not.
-    is_correct = status.enum == Status.CORRECT
-    should_report_case = should_show(output, channel, evaluation_result)
+    for evaluation_result in evaluation_results:
+        status = evaluation_result.result
 
-    if not should_report_case and is_correct:
-        # We do report that a test is correct, to set the status.
-        return False
+        # Decide if we should show this channel or not.
+        is_correct = status.enum == Status.CORRECT
+        should_report_case = should_show(output, channel, evaluation_result)
 
-    expected = evaluation_result.readable_expected
-    out.add(StartTest(expected=expected, channel=channel))
+        if not should_report_case and is_correct:
+            # We do report that a test is correct, to set the status.
+            return False
 
-    # Report any messages we received.
-    for message in evaluation_result.messages:
-        out.add(AppendMessage(message=message))
+        expected = evaluation_result.readable_expected
+        if evaluation_result.channel_override is not None:
+            display_channel = evaluation_result.channel_override
+        else:
+            display_channel = channel
 
-    missing = False
-    if actual is None:
-        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
-        missing = True
-    elif should_report_case and timeout and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.time-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
-    elif should_report_case and memory and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.memory-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
+        out.add(StartTest(expected=expected, channel=display_channel))
 
-    # Close the test.
-    out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+        # Report any messages we received.
+        for message in evaluation_result.messages:
+            out.add(AppendMessage(message=message))
 
-    return missing
+        missing = False
+        if actual is None:
+            out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
+            missing = True
+        elif should_report_case and timeout and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.time-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+        elif should_report_case and memory and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.memory-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+
+        # Close the test.
+        out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+
+        if missing:
+            return True
+
+    return False
 
 
 def evaluate_context_results(
@@ -432,14 +448,17 @@ def should_show(
         raise AssertionError(f"Unknown channel {channel}")
 
 
-def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
+def guess_expected_value(
+    bundle: Bundle, test: OutputChannel, file_index: int | None = None
+) -> str:
     """
     Try and get the expected value for an output channel. In some cases, such as
-    a programmed or language specific oracle, there will be no expected value
+    a programmed or language-specific oracle, there will be no expected value
     available in the test suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.
     :param test: The output channel.
+    :param file_index: Index of the file in the output channel, if applicable.
 
     :return: A best effort attempt of the expected value.
     """
@@ -448,7 +467,8 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     elif isinstance(test, TextOutputChannel):
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, FileOutputChannel):
-        return test.get_data_as_string(bundle.config.resources)
+        # We know file index will be set when we have a FileOutputChannel.
+        return test.get_data_as_string(bundle.config.resources, file_index or 0)
     elif isinstance(test, ExceptionOutputChannel):
         return (
             test.exception.readable(bundle.config.programming_language)
@@ -472,16 +492,36 @@ def _add_channel(
 ):
     """Add a channel to the output if it should be shown."""
     if should_show(output, channel):
-        updates.append(
-            StartTest(expected=guess_expected_value(bundle, output), channel=channel)
-        )
-        updates.append(
-            CloseTest(
-                generated="",
-                status=StatusMessage(enum=Status.NOT_EXECUTED),
-                accepted=False,
+        if isinstance(output, FileOutputChannel):
+            for i, file in enumerate(output.files):
+                if file.path is None:
+                    continue
+
+                updates.append(
+                    StartTest(
+                        expected=guess_expected_value(bundle, output), channel=file.path
+                    )
+                )
+                updates.append(
+                    CloseTest(
+                        generated="",
+                        status=StatusMessage(enum=Status.NOT_EXECUTED),
+                        accepted=False,
+                    )
+                )
+        else:
+            updates.append(
+                StartTest(
+                    expected=guess_expected_value(bundle, output), channel=channel
+                )
             )
-        )
+            updates.append(
+                CloseTest(
+                    generated="",
+                    status=StatusMessage(enum=Status.NOT_EXECUTED),
+                    accepted=False,
+                )
+            )
 
 
 def complete_evaluation(bundle: Bundle, collector: OutputManager):

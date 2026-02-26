@@ -530,14 +530,22 @@ def _convert_file_output_channel(
             "line",
         ), f"The file oracle only supports modes full and line, not {config['mode']}"
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
+            files=[
+                TextData(
+                    path=actual,
+                    content=ContentPath(path=expected),
+                )
+            ],
             oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
         )
     elif stream["oracle"] == "custom_check":
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
+            files=[
+                TextData(
+                    path=actual,
+                    content=ContentPath(path=expected),
+                )
+            ],
             oracle=_convert_custom_check_oracle(stream),
         )
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
