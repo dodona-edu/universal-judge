@@ -8,7 +8,12 @@ from typing import Any
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
+from tested.testsuite import (
+    OutputChannel,
+    OutputFileData,
+    TextChannelType,
+    TextOutputChannel,
+)
 
 
 def _is_number(string: str) -> float | None:
@@ -118,7 +123,7 @@ def evaluate_file(
 
     When no mode is passed, the oracle will default to ``full``.
     """
-    assert isinstance(channel, FileOutputChannel)
+    assert isinstance(channel, OutputFileData)
     options = _text_options(config)
 
     # There must be nothing as output.
@@ -134,15 +139,17 @@ def evaluate_file(
             messages=[message],
         )
 
-    expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
+    expected = channel.content
+    if channel.content_type == TextChannelType.FILE:
+        expected_path = f"{config.bundle.config.resources}/{expected}"
 
-    try:
-        with open(expected_path, "r") as file:
-            expected = file.read()
-    except FileNotFoundError:
-        raise ValueError(f"File {expected_path} not found in resources.")
+        try:
+            with open(expected_path, "r") as file:
+                expected = file.read()
+        except FileNotFoundError:
+            raise ValueError(f"File {expected_path} not found in resources.")
 
-    actual_path = config.context_dir / channel.actual_path
+    actual_path = config.context_dir / channel.path
 
     try:
         with open(str(actual_path), "r") as file:

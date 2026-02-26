@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import textwrap
 from collections.abc import Callable
@@ -31,7 +32,7 @@ from tested.datatypes import (
     StringTypes,
     resolve_to_basic,
 )
-from tested.dodona import ExtendedMessage
+from tested.dodona import ExtendedMessage, Permission
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
 from tested.parsing import get_converter, suite_to_json
 from tested.serialisation import (
@@ -53,23 +54,25 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     ExpectedException,
     FileOutputChannel,
-    FileUrl,
     GenericTextOracle,
     IgnoredChannel,
+    InputFile,
     LanguageLiterals,
     LanguageSpecificOracle,
     MainInput,
     Output,
+    OutputFileData,
     Suite,
     SupportedLanguage,
     Tab,
     Testcase,
     TextBuiltin,
+    TextChannelType,
     TextData,
     TextOutputChannel,
     ValueOutputChannel,
 )
-from tested.utils import get_args, recursive_dict_merge
+from tested.utils import DataWithMessage, get_args, recursive_dict_merge
 
 YamlDict = dict[str, "YamlObject"]
 
@@ -84,13 +87,26 @@ class ExpressionString(str):
     pass
 
 
+class PathString(str):
+    pass
+
+
 class ReturnOracle(dict):
     pass
 
 
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | PathString
 )
 
 
@@ -130,6 +146,12 @@ def _expression_string(loader: yaml.Loader, node: yaml.Node) -> ExpressionString
     return ExpressionString(result)
 
 
+def _path_string(loader: yaml.Loader, node: yaml.Node) -> PathString:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(result, str), f"A path must be a string, got {result}"
+    return PathString(result)
+
+
 def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     result = _parse_yaml_value(loader, node)
     assert isinstance(
@@ -148,6 +170,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!path", _path_string, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -187,6 +210,10 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
 
+def is_path(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, PathString)
+
+
 def load_schema_validator(
     dsl_object: YamlObject = None, file: str = "schema-strict.json"
 ) -> Validator:
@@ -215,9 +242,11 @@ def load_schema_validator(
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    type_checker = (
+        original_validator.TYPE_CHECKER.redefine("oracle", is_oracle)
+        .redefine("expression", is_expression)
+        .redefine("path", is_path)
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(
         validate_tested_dsl_expression
@@ -246,26 +275,46 @@ class DslContext:
     - The "files" property, which is a list of files.
     """
 
-    files: list[FileUrl] = field(factory=list)
+    files: list[InputFile] = field(factory=list)
     config: dict[str, dict] = field(factory=dict)
     language: SupportedLanguage | Literal["tested"] = "tested"
 
-    def deepen_context(self, new_level: YamlDict | None) -> "DslContext":
+    def deepen_context(
+        self, new_level: YamlDict | None, workdir: Path | None
+    ) -> DataWithMessage["DslContext"]:
         """
         Merge certain fields of the new object with the current context, resulting
         in a new context for the new level.
 
         :param new_level: The new object from the DSL to get information from.
+        :param workdir: The working directory where all files are located.
 
         :return: A new context.
         """
         if new_level is None:
-            return self
+            return DataWithMessage(data=self, messages=set())
 
+        deprecated_usage = set()
         the_files = self.files
-        if "files" in new_level:
-            assert isinstance(new_level["files"], list)
-            additional_files = {_convert_file(f) for f in new_level["files"]}
+        if "input_files" in new_level or "files" in new_level:
+            key = "input_files"
+            if "files" in new_level:
+                key = "files"
+                deprecated_usage.add(
+                    ExtendedMessage(
+                        f"WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead.",
+                        permission=Permission.STAFF,
+                    )
+                )
+
+            files = new_level[key]
+            assert isinstance(files, list)
+            additional_files = {
+                _convert_input_file(
+                    f, workdir=workdir, not_deprecated_usage=len(deprecated_usage) == 0
+                )
+                for f in files
+            }
             the_files = list(set(self.files) | additional_files)
 
         the_config = self.config
@@ -273,7 +322,10 @@ class DslContext:
             assert isinstance(new_level["config"], dict)
             the_config = recursive_dict_merge(the_config, new_level["config"])
 
-        return evolve(self, files=the_files, config=the_config)
+        return DataWithMessage(
+            data=evolve(self, files=the_files, config=the_config),
+            messages=deprecated_usage,
+        )
 
     def merge_inheritable_with_specific_config(
         self, level: YamlDict, config_name: str
@@ -402,10 +454,26 @@ def _convert_value(value: YamlObject) -> Value:
     return _tested_type_to_value(tested_type)
 
 
-def _convert_file(link_file: YamlDict) -> FileUrl:
-    assert isinstance(link_file["name"], str)
-    assert isinstance(link_file["url"], str)
-    return FileUrl(name=link_file["name"], url=link_file["url"])
+def _convert_input_file(
+    input_file: YamlDict, workdir: Path | None, not_deprecated_usage: bool
+) -> InputFile:
+    path_key = "path" if not_deprecated_usage else "name"
+    path_str = input_file[path_key]
+    assert isinstance(path_str, str)
+
+    content = ""
+    if "content" in input_file:
+        content = input_file["content"]
+        assert isinstance(content, str)
+        if workdir is not None:
+            full_path = workdir / path_str
+            dir_name = os.path.dirname(full_path)
+            if dir_name:
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+    return InputFile(path=path_str, content=content)
 
 
 def _convert_evaluation_function(stream: dict) -> EvaluationFunction:
@@ -454,42 +522,57 @@ def _convert_text_output_channel(
 ) -> TextOutputChannel:
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
+    path = None
+    data = None
     if isinstance(stream, str):
         config = context.config.get(config_name, dict())
-        raw_data = stream
+        data = stream
     else:
         assert isinstance(stream, dict)
         config = context.merge_inheritable_with_specific_config(stream, config_name)
-        raw_data = str(stream["data"])
+        if "path" in stream:
+            path = str(stream["path"])
+
+        if "content" in stream or "data" in stream:
+            data = str(stream.get("content", stream.get("data")))
+
+        assert path or data
 
     # Normalize the data if necessary.
-    if config.get("normalizeTrailingNewlines", True):
-        data = _ensure_trailing_newline(raw_data)
+    if config.get("normalizeTrailingNewlines", True) and path is None:
+        assert data is not None
+        data = _ensure_trailing_newline(str(data))
+
+    if path is not None:
+        text_output = TextOutputChannel(data=data, path=path, type=TextChannelType.FILE)
     else:
-        data = raw_data
+        text_output = TextOutputChannel(data=data)
 
     if isinstance(stream, str):
-        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+        text_output.oracle = GenericTextOracle(options=config)
+        return text_output
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
-            return TextOutputChannel(
-                data=data, oracle=GenericTextOracle(options=config)
-            )
+
+            text_output.oracle = GenericTextOracle(options=config)
+            return text_output
         elif stream["oracle"] == "custom_check":
-            return TextOutputChannel(
-                data=data, oracle=_convert_custom_check_oracle(stream)
-            )
+            text_output.oracle = _convert_custom_check_oracle(stream)
+            return text_output
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
 
-def _convert_file_output_channel(
+def _convert_file_output_channel_deprecated(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
     assert isinstance(stream, dict)
 
-    expected = str(stream["content"])
-    actual = str(stream["location"])
+    data = OutputFileData(
+        content_type=TextChannelType.TEXT,
+        content=str(stream["content"]),
+        path=str(stream["location"]),
+    )
 
     if "oracle" not in stream or stream["oracle"] == "builtin":
         config = context.merge_inheritable_with_specific_config(stream, config_name)
@@ -501,17 +584,68 @@ def _convert_file_output_channel(
             "line",
         ), f"The file oracle only supports modes full and line, not {config['mode']}"
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
+            output_data=[data],
             oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
         )
     elif stream["oracle"] == "custom_check":
         return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
+            output_data=[data],
             oracle=_convert_custom_check_oracle(stream),
         )
     raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+
+
+def _convert_output_file_channel(
+    output_files: YamlObject, context: DslContext, config_name: str
+) -> FileOutputChannel:
+
+    file_data = []
+    data = output_files
+    if isinstance(output_files, dict):
+        data = output_files["data"]
+    assert isinstance(data, list)
+
+    for item in data:
+        assert isinstance(item, dict)
+        content = item["content"]
+        if isinstance(content, PathString):
+            content_type = TextChannelType.FILE
+        else:
+            content = str(content)
+            content_type = TextChannelType.TEXT
+
+        file_data.append(
+            OutputFileData(
+                content_type=content_type,
+                content=content,
+                path=str(item["path"]),
+            )
+        )
+
+    if (
+        not isinstance(output_files, dict)
+        or "oracle" not in output_files
+        or output_files["oracle"] == "builtin"
+    ):
+        level = {} if not isinstance(output_files, dict) else output_files
+        config = context.merge_inheritable_with_specific_config(level, config_name)
+        if "mode" not in config:
+            config["mode"] = "full"
+
+        assert config["mode"] in (
+            "full",
+            "line",
+        ), f"The file oracle only supports modes full and line, not {config['mode']}"
+        return FileOutputChannel(
+            output_data=file_data,
+            oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
+        )
+    elif output_files["oracle"] == "custom_check":
+        return FileOutputChannel(
+            output_data=file_data,
+            oracle=_convert_custom_check_oracle(output_files),
+        )
+    raise TypeError(f"Unknown file oracle type: {output_files['oracle']}")
 
 
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
@@ -568,8 +702,12 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
-    context = context.deepen_context(testcase)
+def _convert_testcase(
+    testcase: YamlDict, context: DslContext, workdir: Path | None
+) -> DataWithMessage[Testcase]:
+    context_with_data = context.deepen_context(testcase, workdir)
+    context = context_with_data.data
+    deprecated_messages = context_with_data.messages
 
     # This is backwards compatability to some extend.
     # TODO: remove this at some point.
@@ -577,6 +715,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         testcase["expression"] = testcase.pop("statement")
 
     line_comment = ""
+    stdin_file = None
     _validate_testcase_combinations(testcase)
     if (expr_stmt := testcase.get("statement", testcase.get("expression"))) is not None:
         if isinstance(expr_stmt, dict) or context.language != "tested":
@@ -599,8 +738,30 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            assert isinstance(testcase["stdin"], str)
-            stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
+            stdin_data = testcase["stdin"]
+            data = None
+            path = ""
+            if isinstance(stdin_data, str):
+                data = _ensure_trailing_newline(stdin_data)
+            else:
+                assert isinstance(stdin_data, dict)
+                if "path" in stdin_data:
+                    path = stdin_data["path"]
+                    assert isinstance(path, str)
+
+                if "content" in stdin_data:
+                    content = stdin_data["content"]
+                    assert isinstance(content, str)
+                    data = _ensure_trailing_newline(content)
+
+            if path:
+                stdin_file = InputFile(
+                    path=path,
+                    content=data if data is not None else "",
+                )
+                stdin = TextData(data=data, path=path, type=TextChannelType.FILE)
+            else:
+                stdin = TextData(data=data)
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
@@ -616,7 +777,15 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if (stdout := testcase.get("stdout")) is not None:
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (file := testcase.get("file")) is not None:
-        output.file = _convert_file_output_channel(file, context, "file")
+        output.file = _convert_file_output_channel_deprecated(file, context, "file")
+        deprecated_messages.add(
+            ExtendedMessage(
+                "WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead.",
+                permission=Permission.STAFF,
+            )
+        )
+    if (file := testcase.get("output_files")) is not None:
+        output.file = _convert_output_file_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
@@ -660,24 +829,43 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     else:
         the_description = None
 
-    return Testcase(
-        description=the_description,
-        input=the_input,
-        output=output,
-        link_files=context.files,
-        line_comment=line_comment,
+    input_files = context.files
+    if stdin_file is not None:
+        input_files = list(set(input_files) | {stdin_file})
+
+    return DataWithMessage(
+        data=Testcase(
+            description=the_description,
+            input=the_input,
+            output=output,
+            input_files=input_files,
+            line_comment=line_comment,
+        ),
+        messages=deprecated_messages,
     )
 
 
-def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
-    dsl_context = dsl_context.deepen_context(context)
+def _convert_context(
+    context: YamlDict, dsl_context: DslContext, workdir: Path | None
+) -> DataWithMessage[Context]:
+    dsl_context_with_messages = dsl_context.deepen_context(context, workdir)
+    dsl_context = dsl_context_with_messages.data
+    deprecated_messages = dsl_context_with_messages.messages
     raw_testcases = context.get("script", context.get("testcases"))
     assert isinstance(raw_testcases, list)
-    testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
-    return Context(testcases=testcases)
+    testcases = _convert_dsl_list(
+        raw_testcases, dsl_context, workdir, _convert_testcase
+    )
+    deprecated_messages.update(testcases.messages)
+    return DataWithMessage(
+        data=Context(testcases=testcases.data),
+        messages=deprecated_messages,
+    )
 
 
-def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
+def _convert_tab(
+    tab: YamlDict, context: DslContext, workdir: Path | None
+) -> DataWithMessage[Tab]:
     """
     Translate a DSL tab to a full test suite tab.
 
@@ -685,51 +873,81 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     :param context: The context with config for the parent level.
     :return: A full tab.
     """
-    context = context.deepen_context(tab)
+    context_with_messages = context.deepen_context(tab, workdir)
+    context = context_with_messages.data
+    deprecated_messages = context_with_messages.messages
     name = tab.get("unit", tab.get("tab"))
     assert isinstance(name, str)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
         assert isinstance(tab["contexts"], list)
-        contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
+        contexts_with_messages = _convert_dsl_list(
+            tab["contexts"], context, workdir, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        deprecated_messages.update(contexts_with_messages.messages)
     elif "cases" in tab:
         assert "unit" in tab
         # We have testcases N.S. / contexts O.S.
         assert isinstance(tab["cases"], list)
-        contexts = _convert_dsl_list(tab["cases"], context, _convert_context)
+        contexts_with_messages = _convert_dsl_list(
+            tab["cases"], context, workdir, _convert_context
+        )
+        contexts = contexts_with_messages.data
+        deprecated_messages.update(contexts_with_messages.messages)
     elif "testcases" in tab:
         # We have scripts N.S. / testcases O.S.
         assert "tab" in tab
         assert isinstance(tab["testcases"], list)
-        testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        testcases = _convert_dsl_list(
+            tab["testcases"], context, workdir, _convert_testcase
+        )
+        deprecated_messages.update(testcases.messages)
+        contexts = [Context(testcases=[t]) for t in testcases.data]
     else:
         assert "scripts" in tab
         assert isinstance(tab["scripts"], list)
-        testcases = _convert_dsl_list(tab["scripts"], context, _convert_testcase)
-        contexts = [Context(testcases=[t]) for t in testcases]
+        testcases = _convert_dsl_list(
+            tab["scripts"], context, workdir, _convert_testcase
+        )
+        deprecated_messages.update(testcases.messages)
+        contexts = [Context(testcases=[t]) for t in testcases.data]
 
-    return Tab(name=name, contexts=contexts)
+    return DataWithMessage(
+        data=Tab(name=name, contexts=contexts),
+        messages=deprecated_messages,
+    )
 
 
 T = TypeVar("T")
 
 
 def _convert_dsl_list(
-    dsl_list: list, context: DslContext, converter: Callable[[YamlDict, DslContext], T]
-) -> list[T]:
+    dsl_list: list,
+    context: DslContext,
+    workdir: Path | None,
+    converter: Callable[[YamlDict, DslContext, Path | None], DataWithMessage[T]],
+) -> DataWithMessage[list[T]]:
     """
     Convert a list of YAML objects into a test suite object.
     """
     objects = []
+    deprecated_messages = set()
     for dsl_object in dsl_list:
         assert isinstance(dsl_object, dict)
-        objects.append(converter(dsl_object, context))
-    return objects
+        ob = converter(dsl_object, context, workdir)
+        deprecated_messages.update(ob.messages)
+        objects.append(ob.data)
+    return DataWithMessage(
+        data=objects,
+        messages=deprecated_messages,
+    )
 
 
-def _convert_dsl(dsl_object: YamlObject) -> Suite:
+def _convert_dsl(
+    dsl_object: YamlObject, workdir: Path | None
+) -> DataWithMessage[Suite]:
     """
     Translate a DSL test suite into a full test suite.
 
@@ -740,38 +958,51 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
     :return: A full test suite.
     """
     context = DslContext()
+    deprecated_messages = set()
+
     if isinstance(dsl_object, list):
         namespace = None
         tab_list = dsl_object
     else:
         assert isinstance(dsl_object, dict)
         namespace = dsl_object.get("namespace")
-        context = context.deepen_context(dsl_object)
+        context_with_messages = context.deepen_context(dsl_object, workdir)
+        context = context_with_messages.data
+        deprecated_messages.update(context_with_messages.messages)
         tab_list = dsl_object.get("units", dsl_object.get("tabs"))
         assert isinstance(tab_list, list)
         if (language := dsl_object.get("language", "tested")) != "tested":
             language = SupportedLanguage(language)
         context = evolve(context, language=language)
-    tabs = _convert_dsl_list(tab_list, context, _convert_tab)
+    tabs = _convert_dsl_list(tab_list, context, workdir, _convert_tab)
+    deprecated_messages.update(tabs.messages)
 
     if namespace:
         assert isinstance(namespace, str)
-        return Suite(tabs=tabs, namespace=namespace)
+        return DataWithMessage(
+            data=Suite(tabs=tabs.data, namespace=namespace),
+            messages=deprecated_messages,
+        )
     else:
-        return Suite(tabs=tabs)
+        return DataWithMessage(
+            data=Suite(tabs=tabs.data),
+            messages=deprecated_messages,
+        )
 
 
-def parse_dsl(dsl_string: str) -> Suite:
+def parse_dsl(dsl_string: str, workdir: Path | None = None) -> DataWithMessage[Suite]:
     """
     Parse a string containing a DSL test suite into our representation,
     a test suite.
 
     :param dsl_string: The string containing a DSL.
+    :param workdir: The working directory for the test suite.
     :return: The parsed and converted test suite.
     """
     dsl_object = _parse_yaml(dsl_string)
     _validate_dsl(dsl_object)
-    return _convert_dsl(dsl_object)
+
+    return _convert_dsl(dsl_object, workdir)
 
 
 def translate_to_test_suite(dsl_string: str) -> str:
@@ -779,7 +1010,8 @@ def translate_to_test_suite(dsl_string: str) -> str:
     Convert a DSL to a test suite.
 
     :param dsl_string: The DSL.
+    :param workdir: The working directory for the test suite.
     :return: The test suite.
     """
-    suite = parse_dsl(dsl_string)
-    return suite_to_json(suite)
+    suite = parse_dsl(dsl_string, Path("."))
+    return suite_to_json(suite.data)

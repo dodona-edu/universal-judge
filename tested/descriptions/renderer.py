@@ -83,7 +83,7 @@ class TestedRenderer(MarkdownRenderer):
         rendered_dsl = self.render_children(element)
 
         # Parse the DSL
-        parsed_dsl = parse_dsl(rendered_dsl)
+        parsed_dsl = parse_dsl(rendered_dsl).data
 
         # Get all actual tests
         tests = []
@@ -95,7 +95,7 @@ class TestedRenderer(MarkdownRenderer):
         resulting_lines = []
         prompt = self.bundle.language.get_declaration_metadata().get("prompt", ">")
         for testcase in tests:
-            stmt_message, _ = get_readable_input(self.bundle, testcase)
+            stmt_message = get_readable_input(self.bundle, testcase)
             resulting_lines.append(f"{prompt} {stmt_message.description}")
             output_lines = get_expected_output(self.bundle, testcase)
             resulting_lines.extend(output_lines)

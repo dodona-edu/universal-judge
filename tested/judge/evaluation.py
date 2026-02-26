@@ -1,6 +1,4 @@
-import html
 import logging
-from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
 from typing import Literal
@@ -42,9 +40,9 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutput,
     FileOutputChannel,
-    FileUrl,
     IgnoredChannel,
     OutputChannel,
+    OutputFileData,
     SpecialOutputChannel,
     Testcase,
     TextOutput,
@@ -109,40 +107,54 @@ def _evaluate_channel(
     evaluator = get_oracle(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
-    # Run the oracle.
-    evaluation_result = evaluator(output, actual if actual else "")
-    status = evaluation_result.result
 
-    # Decide if we should show this channel or not.
-    is_correct = status.enum == Status.CORRECT
-    should_report_case = should_show(output, channel, evaluation_result)
+    if channel == Channel.FILE and output != "ignored":
+        assert isinstance(output, FileOutputChannel)
+        output_channels = output.output_data
+    else:
+        output_channels = [output]
 
-    if not should_report_case and is_correct:
-        # We do report that a test is correct, to set the status.
-        return False
+    missing = actual is None
 
-    expected = evaluation_result.readable_expected
-    out.add(StartTest(expected=expected, channel=channel))
+    for output_element in output_channels:
+        # Run the oracle.
+        evaluation_result = evaluator(output_element, actual if actual else "")
+        status = evaluation_result.result
 
-    # Report any messages we received.
-    for message in evaluation_result.messages:
-        out.add(AppendMessage(message=message))
+        # Decide if we should show this channel or not.
+        is_correct = status.enum == Status.CORRECT
+        should_report_case = should_show(output, channel, evaluation_result)
 
-    missing = False
-    if actual is None:
-        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
-        missing = True
-    elif should_report_case and timeout and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.time-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
-    elif should_report_case and memory and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.memory-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
+        if should_report_case or not is_correct:
+            expected = evaluation_result.readable_expected
+            expected_channel = channel
+            if isinstance(output_element, OutputFileData):
+                expected_channel = f"file: {output_element.path}"
+            out.add(StartTest(expected=expected, channel=expected_channel))
 
-    # Close the test.
-    out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+            # Report any messages we received.
+            for message in evaluation_result.messages:
+                out.add(AppendMessage(message=message))
+
+            if actual is None:
+                out.add(
+                    AppendMessage(message=get_i18n_string("judge.evaluation.missing"))
+                )
+            elif should_report_case and timeout and not is_correct:
+                status.human = get_i18n_string("judge.evaluation.time-limit")
+                status.enum = Status.TIME_LIMIT_EXCEEDED
+                out.add(AppendMessage(message=status.human))
+            elif should_report_case and memory and not is_correct:
+                status.human = get_i18n_string("judge.evaluation.memory-limit")
+                status.enum = Status.TIME_LIMIT_EXCEEDED
+                out.add(AppendMessage(message=status.human))
+
+            # Close the test.
+            out.add(
+                CloseTest(generated=evaluation_result.readable_actual, status=status)
+            )
+        else:
+            missing = False
 
     return missing
 
@@ -241,15 +253,11 @@ def evaluate_context_results(
                 )
             )
 
-    # All files that will be used in this context.
-    all_files = context.get_files()
-
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         _logger.debug("Evaluating testcase %s", i)
 
-        readable_input, seen = get_readable_input(bundle, testcase)
-        all_files = all_files - seen
+        readable_input = get_readable_input(bundle, testcase)
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
         # Get the functions
@@ -351,29 +359,11 @@ def evaluate_context_results(
 
         t_col.to_manager(collector, CloseTestcase(), i)
 
-    # Add file links
-    if all_files:
-        collector.add(_link_files_message(all_files))
-
     if exec_results.timeout:
         return Status.TIME_LIMIT_EXCEEDED
     if exec_results.memory:
         return Status.MEMORY_LIMIT_EXCEEDED
     return None
-
-
-def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
-    link_list = ", ".join(
-        f'<a href="{link_file.url}" class="file-link" target="_blank">'
-        f'<span class="code">{html.escape(link_file.name)}</span></a>'
-        for link_file in link_files
-    )
-    file_list_str = get_i18n_string(
-        "judge.evaluation.files", count=len(link_files), files=link_list
-    )
-    description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
-    message = ExtendedMessage(description=description, format="html")
-    return AppendMessage(message=message)
 
 
 def should_show(
@@ -495,15 +485,12 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             ]
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
-            # All files that will be used in this context.
-            all_files = context.get_files()
 
             # Begin normal testcases.
             for j, testcase in enumerate(
                 context.testcases[testcase_start:], start=testcase_start
             ):
-                readable_input, seen = get_readable_input(bundle, testcase)
-                all_files = all_files - seen
+                readable_input = get_readable_input(bundle, testcase)
                 updates.append(StartTestcase(description=readable_input))
 
                 # Do the normal output channels.
@@ -520,10 +507,6 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 
                 updates.append(CloseTestcase(accepted=False))
             testcase_start = 0  # For the next context, start at the beginning
-
-            # Add links to files we haven't seen yet.
-            if all_files:
-                updates.insert(0, _link_files_message(all_files))
 
             collector.add_all(updates)
             collector.add(CloseContext(accepted=False))

@@ -10,6 +10,7 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutputChannel,
     MainInput,
+    TextChannelType,
     TextData,
     TextOutputChannel,
     ValueOutputChannel,
@@ -33,6 +34,13 @@ def test_text_output_is_compatible_oracle():
 
 def test_file_output_is_compatible_oracle():
     old_structure = {
+        "output_data": [
+            {
+                "content_type": TextChannelType.TEXT,
+                "content": "some content",
+                "path": "output.py",
+            }
+        ],
         "evaluator": {
             "function": {"file": "evaluate.py"},
             "type": "custom_check",
@@ -108,13 +116,19 @@ def test_file_show_expected_is_accepted():
     scheme = """
     {
         "show_expected": true,
-        "expected_path": "hallo",
-        "actual_path": "hallo"
+        "output_data": [
+            {
+                "content_type": "text",
+                "content": "hallo",
+                "path": "hallo.txt"
+            }
+        ]
     }
     """
     result = get_converter().loads(scheme, FileOutputChannel)
-    assert result.expected_path == "hallo"
-    assert result.actual_path == "hallo"
+
+    assert result.output_data[0].content == "hallo"
+    assert result.output_data[0].path == "hallo.txt"
 
 
 def test_value_show_expected_is_accepted():

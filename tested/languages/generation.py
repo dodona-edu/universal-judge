@@ -2,15 +2,9 @@
 Translates items from the test suite into the actual programming language.
 """
 
-import html
-import json
 import logging
-import re
 import shlex
-import urllib.parse
-from collections.abc import Iterable
 from pathlib import Path
-from re import Match
 from typing import TYPE_CHECKING, TypeAlias
 
 from pygments import highlight
@@ -29,16 +23,8 @@ from tested.languages.preparation import (
     prepare_execution_unit,
     prepare_expression,
 )
-from tested.parsing import get_converter
 from tested.serialisation import Expression, Statement, VariableType
-from tested.testsuite import (
-    Context,
-    FileUrl,
-    LanguageLiterals,
-    MainInput,
-    Testcase,
-    TextData,
-)
+from tested.testsuite import Context, LanguageLiterals, MainInput, Testcase, TextData
 from tested.utils import is_statement_strict
 
 if TYPE_CHECKING:
@@ -77,20 +63,6 @@ def generate_execution_unit(
     return bundle.language.generate_execution_unit(prepared_execution)
 
 
-def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[str, str]:
-    dict_links = dict(
-        (link_file.name, get_converter().unstructure(link_file))
-        for link_file in link_files
-    )
-    files = json.dumps(dict_links)
-    return (
-        f"<div class='contains-file highlight-{language} highlighter-rouge' "
-        f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: "
-        f"1px; background: none;'><code>",
-        "</code></pre></div>",
-    )
-
-
 def _get_heredoc_token(stdin: str) -> str:
     delimiter = "STDIN"
     while delimiter in stdin:
@@ -98,9 +70,7 @@ def _get_heredoc_token(stdin: str) -> str:
     return delimiter
 
 
-def get_readable_input(
-    bundle: Bundle, case: Testcase
-) -> tuple[ExtendedMessage, set[FileUrl]]:
+def get_readable_input(bundle: Bundle, case: Testcase) -> ExtendedMessage:
     """
     Get human-readable input for a testcase. This function will use, in
     order of availability:
@@ -108,7 +78,7 @@ def get_readable_input(
     1. A description on the testcase.
     2. If it is a normal testcase:
         a. A function expression or generate_statement.
-    3. If it is a context testcase:
+    3. If it is a context testcase (main-testcase):
         a. The stdin and the arguments.
     """
     format_ = "text"  # By default, we use text as input.
@@ -127,21 +97,32 @@ def get_readable_input(
         command = shlex.join([submission] + case.input.arguments)
         args = f"$ {command}"
         # Determine the stdin
-        if isinstance(case.input.stdin, TextData):
-            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
-        else:
-            stdin = ""
+        stdin_data = case.input.stdin
+        stdin = ""
+        if isinstance(stdin_data, TextData):
+            if stdin_data.type == "file":
+                stdin = stdin_data.path
+            else:
+                stdin = stdin_data.data
+                assert stdin is not None
 
-        # If we have both stdin and arguments, we use a here-document.
-        if case.input.arguments and stdin:
-            assert stdin[-1] == "\n", "stdin must end with a newline"
-            delimiter = _get_heredoc_token(stdin)
-            text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
-        elif stdin:
-            assert not case.input.arguments
-            text = stdin
+        # If we have both stdin and arguments, we use a here-document or here-string.
+        if stdin:
+            if isinstance(stdin_data, TextData) and stdin_data.type == "file":
+                text = f"{args} < {stdin}"
+            elif case.input.arguments:
+                assert stdin[-1] == "\n", "stdin must end with a newline"
+                if stdin.count("\n") > 1:
+                    delimiter = _get_heredoc_token(stdin)
+                    text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+                else:
+                    text = f"{args} <<< {stdin.strip()}"
+            else:
+                assert not case.input.arguments
+                text = stdin
         else:
             text = args
+
     elif isinstance(case.input, Statement):
         format_ = bundle.config.programming_language
         text = generate_statement(bundle, case.input)
@@ -157,59 +138,14 @@ def get_readable_input(
         if case.line_comment:
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
-    # If there are no files, return now. This means we don't need to do ugly stuff.
-    if not case.link_files:
-        return ExtendedMessage(description=text, format=format_), set()
-
-    # We have potential files.
-    # Check if the file names are present in the string.
-    # If not, we can also stop before doing ugly things.
-    # We construct a regex, since that can be faster than checking everything.
-    simple_regex = re.compile(
-        "|".join(map(lambda x: re.escape(x.name), case.link_files))
-    )
-
-    if not simple_regex.search(text):
-        # There is no match, so bail now.
-        return ExtendedMessage(description=text, format=format_), set()
-
-    # Now we need to do ugly stuff.
-    # Begin by compiling the HTML that will be displayed.
-    if format_ == "text":
-        generated_html = html.escape(text)
-    elif format_ == "console":
-        generated_html = highlight_code(text)
-    else:
-        generated_html = highlight_code(text, bundle.config.programming_language)
-
-    # Map of file URLs.
-    url_map = {html.escape(x.name): x for x in case.link_files}
-
-    seen = set()
-    escaped_regex = re.compile("|".join(url_map.keys()))
-
-    # Replaces the match with the corresponding link.
-    def replace_link(match: Match) -> str:
-        filename = match.group()
-        the_file = url_map[filename]
-        the_url = urllib.parse.quote(the_file.url)
-        the_replacement = (
-            f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
-        )
-        seen.add(the_file)
-        return the_replacement
-
-    generated_html = escaped_regex.sub(replace_link, generated_html)
-    prefix, suffix = _handle_link_files(seen, format_)
-    generated_html = f"{prefix}{generated_html}{suffix}"
-    return ExtendedMessage(description=generated_html, format="html"), seen
+    return ExtendedMessage(description=text, format=format_)
 
 
 def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:
     # Try until we find a testcase with input.
     testcases = context.testcases
     for testcase in testcases:
-        result, _ = get_readable_input(bundle, testcase)
+        result = get_readable_input(bundle, testcase)
         if result.description:
             return result
 
