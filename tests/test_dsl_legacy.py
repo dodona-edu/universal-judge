@@ -1,6 +1,6 @@
 from tested.dsl.translate_parser import parse_dsl
 from tested.serialisation import FunctionCall
-from tested.testsuite import ContentPath
+from tested.testsuite import ContentPath, CustomCheckOracle, FileOutputChannel
 
 
 def test_dsl_tab_legacy_fields():
@@ -149,9 +149,10 @@ def test_dsl_testcase_output_files_legacy_builtin():
     """
     suite = parse_dsl(yaml_legacy_builtin)
     file_output = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file_output, FileOutputChannel)
     assert len(file_output.files) == 1
     assert file_output.files[0].path == "actual.txt"
-    assert file_output.files[0].content.path == "expected.txt"
+    assert file_output.files[0].content == ContentPath(path="expected.txt")
 
 
 def test_dsl_testcase_output_files_new_builtin():
@@ -167,6 +168,7 @@ def test_dsl_testcase_output_files_new_builtin():
     """
     suite = parse_dsl(yaml_new_builtin)
     file_output = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file_output, FileOutputChannel)
     assert len(file_output.files) == 1
     assert file_output.files[0].path == "actual.txt"
     assert file_output.files[0].content == "expected content\n"
@@ -185,6 +187,7 @@ def test_dsl_testcase_output_files_simple_array():
     """
     suite = parse_dsl(yaml_simple_array)
     file_output = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file_output, FileOutputChannel)
     assert len(file_output.files) == 2
     assert file_output.files[0].path == "file1.txt"
     assert file_output.files[1].path == "file2.txt"
@@ -203,6 +206,8 @@ def test_dsl_testcase_output_files_legacy_custom():
     """
     suite = parse_dsl(yaml_legacy_custom)
     file_output = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file_output, FileOutputChannel)
+    assert isinstance(file_output.oracle, CustomCheckOracle)
     assert str(file_output.oracle.function.file).endswith("checker.py")
     assert file_output.files[0].path == "actual.txt"
 
@@ -221,5 +226,7 @@ def test_dsl_testcase_output_files_new_custom():
     """
     suite = parse_dsl(yaml_new_custom)
     file_output = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file_output, FileOutputChannel)
+    assert isinstance(file_output.oracle, CustomCheckOracle)
     assert str(file_output.oracle.function.file).endswith("checker.py")
     assert file_output.files[0].path == "actual.txt"

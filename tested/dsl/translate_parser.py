@@ -1,18 +1,18 @@
-import sys
-from pathlib import Path
-
 import json
+import sys
 import textwrap
-import yaml
-from attrs import define, evolve, field
 from collections.abc import Callable
 from decimal import Decimal
+from pathlib import Path
+from typing import Any, Literal, Type, TypeVar, cast
+
+import yaml
+from attrs import define, evolve, field
 from jsonschema import TypeChecker
 from jsonschema.exceptions import ValidationError
 from jsonschema.protocols import Validator
 from jsonschema.validators import extend as extend_validator
 from jsonschema.validators import validator_for
-from typing import Any, Literal, Type, TypeVar, cast
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -308,7 +308,9 @@ class DslContext:
         self, level: YamlObject, config_name: str
     ) -> dict:
         inherited_options = self.config.get(config_name, dict())
-        specific_options = level.get("config", dict()) if isinstance(level, dict) else dict()
+        specific_options = (
+            level.get("config", dict()) if isinstance(level, dict) else dict()
+        )
         assert isinstance(
             specific_options, dict
         ), f"The config options for {config_name} must be a dictionary, not a {type(specific_options)}"
@@ -533,12 +535,18 @@ def _convert_file_output_channel(
             # Handle legacy stuff.
             expected = str(stream["content"])
             actual = str(stream["location"])
-            files = [TextData(
-                path=actual,
-                content=ContentPath(path=expected),
-            )]
+            files = [
+                TextData(
+                    path=actual,
+                    content=ContentPath(path=expected),
+                )
+            ]
         else:
-            files = [_convert_text_data_required_path(f) for f in stream["data"]]
+            file_list = stream.get("data")
+            assert isinstance(
+                file_list, list
+            ), "The data key must be a list of expected files."
+            files = [_convert_text_data_required_path(f) for f in file_list]
 
         if "oracle" not in stream or stream["oracle"] == "builtin":
             oracle = GenericTextOracle(name=TextBuiltin.FILE, options=config)
