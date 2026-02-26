@@ -239,3 +239,32 @@ def test_readable_input_legacy_files(tmp_path: Path, pytestconfig: pytest.Config
     assert 'href="legacy-url"' in readable.description
     assert "legacy.txt</a>" in readable.description
     assert len(seen) == 1
+
+
+def test_readable_input_no_path_in_input_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "correct",
+    )
+
+    # Testcase with an input file that has NO path.
+    the_input = Testcase(
+        input=MainInput(
+            arguments=["some-arg"],
+        ),
+        input_files=[TextData(path=None, content="some content")],
+    )
+
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+
+    readable, seen = get_readable_input(bundle, the_input)
+
+    assert "some-arg" in readable.description
+    assert len(seen) == 0

@@ -172,6 +172,11 @@ def get_readable_input(
     # If not, we can also stop before doing ugly things.
     # We construct a regex, since that can be faster than checking everything.
     file_paths = [re.escape(x.path) for x in case.input_files if x.path is not None]
+
+    if not file_paths:
+        # No files to match, so bail now.
+        return ExtendedMessage(description=text, format=format_), set()
+
     simple_regex = re.compile("|".join(file_paths))
 
     if not simple_regex.search(text):
