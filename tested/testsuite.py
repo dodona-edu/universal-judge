@@ -554,6 +554,8 @@ class Testcase(WithFeatures, WithFunctions):
     one testcase present.
     """
 
+    __test__ = False  # Prevent pytest warning
+
     input: Statement | MainInput | LanguageLiterals
     description: Message | None = None
     output: Output = field(factory=Output)

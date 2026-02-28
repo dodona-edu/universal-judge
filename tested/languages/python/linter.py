@@ -12,6 +12,7 @@ from pylint.reporters import JSONReporter
 from tested.configs import DodonaConfig
 from tested.dodona import *
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 
 logger = logging.getLogger(__name__)
 
@@ -84,30 +85,21 @@ def run_pylint(
                 f"https://pylint.pycqa.org/en/latest/messages/{raw_type}/{symbol}.html"
             )
 
-        start_row = message.get("line", 0)
-        end_row = message.get("endLine")
-        rows = end_row + 1 - start_row if end_row else None
-        start_col = message.get("column", 0)
-        end_col = message.get("endColumn")
-        # Prevent negative columns
-        if rows == 1:
-            cols = end_col - start_col if end_col else None
-        else:
-            cols = end_col
+        position = get_linter_position(
+            raw_start_row=message.get("line"),
+            source_offset=config.source_offset,
+            raw_end_row=message.get("endLine"),
+            raw_start_column=message.get("column"),
+            raw_end_column=message.get("endColumn"),
+            column_base=0,
+            end_column_inclusive=False,
+        )
 
         annotations.append(
-            AnnotateCode(
-                row=start_row - 1 + config.source_offset,
-                rows=rows,
-                column=start_col,
-                columns=cols,
-                text=text,
-                externalUrl=external,
-                type=category,
+            annotation_from_position(
+                position=position, text=text, external_url=external, type=category
             )
         )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     # for now, reports are not processed
     return [], annotations

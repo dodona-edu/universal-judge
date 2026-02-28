@@ -5,6 +5,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -78,24 +79,22 @@ def run_eslint(
             if rule_id:
                 external = f"https://eslint.org/docs/rules/{rule_id}"
 
-            start_row = message.get("line", 1)
-            end_row = message.get("endLine")
-            rows = end_row - start_row if end_row and end_row > start_row else None
-            start_col = message.get("column", 1)
-            end_col = message.get("endColumn")
-            cols = end_col - start_col if end_col and end_col > start_col else None
+            position = get_linter_position(
+                raw_start_row=message.get("line"),
+                source_offset=config.source_offset,
+                raw_end_row=message.get("endLine"),
+                raw_start_column=message.get("column"),
+                raw_end_column=message.get("endColumn"),
+                end_column_inclusive=False,
+            )
+
             annotations.append(
-                AnnotateCode(
-                    row=start_row - 1 + config.source_offset,
-                    rows=rows,
+                annotation_from_position(
+                    position=position,
                     text=text,
-                    externalUrl=external,
-                    column=start_col - 1,
-                    columns=cols,
+                    external_url=external,
                     type=severity[int(message.get("severity", 1))],
                 )
             )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations
