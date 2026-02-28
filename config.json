@@ -1,4 +1,5 @@
 {
     "judge": "TESTed",
-    "image": "dodona-tested"
+    "image": "dodona-tested",
+    "memory_limit": 500000000
 }

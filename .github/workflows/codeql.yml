@@ -8,8 +8,6 @@ on:
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'
-  schedule:
-    - cron: "18 21 2 * *"
   pull_request_target:
     types: [labeled]
 
@@ -25,23 +23,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v4
         with:
           languages: python
           config-file: ./.github/codeql.yml
           queries: +security-and-quality
-          setup-python-dependencies: false
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:python"

@@ -135,7 +135,7 @@ def execute_file(
         file=executable_name,
         arguments=[argument] if argument else [],
     )
-    _logger.debug(f"Executing {command} in directory {working_directory}")
+    _logger.debug("Executing %s in directory %s", command, working_directory)
 
     result = run_command(working_directory, remaining, command, stdin)
 
@@ -165,7 +165,7 @@ def set_up_unit(
     # Filter dependencies of the global compilation results.
     dependencies = filter_files(plan.files, plan.common_directory)
     dependencies = bundle.language.filter_dependencies(dependencies, unit.name)
-    _logger.debug(f"Dependencies are {dependencies}")
+    _logger.debug("Dependencies are %s", dependencies)
     copy_workdir_files(bundle, execution_dir, True)
 
     # Copy files from the common directory to the context directory.
@@ -174,7 +174,7 @@ def set_up_unit(
         destination = execution_dir / file
         # Ensure we preserve subdirectories.
         destination.parent.mkdir(parents=True, exist_ok=True)
-        _logger.debug(f"Copying {origin} to {destination}")
+        _logger.debug("Copying %s to %s", origin, destination)
         if origin == destination:
             continue  # Don't copy the file to itself
 
@@ -257,7 +257,7 @@ def execute_unit(
         argument = None
 
     executable_or_status = bundle.language.find_main_file(files, main_file_name)
-    _logger.debug(f"Searched for main file: {executable_or_status}")
+    _logger.debug("Searched for main file: %s", executable_or_status)
     if isinstance(executable_or_status, Status):
         return executable_or_status
 

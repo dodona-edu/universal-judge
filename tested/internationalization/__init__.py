@@ -14,7 +14,7 @@ i18n.load_path.append(os.path.dirname(__file__))
 
 
 def set_locale(locale: str):
-    _logger.debug(f"Change locale to {locale}")
+    _logger.debug("Change locale to %s", locale)
     i18n.set("locale", locale)
 
 

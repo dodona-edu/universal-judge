@@ -194,6 +194,12 @@ def test_reverse_decorator_order():
         get_converter().structure(data, ReverseOrderTest)
 
 
+def test_stdin_coercion():
+    data = {"type": "text", "data": 500000}
+    result = get_converter().structure(data, TextOutputChannel)
+    assert result.content == "500000"
+
+
 def test_testcase_legacy_link_files():
     # A testcase with a dummy input and a legacy "link_files" field.
     data = {
