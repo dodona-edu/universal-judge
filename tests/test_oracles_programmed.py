@@ -183,3 +183,37 @@ def test_custom_check_function_static_analysis_missing_language(
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 1
     assert updates.find_status_enum() == ["internal error"]
+
+
+@pytest.mark.parametrize("lang", OBJECT_LANGUAGES)
+def test_custom_check_function_files(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "output-files-custom-oracle",
+        lang,
+        tmp_path,
+        "suite.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("lang", OBJECT_LANGUAGES)
+def test_custom_check_function_files_wrong(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "output-files-custom-oracle",
+        lang,
+        tmp_path,
+        "suite.yaml",
+        "wrong",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]

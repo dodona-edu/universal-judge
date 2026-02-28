@@ -309,8 +309,6 @@ def _file_to_files_converter(value: Any, full: Any) -> Any:
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    # expected_path: str  # Path to the file to compare to.
-    # actual_path: str  # Path to the generated file (by the user code)
     files: list[TextData]
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
