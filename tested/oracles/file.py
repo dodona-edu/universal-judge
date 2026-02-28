@@ -1,3 +1,5 @@
+from attr import evolve
+
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
@@ -77,7 +79,8 @@ def compare_file(
         )
 
     if options["mode"] == "full":
-        return compare_text(options, expected_content, actual)
+        text_result = compare_text(options, expected_content, actual)
+        return evolve(text_result, channel_override=file.path)
     else:
         assert options["mode"] == "line"
         strip_newlines = options.get("stripNewlines", False)
