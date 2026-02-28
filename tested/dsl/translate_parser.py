@@ -305,10 +305,12 @@ class DslContext:
         return evolve(self, files=the_files, config=the_config)
 
     def merge_inheritable_with_specific_config(
-        self, level: YamlDict, config_name: str
+        self, level: YamlObject, config_name: str
     ) -> dict:
         inherited_options = self.config.get(config_name, dict())
-        specific_options = level.get("config", dict())
+        specific_options = (
+            level.get("config", dict()) if isinstance(level, dict) else dict()
+        )
         assert isinstance(
             specific_options, dict
         ), f"The config options for {config_name} must be a dictionary, not a {type(specific_options)}"
@@ -515,32 +517,50 @@ def _convert_text_output_channel(
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
-    assert isinstance(stream, dict)
 
-    expected = str(stream["content"])
-    actual = str(stream["location"])
+    config = context.merge_inheritable_with_specific_config(stream, config_name)
+    if "mode" not in config:
+        config["mode"] = "full"
+    assert config["mode"] in (
+        "full",
+        "line",
+    ), f"The file oracle only supports modes full and line, not {config['mode']}"
 
-    if "oracle" not in stream or stream["oracle"] == "builtin":
-        config = context.merge_inheritable_with_specific_config(stream, config_name)
-        if "mode" not in config:
-            config["mode"] = "full"
+    if isinstance(stream, list):
+        # We have a list of files. This is not supported in the old way, so nothing special.
+        files = [_convert_text_data_required_path(f) for f in stream]
+        oracle = GenericTextOracle(name=TextBuiltin.FILE, options=config)
+    elif isinstance(stream, dict):
+        if "content" in stream:
+            # Handle legacy stuff.
+            expected = str(stream["content"])
+            actual = str(stream["location"])
+            files = [
+                TextData(
+                    path=actual,
+                    content=ContentPath(path=expected),
+                )
+            ]
+        else:
+            file_list = stream.get("data")
+            assert isinstance(
+                file_list, list
+            ), "The data key must be a list of expected files."
+            files = [_convert_text_data_required_path(f) for f in file_list]
 
-        assert config["mode"] in (
-            "full",
-            "line",
-        ), f"The file oracle only supports modes full and line, not {config['mode']}"
-        return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
+        if "oracle" not in stream or stream["oracle"] == "builtin":
+            oracle = GenericTextOracle(name=TextBuiltin.FILE, options=config)
+        elif stream["oracle"] == "custom_check":
+            oracle = _convert_custom_check_oracle(stream)
+        else:
+            raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+    else:
+        raise InvalidDslError(
+            f"Invalid file output channel: {stream}.\n\n"
+            "File output channels must be a list of files, or a dictionary with a 'data' key."
         )
-    elif stream["oracle"] == "custom_check":
-        return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=_convert_custom_check_oracle(stream),
-        )
-    raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+
+    return FileOutputChannel(files=files, oracle=oracle)
 
 
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
@@ -694,6 +714,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (file := testcase.get("file")) is not None:
         output.file = _convert_file_output_channel(file, context, "file")
+    if (file := testcase.get("output_files")) is not None:
+        output.file = _convert_file_output_channel(file, context, "ouput_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:

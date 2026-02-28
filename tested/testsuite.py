@@ -291,14 +291,25 @@ class TextOutputChannel(TextData):
     oracle: GenericTextOracle | CustomCheckOracle = field(factory=GenericTextOracle)
 
 
-@fallback_field({"evaluator": "oracle"})
-@ignore_field("show_expected")
+def _file_to_files_converter(value: Any, full: Any) -> Any:
+    if not isinstance(value, str):
+        return value
+
+    if "actual_path" not in full or not isinstance(full["actual_path"], str):
+        return value
+
+    return [{"path": full["actual_path"], "content": {"path": value}}]
+
+
+@fallback_field(
+    {"evaluator": "oracle", "expected_path": ("files", _file_to_files_converter)}
+)
+@ignore_field("show_expected", "actual_path")
 @define
 class FileOutputChannel(WithFeatures):
     """Describes the output for files."""
 
-    expected_path: str  # Path to the file to compare to.
-    actual_path: str  # Path to the generated file (by the user code)
+    files: list[TextData]
     oracle: GenericTextOracle | CustomCheckOracle = field(
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
@@ -306,10 +317,8 @@ class FileOutputChannel(WithFeatures):
     def get_used_features(self) -> FeatureSet:
         return NOTHING
 
-    def get_data_as_string(self, resources: Path) -> str:
-        file_path = _resolve_path(resources, self.expected_path)
-        with open(file_path, "r") as file:
-            return file.read()
+    def get_data_as_string(self, resources: Path, file_index: int) -> str:
+        return self.files[file_index].get_data_as_string(resources)
 
 
 @fallback_field({"evaluator": "oracle"})
@@ -701,10 +710,17 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> set[TextData]:
+    def get_input_files(self) -> set[TextData]:
         all_files = set()
         for t in self.testcases:
             all_files = all_files.union(t.input_files)
+        return all_files
+
+    def get_output_files(self) -> set[TextData]:
+        all_files = set()
+        for t in self.testcases:
+            if isinstance(t.output.file, FileOutputChannel):
+                all_files.update(t.output.file.files)
         return all_files
 
 

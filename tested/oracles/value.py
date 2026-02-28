@@ -3,7 +3,7 @@ Value oracle.
 """
 
 import logging
-from typing import cast
+from typing import Sequence, cast
 
 from tested.configs import Bundle
 from tested.datatypes import (
@@ -20,6 +20,7 @@ from tested.languages.generation import generate_statement
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.parsing import get_converter
 from tested.serialisation import (
+    Expression,
     ObjectKeyValuePair,
     ObjectType,
     SequenceType,
@@ -30,6 +31,8 @@ from tested.serialisation import (
     to_python_comparable,
 )
 from tested.testsuite import (
+    ExceptionOutputChannel,
+    FileOutputChannel,
     OracleOutputChannel,
     OutputChannel,
     TextOutputChannel,
@@ -56,25 +59,69 @@ def get_values(
     bundle: Bundle, output_channel: OracleOutputChannel, actual_str: str
 ) -> OracleResult | tuple[Value, str, Value | None, str]:
     if isinstance(output_channel, TextOutputChannel):
-        expected = output_channel.get_data_as_string(bundle.config.resources)
-        expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
-        actual_value = StringType(type=BasicStringTypes.TEXT, data=actual_str)
-        return expected_value, expected, actual_value, actual_str
+        return _get_text_value(bundle, output_channel, actual_str)
+    elif isinstance(output_channel, FileOutputChannel):
+        return _get_file_values(bundle, output_channel)
+    elif isinstance(output_channel, ValueOutputChannel):
+        return _get_value_value(bundle, output_channel, actual_str)
+    else:
+        raise ValueError(f"Unsupported output channel: {output_channel}")
 
-    assert isinstance(output_channel, ValueOutputChannel)
 
-    expected = output_channel.value
-    assert isinstance(expected, Value)
-    readable_expected = generate_statement(bundle, expected)
+def _get_file_values(
+    bundle: Bundle, output_channel: FileOutputChannel
+) -> tuple[Value, str, Value, str]:
+    expected = [
+        StringType(
+            type=BasicStringTypes.TEXT,
+            data=output_channel.get_data_as_string(bundle.config.resources, i),
+        )
+        for i, _ in enumerate(output_channel.files)
+    ]
+    actual = [
+        StringType(type=BasicStringTypes.TEXT, data=f.path)
+        for f in output_channel.files
+        if f.path
+    ]
+    # noinspection PyUnnecessaryCast
+    expected_value = SequenceType(
+        type=BasicSequenceTypes.SEQUENCE, data=cast(list[Expression], expected)
+    )
+    # noinspection PyUnnecessaryCast
+    actual_value = SequenceType(
+        type=BasicSequenceTypes.SEQUENCE, data=cast(list[Expression], actual)
+    )
+
+    expected_str = ", ".join(f.data for f in expected)
+    actual_str = ", ".join(f.data for f in actual)
+
+    return expected_value, expected_str, actual_value, actual_str
+
+
+def _get_text_value(
+    bundle: Bundle, output_channel: TextOutputChannel, actual_str: str
+) -> tuple[Value, str, Value, str]:
+    expected = output_channel.get_data_as_string(bundle.config.resources)
+    expected_value = StringType(type=BasicStringTypes.TEXT, data=expected)
+    actual_value = StringType(type=BasicStringTypes.TEXT, data=actual_str)
+    return expected_value, expected, actual_value, actual_str
+
+
+def _get_value_value(
+    bundle: Bundle, output_channel: ValueOutputChannel, actual_str: str
+) -> OracleResult | tuple[Value, str, Value | None, str]:
+    expected_value = output_channel.value
+    assert isinstance(expected_value, Value)
+    readable_expected = generate_statement(bundle, expected_value)
 
     # Special support for empty strings.
     if not actual_str.strip():
-        return expected, readable_expected, None, ""
+        return expected_value, readable_expected, None, ""
 
     # A crash here indicates a problem with one of the language implementations,
     # or a student is trying to cheat.
     try:
-        actual = parse_value(actual_str)
+        actual_value = parse_value(actual_str)
     except Exception as e:
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
@@ -88,8 +135,8 @@ def get_values(
             messages=[message],
         )
 
-    readable_actual = generate_statement(bundle, actual)
-    return expected, readable_expected, actual, readable_actual
+    readable_actual = generate_statement(bundle, actual_value)
+    return expected_value, readable_expected, actual_value, readable_actual
 
 
 def _prepare_value_for_type_check(value: Value) -> Value:
