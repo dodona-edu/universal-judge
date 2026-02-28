@@ -712,10 +712,17 @@ class Context(WithFeatures, WithFunctions):
     def has_exit_testcase(self):
         return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
 
-    def get_files(self) -> set[TextData]:
+    def get_input_files(self) -> set[TextData]:
         all_files = set()
         for t in self.testcases:
             all_files = all_files.union(t.input_files)
+        return all_files
+
+    def get_output_files(self) -> set[TextData]:
+        all_files = set()
+        for t in self.testcases:
+            if isinstance(t.output.file, FileOutputChannel):
+                all_files.update(t.output.file.files)
         return all_files
 
 

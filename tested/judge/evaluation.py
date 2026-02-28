@@ -260,7 +260,7 @@ def evaluate_context_results(
             )
 
     # All files that will be used in this context.
-    all_files = context.get_files()
+    all_files = context.get_input_files()
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
@@ -546,7 +546,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
             # All files that will be used in this context.
-            all_files = context.get_files()
+            all_files = context.get_input_files()
 
             # Begin normal testcases.
             for j, testcase in enumerate(
