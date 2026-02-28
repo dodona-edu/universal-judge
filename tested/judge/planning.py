@@ -13,7 +13,7 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.conventionalize import execution_name
 from tested.languages.language import FileFilter
-from tested.testsuite import Context, EmptyChannel, MainInput
+from tested.testsuite import ContentPath, Context, EmptyChannel, MainInput
 
 
 @define
@@ -31,6 +31,12 @@ class PlannedContext:
     context: Context
     tab_index: int
     context_index: int
+
+
+@define(frozen=True)
+class DynamicallyGeneratedFile:
+    path: str
+    content: ContentPath | str
 
 
 @define
@@ -55,6 +61,44 @@ class PlannedExecutionUnit:
 
     def has_exit_testcase(self) -> bool:
         return self.contexts[-1].context.has_exit_testcase()
+
+    def get_dynamically_generated_files(self) -> list[DynamicallyGeneratedFile]:
+        generated_files = set()
+
+        for context in self.contexts:
+            for testcase in context.context.testcases:
+                if (
+                    isinstance(testcase.input, MainInput)
+                    and testcase.input.stdin != EmptyChannel.NONE
+                    and testcase.input.stdin.is_dynamically_generated()
+                    and testcase.input.stdin.path is not None
+                ):
+                    generated_files.add(
+                        DynamicallyGeneratedFile(
+                            path=testcase.input.stdin.path,
+                            content=testcase.input.stdin.content,
+                        )
+                    )
+
+                for input_file in testcase.input_files:
+                    if (
+                        input_file.is_dynamically_generated()
+                        and input_file.path is not None
+                    ):
+                        generated_files.add(
+                            DynamicallyGeneratedFile(
+                                path=input_file.path,
+                                content=input_file.content,
+                            )
+                        )
+
+        return sorted(
+            generated_files,
+            key=lambda f: (
+                f.path,
+                f.content.path if isinstance(f.content, ContentPath) else f.content,
+            ),
+        )
 
 
 @define

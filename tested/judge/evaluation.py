@@ -1,5 +1,6 @@
 import html
 import logging
+import urllib.parse
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
@@ -35,6 +36,7 @@ from tested.languages.generation import (
 from tested.oracles import get_oracle
 from tested.oracles.common import OracleResult
 from tested.testsuite import (
+    ContentPath,
     Context,
     EmptyChannel,
     ExceptionOutput,
@@ -42,11 +44,11 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutput,
     FileOutputChannel,
-    FileUrl,
     IgnoredChannel,
     OutputChannel,
     SpecialOutputChannel,
     Testcase,
+    TextData,
     TextOutput,
     TextOutputChannel,
     ValueOutput,
@@ -353,7 +355,7 @@ def evaluate_context_results(
 
     # Add file links
     if all_files:
-        collector.add(_link_files_message(all_files))
+        collector.add(link_files_message(all_files))
 
     if exec_results.timeout:
         return Status.TIME_LIMIT_EXCEEDED
@@ -362,16 +364,24 @@ def evaluate_context_results(
     return None
 
 
-def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
-    link_list = ", ".join(
-        f'<a href="{link_file.url}" class="file-link" target="_blank">'
-        f'<span class="code">{html.escape(link_file.name)}</span></a>'
-        for link_file in link_files
-    )
+def link_files_message(
+    link_files: Collection[TextData],
+) -> AppendMessage:
+    link_list = []
+    for link_file in link_files:
+        # TODO: handle inline files somehow.
+        if link_file.path is not None and isinstance(link_file.content, ContentPath):
+            the_url = urllib.parse.quote(link_file.content.path)
+            link_list.append(
+                f'<a href="{the_url}" class="file-link" target="_blank">'
+                f'<span class="code">{html.escape(link_file.path)}</span></a>'
+            )
+
+    file_list = ", ".join(link_list)
     file_list_str = get_i18n_string(
-        "judge.evaluation.files", count=len(link_files), files=link_list
+        "judge.evaluation.files", count=len(link_list), files=file_list
     )
-    description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
+    description = f"<div class='contains-file'><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     return AppendMessage(message=message)
 
@@ -523,7 +533,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 
             # Add links to files we haven't seen yet.
             if all_files:
-                updates.insert(0, _link_files_message(all_files))
+                updates.insert(0, link_files_message(all_files))
 
             collector.add_all(updates)
             collector.add(CloseContext(accepted=False))

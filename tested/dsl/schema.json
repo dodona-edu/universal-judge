@@ -276,11 +276,18 @@
         },
         "stdin" : {
           "description" : "Stdin for this context",
-          "type" : [
-            "string",
-            "number",
-            "integer",
-            "boolean"
+          "oneOf" : [
+            {
+              "type" : [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            },
+            {
+              "$ref": "#/definitions/fileData"
+            }
           ]
         },
         "arguments" : {
@@ -339,6 +346,12 @@
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/file"
+          }
+        },
+        "input_files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/fileDataRequiredPath"
           }
         },
         "return" : {
@@ -882,6 +895,49 @@
         },
         "file": {
           "$ref" : "#/definitions/fileConfigurationOptions"
+        }
+      }
+    },
+    "fileData": {
+      "type": "object",
+      "additionalProperties" : false,
+      "anyOf" : [
+        {
+          "required" : [
+            "content"
+          ]
+        },
+        {
+          "required" : [
+            "path"
+          ]
+        }
+      ],
+      "properties": {
+        "content": {
+          "type": "string",
+          "description" : "Content of the file, which will be provided inline or written to disk in the workdir. If a !path, the file contents will be read from the provided path."
+        },
+        "path": {
+          "type": "string",
+          "description" : "Path to the file, relative to the workdir. Used to display in the output."
+        }
+      }
+    },
+    "fileDataRequiredPath": {
+      "type": "object",
+      "additionalProperties" : false,
+      "required" : [
+        "path"
+      ],
+      "properties": {
+        "content": {
+          "type": "string",
+          "description" : "Content of the file, which will be provided inline or written to disk in the workdir. If a !path, the file contents will be read from the provided path."
+        },
+        "path": {
+          "type": "string",
+          "description" : "Path to the file, relative to the workdir. Used to display in the output."
         }
       }
     }

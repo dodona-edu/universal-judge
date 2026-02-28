@@ -30,6 +30,7 @@ from tested.serialisation import (
     VariableAssignment,
 )
 from tested.testsuite import (
+    ContentPath,
     CustomCheckOracle,
     FileOutputChannel,
     FileUrl,
@@ -38,6 +39,7 @@ from tested.testsuite import (
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
+    TextData,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -68,10 +70,10 @@ tabs:
     assert len(context.testcases) == 1
     tc = context.testcases[0]
     assert tc.is_main_testcase()
-    assert tc.input.stdin.data == "Input string\n"
+    assert tc.input.stdin.content == "Input string\n"
     assert tc.input.arguments == ["--arg", "argument"]
-    assert tc.output.stderr.data == "Error string\n"
-    assert tc.output.stdout.data == "Output string\n"
+    assert tc.output.stderr.content == "Error string\n"
+    assert tc.output.stdout.content == "Output string\n"
     assert tc.output.exit_code.value == 1
 
 
@@ -223,7 +225,7 @@ def test_parse_ctx_with_config():
     assert tc3.input.arguments == ["-e"]
 
     stdout = tc0.output.stdout
-    assert stdout.data == "3.34\n"
+    assert stdout.content == "3.34\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -231,7 +233,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stdout = tc1.output.stdout
-    assert stdout.data == "3.337\n"
+    assert stdout.content == "3.337\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -239,7 +241,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 3
 
     stdout = tc2.output.stdout
-    assert stdout.data == "3.3\n"
+    assert stdout.content == "3.3\n"
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -247,7 +249,7 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stderr = tc3.output.stderr
-    assert stderr.data == " Fail \n"
+    assert stderr.content == " Fail \n"
     options = stderr.oracle.options
     assert len(options) == 2
     assert not options["caseInsensitive"]
@@ -288,14 +290,14 @@ def test_statements():
 
     assert len(tests0) == 2
     assert isinstance(tests0[0].input, VariableAssignment)
-    assert tests0[0].output.stdout.data == "New safe\n"
+    assert tests0[0].output.stdout.content == "New safe\n"
     assert tests0[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests0[1].input, FunctionCall)
     assert tests0[1].output.result.value.data == "Ignore whitespace"
 
     assert len(tests1) == 2
     assert isinstance(tests1[0].input, VariableAssignment)
-    assert tests1[0].output.stdout.data == "New safe\n"
+    assert tests1[0].output.stdout.content == "New safe\n"
     assert not tests1[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests1[1].input, FunctionCall)
     assert tests1[1].output.result.value.data == 5
@@ -324,7 +326,7 @@ def test_expression_and_main():
     assert len(ctx.testcases) == 2
     tc = ctx.testcases[0]
     assert tc.input.arguments == ["-a", "5", "7"]
-    assert tc.output.stdout.data == "12\n"
+    assert tc.output.stdout.content == "12\n"
     assert tc.output.stdout.oracle.options["tryFloatingPoint"]
     test = ctx.testcases[1]
     assert isinstance(test.input, FunctionCall)
@@ -651,7 +653,7 @@ def test_text_built_in_checks_implied():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, GenericTextOracle)
-    assert test.output.stdout.data == "hallo\n"
+    assert test.output.stdout.content == "hallo\n"
 
 
 def test_text_built_in_checks_explicit():
@@ -675,7 +677,7 @@ def test_text_built_in_checks_explicit():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, GenericTextOracle)
-    assert test.output.stdout.data == "hallo\n"
+    assert test.output.stdout.content == "hallo\n"
 
 
 def test_text_custom_checks_correct():
@@ -702,7 +704,7 @@ def test_text_custom_checks_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.stdout, TextOutputChannel)
     assert isinstance(test.output.stdout.oracle, CustomCheckOracle)
-    assert test.output.stdout.data == "hallo\n"
+    assert test.output.stdout.content == "hallo\n"
     oracle = test.output.stdout.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
@@ -1192,9 +1194,9 @@ def test_files_are_propagated():
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
-    assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+    assert set(test0.input_files) == {
+        TextData(path="test", content=ContentPath("test.md")),
+        TextData(path="two", content=ContentPath("two.md")),
     }
 
 
@@ -1211,7 +1213,7 @@ def test_newlines_are_added_to_stdout():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
     assert actual_stdout == "12\n"
 
     yaml_str2 = """
@@ -1223,7 +1225,7 @@ def test_newlines_are_added_to_stdout():
         """
     json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
-    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
     assert actual_stdout == "hello\n"
 
 
@@ -1240,7 +1242,7 @@ def test_newlines_are_added_to_stderr():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
     assert actual_stderr == "12\n"
 
     yaml_str2 = """
@@ -1252,7 +1254,7 @@ def test_newlines_are_added_to_stderr():
         """
     json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
     assert actual_stderr == "hello\n"
 
 
@@ -1268,7 +1270,7 @@ def test_no_duplicate_newlines_are_added():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual = suite.tabs[0].contexts[0].testcases[0].output.stdout.data
+    actual = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
     assert actual == "hello\nworld\n"
 
 
@@ -1286,7 +1288,7 @@ def test_can_disable_normalizing_newlines():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
     assert actual_stderr == "12"
 
 
@@ -1300,7 +1302,7 @@ def test_empty_text_data_newlines():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.data
+    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
     assert actual_stderr == ""
 
 
@@ -1342,3 +1344,107 @@ def test_editor_json_schema_is_valid():
     validator = load_schema_validator(file="schema.json")
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
+
+
+def test_stdin_shorthand_string():
+    yaml_str = """
+namespace: "IO"
+tabs:
+  - tab: "Stdin"
+    testcases:
+      - stdin: "hello"
+        stdout: "hello world!\\n"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+
+    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+
+    assert stdin_def.content == "hello\n"
+    assert stdin_def.path is None
+
+
+def test_stdin_implicit_file_reference():
+    yaml_str = """
+namespace: "IO"
+tabs:
+  - tab: "Stdin"
+    testcases:
+      - stdin: 
+          path: "hello.txt"
+        stdout: "hello world!\\n"
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+
+    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+
+    assert stdin_def.path == "hello.txt"
+    assert stdin_def.content.path == "hello.txt"
+
+
+def test_stdin_explicit_path_and_content():
+    yaml_str = """
+namespace: "IO"
+tabs:
+  - tab: "Stdin"
+    testcases:
+      - stdin: 
+          path: "hello.txt"
+          content: "hello"
+        stdout: "hello world!\\n"
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+
+    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+
+    assert stdin_def.path == "hello.txt"
+    assert stdin_def.content == "hello\n"
+
+
+def test_input_files_new_format():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "InputFiles"
+    testcases:
+      - expression: "test()"
+        input_files:
+          - path: "data.txt"
+            content: "hello"
+          - path: "config.json"
+            content: !path "configs/test.json"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert len(testcase.input_files) == 2
+    assert testcase.input_files[0].path == "data.txt"
+    assert testcase.input_files[0].content == "hello\n"
+    assert testcase.input_files[1].path == "config.json"
+    assert testcase.input_files[1].content.path == "configs/test.json"
+
+
+def test_input_files_missing_path_fails():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "InputFiles"
+    testcases:
+      - expression: "test()"
+        input_files:
+          - content: "hello"
+    """
+    with pytest.raises(ExceptionGroup) as excinfo:
+        translate_to_test_suite(yaml_str)
+
+    def check_error(exc):
+        if "path" in str(exc):
+            return True
+        if isinstance(exc, ExceptionGroup):
+            return any(check_error(e) for e in exc.exceptions)
+        return False
+
+    assert check_error(excinfo.value)
