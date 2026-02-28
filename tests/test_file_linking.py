@@ -70,9 +70,7 @@ def test_link_files_message_no_path_ignored():
     message = link_files_message(link_files)
 
     # If path is None, it should be ignored by link_files_message
-    assert message
-    assert isinstance(message.message, ExtendedMessage)
-    assert "href=" not in message.message.description
+    assert message is None
 
 
 def test_readable_input_file_linking(tmp_path: Path, pytestconfig: pytest.Config):
