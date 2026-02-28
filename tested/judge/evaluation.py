@@ -371,7 +371,9 @@ def evaluate_context_results(
 
     # Add file links
     if all_files:
-        collector.add(link_files_message(all_files))
+        link_files = link_files_message(all_files)
+        if link_files:
+            collector.add(link_files)
 
     if exec_results.timeout:
         return Status.TIME_LIMIT_EXCEEDED
@@ -382,7 +384,7 @@ def evaluate_context_results(
 
 def link_files_message(
     link_files: Collection[TextData],
-) -> AppendMessage:
+) -> AppendMessage | None:
     link_list = []
     for link_file in link_files:
         # TODO: handle inline files somehow.
@@ -392,6 +394,9 @@ def link_files_message(
                 f'<a href="{the_url}" class="file-link" target="_blank">'
                 f'<span class="code">{html.escape(link_file.path)}</span></a>'
             )
+
+    if len(link_list) == 0:
+        return None  # Do not append any message if there are no files.
 
     file_list = ", ".join(link_list)
     file_list_str = get_i18n_string(
@@ -573,7 +578,9 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 
             # Add links to files we haven't seen yet.
             if all_files:
-                updates.insert(0, link_files_message(all_files))
+                link_files = link_files_message(all_files)
+                if link_files:
+                    updates.insert(0, link_files)
 
             collector.add_all(updates)
             collector.add(CloseContext(accepted=False))
