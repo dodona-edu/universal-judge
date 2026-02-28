@@ -1,0 +1,20 @@
+tabs:
+  - tab: "Main"
+    testcases:
+      - stdin: "Dave"
+        stdout: |-
+          Hello, I don't believe we have met.
+          Nice to meet you Dave.
+        input_files:
+          - path: "datafile.txt"
+            content: ""
+        output_files:
+          - path: "datafile.txt"
+            content: "Dave"
+      - stdout: "It's good to see you again, Craig."
+        input_files:
+          - path: "datafile.txt"
+            content: "Craig"
+        output_files:
+          - path: "datafile.txt"
+            content: "Craig"
