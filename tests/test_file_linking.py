@@ -25,6 +25,7 @@ def test_link_files_message_single_file():
     ]
     message = link_files_message(link_files)
 
+    assert message
     assert isinstance(message.message, ExtendedMessage)
     assert message.message.format == "html"
     assert 'href="path/to/data.txt"' in message.message.description
@@ -40,6 +41,7 @@ def test_link_files_message_multiple_files():
 
     message = link_files_message(link_files)
 
+    assert message
     assert isinstance(message.message, ExtendedMessage)
     assert 'href="url1"' in message.message.description
     assert "file1.txt</span></a>" in message.message.description
@@ -56,6 +58,7 @@ def test_link_files_message_inline_content_ignored():
     ]
     message = link_files_message(link_files)
 
+    assert message
     assert isinstance(message.message, ExtendedMessage)
     assert 'href="linked-url"' in message.message.description
     assert "linked.txt</span></a>" in message.message.description
@@ -67,6 +70,7 @@ def test_link_files_message_no_path_ignored():
     message = link_files_message(link_files)
 
     # If path is None, it should be ignored by link_files_message
+    assert message
     assert isinstance(message.message, ExtendedMessage)
     assert "href=" not in message.message.description
 
