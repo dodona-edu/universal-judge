@@ -348,6 +348,12 @@
             "$ref" : "#/definitions/file"
           }
         },
+        "input_files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/fileDataRequiredPath"
+          }
+        },
         "return" : {
           "description" : "Expected return value",
           "$ref" : "#/definitions/returnOutputChannel"
@@ -912,6 +918,26 @@
             "path"
           ]
         }
+      ],
+      "properties": {
+        "content": {
+          "type": [
+            "string",
+            "path"
+          ],
+          "description" : "Content of the file, which will be provided inline or written to disk in the workdir. If a !path, the file contents will be read from the provided path."
+        },
+        "path": {
+          "type": "string",
+          "description" : "Path to the file, relative to the workdir. Used to display in the output."
+        }
+      }
+    },
+    "fileDataRequiredPath": {
+      "type": "object",
+      "additionalProperties" : false,
+      "required" : [
+        "path"
       ],
       "properties": {
         "content": {
