@@ -1,0 +1,19 @@
+- tab: "Tests"
+  testcases:
+    - stdin:
+        path: "input2.txt"
+        content: !path input.txt
+      stdout: "Hallo"
+    - stdin:
+        path: "input2.txt"
+        content: |
+          Line1
+      stdout: "Line1"
+    - stdin:
+        path: "input3.txt"
+        content: "TESTed"
+      stdout: "TESTed"
+    - stdin:
+        path: "input.txt"
+        content: "This is overwritten."
+      stdout: "This is overwritten."
