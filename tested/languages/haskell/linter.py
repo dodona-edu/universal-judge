@@ -5,6 +5,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -85,26 +86,24 @@ def run_hlint(
         if notes:
             hint = f"{hint}\n{notes}"
 
-        start_row = hlint_message.get("startLine", 1)
-        end_row = hlint_message.get("endLine")
-        rows = end_row - start_row if end_row else None
-        start_col = hlint_message.get("startColumn", 1)
-        end_col = hlint_message.get("endColumn")
-        cols = end_col - start_col if end_col else None
+        position = get_linter_position(
+            raw_start_row=hlint_message.get("startLine"),
+            source_offset=config.source_offset,
+            raw_end_row=hlint_message.get("endLine"),
+            raw_start_column=hlint_message.get("startColumn"),
+            raw_end_column=hlint_message.get("endColumn"),
+            end_column_inclusive=False,
+        )
 
         annotations.append(
-            AnnotateCode(
-                row=start_row - 1 + config.source_offset,
-                rows=rows,
+            annotation_from_position(
+                position=position,
                 text=hint,
-                externalUrl="https://github.com/ndmitchell/hlint/blob/master/hints.md",
-                column=start_col - 1,
-                columns=cols,
+                external_url="https://github.com/ndmitchell/hlint/blob/master/hints.md",
                 type=message_categories.get(
                     hlint_message.get("severity", "warning"), Severity.WARNING
                 ),
-            )
+            ),
         )
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
+
     return [], annotations

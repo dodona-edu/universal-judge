@@ -85,8 +85,11 @@
             "column":  { "$ref": "#/definitions/index" },
             "text":    { "type": "string" },
             "type":    { "$ref": "#/definitions/severity" },
-            "rows":    { "$ref": "#/definitions/index" },
-            "columns": { "$ref": "#/definitions/index" }
+            "rows":    {
+              "type": "integer",
+              "minimum": 1
+            },
+            "columns": { "type": "integer" }
         }
     },
     "escalate-status": {
