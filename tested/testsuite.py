@@ -683,6 +683,13 @@ def _runs_to_tab_converter(runs: list | None):
                 contexts.append(context)
     return contexts
 
+@unique
+class Permission(StrEnum):
+    """To which level of user this message is visible."""
+
+    STAFF = auto()
+    STUDENT = auto()
+    ZEUS = auto()
 
 @custom_fallback_field(get_converter(), {"runs": ("contexts", _runs_to_tab_converter)})
 @define
@@ -692,6 +699,7 @@ class Tab(WithFeatures, WithFunctions):
     name: str
     contexts: list[Context] = field()
     hidden: bool | None = None
+    permission: Permission | None = None
 
     def get_used_features(self) -> FeatureSet:
         assert self.contexts is not None
