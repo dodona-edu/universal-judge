@@ -1,5 +1,6 @@
 import html
 import logging
+import urllib.parse
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
@@ -35,6 +36,7 @@ from tested.languages.generation import (
 from tested.oracles import get_oracle
 from tested.oracles.common import OracleResult
 from tested.testsuite import (
+    ContentPath,
     Context,
     EmptyChannel,
     ExceptionOutput,
@@ -42,11 +44,11 @@ from tested.testsuite import (
     ExitCodeOutputChannel,
     FileOutput,
     FileOutputChannel,
-    FileUrl,
     IgnoredChannel,
     OutputChannel,
     SpecialOutputChannel,
     Testcase,
+    TextData,
     TextOutput,
     TextOutputChannel,
     ValueOutput,
@@ -110,41 +112,56 @@ def _evaluate_channel(
         bundle, context_directory, output, testcase, unexpected_status=unexpected_status
     )
     # Run the oracle.
-    evaluation_result = evaluator(output, actual if actual else "")
-    status = evaluation_result.result
+    # The file oracle produces multiple results if comparing multiple files.
+    evaluation_results = evaluator(output, actual if actual else "")
+    evaluation_results = (
+        [evaluation_results]
+        if not isinstance(evaluation_results, list)
+        else evaluation_results
+    )
 
-    # Decide if we should show this channel or not.
-    is_correct = status.enum == Status.CORRECT
-    should_report_case = should_show(output, channel, evaluation_result)
+    for evaluation_result in evaluation_results:
+        status = evaluation_result.result
 
-    if not should_report_case and is_correct:
-        # We do report that a test is correct, to set the status.
-        return False
+        # Decide if we should show this channel or not.
+        is_correct = status.enum == Status.CORRECT
+        should_report_case = should_show(output, channel, evaluation_result)
 
-    expected = evaluation_result.readable_expected
-    out.add(StartTest(expected=expected, channel=channel))
+        if not should_report_case and is_correct:
+            continue
 
-    # Report any messages we received.
-    for message in evaluation_result.messages:
-        out.add(AppendMessage(message=message))
+        expected = evaluation_result.readable_expected
+        if evaluation_result.channel_override is not None:
+            display_channel = evaluation_result.channel_override
+        else:
+            display_channel = channel
 
-    missing = False
-    if actual is None:
-        out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
-        missing = True
-    elif should_report_case and timeout and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.time-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
-    elif should_report_case and memory and not is_correct:
-        status.human = get_i18n_string("judge.evaluation.memory-limit")
-        status.enum = Status.TIME_LIMIT_EXCEEDED
-        out.add(AppendMessage(message=status.human))
+        out.add(StartTest(expected=expected, channel=display_channel))
 
-    # Close the test.
-    out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+        # Report any messages we received.
+        for message in evaluation_result.messages:
+            out.add(AppendMessage(message=message))
 
-    return missing
+        missing = False
+        if actual is None:
+            out.add(AppendMessage(message=get_i18n_string("judge.evaluation.missing")))
+            missing = True
+        elif should_report_case and timeout and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.time-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+        elif should_report_case and memory and not is_correct:
+            status.human = get_i18n_string("judge.evaluation.memory-limit")
+            status.enum = Status.TIME_LIMIT_EXCEEDED
+            out.add(AppendMessage(message=status.human))
+
+        # Close the test.
+        out.add(CloseTest(generated=evaluation_result.readable_actual, status=status))
+
+        if missing:
+            return True
+
+    return False
 
 
 def evaluate_context_results(
@@ -242,7 +259,7 @@ def evaluate_context_results(
             )
 
     # All files that will be used in this context.
-    all_files = context.get_files()
+    all_files = context.get_input_files()
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
@@ -353,7 +370,9 @@ def evaluate_context_results(
 
     # Add file links
     if all_files:
-        collector.add(_link_files_message(all_files))
+        link_files = link_files_message(all_files)
+        if link_files:
+            collector.add(link_files)
 
     if exec_results.timeout:
         return Status.TIME_LIMIT_EXCEEDED
@@ -362,16 +381,27 @@ def evaluate_context_results(
     return None
 
 
-def _link_files_message(link_files: Collection[FileUrl]) -> AppendMessage:
-    link_list = ", ".join(
-        f'<a href="{link_file.url}" class="file-link" target="_blank">'
-        f'<span class="code">{html.escape(link_file.name)}</span></a>'
-        for link_file in link_files
-    )
+def link_files_message(
+    link_files: Collection[TextData],
+) -> AppendMessage | None:
+    link_list = []
+    for link_file in link_files:
+        # TODO: handle inline files somehow.
+        if link_file.path is not None and isinstance(link_file.content, ContentPath):
+            the_url = urllib.parse.quote(link_file.content.path)
+            link_list.append(
+                f'<a href="{the_url}" class="file-link" target="_blank">'
+                f'<span class="code">{html.escape(link_file.path)}</span></a>'
+            )
+
+    if len(link_list) == 0:
+        return None  # Do not append any message if there are no files.
+
+    file_list = ", ".join(link_list)
     file_list_str = get_i18n_string(
-        "judge.evaluation.files", count=len(link_files), files=link_list
+        "judge.evaluation.files", count=len(link_list), files=file_list
     )
-    description = f"<div class='contains-file''><p>{file_list_str}</p></div>"
+    description = f"<div class='contains-file'><p>{file_list_str}</p></div>"
     message = ExtendedMessage(description=description, format="html")
     return AppendMessage(message=message)
 
@@ -422,14 +452,17 @@ def should_show(
         raise AssertionError(f"Unknown channel {channel}")
 
 
-def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
+def guess_expected_value(
+    bundle: Bundle, test: OutputChannel, file_index: int | None = None
+) -> str:
     """
     Try and get the expected value for an output channel. In some cases, such as
-    a programmed or language specific oracle, there will be no expected value
+    a programmed or language-specific oracle, there will be no expected value
     available in the test suite. In that case, we use an empty string.
 
     :param bundle: Configuration bundle.
     :param test: The output channel.
+    :param file_index: Index of the file in the output channel, if applicable.
 
     :return: A best effort attempt of the expected value.
     """
@@ -438,7 +471,8 @@ def guess_expected_value(bundle: Bundle, test: OutputChannel) -> str:
     elif isinstance(test, TextOutputChannel):
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, FileOutputChannel):
-        return test.get_data_as_string(bundle.config.resources)
+        # We know file index will be set when we have a FileOutputChannel.
+        return test.get_data_as_string(bundle.config.resources, file_index or 0)
     elif isinstance(test, ExceptionOutputChannel):
         return (
             test.exception.readable(bundle.config.programming_language)
@@ -462,16 +496,38 @@ def _add_channel(
 ):
     """Add a channel to the output if it should be shown."""
     if should_show(output, channel):
-        updates.append(
-            StartTest(expected=guess_expected_value(bundle, output), channel=channel)
-        )
-        updates.append(
-            CloseTest(
-                generated="",
-                status=StatusMessage(enum=Status.NOT_EXECUTED),
-                accepted=False,
+        if isinstance(output, FileOutputChannel):
+            for i, file in enumerate(output.files):
+                assert (
+                    file.path is not None
+                ), "File path must be set when using output_files"
+
+                updates.append(
+                    StartTest(
+                        expected=guess_expected_value(bundle, output, i),
+                        channel=file.path,
+                    )
+                )
+                updates.append(
+                    CloseTest(
+                        generated="",
+                        status=StatusMessage(enum=Status.NOT_EXECUTED),
+                        accepted=False,
+                    )
+                )
+        else:
+            updates.append(
+                StartTest(
+                    expected=guess_expected_value(bundle, output), channel=channel
+                )
             )
-        )
+            updates.append(
+                CloseTest(
+                    generated="",
+                    status=StatusMessage(enum=Status.NOT_EXECUTED),
+                    accepted=False,
+                )
+            )
 
 
 def complete_evaluation(bundle: Bundle, collector: OutputManager):
@@ -496,7 +552,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
             # All files that will be used in this context.
-            all_files = context.get_files()
+            all_files = context.get_input_files()
 
             # Begin normal testcases.
             for j, testcase in enumerate(
@@ -523,7 +579,9 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
 
             # Add links to files we haven't seen yet.
             if all_files:
-                updates.insert(0, _link_files_message(all_files))
+                link_files = link_files_message(all_files)
+                if link_files:
+                    updates.insert(0, link_files)
 
             collector.add_all(updates)
             collector.add(CloseContext(accepted=False))

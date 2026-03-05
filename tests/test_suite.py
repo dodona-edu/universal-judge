@@ -5,6 +5,7 @@ If making a breaking change, add a test here to ensure it doesn't break later.
 
 from tested.parsing import get_converter
 from tested.testsuite import (
+    ContentPath,
     CustomCheckOracle,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
@@ -89,7 +90,7 @@ def test_input_deprecated_attribute_is_accepted():
     """
     result = get_converter().loads(scheme, MainInput)
     assert isinstance(result.stdin, TextData)
-    assert result.stdin.data == "input-1"
+    assert result.stdin.content == "input-1"
 
 
 def test_text_show_expected_is_accepted():
@@ -101,20 +102,20 @@ def test_text_show_expected_is_accepted():
     }
     """
     result = get_converter().loads(scheme, TextOutputChannel)
-    assert result.data == "hallo"
+    assert result.content == "hallo"
 
 
 def test_file_show_expected_is_accepted():
     scheme = """
     {
         "show_expected": true,
-        "expected_path": "hallo",
-        "actual_path": "hallo"
+        "expected_path": "expected-hallo",
+        "actual_path": "actual-hallo"
     }
     """
     result = get_converter().loads(scheme, FileOutputChannel)
-    assert result.expected_path == "hallo"
-    assert result.actual_path == "hallo"
+    assert result.files[0].path == "actual-hallo"
+    assert result.files[0].content == ContentPath(path="expected-hallo")
 
 
 def test_value_show_expected_is_accepted():
