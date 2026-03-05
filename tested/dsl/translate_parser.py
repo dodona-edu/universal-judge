@@ -715,7 +715,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if (file := testcase.get("file")) is not None:
         output.file = _convert_file_output_channel(file, context, "file")
     if (file := testcase.get("output_files")) is not None:
-        output.file = _convert_file_output_channel(file, context, "ouput_files")
+        output.file = _convert_file_output_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
