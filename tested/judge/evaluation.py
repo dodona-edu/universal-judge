@@ -129,7 +129,7 @@ def _evaluate_channel(
 
         if not should_report_case and is_correct:
             # We do report that a test is correct, to set the status.
-            return False
+            continue
 
         expected = evaluation_result.readable_expected
         if evaluation_result.channel_override is not None:
