@@ -67,8 +67,8 @@ class OutputManager:
         """
         assert not self.finalized, "OutputManager already finished!"
         action, type_ = command.command.split("-")
-        _logger.debug(f"Adding {command}")
-        _logger.debug(f"Stack is {self.open_stack}")
+        _logger.debug("Adding %s", command)
+        _logger.debug("Stack is %s", self.open_stack)
         if action == "start":
             self.open_stack.append(type_)
         elif action == "close":
@@ -86,7 +86,7 @@ class OutputManager:
                 tabs, contexts, _ = self.currently_open
                 self.currently_open = (tabs, contexts, index + 1)
 
-        _logger.debug(f"After adding, stack is {self.open_stack}")
+        _logger.debug("After adding, stack is %s", self.open_stack)
         report_update(self.out, command)
 
     def terminate(

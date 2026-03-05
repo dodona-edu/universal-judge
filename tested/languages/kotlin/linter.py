@@ -92,12 +92,15 @@ def run_ktlint(
                 )
                 message += f" ({rule})"
 
+            column = error.get("column", 1) - 1
+            if column < 0:
+                column = None
             annotations.append(
                 AnnotateCode(
                     row=error.get("line", 1) - 1 + config.source_offset,
                     text=message,
                     externalUrl=external_url,
-                    column=error.get("column", 1) - 1,
+                    column=column,
                     type=Severity.INFO,
                 )
             )

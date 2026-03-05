@@ -190,14 +190,16 @@ def _get_language(config: DodonaConfig) -> tuple[SupportedLanguage, int]:
     bang = _consume_shebang(config.source)
     if bang and langs.language_exists(bang):
         _logger.debug(
-            f"Found shebang language and it exists, using {bang} instead "
-            f"of config language {config.programming_language}."
+            "Found shebang language and it exists, using %s instead of config language %s.",
+            bang,
+            config.programming_language,
         )
         return bang, 1
     else:
         _logger.debug(
-            f"No shebang found or it doesn't exist: {bang}. Using "
-            f"configuration language {config.programming_language}."
+            "No shebang found or it doesn't exist: %s. Using configuration language %s.",
+            bang,
+            config.programming_language,
         )
         return config.programming_language, 0
 
