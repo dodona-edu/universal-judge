@@ -4,7 +4,7 @@ from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.oracles.text import _text_options, compare_text
-from tested.testsuite import FileOutputChannel, OutputChannel, TextData
+from tested.testsuite import FileOutputChannel, OutputChannel, TextData, ContentPath
 
 
 def evaluate_file(
@@ -61,7 +61,7 @@ def compare_file(
         expected_content = file.get_data_as_string(config.bundle.config.resources)
     except FileNotFoundError:
         # We know content is TextData if we get a file not found error.
-        assert isinstance(file.content, TextData)
+        assert isinstance(file.content, ContentPath)
         raise ValueError(f"File {file.content.path} not found in resources.")
 
     actual_path = config.context_dir / file.path
