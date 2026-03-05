@@ -504,7 +504,7 @@ def _add_channel(
 
                 updates.append(
                     StartTest(
-                        expected=guess_expected_value(bundle, output), channel=file.path
+                        expected=guess_expected_value(bundle, output, i), channel=file.path
                     )
                 )
                 updates.append(
