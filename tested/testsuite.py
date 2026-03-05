@@ -316,6 +316,11 @@ class FileOutputChannel(WithFeatures):
         factory=lambda: GenericTextOracle(name=TextBuiltin.FILE)
     )
 
+    def __attrs_post_init__(self):
+        for f in self.files:
+            if f.path is None:
+                raise ValueError("File path must be set when using output_files.")
+
     def get_used_features(self) -> FeatureSet:
         return NOTHING
 
