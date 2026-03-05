@@ -2,3 +2,6 @@ paths:
   - tested
 paths-ignore:
   - tested/languages
+query-filters:
+  - exclude:
+      id: py/unsafe-cyclic-import
