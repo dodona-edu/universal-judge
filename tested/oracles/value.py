@@ -3,7 +3,7 @@ Value oracle.
 """
 
 import logging
-from typing import Sequence, cast
+from typing import cast
 
 from tested.configs import Bundle
 from tested.datatypes import (
