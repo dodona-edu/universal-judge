@@ -3,8 +3,8 @@ from attr import evolve
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.oracles.text import _text_options, compare_text
-from tested.testsuite import FileOutputChannel, OutputChannel, TextData, ContentPath
+from tested.oracles.text import compare_text, text_options
+from tested.testsuite import ContentPath, FileOutputChannel, OutputChannel, TextData
 
 
 def evaluate_file(
@@ -25,7 +25,7 @@ def evaluate_file(
     When no mode is passed, the oracle will default to ``full``.
     """
     assert isinstance(channel, FileOutputChannel)
-    options = _text_options(config)
+    options = text_options(config)
 
     # There must be nothing as output.
     if actual:
@@ -52,7 +52,7 @@ def compare_file(
     config: OracleConfig,
     file: TextData,
     options: dict,
-):
+) -> OracleResult:
     assert isinstance(
         file.path, str
     ), "File path must be a string when using file evaluator"

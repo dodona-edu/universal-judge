@@ -17,7 +17,7 @@ def _is_number(string: str) -> float | None:
         return None
 
 
-def _text_options(config: OracleConfig) -> dict:
+def text_options(config: OracleConfig) -> dict:
     defaults = {
         # Options for textual comparison
         "ignoreWhitespace": False,
@@ -93,7 +93,7 @@ def evaluate_text(
     Note: floating points inside other texts are currently not supported.
     """
     assert isinstance(channel, TextOutputChannel)
-    options = _text_options(config)
+    options = text_options(config)
 
     expected = channel.get_data_as_string(config.bundle.config.resources)
     result = compare_text(options, expected, actual)
