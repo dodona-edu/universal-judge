@@ -60,7 +60,9 @@ def compare_file(
     try:
         expected_content = file.get_data_as_string(config.bundle.config.resources)
     except FileNotFoundError:
-        raise ValueError(f"File {file.path} not found in resources.")
+        # We know content is TextData if we get a file not found error.
+        assert isinstance(file.content, TextData)
+        raise ValueError(f"File {file.content.path} not found in resources.")
 
     actual_path = config.context_dir / file.path
 
