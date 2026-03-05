@@ -128,7 +128,6 @@ def _evaluate_channel(
         should_report_case = should_show(output, channel, evaluation_result)
 
         if not should_report_case and is_correct:
-            # We do report that a test is correct, to set the status.
             continue
 
         expected = evaluation_result.readable_expected
