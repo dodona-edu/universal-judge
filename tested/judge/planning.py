@@ -127,25 +127,67 @@ class PlanStrategy(Enum):
 def _flattened_contexts_to_units(
     flattened_contexts: list[PlannedContext],
 ) -> list[list[PlannedContext]]:
+    """
+    Transform a flat list of contexts into a list of execution units.
+
+    This function attempts to produce as few execution units as possible.
+    Contexts are split into a new execution unit whenever there is a "conflict".
+    """
     contexts_per_unit = []
     current_unit_contexts = []
 
+    # Track files for the current execution unit.
+    current_input_files: dict[str, ContentPath | str] = {}
+    current_output_files: set[str] = set()  # These are paths
+
     for planned in flattened_contexts:
-        # If we get stdin, start a new execution unit.
-        if (
+        planned_input_files = {
+            planned_input_file.path: planned_input_file.content
+            for planned_input_file in planned.context.get_input_files()
+            if planned_input_file.path
+        }
+
+        planned_output_files = [
+            planned_output_file.path
+            for planned_output_file in planned.context.get_output_files()
+            if planned_output_file.path
+        ]
+
+        # If any context wants the same input file with different content, we have a conflict.
+        has_input_file_conflict = any(
+            path in current_input_files and current_input_files[path] != content
+            for path, content in planned_input_files.items()
+        )
+
+        # If any context wants an output file in the same location, we have a conflict.
+        has_output_conflict = any(
+            path in current_output_files for path in planned_output_files
+        )
+
+        # If any context has stdin, we have a conflict.
+        has_stdin_conflict = (
             planned.context.has_main_testcase()
             and cast(MainInput, planned.context.testcases[0].input).stdin
             != EmptyChannel.NONE
-        ):
+        )
+
+        if has_input_file_conflict or has_stdin_conflict or has_output_conflict:
             if current_unit_contexts:
                 contexts_per_unit.append(current_unit_contexts)
             current_unit_contexts = []
+            current_input_files.clear()
+            current_output_files.clear()
 
         current_unit_contexts.append(planned)
+        current_input_files.update(planned_input_files)
+        current_output_files.update(planned_output_files)
 
+        # If any context checks the exit code, we have a conflict in the next context.
         if planned.context.has_exit_testcase():
             contexts_per_unit.append(current_unit_contexts)
             current_unit_contexts = []
+            current_input_files.clear()
+            current_output_files.clear()
 
     if current_unit_contexts:
         contexts_per_unit.append(current_unit_contexts)

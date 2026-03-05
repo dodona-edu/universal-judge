@@ -213,3 +213,18 @@ def test_io_function_exercise_haskell_io(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_file_combinations(language: str, tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "time-2-code",
+        language,
+        tmp_path,
+        "plan.yml",
+        "solution",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 4

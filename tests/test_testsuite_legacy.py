@@ -66,8 +66,8 @@ def test_file_output_channel_legacy_evaluator():
         "evaluator": {"name": "file"},
     }
     result = get_converter().structure(data, FileOutputChannel)
-    assert result.expected_path == "exp.txt"
-    assert result.actual_path == "act.txt"
+    assert result.files[0].content == ContentPath(path="exp.txt")
+    assert result.files[0].path == "act.txt"
     assert isinstance(result.oracle, GenericTextOracle)
     assert result.oracle.name == TextBuiltin.FILE
 
