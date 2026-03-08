@@ -152,7 +152,7 @@ def _evaluate_channel(
             out.add(AppendMessage(message=status.human))
         elif should_report_case and memory and not is_correct:
             status.human = get_i18n_string("judge.evaluation.memory-limit")
-            status.enum = Status.TIME_LIMIT_EXCEEDED
+            status.enum = Status.MEMORY_LIMIT_EXCEEDED
             out.add(AppendMessage(message=status.human))
 
         # Close the test.
