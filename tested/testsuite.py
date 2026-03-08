@@ -697,6 +697,34 @@ class Context(WithFeatures, WithFunctions):
             ):
                 raise ValueError("Only the last testcase may have an exit code check.")
 
+        # Check that there are no input files with the same path but different content.
+        input_files_by_path: dict[str, TextData] = {}
+        for testcase in value:
+            for file in testcase.input_files:
+                if not file.path:
+                    continue
+                if existing := input_files_by_path.get(file.path):
+                    if existing.content != file.content:
+                        raise ValueError(
+                            f"The same path with different content is used in input_files ({file.path})."
+                        )
+                input_files_by_path[file.path] = file
+
+        # Check that there are no duplicate output files with the same path but different content.
+        output_files_by_path: dict[str, TextData] = {}
+        for testcase in value:
+            if not isinstance(testcase.output.file, FileOutputChannel):
+                continue
+            for file in testcase.output.file.files:
+                if not file.path:
+                    continue
+                if existing := output_files_by_path.get(file.path):
+                    if existing.content != file.content:
+                        raise ValueError(
+                            f"The same path with different content is used in output_files ({file.path})."
+                        )
+                output_files_by_path[file.path] = file
+
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
 
