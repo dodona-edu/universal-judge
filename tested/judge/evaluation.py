@@ -269,7 +269,6 @@ def evaluate_context_results(
         all_files = all_files - seen
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
-        # Get the functions
         output = testcase.output
 
         # Get the values produced by the execution. If there are no values,
@@ -472,7 +471,8 @@ def guess_expected_value(
         return test.get_data_as_string(bundle.config.resources)
     elif isinstance(test, FileOutputChannel):
         # We know file index will be set when we have a FileOutputChannel.
-        return test.get_data_as_string(bundle.config.resources, file_index or 0)
+        assert file_index is not None
+        return test.get_data_as_string(bundle.config.resources, file_index)
     elif isinstance(test, ExceptionOutputChannel):
         return (
             test.exception.readable(bundle.config.programming_language)

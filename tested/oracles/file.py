@@ -3,8 +3,23 @@ from attr import evolve
 from tested.dodona import Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.oracles.text import compare_text, text_options
+from tested.oracles.text import compare_text
 from tested.testsuite import ContentPath, FileOutputChannel, OutputChannel, TextData
+
+
+def _file_defaults(config: OracleConfig) -> dict:
+    defaults = {
+        "mode": "full",
+        "ignoreWhitespace": False,
+        "caseInsensitive": False,
+        "tryFloatingPoint": False,
+        "applyRounding": False,
+        "roundTo": 3,
+    }
+    defaults.update(config.options)
+    if defaults["mode"] not in ("line", "full"):
+        raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
+    return defaults
 
 
 def evaluate_file(
@@ -25,7 +40,7 @@ def evaluate_file(
     When no mode is passed, the oracle will default to ``full``.
     """
     assert isinstance(channel, FileOutputChannel)
-    options = text_options(config)
+    options = _file_defaults(config)
 
     # There must be nothing as output.
     if actual:
@@ -62,7 +77,15 @@ def compare_file(
     except FileNotFoundError:
         # We know content is ContentPath if we get a file not found error.
         assert isinstance(file.content, ContentPath)
-        raise ValueError(f"File {file.content.path} not found in resources.")
+        return OracleResult(
+            result=StatusMessage(
+                enum=Status.INTERNAL_ERROR,
+                human=get_i18n_string("oracles.text.file.not-found"),
+            ),
+            readable_expected=file.content.path,
+            readable_actual="",
+            channel_override=file.path,
+        )
 
     actual_path = config.context_dir / file.path
 

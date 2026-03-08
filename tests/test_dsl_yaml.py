@@ -1404,6 +1404,28 @@ tabs:
     assert stdin_def.content == "hello\n"
 
 
+def test_output_files_path_tag():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "OutputFiles"
+    testcases:
+      - expression: "test()"
+        output_files:
+          - path: "output.txt"
+            content: !path "expected/output.txt"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.output.file, FileOutputChannel)
+    files = testcase.output.file.files
+    assert len(files) == 1
+    assert files[0].path == "output.txt"
+    assert isinstance(files[0].content, ContentPath)
+    assert files[0].content.path == "expected/output.txt"
+
+
 def test_input_files_new_format():
     yaml_str = """
 namespace: "Files"

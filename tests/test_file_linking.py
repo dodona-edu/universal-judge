@@ -243,6 +243,29 @@ def test_readable_input_legacy_files(tmp_path: Path, pytestconfig: pytest.Config
     assert len(seen) == 1
 
 
+def test_link_files_message_url_encoding_spaces():
+    link_files = [
+        TextData(path="my file.txt", content=ContentPath(path="path/to/my file.txt"))
+    ]
+    message = link_files_message(link_files)
+    assert message is not None
+    assert isinstance(message.message, ExtendedMessage)
+    assert 'href="path/to/my%20file.txt"' in message.message.description
+
+
+def test_link_files_message_url_encoding_unicode():
+    link_files = [
+        TextData(path="résumé.txt", content=ContentPath(path="files/résumé.txt"))
+    ]
+    message = link_files_message(link_files)
+    assert message is not None
+    assert isinstance(message.message, ExtendedMessage)
+    desc = message.message.description
+    # The href must be percent-encoded, not contain raw non-ASCII chars.
+    assert 'href="files/r%C3%A9sum%C3%A9.txt"' in desc
+    assert 'href="files/résumé.txt"' not in desc
+
+
 def test_readable_input_no_path_in_input_files(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

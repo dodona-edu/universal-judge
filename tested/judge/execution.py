@@ -185,11 +185,14 @@ def set_up_unit(
     dynamically_generated_files = unit.get_dynamically_generated_files()
     for dynamically_generated_file in dynamically_generated_files:
         destination = execution_dir / dynamically_generated_file.path
+        assert destination.resolve().is_relative_to(
+            execution_dir.resolve()
+        ), "Cannot write outside the execution directory"
         destination.parent.mkdir(parents=True, exist_ok=True)
 
         if isinstance(dynamically_generated_file.content, ContentPath):
             _logger.debug(
-                f"Copying input file %s to %s",
+                "Copying input file %s to %s",
                 dynamically_generated_file.content.path,
                 destination,
             )
@@ -198,7 +201,7 @@ def set_up_unit(
             )
             shutil.copy2(source_file, destination)
         else:
-            _logger.debug(f"Creating dynamically generated file %s", destination)
+            _logger.debug("Creating dynamically generated file %s", destination)
             destination.write_text(dynamically_generated_file.content)
 
     return execution_dir, dependencies

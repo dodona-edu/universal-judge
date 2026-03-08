@@ -17,7 +17,7 @@ def _is_number(string: str) -> float | None:
         return None
 
 
-def text_options(config: OracleConfig) -> dict:
+def _text_options(config: OracleConfig) -> dict:
     defaults = {
         # Options for textual comparison
         "ignoreWhitespace": False,
@@ -30,14 +30,6 @@ def text_options(config: OracleConfig) -> dict:
         "normalizeTrailingNewlines": True,
     }
     defaults.update(config.options)
-    return defaults
-
-
-def _file_defaults(config: OracleConfig) -> dict:
-    defaults = {"mode": "exact"}
-    defaults.update(config.options)
-    if defaults["mode"] not in ("exact", "lines", "values"):
-        raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
     return defaults
 
 
@@ -93,7 +85,7 @@ def evaluate_text(
     Note: floating points inside other texts are currently not supported.
     """
     assert isinstance(channel, TextOutputChannel)
-    options = text_options(config)
+    options = _text_options(config)
 
     expected = channel.get_data_as_string(config.bundle.config.resources)
     result = compare_text(options, expected, actual)

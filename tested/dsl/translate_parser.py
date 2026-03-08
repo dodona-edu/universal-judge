@@ -294,8 +294,11 @@ class DslContext:
         the_files = self.files
         if "files" in new_level:
             assert isinstance(new_level["files"], list)
-            additional_files = {_convert_file(f) for f in new_level["files"]}
-            the_files = list(set(self.files) | additional_files)
+            files_by_name = {f.name: f for f in self.files}
+            for f in new_level["files"]:
+                converted = _convert_file(f)
+                files_by_name[converted.name] = converted
+            the_files = list(files_by_name.values())
 
         the_config = self.config
         if "config" in new_level:

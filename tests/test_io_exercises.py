@@ -233,6 +233,35 @@ def test_io_function_exercise_haskell_io(
     assert updates.find_status_enum() == ["correct"]
 
 
+def test_path_traversal_rejected(tmp_path: Path, pytestconfig: pytest.Config):
+    plan_content = """\
+- tab: "Traversal"
+  testcases:
+    - stdin: "hello"
+      input_files:
+        - path: "../../escape.txt"
+          content: "data"
+      stdout: "hello"
+"""
+    plan_file = tmp_path / "traversal-plan.yaml"
+    plan_file.write_text(plan_content)
+
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "traversal-plan.yaml",
+        "correct",
+        options={"resources": tmp_path},
+    )
+
+    with pytest.raises(
+        AssertionError, match="Cannot write outside the execution directory"
+    ):
+        execute_config(conf)
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_file_combinations(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(

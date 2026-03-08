@@ -9,7 +9,8 @@ import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
-from tested.oracles.common import OracleConfig
+from tested.judge.evaluation import guess_expected_value
+from tested.oracles.common import OracleConfig, OracleResult
 from tested.oracles.exception import evaluate as evaluate_exception
 from tested.oracles.file import evaluate_file
 from tested.oracles.text import evaluate_text
@@ -1042,3 +1043,86 @@ def test_wrong_map_is_accepted(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, language="javascript")
     result = evaluate_value(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
+
+
+def test_file_oracle_unexpected_stdout(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "unexpected output")
+    assert isinstance(result, OracleResult)
+    assert not isinstance(result, list)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == ""
+    assert result.readable_actual == "unexpected output"
+
+
+def test_file_oracle_missing_actual_file(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    mock_files = [
+        mocker.mock_open(read_data="expected content").return_value,
+        FileNotFoundError(),
+    ]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.RUNTIME_ERROR
+    assert result[0].readable_expected  # non-empty: the expected file content
+    assert result[0].readable_actual == ""
+    assert result[0].channel_override == "expected.txt"
+
+
+def test_file_oracle_missing_expected_resource(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    mocker.patch("builtins.open", side_effect=FileNotFoundError)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.INTERNAL_ERROR
+    assert result[0].channel_override == "expected.txt"
+
+
+def test_file_oracle_default_mode(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {})
+    (tmp_path / "expected.txt").write_text("hello world")
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content="hello world")]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+
+
+def test_file_oracle_unknown_mode_raises(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "invalid"})
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    with pytest.raises(ValueError, match="Unknown mode"):
+        evaluate_file(config, channel, "")
+
+
+def test_guess_expected_value_file_channel_requires_file_index(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content="expected content")]
+    )
+    with pytest.raises(AssertionError):
+        guess_expected_value(config.bundle, channel, file_index=None)

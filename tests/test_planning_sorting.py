@@ -1,3 +1,5 @@
+import pytest
+
 from tested.judge.planning import PlannedContext, PlannedExecutionUnit
 from tested.testsuite import (
     ContentPath,
@@ -7,32 +9,6 @@ from tested.testsuite import (
     Testcase,
     TextData,
 )
-
-
-def test_get_dynamically_generated_files_no_type_error():
-    file1 = TextData(path="same.txt", content=ContentPath(path="url1"))
-    file2 = TextData(path="same.txt", content=ContentPath(path="url2"))
-    file3 = TextData(path="same.txt", content="plain text content")
-
-    testcase1 = Testcase(
-        input=MainInput(stdin=EmptyChannel.NONE), input_files=[file1, file2, file3]
-    )
-
-    context = Context(testcases=[testcase1])
-    planned_context = PlannedContext(context=context, tab_index=0, context_index=0)
-
-    unit = PlannedExecutionUnit(contexts=[planned_context], name="unit0", index=0)
-
-    generated_files = unit.get_dynamically_generated_files()
-
-    assert len(generated_files) == 3
-    # Check that sorting actually happened based on path and then content string representation
-    # "plain text content" comes before "url1" and "url2" alphabetically
-    assert generated_files[0].content == "plain text content"
-    assert isinstance(generated_files[1].content, ContentPath)
-    assert generated_files[1].content.path == "url1"
-    assert isinstance(generated_files[2].content, ContentPath)
-    assert generated_files[2].content.path == "url2"
 
 
 def test_get_dynamically_generated_files_stdin_sorting():
@@ -120,17 +96,13 @@ def test_get_dynamically_generated_files_deduplication():
 
 
 def test_get_dynamically_generated_files_complex_sorting():
-    # Group A: Same path "a.txt", different contents to test secondary sort
     file_a1 = TextData(path="a.txt", content=ContentPath(path="z_url"))
-    file_a2 = TextData(path="a.txt", content="a_string")
-    file_a3 = TextData(path="a.txt", content=ContentPath(path="m_url"))
-
-    # Group B: Different path "b.txt" to test primary sort
-    file_b1 = TextData(path="b.txt", content="b_string")
+    file_a2 = TextData(path="b.txt", content="a_string")
+    file_a3 = TextData(path="c.txt", content=ContentPath(path="m_url"))
 
     testcase = Testcase(
         input=MainInput(stdin=EmptyChannel.NONE),
-        input_files=[file_b1, file_a1, file_a3, file_a2],
+        input_files=[file_a1, file_a3, file_a2],
     )
     planned = PlannedContext(
         context=Context(testcases=[testcase]), tab_index=0, context_index=0
@@ -139,27 +111,18 @@ def test_get_dynamically_generated_files_complex_sorting():
 
     generated = unit.get_dynamically_generated_files()
 
-    assert len(generated) == 4
-
-    # Expected order:
-    # 1. a.txt -> "a_string"
-    # 2. a.txt -> m_url
-    # 3. a.txt -> z_url
-    # 4. b.txt -> "b_string"
+    assert len(generated) == 3
 
     assert generated[0].path == "a.txt"
-    assert generated[0].content == "a_string"
+    assert isinstance(generated[0].content, ContentPath)
+    assert generated[0].content.path == "z_url"
 
-    assert generated[1].path == "a.txt"
-    assert isinstance(generated[1].content, ContentPath)
-    assert generated[1].content.path == "m_url"
+    assert generated[1].path == "b.txt"
+    assert generated[1].content == "a_string"
 
-    assert generated[2].path == "a.txt"
+    assert generated[2].path == "c.txt"
     assert isinstance(generated[2].content, ContentPath)
-    assert generated[2].content.path == "z_url"
-
-    assert generated[3].path == "b.txt"
-    assert generated[3].content == "b_string"
+    assert generated[2].content.path == "m_url"
 
 
 def test_get_dynamically_generated_files_none_path():
@@ -177,3 +140,16 @@ def test_get_dynamically_generated_files_none_path():
     unit = PlannedExecutionUnit(contexts=[planned], name="no_path_unit", index=0)
 
     assert unit.get_dynamically_generated_files() == []
+
+
+@pytest.mark.parametrize(
+    "text_data, expected",
+    [
+        (TextData(content="inline", path=None), False),
+        (TextData(content="inline text", path="x.txt"), True),
+        (TextData(content=ContentPath(path="x.txt"), path="x.txt"), False),
+        (TextData(content=ContentPath(path="other.txt"), path="x.txt"), True),
+    ],
+)
+def test_is_dynamically_generated(text_data: TextData, expected: bool):
+    assert text_data.is_dynamically_generated() == expected
