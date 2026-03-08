@@ -138,7 +138,7 @@ def get_readable_input(
             stdin = ""
 
         if stdin and isinstance(stdin, Path):
-            text = f"${args} < {stdin}"
+            text = f"{args} < {stdin}"
         elif case.input.arguments and stdin:
             assert stdin[-1] == "\n", "stdin must end with a newline"
             delimiter = _get_heredoc_token(stdin)
