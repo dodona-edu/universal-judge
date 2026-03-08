@@ -172,7 +172,6 @@ def set_up_unit(
     for file in dependencies:
         origin = plan.common_directory / file
         destination = execution_dir / file
-        # Ensure we preserve subdirectories.
         destination.parent.mkdir(parents=True, exist_ok=True)
         _logger.debug("Copying %s to %s", origin, destination)
         if origin == destination:
@@ -186,6 +185,7 @@ def set_up_unit(
     dynamically_generated_files = unit.get_dynamically_generated_files()
     for dynamically_generated_file in dynamically_generated_files:
         destination = execution_dir / dynamically_generated_file.path
+        destination.parent.mkdir(parents=True, exist_ok=True)
 
         if isinstance(dynamically_generated_file.content, ContentPath):
             _logger.debug(
@@ -199,7 +199,6 @@ def set_up_unit(
             shutil.copy2(source_file, destination)
         else:
             _logger.debug(f"Creating dynamically generated file %s", destination)
-            destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text(dynamically_generated_file.content)
 
     return execution_dir, dependencies

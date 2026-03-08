@@ -45,6 +45,24 @@ def test_io_exercise_input_dynamic_file(
     assert updates.find_status_enum() == ["correct"] * 6
 
 
+def test_io_exercise_input_dynamic_file_nested_path(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Regression test: ContentPath source with a nested destination path (e.g.
+    # "subdir/input.txt") requires creating the parent directory before copying.
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-dynamic-nested-path.yaml",
+        "correct-files-nested",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
