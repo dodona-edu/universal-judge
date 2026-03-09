@@ -1,0 +1,12 @@
+- tab: "Tests"
+  testcases:
+    - stdin: "Hallo"
+      stdout: "Hallo"
+    - stdin: "Hallo with arguments"
+      arguments: ["hallo"]
+      stdout: "Hallo with arguments"
+    - stdin:
+        path: "input.txt"
+        content: !path input.txt
+      stdout: "Hallo"
+

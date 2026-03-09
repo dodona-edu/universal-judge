@@ -24,6 +24,46 @@ def test_io_exercise(language: str, tmp_path: Path, pytestconfig: pytest.Config)
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_stdin(language: str, tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_io_exercise_input_dynamic_file(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "plan-dynamic.yaml", "correct-files"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 6
+
+
+def test_io_exercise_input_dynamic_file_nested_path(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Regression test: ContentPath source with a nested destination path (e.g.
+    # "subdir/input.txt") requires creating the parent directory before copying.
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-dynamic-nested-path.yaml",
+        "correct-files-nested",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
     result = execute_config(conf)
@@ -191,3 +231,47 @@ def test_io_function_exercise_haskell_io(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def test_path_traversal_rejected(tmp_path: Path, pytestconfig: pytest.Config):
+    plan_content = """\
+- tab: "Traversal"
+  testcases:
+    - stdin: "hello"
+      input_files:
+        - path: "../../escape.txt"
+          content: "data"
+      stdout: "hello"
+"""
+    plan_file = tmp_path / "traversal-plan.yaml"
+    plan_file.write_text(plan_content)
+
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "traversal-plan.yaml",
+        "correct",
+        options={"resources": tmp_path},
+    )
+
+    with pytest.raises(
+        AssertionError, match="Cannot write outside the execution directory"
+    ):
+        execute_config(conf)
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_file_combinations(language: str, tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "time-2-code",
+        language,
+        tmp_path,
+        "plan.yml",
+        "solution",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 4
