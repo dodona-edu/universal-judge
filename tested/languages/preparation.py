@@ -487,10 +487,10 @@ def prepare_context(
     """
     language = bundle.config.programming_language
     resources = bundle.config.resources
-    before_code = context.before.get(language, TextData(data="")).get_data_as_string(
+    before_code = context.before.get(language, TextData(content="")).get_data_as_string(
         resources
     )
-    after_code = context.after.get(language, TextData(data="")).get_data_as_string(
+    after_code = context.after.get(language, TextData(content="")).get_data_as_string(
         resources
     )
     testcases, evaluator_names = prepare_testcases(bundle, context)
