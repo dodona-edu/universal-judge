@@ -206,7 +206,7 @@ def get_readable_input(
             # TODO: how to handle inline files?
             return filename
 
-        the_url = urllib.parse.quote(the_file.content.path)
+        the_url = urllib.parse.quote("media/" + the_file.content.path)
         the_replacement = (
             f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
         )

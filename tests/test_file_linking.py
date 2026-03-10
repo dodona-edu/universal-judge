@@ -95,7 +95,7 @@ def test_readable_input_file_linking(tmp_path: Path, pytestconfig: pytest.Config
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="path/to/data.txt"' in readable.description
+    assert 'href="media/path/to/data.txt"' in readable.description
     assert "data.txt</a>" in readable.description
     assert the_input.input_files[0] in seen
 
@@ -124,8 +124,8 @@ def test_readable_input_multiple_files(tmp_path: Path, pytestconfig: pytest.Conf
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="url1"' in readable.description
-    assert 'href="url2"' in readable.description
+    assert 'href="media/url1"' in readable.description
+    assert 'href="media/url2"' in readable.description
     assert len(seen) == 2
 
 
@@ -153,7 +153,7 @@ def test_readable_input_stdin_file(tmp_path: Path, pytestconfig: pytest.Config):
 
     # When stdin has a path, the description is "$ submission < input.txt" (or similar)
     # We want to check if "input.txt" is linked.
-    assert 'href="input-url"' in readable.description
+    assert 'href="media/input-url"' in readable.description
     assert "input.txt</a>" in readable.description
     assert the_input.input_files[0] in seen
 
@@ -238,7 +238,7 @@ def test_readable_input_legacy_files(tmp_path: Path, pytestconfig: pytest.Config
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="legacy-url"' in readable.description
+    assert 'href="media/legacy-url"' in readable.description
     assert "legacy.txt</a>" in readable.description
     assert len(seen) == 1
 

@@ -701,10 +701,14 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         for file_object in testcase["input_files"]:
             input_files.append(_convert_text_data_required_path(file_object))
     elif len(context.files) > 0:  # Backwards compatibility.
-        input_files = [
-            TextData(content=ContentPath(path=file.url), path=file.name)
-            for file in context.files
-        ]
+        input_files = []
+        for file in context.files:
+            # Old "files" have a URL like "media/getallen1.txt"
+            # This is used to link the files on Dodona
+            # In the new system, TESTed manages this awaiting a better way to link
+            # the files in Dodona.
+            url = file.url.lstrip("media/")
+            input_files.append(TextData(content=ContentPath(path=url), path=file.name))
     else:
         input_files = []
 
