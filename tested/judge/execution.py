@@ -241,7 +241,7 @@ def execute_unit(
 
     executable = executable_or_status
     files.remove(executable)
-    stdin = unit.get_stdin(bundle.config.resources)
+    stdin = unit.get_stdin(bundle.config.workdir)
 
     # Do the execution.
     base_result = execute_file(

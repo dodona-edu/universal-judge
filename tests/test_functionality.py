@@ -18,7 +18,15 @@ from tested.features import Construct
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
-from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
+from tested.testsuite import (
+    Context,
+    MainInput,
+    Suite,
+    Tab,
+    Testcase,
+    TextChannelType,
+    TextData,
+)
 from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
@@ -765,7 +773,7 @@ def test_main_call_quotes(tmp_path: Path, pytestconfig: pytest.Config):
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
-    actual, _ = get_readable_input(bundle, the_input)
+    actual = get_readable_input(bundle, the_input)
 
     assert (
         actual.description == "$ submission hello 'it'\"'\"'s' '$yes' --hello=no -hello"
@@ -788,7 +796,7 @@ def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Co
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
-    actual, _ = get_readable_input(bundle, the_input)
+    actual = get_readable_input(bundle, the_input)
 
     assert (
         actual.description
@@ -810,8 +818,53 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
-    actual, _ = get_readable_input(bundle, the_input)
+    actual = get_readable_input(bundle, the_input)
 
     assert (
         actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
+
+
+def test_stdin_with_path(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(
+            arguments=["hello"],
+            stdin=TextData(
+                data="One line\n",
+                path="line.txt",
+                type=TextChannelType.FILE,
+            ),
+        )
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual = get_readable_input(bundle, the_input)
+
+    assert actual.description == "$ submission hello < line.txt"
+
+
+def test_stdin_with_one_line(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(arguments=["hello"], stdin=TextData(data="One line\n"))
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual = get_readable_input(bundle, the_input)
+
+    assert actual.description == "$ submission hello <<< One line"

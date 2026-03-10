@@ -116,6 +116,9 @@ def judge(bundle: Bundle):
     # Do the set-up for the judgement.
     collector = OutputManager(bundle.out)
     collector.add(StartJudgement())
+    if bundle.messages:
+        collector.add_messages(bundle.messages)
+
     max_time = float(bundle.config.time_limit) * 0.9
     start = time.perf_counter()
 
@@ -338,27 +341,35 @@ def _process_results(
             compilation_results=compilation_results,
         )
 
+        input_files = []
+        for case in planned.context.testcases:
+            for file in case.input_files:
+                file_data = {"path": file.path}
+                if file.content != "":
+                    file_data["content"] = file.content
+                input_files.append(file_data)
+        if not input_files:
+            input_files = None
+
         if bundle.language.supports_debug_information():
-            # TODO: this is currently very Python-specific
-            # See if we need a callback to the language modules in the future.
-            # TODO: we could probably re-use the "readable_input" function here,
-            #       since it only differs a bit.
             meta_statements = []
             meta_stdin = None
+
             for case in planned.context.testcases:
                 if case.is_main_testcase():
                     assert isinstance(case.input, MainInput)
-                    if isinstance(case.input.stdin, TextData):
-                        meta_stdin = case.input.stdin.get_data_as_string(
-                            bundle.config.resources
-                        )
+                    if (
+                        isinstance(case.input.stdin, TextData)
+                        and case.input.stdin.data is not None
+                    ):
+                        meta_stdin = case.input.stdin.data
                 elif isinstance(case.input, Statement):
                     stmt = generate_statement(bundle, case.input)
                     meta_statements.append(stmt)
                 elif isinstance(case.input, LanguageLiterals):
                     stmt = case.input.get_for(bundle.config.programming_language)
                     meta_statements.append(stmt)
-                else:
+                elif not case.is_main_testcase():
                     raise AssertionError(f"Found unknown case input type: {case.input}")
 
             if meta_statements:
@@ -367,17 +378,24 @@ def _process_results(
                 # Don't add empty statements
                 meta_statements = None
 
+            if not input_files:
+                input_files = None
+
             collector.add(
                 CloseContext(
                     data=Metadata(
-                        statements=meta_statements,
-                        stdin=meta_stdin,
+                        statements=meta_statements, files=input_files, stdin=meta_stdin
                     )
                 ),
                 planned.context_index,
             )
         else:
-            collector.add(CloseContext(), planned.context_index)
+            collector.add(
+                CloseContext(
+                    data=Metadata(files=input_files, stdin=None, statements=None)
+                ),
+                planned.context_index,
+            )
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_, currently_open_tab
 

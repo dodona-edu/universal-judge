@@ -1,5 +1,6 @@
 # type: ignore[reportAttributeAccessIssue]
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
 )
+from tested.dodona import Permission
 from tested.dsl import parse_dsl, translate_to_test_suite
 from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
@@ -32,12 +34,13 @@ from tested.serialisation import (
 from tested.testsuite import (
     CustomCheckOracle,
     FileOutputChannel,
-    FileUrl,
     GenericTextOracle,
     GenericValueOracle,
+    InputFile,
     LanguageLiterals,
     LanguageSpecificOracle,
     SupportedLanguage,
+    TextChannelType,
     TextOutputChannel,
     ValueOutputChannel,
     parse_test_suite,
@@ -69,9 +72,49 @@ tabs:
     tc = context.testcases[0]
     assert tc.is_main_testcase()
     assert tc.input.stdin.data == "Input string\n"
+    assert tc.input.stdin.type == TextChannelType.TEXT
     assert tc.input.arguments == ["--arg", "argument"]
     assert tc.output.stderr.data == "Error string\n"
+    assert tc.output.stderr.type == TextChannelType.TEXT
     assert tc.output.stdout.data == "Output string\n"
+    assert tc.output.stdout.type == TextChannelType.TEXT
+    assert tc.output.exit_code.value == 1
+
+
+def test_parse_one_tab_ctx_with_files():
+    yaml_str = """
+namespace: "solution"
+tabs:
+- tab: "Ctx"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin:
+        path: "input.text"
+    stdout:
+        path: "output.text"
+    stderr: 
+        path: "error.text"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert suite.namespace == "solution"
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert tab.name == "Ctx"
+    assert len(tab.contexts) == 1
+    context = tab.contexts[0]
+    assert len(context.testcases) == 1
+    tc = context.testcases[0]
+    assert tc.is_main_testcase()
+    assert tc.input.stdin.path == "input.text"
+    assert tc.input.stdin.type == TextChannelType.FILE
+    assert tc.input.stdin.data is None
+    assert tc.input.arguments == ["--arg", "argument"]
+    assert tc.output.stderr.path == "error.text"
+    assert tc.output.stderr.type == TextChannelType.FILE
+    assert tc.output.stdout.path == "output.text"
+    assert tc.output.stdout.type == TextChannelType.FILE
     assert tc.output.exit_code.value == 1
 
 
@@ -532,7 +575,8 @@ def test_tab_config_trickles_down_stderr():
       namespace: "solution"
   testcases:
   - arguments: [ "--arg", "argument" ]
-    stdin: "Input string"
+    stdin: 
+        content: "Input string"
     stdout: "Output string"
     stderr: "Error string"
     exit_code: 1
@@ -744,16 +788,84 @@ def test_value_built_in_checks_implied():
     )
 
 
-def test_file_custom_check_correct():
+def test_using_deprecated_file():
+    yaml_str = f"""
+        - tab: 'Test'
+          contexts:
+            - testcases:
+                - statement: 'test()'
+                  file:
+                    content: "Hello world!"
+                    location: "test.txt"
+        """
+    suite_with_data = parse_dsl(yaml_str)
+    suite = suite_with_data.data
+    messages = list(suite_with_data.messages)
+    assert len(messages) == 1
+    deprecated_message = messages[0]
+    assert deprecated_message.permission == Permission.STAFF
+    assert (
+        deprecated_message.description
+        == "WARNING: You are using YAML syntax to specify output files with the key 'file'. This usage is deprecated! Try using 'output_files' instead."
+    )
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.file, FileOutputChannel)
+    assert test.output.file.output_data[0].path == "test.txt"
+    assert test.output.file.output_data[0].content == "Hello world!"
+    assert test.output.file.output_data[0].content_type == TextChannelType.TEXT
+
+
+def test_using_deprecated_files():
+    yaml_str = f"""
+            - tab: 'Test'
+              contexts:
+                - testcases:
+                  - expression: 'test("hello.txt")'
+                    return: "Hello world!"
+                    files:
+                      - url: "media/hello.txt"
+                        name: "hello.txt"
+            """
+    suite_with_data = parse_dsl(yaml_str)
+    suite = suite_with_data.data
+    messages = list(suite_with_data.messages)
+    assert len(messages) == 1
+    deprecated_message = messages[0]
+    assert deprecated_message.permission == Permission.STAFF
+    assert (
+        deprecated_message.description
+        == "WARNING: You are using YAML syntax to specify input files with the key 'files'. This usage is deprecated! Try using 'input_files' instead."
+    )
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert len(tab.contexts) == 1
+    testcases = tab.contexts[0].testcases
+    assert len(testcases) == 1
+    test = testcases[0]
+    assert isinstance(test.input, FunctionCall)
+    assert len(test.input_files) == 1
+    assert test.input_files[0].path == "hello.txt"
+
+
+def test_output_files_custom_check_correct():
     yaml_str = f"""
     - tab: 'Test'
       contexts:
         - testcases:
             - statement: 'test()'
-              file:
-                content: "test/hallo.txt"
+              output_files:
+                data: 
+                    - content: !path "test/hallo.txt"
+                      path: "test.txt"
+                    - content: "Hallo world!"
+                      path: "test2.txt"  
                 oracle: "custom_check"
-                location: "test.txt"
                 name: "evaluate_test"
                 file: "test.py"
     """
@@ -768,8 +880,12 @@ def test_file_custom_check_correct():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.file, FileOutputChannel)
     assert isinstance(test.output.file.oracle, CustomCheckOracle)
-    assert test.output.file.actual_path == "test.txt"
-    assert test.output.file.expected_path == "test/hallo.txt"
+    assert test.output.file.output_data[0].path == "test.txt"
+    assert test.output.file.output_data[0].content == "test/hallo.txt"
+    assert test.output.file.output_data[0].content_type == TextChannelType.FILE
+    assert test.output.file.output_data[1].path == "test2.txt"
+    assert test.output.file.output_data[1].content == "Hallo world!"
+    assert test.output.file.output_data[1].content_type == TextChannelType.TEXT
     oracle = test.output.file.oracle
     assert oracle.function.name == "evaluate_test"
     assert oracle.function.file == Path("test.py")
@@ -1172,19 +1288,16 @@ def test_additional_properties_are_not_allowed():
 def test_files_are_propagated():
     yaml_str = """
 - tab: "Config ctx"
-  files:
-    - name: "test"
-      url: "test.md"
-    - name: "two"
-      url: "two.md"
+  input_files:
+    - path: "test"
+    - path: "two"
   testcases:
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.34"
   - arguments: [ '-a', '2.125', '1.212' ]
     stdout: "3.337"
-    files:
-        - name: "test"
-          url: "twooo.md"
+    input_files:
+        - path: "test"
     """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
@@ -1192,10 +1305,29 @@ def test_files_are_propagated():
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
-    assert set(test0.link_files) == {
-        FileUrl(name="test", url="test.md"),
-        FileUrl(name="two", url="two.md"),
+    assert set(test0.input_files) == {
+        InputFile(path="test"),
+        InputFile(path="two"),
     }
+
+
+def test_input_file_created(tmp_path: Path, pytestconfig: pytest.Config):
+    yaml_str = f"""
+            - tab: 'Test'
+              contexts:
+                - testcases:
+                  - expression: 'test("hello.txt")'
+                    return: "Hello world!"
+                    input_files:
+                      - content: "Hello world!"
+                        path: "hello.txt"
+            """
+
+    os.chdir(tmp_path)
+    translate_to_test_suite(yaml_str)
+
+    with open("hello.txt", "r", encoding="utf-8") as f:
+        assert f.read() == "Hello world!"
 
 
 def test_newlines_are_added_to_stdout():
