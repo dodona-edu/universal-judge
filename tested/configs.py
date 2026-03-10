@@ -67,7 +67,7 @@ class Options:
     """
 
 
-@fallback_field(get_converter(), {"testplan": "test_suite", "plan_name": "test_suite"})
+@fallback_field({"testplan": "test_suite", "plan_name": "test_suite"})
 @define
 class DodonaConfig:
     resources: Path

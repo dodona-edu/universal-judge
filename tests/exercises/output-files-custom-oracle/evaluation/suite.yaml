@@ -1,0 +1,9 @@
+- tab: "Custom File Check"
+  testcases:
+    - expression: "generate_even()"
+      output_files:
+        oracle: "custom_check"
+        file: "evaluator.py"
+        data:
+          - path: "even.txt"
+            content: "2\n4\n6\n8\n10\n"
