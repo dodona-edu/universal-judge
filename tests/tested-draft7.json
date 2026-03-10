@@ -28,8 +28,7 @@
         "object",
         "string",
         "oracle",
-        "expression",
-        "path"
+        "expression"
       ]
     },
     "stringArray": {

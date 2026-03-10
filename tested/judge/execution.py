@@ -1,6 +1,5 @@
 import itertools
 import logging
-import shutil
 from pathlib import Path
 
 from attrs import define
@@ -17,7 +16,6 @@ from tested.judge.utils import (
 )
 from tested.languages.conventionalize import selector_name
 from tested.languages.preparation import exception_file, value_file
-from tested.testsuite import ContentPath
 from tested.utils import safe_del
 
 _logger = logging.getLogger(__name__)
@@ -172,6 +170,7 @@ def set_up_unit(
     for file in dependencies:
         origin = plan.common_directory / file
         destination = execution_dir / file
+        # Ensure we preserve subdirectories.
         destination.parent.mkdir(parents=True, exist_ok=True)
         _logger.debug("Copying %s to %s", origin, destination)
         if origin == destination:
@@ -180,29 +179,6 @@ def set_up_unit(
         # Use hard links instead of copying, due to issues with busy files.
         # See https://github.com/dodona-edu/universal-judge/issues/57
         destination.hardlink_to(origin)
-
-    # Create dynamically generated files if necessary.
-    dynamically_generated_files = unit.get_dynamically_generated_files()
-    for dynamically_generated_file in dynamically_generated_files:
-        destination = execution_dir / dynamically_generated_file.path
-        assert destination.resolve().is_relative_to(
-            execution_dir.resolve()
-        ), "Cannot write outside the execution directory"
-        destination.parent.mkdir(parents=True, exist_ok=True)
-
-        if isinstance(dynamically_generated_file.content, ContentPath):
-            _logger.debug(
-                "Copying input file %s to %s",
-                dynamically_generated_file.content.path,
-                destination,
-            )
-            source_file = (
-                bundle.config.resources / dynamically_generated_file.content.path
-            )
-            shutil.copy2(source_file, destination)
-        else:
-            _logger.debug("Creating dynamically generated file %s", destination)
-            destination.write_text(dynamically_generated_file.content)
 
     return execution_dir, dependencies
 

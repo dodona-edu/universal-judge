@@ -6,9 +6,11 @@ a single converter for all, both the serialization and suite.
 """
 
 import logging
+from collections.abc import Callable
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
+from typing import TYPE_CHECKING, Any
 
+from cattrs import Converter
 from cattrs.gen import make_dict_structure_fn
 from cattrs.preconf.json import JsonConverter, make_converter
 from typing_inspect import is_union_type
@@ -24,14 +26,6 @@ _logger = logging.getLogger(__name__)
 _suite_converter = make_converter(forbid_extra_keys=True, omit_if_default=True)
 initialized = False
 
-T = TypeVar("T")
-
-# Saves the registry of structure hooks.
-# Note that this assumes we only have a single converter.
-_TESTED_STRUCTURE_HOOK_REGISTRIES: dict[type, Callable[[dict[str, Any], type], Any]] = (
-    dict()
-)
-
 
 def structure_decimal(obj: Any, _) -> Decimal:
     return Decimal(str(obj))
@@ -41,9 +35,8 @@ def unstructure_decimal(obj: Decimal) -> str:
     return str(obj)
 
 
-def structure_every_union(to_convert: Any, the_type: Any) -> Any:
+def structure_every_union(to_convert: Any, the_type: type) -> Any:
     from tested.serialisation import Identifier
-    from tested.testsuite import ContentPath
 
     _logger.debug("=== Finding type for %s, from %s...", to_convert, the_type)
     if to_convert is None and type(None) in get_args(the_type):
@@ -51,9 +44,6 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
         return None
     if isinstance(to_convert, bool) and bool in get_args(the_type):
         _logger.debug("Yes: found boolean: %s.", to_convert)
-        return to_convert
-    if isinstance(to_convert, ContentPath) and ContentPath in get_args(the_type):
-        _logger.debug(f"Yes: found content path: {to_convert}.")
         return to_convert
 
     for possible_class in get_args(the_type):
@@ -121,96 +111,68 @@ def suite_to_json(suite: "Suite") -> str:
     return _suite_converter.dumps(suite)
 
 
-def _chain_structure_hook(
-    cls: type[T],
-    wrapper: Callable[
-        [dict[str, Any], type[T], Callable[[dict[str, Any], type[T]], Any]], Any
-    ],
-):
-    """
-    Compose structure hooks for a class.
-
-    cattrs only keeps one structure hook per class; decorator stacking would otherwise
-    overwrite earlier hooks. We keep our own per-converter registry and wrap the
-    previously registered hook.
-
-    Since the wrapper is executed first and then the previous one is called, the final
-    order in which the transformations are applied is top to bottom.
-
-    For example:
-        @fallback_field(..., 1)   # top
-        @fallback_field(..., 2)
-        @ignore_field(..., "show_expected")
-        @ignore_field(..., "type")    # bottom
-        class TextOutputChannel(...):
-
-    When structuring a dictionary, the transformations will be applied in the same order:
-
-    1. `@fallback_field(..., 1)`
-    2. `@fallback_field(..., 2)`
-    3. `@ignore_field(..., "show_expected")`
-    4. `@ignore_field(..., "type")`
-    """
-    converter = get_converter()
-
-    previous = _TESTED_STRUCTURE_HOOK_REGISTRIES.get(cls)
-    if previous is None:
-        previous = make_dict_structure_fn(
-            cls, converter, _cattrs_forbid_extra_keys=False
+def fallback_field(converter_arg: Converter, old_to_new_field: dict[str, str]):
+    def decorator(cls):
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
         )
 
-    def composed(d: dict[str, Any], cl: type[T]):
-        if not isinstance(d, dict):
-            return previous(d, cl)
+        def structure(d, cl):
+            for k, v in old_to_new_field.items():
+                if k in d:
+                    d[v] = d[k]
 
-        # Work on a shallow copy so we don't mutate dicts.
-        d2 = dict(d)
-        return wrapper(d2, cl, previous)
+            return struct(d, cl)
 
-    # Python's types cannot encode dict[T, Callable[..., T]].
-    # However, we know that the key is a type that the value expects, so cast it.
-    _TESTED_STRUCTURE_HOOK_REGISTRIES[cls] = cast(
-        Callable[[dict[str, Any], type], Any], composed
-    )
+        converter_arg.register_structure_hook(cls, structure)
 
-    converter.register_structure_hook(cls, composed)
-
-
-def ignore_field(*fields: str):
-    def decorator(cls):
-        def _wrapper(d: dict[str, Any], cl: type, next_hook):
-            for to_ignore in fields:
-                d.pop(to_ignore, None)
-            return next_hook(d, cl)
-
-        _chain_structure_hook(cls, _wrapper)
         return cls
 
     return decorator
 
 
-def fallback_field(
-    old_to_new_field: dict[str, str | tuple[str, Callable[[Any, dict[str, Any]], Any]]],
+def custom_fallback_field(
+    converter_arg: Converter,
+    old_to_new_field: dict[str, tuple[str, Callable[[Any], Any]]],
 ):
     def decorator(cls):
-        def _wrapper(d: dict[str, Any], cl: type, next_hook):
-            for old_name, mapping in old_to_new_field.items():
-                if old_name in d:
-                    if isinstance(mapping, tuple):
-                        new_name, mapper = mapping
-                        if new_name in d:
-                            raise ValueError(
-                                f"You cannot use {new_name} and {old_name} simultaneously. "
-                                f"Migrate to {new_name}."
-                            )
-                        d[new_name] = mapper(d[old_name], d)
-                    else:
-                        new_name = mapping
-                        if new_name not in d:
-                            d[new_name] = d[old_name]
-            return next_hook(d, cl)
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
 
-        _chain_structure_hook(cls, _wrapper)
+        def structure(d, cl):
+            for k, (new_name, mapper) in old_to_new_field.items():
+                if k in d:
+                    if new_name in d:
+                        raise ValueError(
+                            f"You cannot use {new_name} and {k} simultaneously. Migrate to {new_name}."
+                        )
+                    d[new_name] = mapper(d[k])
+
+            return struct(d, cl)
+
+        converter_arg.register_structure_hook(cls, structure)
+
+        return cls
+
+    return decorator
+
+
+def ignore_field(converter_arg: Converter, *fields: str):
+    def decorator(cls):
+        struct = make_dict_structure_fn(
+            cls, converter_arg, _cattrs_forbid_extra_keys=False
+        )
+
+        def structure(d, cl):
+            for to_ignore in fields:
+                if to_ignore in d:
+                    del d[to_ignore]
+
+            return struct(d, cl)
+
+        converter_arg.register_structure_hook(cls, structure)
+
         return cls
 
     return decorator

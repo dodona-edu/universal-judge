@@ -6,8 +6,9 @@ import math
 from typing import Any
 
 from tested.dodona import Status, StatusMessage
+from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.testsuite import OutputChannel, TextOutputChannel
+from tested.testsuite import FileOutputChannel, OutputChannel, TextOutputChannel
 
 
 def _is_number(string: str) -> float | None:
@@ -30,6 +31,14 @@ def _text_options(config: OracleConfig) -> dict:
         "normalizeTrailingNewlines": True,
     }
     defaults.update(config.options)
+    return defaults
+
+
+def _file_defaults(config: OracleConfig) -> dict:
+    defaults = {"mode": "exact"}
+    defaults.update(config.options)
+    if defaults["mode"] not in ("exact", "lines", "values"):
+        raise ValueError(f"Unknown mode for file oracle: {defaults['mode']}")
     return defaults
 
 
@@ -90,3 +99,77 @@ def evaluate_text(
     expected = channel.get_data_as_string(config.bundle.config.resources)
     result = compare_text(options, expected, actual)
     return result
+
+
+def evaluate_file(
+    config: OracleConfig, channel: OutputChannel, actual: str
+) -> OracleResult:
+    """
+    Evaluate the contents of two files. The file oracle supports one option,
+    ``mode``, used to define in which mode the oracle should operate:
+
+    1. ``full``: The complete contents are passed to the :class:`TextEvaluator`.
+    2. ``line``: The file is split by lines and each line is compared to the
+       corresponding line with the :class:`TextEvaluator`. The lines are compared
+       without newlines.
+
+    Since the text oracle is used behind the scenes, this oracle also supports
+    all parameters of that oracle.
+
+    When no mode is passed, the oracle will default to ``full``.
+    """
+    assert isinstance(channel, FileOutputChannel)
+    options = _text_options(config)
+
+    # There must be nothing as output.
+    if actual:
+        message = get_i18n_string("oracles.text.file.unexpected.message", actual=actual)
+        return OracleResult(
+            result=StatusMessage(
+                enum=Status.WRONG,
+                human=get_i18n_string("oracles.text.file.unexpected.status"),
+            ),
+            readable_expected="",
+            readable_actual=actual,
+            messages=[message],
+        )
+
+    expected_path = f"{config.bundle.config.resources}/{channel.expected_path}"
+
+    try:
+        with open(expected_path, "r") as file:
+            expected = file.read()
+    except FileNotFoundError:
+        raise ValueError(f"File {expected_path} not found in resources.")
+
+    actual_path = config.context_dir / channel.actual_path
+
+    try:
+        with open(str(actual_path), "r") as file:
+            actual = file.read()
+    except FileNotFoundError:
+        return OracleResult(
+            result=StatusMessage(
+                enum=Status.RUNTIME_ERROR,
+                human=get_i18n_string("oracles.text.file.not-found"),
+            ),
+            readable_expected=expected,
+            readable_actual="",
+        )
+
+    if options["mode"] == "full":
+        return compare_text(options, expected, actual)
+    else:
+        assert options["mode"] == "line"
+        strip_newlines = options.get("stripNewlines", False)
+        expected_lines = expected.splitlines(keepends=not strip_newlines)
+        actual_lines = actual.splitlines(keepends=not strip_newlines)
+        correct = len(actual_lines) == len(expected_lines)
+        for expected_line, actual_line in zip(expected_lines, actual_lines):
+            r = compare_text(options, expected_line, actual_line)
+            correct = correct and r.result.enum == Status.CORRECT
+        return OracleResult(
+            result=StatusMessage(enum=Status.CORRECT if correct else Status.WRONG),
+            readable_expected=expected,
+            readable_actual=actual,
+        )

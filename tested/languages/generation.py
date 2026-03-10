@@ -32,8 +32,8 @@ from tested.languages.preparation import (
 from tested.parsing import get_converter
 from tested.serialisation import Expression, Statement, VariableType
 from tested.testsuite import (
-    ContentPath,
     Context,
+    FileUrl,
     LanguageLiterals,
     MainInput,
     Testcase,
@@ -77,11 +77,9 @@ def generate_execution_unit(
     return bundle.language.generate_execution_unit(prepared_execution)
 
 
-def _handle_link_files(
-    link_files: Iterable[TextData], language: str
-) -> tuple[str, str]:
+def _handle_link_files(link_files: Iterable[FileUrl], language: str) -> tuple[str, str]:
     dict_links = dict(
-        (link_file.path, get_converter().unstructure(link_file))
+        (link_file.name, get_converter().unstructure(link_file))
         for link_file in link_files
     )
     files = json.dumps(dict_links)
@@ -102,7 +100,7 @@ def _get_heredoc_token(stdin: str) -> str:
 
 def get_readable_input(
     bundle: Bundle, case: Testcase
-) -> tuple[ExtendedMessage, set[TextData]]:
+) -> tuple[ExtendedMessage, set[FileUrl]]:
     """
     Get human-readable input for a testcase. This function will use, in
     order of availability:
@@ -130,16 +128,12 @@ def get_readable_input(
         args = f"$ {command}"
         # Determine the stdin
         if isinstance(case.input.stdin, TextData):
-            if case.input.stdin.path is not None:
-                stdin = Path(case.input.stdin.path)
-            else:
-                stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
+            stdin = case.input.stdin.get_data_as_string(bundle.config.resources)
         else:
             stdin = ""
 
-        if stdin and isinstance(stdin, Path):
-            text = f"{args} < {stdin}"
-        elif case.input.arguments and stdin:
+        # If we have both stdin and arguments, we use a here-document.
+        if case.input.arguments and stdin:
             assert stdin[-1] == "\n", "stdin must end with a newline"
             delimiter = _get_heredoc_token(stdin)
             text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
@@ -164,20 +158,16 @@ def get_readable_input(
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
     # If there are no files, return now. This means we don't need to do ugly stuff.
-    if not case.input_files:
+    if not case.link_files:
         return ExtendedMessage(description=text, format=format_), set()
 
     # We have potential files.
     # Check if the file names are present in the string.
     # If not, we can also stop before doing ugly things.
     # We construct a regex, since that can be faster than checking everything.
-    file_paths = [re.escape(x.path) for x in case.input_files if x.path is not None]
-
-    if not file_paths:
-        # No files to match, so bail now.
-        return ExtendedMessage(description=text, format=format_), set()
-
-    simple_regex = re.compile("|".join(file_paths))
+    simple_regex = re.compile(
+        "|".join(map(lambda x: re.escape(x.name), case.link_files))
+    )
 
     if not simple_regex.search(text):
         # There is no match, so bail now.
@@ -193,7 +183,7 @@ def get_readable_input(
         generated_html = highlight_code(text, bundle.config.programming_language)
 
     # Map of file URLs.
-    url_map = {html.escape(x.path): x for x in case.input_files if x.path is not None}
+    url_map = {html.escape(x.name): x for x in case.link_files}
 
     seen = set()
     escaped_regex = re.compile("|".join(url_map.keys()))
@@ -202,11 +192,7 @@ def get_readable_input(
     def replace_link(match: Match) -> str:
         filename = match.group()
         the_file = url_map[filename]
-        if not isinstance(the_file.content, ContentPath):
-            # TODO: how to handle inline files?
-            return filename
-
-        the_url = urllib.parse.quote(the_file.content.path)
+        the_url = urllib.parse.quote(the_file.url)
         the_replacement = (
             f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
         )

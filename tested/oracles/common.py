@@ -62,30 +62,19 @@ class OracleResult:
     Represents the result of applying an oracle to evaluate some result.
     """
 
-    result: StatusMessage
-    """
-    The result of the evaluation.
-    """
-    readable_expected: str
-    """
-    A human-friendly version of what the channel should have been.
-    """
-    readable_actual: str
-    """
-    A human-friendly version (on a best-efforts basis) of what the channel is.
-    """
+    result: StatusMessage  # The result of the evaluation.
+    readable_expected: (
+        str  # A human-friendly version of what the channel should have been.
+    )
+    readable_actual: str  # A human-friendly version (on a best-efforts basis) of what the channel is.
     messages: list[Message] = field(factory=list)
-    is_multiline_string: bool = False
-    """
-    Indicates if the evaluation result is a multiline string.
-    """
-    channel_override: str | None = None
-    """
-    Allows overriding as which channel this will be reported.
-    """
+    is_multiline_string: bool = (
+        False  # Indicates if the evaluation result is a multiline string.
+    )
 
 
 @fallback_field(
+    get_converter(),
     {
         "readableExpected": "readable_expected",
         "readableActual": "readable_actual",
@@ -163,11 +152,9 @@ class OracleConfig:
     context_dir: Path
 
 
-RawOracle = Callable[
-    [OracleConfig, OutputChannel, str], OracleResult | list[OracleResult]
-]
+RawOracle = Callable[[OracleConfig, OutputChannel, str], OracleResult]
 
-Oracle = Callable[[OutputChannel, str], OracleResult | list[OracleResult]]
+Oracle = Callable[[OutputChannel, str], OracleResult]
 
 
 def _curry_oracle(

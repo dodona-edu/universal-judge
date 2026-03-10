@@ -18,15 +18,7 @@ from tested.features import Construct
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
-from tested.testsuite import (
-    ContentPath,
-    Context,
-    MainInput,
-    Suite,
-    Tab,
-    Testcase,
-    TextData,
-)
+from tested.testsuite import Context, MainInput, Suite, Tab, Testcase, TextData
 from tests.language_markers import (
     ALL_LANGUAGES,
     ALL_SPECIFIC_LANGUAGES,
@@ -791,7 +783,7 @@ def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Co
     )
     the_input = Testcase(
         input=MainInput(
-            arguments=["hello"], stdin=TextData(content="One line\nSecond line\n")
+            arguments=["hello"], stdin=TextData(data="One line\nSecond line\n")
         )
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
@@ -804,28 +796,6 @@ def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Co
     )
 
 
-def test_stdin_as_file_path(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "echo-function",
-        "bash",
-        tmp_path,
-        "two.yaml",
-        "top-level-output",
-    )
-    the_input = Testcase(
-        input=MainInput(
-            arguments=[],
-            stdin=TextData(path="input.txt", content=ContentPath(path="input-url")),
-        )
-    )
-    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
-    bundle = create_bundle(conf, sys.stdout, suite)
-    actual, _ = get_readable_input(bundle, the_input)
-
-    assert actual.description == "$ submission < input.txt"
-
-
 def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -836,9 +806,7 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
         "top-level-output",
     )
     the_input = Testcase(
-        input=MainInput(
-            arguments=["hello"], stdin=TextData(content="One line\nSTDIN\n")
-        )
+        input=MainInput(arguments=["hello"], stdin=TextData(data="One line\nSTDIN\n"))
     )
     suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
     bundle = create_bundle(conf, sys.stdout, suite)
