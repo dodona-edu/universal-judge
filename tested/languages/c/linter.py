@@ -4,6 +4,7 @@ from xml.etree import ElementTree
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -70,25 +71,31 @@ def run_cppcheck(
             if not message:
                 continue
             severity = error.attrib.get("severity", "warning")
-            row = None
-            col = None
-            for el in error:
-                if el.tag != "location":
-                    continue
-                row = int(el.attrib.get("line", "1")) - 1 + config.source_offset
-                col = int(el.attrib.get("column", "1")) - 1
-                if col < 0:
-                    col = None
-                break
+
+            location_element = error.find("location")
+            if location_element is not None:
+                position = get_linter_position(
+                    raw_start_row=location_element.attrib.get("line"),
+                    source_offset=config.source_offset,
+                    raw_end_row=None,
+                    raw_start_column=location_element.attrib.get("column"),
+                    raw_end_column=None,
+                )
+            else:
+                position = get_linter_position(
+                    raw_start_row=None,
+                    source_offset=config.source_offset,
+                    raw_end_row=None,
+                    raw_start_column=None,
+                    raw_end_column=None,
+                )
+
             annotations.append(
-                AnnotateCode(
-                    row=row or 0,
+                annotation_from_position(
+                    position=position,
                     text=message,
-                    column=col,
                     type=message_categories.get(severity, Severity.WARNING),
                 )
             )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations
