@@ -37,6 +37,7 @@ from tested.testsuite import (
     GenericValueOracle,
     LanguageLiterals,
     LanguageSpecificOracle,
+    Permission,
     SupportedLanguage,
     TextOutputChannel,
     ValueOutputChannel,
@@ -1326,6 +1327,26 @@ tabs:
     assert testcase.input.type == "expression"
     assert testcase.input.literals.keys() == {"java"}
 
+def test_tabs_can_be_given_permission():
+    yaml_str = """
+namespace: "solution"
+tabs:
+- tab: "Ctx"
+  permission: "staff"
+  testcases:
+  - arguments: [ "--arg", "argument" ]
+    stdin: "Input string"
+    stdout: "Output string"
+    stderr: "Error string"
+    exit_code: 1
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    assert len(suite.tabs) == 1
+    tab = suite.tabs[0]
+    assert tab.permission == Permission.STAFF
+    assert isinstance(testcase.input, LanguageLiterals)
+    assert testcase.input.type == "expression"
 
 def test_strict_json_schema_is_valid():
     path_to_schema = Path(__file__).parent / "tested-draft7.json"
