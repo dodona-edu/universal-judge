@@ -10,7 +10,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from enum import StrEnum, auto, unique
 from os import path
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, Literal, Protocol, TypeGuard, Union
 
 from attrs import define, field
@@ -235,6 +235,7 @@ def _resolve_path(working_directory, file_path):
 @define(frozen=True)
 class ContentPath:
     path: str
+    display_override: str | None = None
 
 
 def _data_to_content_converter(data: Any, full: Any) -> str | ContentPath | None:
@@ -277,6 +278,17 @@ class TextData(WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
+
+    def get_display_path(self) -> str | None:
+        if isinstance(self.content, ContentPath):
+            if self.content.display_override is not None:
+                return self.content.display_override
+            else:
+                media_path = PurePath("media") / self.content.path
+                return str(media_path)
+        else:
+            # Inline files do not have a path to link to.
+            return None
 
 
 @fallback_field(

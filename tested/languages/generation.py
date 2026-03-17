@@ -202,13 +202,14 @@ def get_readable_input(
     def replace_link(match: Match) -> str:
         filename = match.group()
         the_file = url_map[filename]
-        if not isinstance(the_file.content, ContentPath):
+        the_url = the_file.get_display_path()
+        if the_url is None:
             # TODO: how to handle inline files?
             return filename
 
-        the_url = urllib.parse.quote(the_file.content.path)
+        quoted_url = urllib.parse.quote(the_url)
         the_replacement = (
-            f'<a href="{the_url}" class="file-link" target="_blank">{filename}</a>'
+            f'<a href="{quoted_url}" class="file-link" target="_blank">{filename}</a>'
         )
         seen.add(the_file)
         return the_replacement

@@ -702,7 +702,10 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             input_files.append(_convert_text_data_required_path(file_object))
     elif len(context.files) > 0:  # Backwards compatibility.
         input_files = [
-            TextData(content=ContentPath(path=file.url), path=file.name)
+            TextData(
+                content=ContentPath(path=file.name, display_override=file.url),
+                path=file.name,
+            )
             for file in context.files
         ]
     else:

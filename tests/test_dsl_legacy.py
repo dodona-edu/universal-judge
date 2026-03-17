@@ -98,7 +98,8 @@ def test_dsl_testcase_legacy_link_files():
     assert len(testcase.input_files) == 1
     assert testcase.input_files[0].path == "data.txt"
     assert isinstance(testcase.input_files[0].content, ContentPath)
-    assert testcase.input_files[0].content.path == "path/to/data.txt"
+    assert testcase.input_files[0].content.path == "data.txt"
+    assert testcase.input_files[0].content.display_override == "path/to/data.txt"
 
 
 def test_dsl_inheritance_legacy_files():
@@ -115,7 +116,8 @@ def test_dsl_inheritance_legacy_files():
     assert len(testcase.input_files) == 1
     assert testcase.input_files[0].path == "data.txt"
     assert isinstance(testcase.input_files[0].content, ContentPath)
-    assert testcase.input_files[0].content.path == "tab/data.txt"
+    assert testcase.input_files[0].content.path == "data.txt"
+    assert testcase.input_files[0].content.display_override == "tab/data.txt"
 
 
 def test_dsl_mixed_files_input_files_priority():
