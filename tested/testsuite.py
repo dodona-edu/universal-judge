@@ -587,7 +587,9 @@ def _file_url_to_text_data_converter(value: Any, _: Any) -> list[dict]:
                 converted.append(
                     {
                         "path": item["name"],
-                        "content": ContentPath(path=item["name"], display_override=item["url"]),
+                        "content": ContentPath(
+                            path=item["name"], display_override=item["url"]
+                        ),
                     }
                 )
 
