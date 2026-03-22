@@ -221,11 +221,13 @@ def test_testcase_legacy_link_files():
     assert isinstance(file1, TextData)
     assert file1.path == "data.txt"
     assert isinstance(file1.content, ContentPath)
-    assert file1.content.path == "path/to/data.txt"
+    assert file1.content.path == "data.txt"
+    assert file1.content.display_override == "path/to/data.txt"
 
     # Check the second file.
     file2 = result.input_files[1]
     assert isinstance(file2, TextData)
     assert file2.path == "data.json"
     assert isinstance(file2.content, ContentPath)
-    assert file2.content.path == "another/path.json"
+    assert file2.content.path == "data.json"
+    assert file2.content.display_override == "another/path.json"
