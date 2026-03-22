@@ -1196,8 +1196,12 @@ def test_files_are_propagated():
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
     test0, test1 = testcases0[0], testcases1[0]
     assert set(test0.input_files) == {
-        TextData(path="test", content=ContentPath("test.md")),
-        TextData(path="two", content=ContentPath("two.md")),
+        TextData(
+            path="test", content=ContentPath(path="test", display_override="test.md")
+        ),
+        TextData(
+            path="two", content=ContentPath(path="two", display_override="two.md")
+        ),
     }
 
 
