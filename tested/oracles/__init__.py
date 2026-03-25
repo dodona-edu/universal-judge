@@ -4,6 +4,7 @@ from pathlib import Path
 
 from tested.configs import Bundle
 from tested.dodona import Status
+from tested.oracles import file
 from tested.oracles.common import Oracle, RawOracle, _curry_oracle
 from tested.testsuite import (
     CustomCheckOracle,
@@ -69,7 +70,7 @@ def get_oracle(
         if oracle.name == TextBuiltin.TEXT:
             return currier(text.evaluate_text, oracle.options)
         elif oracle.name == TextBuiltin.FILE:
-            return currier(text.evaluate_file, oracle.options)
+            return currier(file.evaluate_file, oracle.options)
         raise AssertionError("Unknown built-in text oracle")
     # Handle built-in value functions
     elif isinstance(oracle, GenericValueOracle):

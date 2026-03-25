@@ -1,0 +1,6 @@
+- tab: "Tests"
+  testcases:
+    - stdin:
+        path: "subdir/input.txt"
+        content: !path input.txt
+      stdout: "Hallo"

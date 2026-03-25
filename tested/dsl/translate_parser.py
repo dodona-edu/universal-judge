@@ -45,6 +45,7 @@ from tested.serialisation import (
     Value,
 )
 from tested.testsuite import (
+    ContentPath,
     Context,
     CustomCheckOracle,
     EmptyChannel,
@@ -88,9 +89,22 @@ class ReturnOracle(dict):
     pass
 
 
+class ContentPathString(str):
+    pass
+
+
 OptionDict = dict[str, int | bool]
 YamlObject = (
-    YamlDict | list | bool | float | int | str | None | ExpressionString | ReturnOracle
+    YamlDict
+    | list
+    | bool
+    | float
+    | int
+    | str
+    | None
+    | ExpressionString
+    | ReturnOracle
+    | ContentPathString
 )
 
 
@@ -138,6 +152,12 @@ def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     return ReturnOracle(result)
 
 
+def _return_path(loader: yaml.Loader, node: yaml.Node) -> ContentPathString:
+    result = _parse_yaml_value(loader, node)
+    assert isinstance(result, str), f"A path must be a string, got {result}"
+    return ContentPathString(result)
+
+
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
@@ -148,6 +168,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
     yaml.add_constructor("!expression", _expression_string, loader)
     yaml.add_constructor("!oracle", _return_oracle, loader)
+    yaml.add_constructor("!path", _return_path, loader)
 
     try:
         return yaml.load(yaml_stream, loader)
@@ -187,6 +208,10 @@ def is_expression(_checker: TypeChecker, instance: Any) -> bool:
     return isinstance(instance, ExpressionString)
 
 
+def is_path(_checker: TypeChecker, instance: Any) -> bool:
+    return isinstance(instance, ContentPathString)
+
+
 def load_schema_validator(
     dsl_object: YamlObject = None, file: str = "schema-strict.json"
 ) -> Validator:
@@ -215,9 +240,13 @@ def load_schema_validator(
         schema_object = json.load(schema_file)
 
     original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine(
-        "oracle", is_oracle
-    ).redefine("expression", is_expression)
+    type_checker = original_validator.TYPE_CHECKER.redefine_many(
+        {
+            "oracle": is_oracle,
+            "expression": is_expression,
+            "path": is_path,
+        }
+    )
     format_checker = original_validator.FORMAT_CHECKER
     format_checker.checks("tested-dsl-expression", SyntaxError)(
         validate_tested_dsl_expression
@@ -265,8 +294,11 @@ class DslContext:
         the_files = self.files
         if "files" in new_level:
             assert isinstance(new_level["files"], list)
-            additional_files = {_convert_file(f) for f in new_level["files"]}
-            the_files = list(set(self.files) | additional_files)
+            files_by_name = {f.name: f for f in self.files}
+            for f in new_level["files"]:
+                converted = _convert_file(f)
+                files_by_name[converted.name] = converted
+            the_files = list(files_by_name.values())
 
         the_config = self.config
         if "config" in new_level:
@@ -276,10 +308,12 @@ class DslContext:
         return evolve(self, files=the_files, config=the_config)
 
     def merge_inheritable_with_specific_config(
-        self, level: YamlDict, config_name: str
+        self, level: YamlObject, config_name: str
     ) -> dict:
         inherited_options = self.config.get(config_name, dict())
-        specific_options = level.get("config", dict())
+        specific_options = (
+            level.get("config", dict()) if isinstance(level, dict) else dict()
+        )
         assert isinstance(
             specific_options, dict
         ), f"The config options for {config_name} must be a dictionary, not a {type(specific_options)}"
@@ -469,16 +503,16 @@ def _convert_text_output_channel(
         data = raw_data
 
     if isinstance(stream, str):
-        return TextOutputChannel(data=data, oracle=GenericTextOracle(options=config))
+        return TextOutputChannel(content=data, oracle=GenericTextOracle(options=config))
     else:
         assert isinstance(stream, dict)
         if "oracle" not in stream or stream["oracle"] == "builtin":
             return TextOutputChannel(
-                data=data, oracle=GenericTextOracle(options=config)
+                content=data, oracle=GenericTextOracle(options=config)
             )
         elif stream["oracle"] == "custom_check":
             return TextOutputChannel(
-                data=data, oracle=_convert_custom_check_oracle(stream)
+                content=data, oracle=_convert_custom_check_oracle(stream)
             )
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
 
@@ -486,32 +520,50 @@ def _convert_text_output_channel(
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
 ) -> FileOutputChannel:
-    assert isinstance(stream, dict)
 
-    expected = str(stream["content"])
-    actual = str(stream["location"])
+    config = context.merge_inheritable_with_specific_config(stream, config_name)
+    if "mode" not in config:
+        config["mode"] = "full"
+    assert config["mode"] in (
+        "full",
+        "line",
+    ), f"The file oracle only supports modes full and line, not {config['mode']}"
 
-    if "oracle" not in stream or stream["oracle"] == "builtin":
-        config = context.merge_inheritable_with_specific_config(stream, config_name)
-        if "mode" not in config:
-            config["mode"] = "full"
+    if isinstance(stream, list):
+        # We have a list of files. This is not supported in the old way, so nothing special.
+        files = [_convert_text_data_required_path(f) for f in stream]
+        oracle = GenericTextOracle(name=TextBuiltin.FILE, options=config)
+    elif isinstance(stream, dict):
+        if "content" in stream:
+            # Handle legacy stuff.
+            expected = str(stream["content"])
+            actual = str(stream["location"])
+            files = [
+                TextData(
+                    path=actual,
+                    content=ContentPath(path=expected),
+                )
+            ]
+        else:
+            file_list = stream.get("data")
+            assert isinstance(
+                file_list, list
+            ), "The data key must be a list of expected files."
+            files = [_convert_text_data_required_path(f) for f in file_list]
 
-        assert config["mode"] in (
-            "full",
-            "line",
-        ), f"The file oracle only supports modes full and line, not {config['mode']}"
-        return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=GenericTextOracle(name=TextBuiltin.FILE, options=config),
+        if "oracle" not in stream or stream["oracle"] == "builtin":
+            oracle = GenericTextOracle(name=TextBuiltin.FILE, options=config)
+        elif stream["oracle"] == "custom_check":
+            oracle = _convert_custom_check_oracle(stream)
+        else:
+            raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+    else:
+        raise InvalidDslError(
+            f"Invalid file output channel: {stream}.\n\n"
+            "File output channels must be a list of files, or a dictionary with a 'data' key."
         )
-    elif stream["oracle"] == "custom_check":
-        return FileOutputChannel(
-            expected_path=expected,
-            actual_path=actual,
-            oracle=_convert_custom_check_oracle(stream),
-        )
-    raise TypeError(f"Unknown file oracle type: {stream['oracle']}")
+
+    return FileOutputChannel(files=files, oracle=oracle)
 
 
 def _convert_yaml_value(stream: YamlObject) -> Value | None:
@@ -568,6 +620,35 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
+def _convert_text_data(stream: YamlDict) -> TextData:
+    raw_content = stream.get("content")
+    raw_path = stream.get("path")
+
+    if isinstance(raw_content, ContentPathString):
+        file_content = ContentPath(path=raw_content)
+    elif isinstance(raw_content, str):
+        file_content = _ensure_trailing_newline(raw_content)
+    elif isinstance(raw_path, str):
+        file_content = ContentPath(path=raw_path)
+    else:
+        assert (
+            False
+        ), f"Invalid text data content is required but got {type(raw_content)}"
+
+    assert raw_path is None or isinstance(
+        raw_path, str
+    ), "Path must be a string if given."
+    file_path = raw_path
+
+    return TextData(content=file_content, path=file_path)
+
+
+def _convert_text_data_required_path(stream: YamlDict) -> TextData:
+    text_data = _convert_text_data(stream)
+    assert text_data.path is not None, "Path is required"
+    return TextData(content=text_data.content, path=text_data.path)
+
+
 def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     context = context.deepen_context(testcase)
 
@@ -599,14 +680,36 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         return_channel = IgnoredChannel.IGNORED if "statement" in testcase else None
     else:
         if "stdin" in testcase:
-            assert isinstance(testcase["stdin"], str)
-            stdin = TextData(data=_ensure_trailing_newline(testcase["stdin"]))
+            if isinstance(testcase["stdin"], dict):
+                stdin_object = testcase["stdin"]
+                stdin = _convert_text_data(stdin_object)
+            else:
+                assert isinstance(testcase["stdin"], str)
+                file_content = _ensure_trailing_newline(testcase["stdin"])
+                stdin = TextData(content=file_content, path=None)
         else:
             stdin = EmptyChannel.NONE
         arguments = testcase.get("arguments", [])
         assert isinstance(arguments, list)
         the_input = MainInput(stdin=stdin, arguments=arguments)
         return_channel = None
+
+    if "input_files" in testcase:
+        assert isinstance(testcase["input_files"], list)
+
+        input_files = []
+        for file_object in testcase["input_files"]:
+            input_files.append(_convert_text_data_required_path(file_object))
+    elif len(context.files) > 0:  # Backwards compatibility.
+        input_files = [
+            TextData(
+                content=ContentPath(path=file.name, display_override=file.url),
+                path=file.name,
+            )
+            for file in context.files
+        ]
+    else:
+        input_files = []
 
     output = Output()
 
@@ -617,6 +720,8 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output.stdout = _convert_text_output_channel(stdout, context, "stdout")
     if (file := testcase.get("file")) is not None:
         output.file = _convert_file_output_channel(file, context, "file")
+    if (file := testcase.get("output_files")) is not None:
+        output.file = _convert_file_output_channel(file, context, "output_files")
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
@@ -664,7 +769,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         description=the_description,
         input=the_input,
         output=output,
-        link_files=context.files,
+        input_files=input_files,
         line_comment=line_comment,
     )
 
