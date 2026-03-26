@@ -2,7 +2,7 @@ en:
   oracles:
     exception:
       staff: >-
-        Expected value exception, but received %{actual}, which caused an exception
+        Expected an exception value, but received %{actual}, which caused an exception
         while parsing: %{exception}
       student: >-
         Dodona does not understand this exception. Report this error to the teacher.
@@ -31,7 +31,7 @@ en:
       missing:
         status: "Missing output."
         message: "Output is missing here."
-      status: "Error by evaluating the result."
+      status: "Error while evaluating the result."
       staff: >-
         Received invalid output for specific evaluation: %{actual}.
         Either the test suite is invalid, the evaluation code has a bug or the student
@@ -67,7 +67,7 @@ en:
         one: "File: %{files}"
         many: "Files: %{files}"
       dynamic: "Dynamic"
-      hidden_expected: "\U0001f937 You must find the correct solution by your own."
+      hidden_expected: "\U0001f937 You must find the correct solution on your own."
     programmed:
       student: >-
         Something went wrong while evaluating the solution.
