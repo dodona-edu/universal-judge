@@ -1,0 +1,28 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "testcases": [
+            {
+              "input": {
+                "main_call": true,
+                "stdin": {
+                  "type": "text",
+                  "data": "test\n"
+                }
+              },
+              "output": {
+                "stdout": {
+                  "type": "text",
+                  "data": "test\n"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ from xml.etree import ElementTree
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -76,17 +77,20 @@ def run_checkstyle(
             external = None
             if source:
                 external = f'https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace(".", "/")}.html'
-            column = int(error_element.attrib.get("column", "1")) - 1
-            if column < 0:
-                column = None
+
+            position = get_linter_position(
+                raw_start_row=error_element.attrib.get("line"),
+                source_offset=config.source_offset,
+                raw_end_row=None,
+                raw_start_column=error_element.attrib.get("column"),
+                raw_end_column=None,
+            )
+
             annotations.append(
-                AnnotateCode(
-                    row=int(error_element.attrib.get("line", "1"))
-                    - 1
-                    + config.source_offset,
+                annotation_from_position(
+                    position=position,
                     text=message,
-                    externalUrl=external,
-                    column=column,
+                    external_url=external,
                     type=message_categories.get(
                         error_element.attrib.get("severity", "warning"),
                         Severity.WARNING,
@@ -94,6 +98,4 @@ def run_checkstyle(
                 )
             )
 
-    # sort linting messages on line, column and code
-    annotations.sort(key=lambda a: (a.row, a.column, a.text))
     return [], annotations
