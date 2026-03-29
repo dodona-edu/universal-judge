@@ -73,9 +73,8 @@ class PlannedExecutionUnit:
             for testcase in context.context.testcases:
                 for input_file in testcase.input_files:
                     if (
-                        (uses_strict_workdir or input_file.is_dynamically_generated())
-                        and input_file.path is not None
-                    ):
+                        uses_strict_workdir or input_file.is_dynamically_generated()
+                    ) and input_file.path is not None:
                         generated_files.add(
                             DynamicallyGeneratedFile(
                                 path=input_file.path,

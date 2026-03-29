@@ -524,7 +524,9 @@ def test_planning_conflict_input_file_forward_leak(
         ]
     )
     ctx_b = Context(
-        testcases=[SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])]
+        testcases=[
+            SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+        ]
     )
 
     tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
@@ -542,7 +544,9 @@ def test_planning_conflict_input_file_backward_leak(
     # ctx A has no input files; ctx B has a dynamic file.
     # Files are written upfront, so B's file would already be present during A.
     ctx_a = Context(
-        testcases=[SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])]
+        testcases=[
+            SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+        ]
     )
     file_b = TextData(path="file.txt", content="content")
     ctx_b = Context(
@@ -592,9 +596,7 @@ def test_planning_no_conflict_static_input_files_lax(
     assert len(units) == 1
 
 
-def test_planning_conflict_strict_then_lax(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_planning_conflict_strict_then_lax(tmp_path: Path, pytestconfig: pytest.Config):
     # ctx A is strict (declares input_files); ctx B is lax (no input_files).
     # Strict ctx includes static files in its footprint, so the sets differ.
     strict_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
@@ -616,9 +618,7 @@ def test_planning_conflict_strict_then_lax(
     assert len(units) == 2
 
 
-def test_planning_conflict_lax_then_strict(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_planning_conflict_lax_then_strict(tmp_path: Path, pytestconfig: pytest.Config):
     # ctx A is lax; ctx B is strict. B's static file footprint differs from A's empty set.
     tc_a = SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
     ctx_a = Context(testcases=[tc_a])

@@ -189,7 +189,9 @@ def test_get_dynamically_generated_files_not_dynamic_lax_vs_strict():
         use_strict_workdir=True,
     )
     strict_context = Context(testcases=[strict_testcase])
-    strict_planned = PlannedContext(context=strict_context, tab_index=0, context_index=0)
+    strict_planned = PlannedContext(
+        context=strict_context, tab_index=0, context_index=0
+    )
     strict_unit = PlannedExecutionUnit(
         contexts=[strict_planned], name="strict_unit", index=0
     )
@@ -209,7 +211,9 @@ def test_has_strict_workdir():
     strict_context = Context(testcases=[strict_testcase])
     lax_context = Context(testcases=[lax_testcase])
 
-    strict_planned = PlannedContext(context=strict_context, tab_index=0, context_index=0)
+    strict_planned = PlannedContext(
+        context=strict_context, tab_index=0, context_index=0
+    )
     lax_planned = PlannedContext(context=lax_context, tab_index=0, context_index=1)
 
     mixed_unit = PlannedExecutionUnit(

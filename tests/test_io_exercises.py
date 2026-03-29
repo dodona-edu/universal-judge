@@ -63,13 +63,16 @@ def test_io_exercise_input_dynamic_file_nested_path(
     assert updates.find_status_enum() == ["correct"]
 
 
-def test_io_exercise_stdin_multiline_args(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_io_exercise_stdin_multiline_args(tmp_path: Path, pytestconfig: pytest.Config):
     # Exercises the heredoc display path (stdin.count('\n') > 1) in get_readable_input().
     # Python-only: other correct.* solutions read all of stdin and would produce different output.
     conf = configuration(
-        pytestconfig, "echo", "python", tmp_path, "plan-stdin-multiline-args.yaml", "correct"
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-stdin-multiline-args.yaml",
+        "correct",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -81,7 +84,12 @@ def test_io_exercise_lax_workdir_has_workdir_files(
 ):
     (tmp_path / "workdir-extra.txt").write_text("workdir content\n")
     conf = configuration(
-        pytestconfig, "echo", "python", tmp_path, "plan-lax-workdir.yaml", "correct-workdir"
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-lax-workdir.yaml",
+        "correct-workdir",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -95,7 +103,12 @@ def test_io_exercise_strict_workdir_isolates_workdir_files(
     # from reaching the execution directory since it is not listed in input_files.
     (tmp_path / "workdir-extra.txt").write_text("workdir content\n")
     conf = configuration(
-        pytestconfig, "echo", "python", tmp_path, "plan-strict-isolation.yaml", "correct-workdir"
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-strict-isolation.yaml",
+        "correct-workdir",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
