@@ -626,6 +626,8 @@ class Testcase(WithFeatures, WithFunctions):
     description: Message | None = None
     output: Output = field(factory=Output)
     input_files: list[TextData] = field(factory=list)
+    # If true, only "input_files" will be available in the workdir.
+    use_strict_workdir: bool = False
     line_comment: str = ""
 
     def get_used_features(self) -> FeatureSet:
@@ -773,6 +775,9 @@ class Context(WithFeatures, WithFunctions):
             if isinstance(t.output.file, FileOutputChannel):
                 all_files.update(t.output.file.files)
         return all_files
+
+    def has_strict_workdir(self) -> bool:
+        return any(testcase.use_strict_workdir for testcase in self.testcases)
 
 
 def _runs_to_tab_converter(runs: list | None, _):

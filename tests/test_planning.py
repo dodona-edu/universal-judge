@@ -11,6 +11,7 @@ from tested.judge.planning import (
     plan_test_suite,
 )
 from tested.testsuite import (
+    ContentPath,
     Context,
     EmptyChannel,
     ExitCodeOutputChannel,
@@ -479,14 +480,14 @@ def test_planning_mixed_conflicts(tmp_path: Path, pytestconfig: pytest.Config):
     bundle = create_bundle(conf, sys.stdout, suite)
     units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
 
-    assert len(units) == 3
-    assert [len(u.contexts) for u in units] == [1, 4, 1]
+    assert len(units) == 5
+    assert [len(u.contexts) for u in units] == [1, 2, 1, 1, 1]
     assert units[0].contexts[0].context == ctx1
     assert units[1].contexts[0].context == ctx2
     assert units[1].contexts[1].context == ctx3
-    assert units[1].contexts[2].context == ctx4
-    assert units[1].contexts[3].context == ctx5
-    assert units[2].contexts[0].context == ctx6
+    assert units[2].contexts[0].context == ctx4
+    assert units[3].contexts[0].context == ctx5
+    assert units[4].contexts[0].context == ctx6
 
 
 def test_planning_sequential_exit_codes(tmp_path: Path, pytestconfig: pytest.Config):
@@ -507,3 +508,183 @@ def test_planning_sequential_exit_codes(tmp_path: Path, pytestconfig: pytest.Con
     assert len(units) == 2
     assert len(units[0].contexts) == 1
     assert len(units[1].contexts) == 1
+
+
+def test_planning_conflict_input_file_forward_leak(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A has a dynamic file; ctx B has no input files.
+    # The file written for A would persist into B, so they must be split.
+    file_a = TextData(path="file.txt", content="content")
+    ctx_a = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_a]
+            )
+        ]
+    )
+    ctx_b = Context(
+        testcases=[SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])]
+    )
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_conflict_input_file_backward_leak(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A has no input files; ctx B has a dynamic file.
+    # Files are written upfront, so B's file would already be present during A.
+    ctx_a = Context(
+        testcases=[SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])]
+    )
+    file_b = TextData(path="file.txt", content="content")
+    ctx_b = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_b]
+            )
+        ]
+    )
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_no_conflict_static_input_files_lax(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Both contexts use the same static ContentPath file in lax mode.
+    # Static files are already in the workdir, so no conflict arises.
+    static_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+    ctx_a = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[static_file]
+            )
+        ]
+    )
+    ctx_b = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[static_file]
+            )
+        ]
+    )
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 1
+
+
+def test_planning_conflict_strict_then_lax(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A is strict (declares input_files); ctx B is lax (no input_files).
+    # Strict ctx includes static files in its footprint, so the sets differ.
+    strict_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+    tc_a = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[strict_file],
+        use_strict_workdir=True,
+    )
+    ctx_a = Context(testcases=[tc_a])
+    tc_b = SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+    ctx_b = Context(testcases=[tc_b])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_conflict_lax_then_strict(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A is lax; ctx B is strict. B's static file footprint differs from A's empty set.
+    tc_a = SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+    ctx_a = Context(testcases=[tc_a])
+    strict_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+    tc_b = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[strict_file],
+        use_strict_workdir=True,
+    )
+    ctx_b = Context(testcases=[tc_b])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_no_conflict_strict_same_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Both contexts are strict with the same ContentPath file → 1 unit.
+    strict_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+    tc = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[strict_file],
+        use_strict_workdir=True,
+    )
+    ctx_a = Context(testcases=[tc])
+    ctx_b = Context(testcases=[tc])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 1
+
+
+def test_planning_conflict_strict_different_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Both contexts are strict but declare different files → 2 units.
+    file_a = TextData(path="a.txt", content=ContentPath(path="a.txt"))
+    tc_a = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[file_a],
+        use_strict_workdir=True,
+    )
+    ctx_a = Context(testcases=[tc_a])
+
+    file_b = TextData(path="b.txt", content=ContentPath(path="b.txt"))
+    tc_b = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[file_b],
+        use_strict_workdir=True,
+    )
+    ctx_b = Context(testcases=[tc_b])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2

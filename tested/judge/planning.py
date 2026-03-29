@@ -62,27 +62,18 @@ class PlannedExecutionUnit:
     def has_exit_testcase(self) -> bool:
         return self.contexts[-1].context.has_exit_testcase()
 
+    def has_strict_workdir(self) -> bool:
+        return any(context.context.has_strict_workdir() for context in self.contexts)
+
     def get_dynamically_generated_files(self) -> list[DynamicallyGeneratedFile]:
         generated_files = set()
+        uses_strict_workdir = self.has_strict_workdir()
 
         for context in self.contexts:
             for testcase in context.context.testcases:
-                if (
-                    isinstance(testcase.input, MainInput)
-                    and testcase.input.stdin != EmptyChannel.NONE
-                    and testcase.input.stdin.is_dynamically_generated()
-                    and testcase.input.stdin.path is not None
-                ):
-                    generated_files.add(
-                        DynamicallyGeneratedFile(
-                            path=testcase.input.stdin.path,
-                            content=testcase.input.stdin.content,
-                        )
-                    )
-
                 for input_file in testcase.input_files:
                     if (
-                        input_file.is_dynamically_generated()
+                        (uses_strict_workdir or input_file.is_dynamically_generated())
                         and input_file.path is not None
                     ):
                         generated_files.add(
@@ -141,10 +132,12 @@ def _flattened_contexts_to_units(
     current_output_files: set[str] = set()  # These are paths
 
     for planned in flattened_contexts:
+        strict = planned.context.has_strict_workdir()
+
         planned_input_files = {
-            planned_input_file.path: planned_input_file.content
-            for planned_input_file in planned.context.get_input_files()
-            if planned_input_file.path
+            f.path: f.content
+            for f in planned.context.get_input_files()
+            if f.path and (strict or f.is_dynamically_generated())
         }
 
         planned_output_files = [
@@ -154,10 +147,7 @@ def _flattened_contexts_to_units(
         ]
 
         # If any context wants the same input file with different content, we have a conflict.
-        has_input_file_conflict = any(
-            path in current_input_files and current_input_files[path] != content
-            for path, content in planned_input_files.items()
-        )
+        has_input_file_conflict = planned_input_files != current_input_files
 
         # If any context wants an output file in the same location, we have a conflict.
         has_output_conflict = any(
