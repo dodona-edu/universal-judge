@@ -51,9 +51,6 @@ class AnnotationLocation:
     """Optional, number of columns spanned by the annotation. If provided >= 1."""
 
 
-type IndexOffset = Literal[0, 1]
-
-
 def get_linter_position(
     raw_start_row: str | int | None,
     source_offset: int,

@@ -77,7 +77,7 @@ def run_eslint(
             rule_id = message.get("ruleId")
             external = None
             if rule_id:
-                if "@typescript" in rule_id:
+                if rule_id.startswith("@typescript-eslint/"):
                     raw_rule_id = rule_id.replace("@typescript-eslint/", "")
                     external = f"https://typescript-eslint.io/rules/{raw_rule_id}"
                 else:

@@ -82,7 +82,7 @@ def run_ktlint(
 
             # Attempt to extract rule information.
             if ":" in rule:
-                ruleset, name = rule.split(":")
+                ruleset, name = rule.split(":", maxsplit=1)
                 external_url = (
                     f"https://pinterest.github.io/ktlint/latest/rules/{ruleset}/#{name}"
                 )
