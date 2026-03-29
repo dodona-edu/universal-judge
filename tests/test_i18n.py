@@ -7,10 +7,18 @@ locales, and that the English fallback works for unknown locales.
 
 from pathlib import Path
 
+import pytest
 import yaml
+
 from tested.internationalization import get_i18n_string, set_locale
 
 I18N_DIR = Path(__file__).parent.parent / "tested" / "internationalization"
+
+
+@pytest.fixture(autouse=True)
+def _restore_locale():
+    yield
+    set_locale("en")
 
 
 def _flatten_keys(d: dict, prefix: str = "") -> set[str]:
@@ -40,11 +48,11 @@ def test_es_yaml_loadable():
     set_locale("es")
     result = get_i18n_string("judge.evaluation.time-limit")
     # Must not be the English fallback.
-    assert result != "Time limit exceeded", (
-        "Expected Spanish string, but got English fallback"
-    )
+    assert (
+        result != "Time limit exceeded"
+    ), "Expected Spanish string, but got English fallback"
     # Sanity-check it looks like the Spanish translation.
-    assert "excedido" in result.lower() or "límite" in result.lower()
+    assert "excedido" in result.lower() or "l\u00edmite" in result.lower()
 
 
 # Test that every en.yaml leaf key exists in es.yaml.
@@ -52,9 +60,9 @@ def test_all_en_keys_present_in_es():
     en_keys = _load_keys("en")
     es_keys = _load_keys("es")
     missing = en_keys - es_keys
-    assert not missing, (
-        f"es.yaml is missing keys present in en.yaml:\n{sorted(missing)}"
-    )
+    assert (
+        not missing
+    ), f"es.yaml is missing keys present in en.yaml:\n{sorted(missing)}"
 
 
 # Test that every nl.yaml leaf key exists in es.yaml.
@@ -71,9 +79,9 @@ def test_all_nl_keys_present_in_es():
     nl_keys = _load_keys("nl")
     es_keys = _load_keys("es")
     missing = nl_keys - es_keys - KNOWN_NL_STRUCTURAL_DIFFERENCES
-    assert not missing, (
-        f"es.yaml is missing keys present in nl.yaml:\n{sorted(missing)}"
-    )
+    assert (
+        not missing
+    ), f"es.yaml is missing keys present in nl.yaml:\n{sorted(missing)}"
 
 
 # Test that type-related keys resolve to Spanish strings.
@@ -95,5 +103,3 @@ def test_unknown_locale_falls_back_to_en():
     set_locale("xx")
     result = get_i18n_string("judge.evaluation.time-limit")
     assert result == "Time limit exceeded", f"Expected English fallback, got '{result}'"
-    # Restore to a valid locale so other tests aren't affected.
-    set_locale("en")
