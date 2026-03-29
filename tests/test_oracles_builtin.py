@@ -9,9 +9,11 @@ import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
-from tested.oracles.common import OracleConfig
+from tested.judge.evaluation import guess_expected_value
+from tested.oracles.common import OracleConfig, OracleResult
 from tested.oracles.exception import evaluate as evaluate_exception
-from tested.oracles.text import evaluate_file, evaluate_text
+from tested.oracles.file import evaluate_file
+from tested.oracles.text import evaluate_text
 from tested.oracles.value import evaluate as evaluate_value
 from tested.parsing import get_converter
 from tested.serialisation import (
@@ -22,11 +24,13 @@ from tested.serialisation import (
     StringType,
 )
 from tested.testsuite import (
+    ContentPath,
     ExceptionOutputChannel,
     ExpectedException,
     FileOutputChannel,
     Suite,
     SupportedLanguage,
+    TextData,
     TextOutputChannel,
     ValueOutputChannel,
 )
@@ -46,7 +50,7 @@ def oracle_config(
 
 def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
-    channel = TextOutputChannel(data="expected")
+    channel = TextOutputChannel(content="expected")
     result = evaluate_text(config, channel, "expected")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -60,7 +64,7 @@ def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_text_oracle_whitespace(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": True})
-    channel = TextOutputChannel(data="expected")
+    channel = TextOutputChannel(content="expected")
     result = evaluate_text(config, channel, "expected      ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -74,7 +78,7 @@ def test_text_oracle_whitespace(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_text_oracle_case_sensitive(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"caseInsensitive": True})
-    channel = TextOutputChannel(data="expected")
+    channel = TextOutputChannel(content="expected")
     result = evaluate_text(config, channel, "Expected")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -90,7 +94,7 @@ def test_text_oracle_combination(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"caseInsensitive": True, "ignoreWhitespace": True}
     )
-    channel = TextOutputChannel(data="expected")
+    channel = TextOutputChannel(content="expected")
     result = evaluate_text(config, channel, "Expected     ")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "expected"
@@ -106,7 +110,7 @@ def test_text_oracle_rounding(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(
         tmp_path, pytestconfig, {"tryFloatingPoint": True, "applyRounding": True}
     )
-    channel = TextOutputChannel(data="1.333")
+    channel = TextOutputChannel(content="1.333")
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.333"
@@ -124,7 +128,7 @@ def test_text_oracle_round_to(tmp_path: Path, pytestconfig: pytest.Config):
         pytestconfig,
         {"tryFloatingPoint": True, "applyRounding": True, "roundTo": 1},
     )
-    channel = TextOutputChannel(data="1.3")
+    channel = TextOutputChannel(content="1.3")
     result = evaluate_text(config, channel, "1.3333333")
     assert result.result.enum == Status.CORRECT
     assert result.readable_expected == "1.3"
@@ -140,7 +144,7 @@ def test_file_oracle_full_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "actual\nactual"]
@@ -149,20 +153,22 @@ def test_file_oracle_full_wrong(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "actual\nactual")
-    assert result.result.enum == Status.WRONG
-    assert result.readable_expected == "expected\nexpected"
-    assert result.readable_actual == "actual\nactual"
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.WRONG
+    assert result[0].readable_expected == "expected\nexpected"
+    assert result[0].readable_actual == "actual\nactual"
 
 
 def test_file_oracle_full_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected", "expected\nexpected"]
@@ -171,13 +177,16 @@ def test_file_oracle_full_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
     result = evaluate_file(config, channel, "")
     s.assert_called_once_with(ANY, "expected\nexpected", "expected\nexpected")
-    assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected"
-    assert result.readable_actual == "expected\nexpected"
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected"
+    assert result[0].readable_actual == "expected\nexpected"
 
 
 def test_file_oracle_line_wrong(
@@ -186,7 +195,7 @@ def test_file_oracle_line_wrong(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "actual\nactual2"]
@@ -195,15 +204,18 @@ def test_file_oracle_line_wrong(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "actual")
     s.assert_any_call(ANY, "expected2", "actual2")
     assert s.call_count == 2
-    assert result.result.enum == Status.WRONG
-    assert result.readable_expected == "expected\nexpected2"
-    assert result.readable_actual == "actual\nactual2"
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.WRONG
+    assert result[0].readable_expected == "expected\nexpected2"
+    assert result[0].readable_actual == "actual\nactual2"
 
 
 def test_file_oracle_line_correct(
@@ -212,7 +224,7 @@ def test_file_oracle_line_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2", "expected\nexpected2"]
@@ -221,15 +233,18 @@ def test_file_oracle_line_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
     assert s.call_count == 2
-    assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2"
-    assert result.readable_actual == "expected\nexpected2"
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected2"
+    assert result[0].readable_actual == "expected\nexpected2"
 
 
 def test_file_oracle_strip_lines_correct(
@@ -238,7 +253,7 @@ def test_file_oracle_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2"]
@@ -247,15 +262,18 @@ def test_file_oracle_strip_lines_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected", "expected")
     s.assert_any_call(ANY, "expected2", "expected2")
     assert s.call_count == 2
-    assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2\n"
-    assert result.readable_actual == "expected\nexpected2"
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected2\n"
+    assert result[0].readable_actual == "expected\nexpected2"
 
 
 def test_file_oracle_dont_strip_lines_correct(
@@ -264,7 +282,7 @@ def test_file_oracle_dont_strip_lines_correct(
     config = oracle_config(
         tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
     )
-    s = mocker.spy(tested.oracles.text, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
     mock_files = [
         mocker.mock_open(read_data=content).return_value
         for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
@@ -273,15 +291,100 @@ def test_file_oracle_dont_strip_lines_correct(
     mock_opener.side_effect = mock_files
     mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
-        expected_path="expected.txt", actual_path="expected.txt"
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
     result = evaluate_file(config, channel, "")
     s.assert_any_call(ANY, "expected\n", "expected\n")
     s.assert_any_call(ANY, "expected2\n", "expected2\n")
     assert s.call_count == 2
-    assert result.result.enum == Status.CORRECT
-    assert result.readable_expected == "expected\nexpected2\n"
-    assert result.readable_actual == "expected\nexpected2\n"
+
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected2\n"
+    assert result[0].readable_actual == "expected\nexpected2\n"
+
+
+def test_file_oracle_multiple_files_correct(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            "expected\nexpected2\n",
+            "expected\nexpected2\n",
+            "expected\nexpected4\n",
+            "expected\nexpected4\n",
+        ]
+    ]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        files=[
+            TextData(path="expected.txt", content=ContentPath(path="expected.txt")),
+            TextData(
+                path="another_file.txt", content=ContentPath(path="another_path.txt")
+            ),
+        ]
+    )
+    result = evaluate_file(config, channel, "")
+    s.assert_any_call(ANY, "expected\nexpected2\n", "expected\nexpected2\n")
+    s.assert_any_call(ANY, "expected\nexpected4\n", "expected\nexpected4\n")
+    assert s.call_count == 2
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected2\n"
+    assert result[0].readable_actual == "expected\nexpected2\n"
+
+    assert result[1].result.enum == Status.CORRECT
+    assert result[1].readable_expected == "expected\nexpected4\n"
+    assert result[1].readable_actual == "expected\nexpected4\n"
+
+
+def test_file_oracle_multiple_files_one_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    s = mocker.spy(tested.oracles.file, name="compare_text")  # type: ignore[reportAttributeAccessIssue]
+    mock_files = [
+        mocker.mock_open(read_data=content).return_value
+        for content in [
+            "expected\nexpected2\n",
+            "expected\nexpected2\n",
+            "expected\nexpected4\n",
+            "expected\nexpected3\n",
+        ]
+    ]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        files=[
+            TextData(path="expected.txt", content=ContentPath(path="expected.txt")),
+            TextData(
+                path="another_file.txt", content=ContentPath(path="another_path.txt")
+            ),
+        ]
+    )
+    result = evaluate_file(config, channel, "")
+    s.assert_any_call(ANY, "expected\nexpected2\n", "expected\nexpected2\n")
+    s.assert_any_call(ANY, "expected\nexpected4\n", "expected\nexpected3\n")
+    assert s.call_count == 2
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0].result.enum == Status.CORRECT
+    assert result[0].readable_expected == "expected\nexpected2\n"
+    assert result[0].readable_actual == "expected\nexpected2\n"
+
+    assert result[1].result.enum == Status.WRONG
+    assert result[1].readable_expected == "expected\nexpected4\n"
+    assert result[1].readable_actual == "expected\nexpected3\n"
 
 
 def test_exception_oracle_only_messages_correct(
@@ -940,3 +1043,86 @@ def test_wrong_map_is_accepted(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, language="javascript")
     result = evaluate_value(config, channel, actual_value)
     assert result.result.enum == Status.WRONG
+
+
+def test_file_oracle_unexpected_stdout(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "unexpected output")
+    assert isinstance(result, OracleResult)
+    assert not isinstance(result, list)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == ""
+    assert result.readable_actual == "unexpected output"
+
+
+def test_file_oracle_missing_actual_file(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    mock_files = [
+        mocker.mock_open(read_data="expected content").return_value,
+        FileNotFoundError(),
+    ]
+    mock_opener = mocker.mock_open()
+    mock_opener.side_effect = mock_files
+    mocker.patch("builtins.open", mock_opener)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.RUNTIME_ERROR
+    assert result[0].readable_expected  # non-empty: the expected file content
+    assert result[0].readable_actual == ""
+    assert result[0].channel_override == "expected.txt"
+
+
+def test_file_oracle_missing_expected_resource(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    mocker.patch("builtins.open", side_effect=FileNotFoundError)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.INTERNAL_ERROR
+    assert result[0].channel_override == "expected.txt"
+
+
+def test_file_oracle_default_mode(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {})
+    (tmp_path / "expected.txt").write_text("hello world")
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content="hello world")]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.CORRECT
+
+
+def test_file_oracle_unknown_mode_raises(tmp_path: Path, pytestconfig: pytest.Config):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "invalid"})
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
+    )
+    with pytest.raises(ValueError, match="Unknown mode"):
+        evaluate_file(config, channel, "")
+
+
+def test_guess_expected_value_file_channel_requires_file_index(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    channel = FileOutputChannel(
+        files=[TextData(path="expected.txt", content="expected content")]
+    )
+    with pytest.raises(AssertionError):
+        guess_expected_value(config.bundle, channel, file_index=None)
