@@ -102,6 +102,14 @@ en:
         timeout: "ESLint exceeded time limit"
         memory: "ESLint exceeded memory limit"
         output: "ESLint produced bad output."
+    typescript:
+      runtime:
+        invalid:
+          exception: "%{actual_type} is not an instance of Error (or a subclass)."
+      linter:
+        timeout: "ESLint exceeded time limit"
+        memory: "ESLint exceeded memory limit"
+        output: "ESLint produced bad output."
     haskell:
       linter:
         timeout: "HLint exceeded time limit"
@@ -127,48 +135,6 @@ en:
         timeout: "ShellCheck exceeded time limit"
         memory: "ShellCheck exceeded memory limit"
         output: "ShellCheck produced bad output."
-  timings:
-    parallel: "In parallel execution, the cumulative execution times can be greater than the total execution time."
-    title: "Stats"
-    testplan: "Reading test suite"
-    dsl: "Parse YAML test suite"
-    json: "Parse JSON test suite"
-    bundle: "Create bundle information"
-    analyse:
-      supported: "Check if test suite is supported by the programming language"
-      features: "Analyse features"
-    prepare:
-      output: "Preparing feedback table"
-      results: "Preparing results"
-    linter: "Running linter"
-    generation: "Generate testcode"
-    submission:
-      modify: "Modify submission"
-    generate:
-      templates: "Generate testcode from templates"
-    compilation:
-      pre: "Batch compilation"
-      individual: "Individual compilation"
-      batch:
-        done: "Adding feedback from batch compilation"
-    run:
-      execution: "Running a run"
-      testcode: "Running test executables"
-    dependencies:
-      copy: "Copy dependencies"
-    evaluate:
-      text: "Evaluating text results/full file with built-in evaluator"
-      results: "Evaluating results"
-      builtin:
-        file: "Evaluating file line-by-line with built-in evaluator"
-        value: "Evaluating return values with built-in evaluator"
-        exception: "Evaluating exceptions with built-in evaluator"
-      programmed: "Evaluating results with programmed evaluator"
-    total: "Total execution time"
-    parse:
-      expression: "Parse expressions and statements"
-      return: "Parse YAML return values"
-      return-raw: "Parse return-raw values"
   types:
     joiner: "or"
     singular:
@@ -178,7 +144,7 @@ en:
       text: "string"
       boolean: "boolean"
       nothing: "nothing"
-      undefined: "nothing"
+      undefined: "undefined"
       int8: "8-bit integer"
       uint8: "8-bit natural number"
       int16: "16-bit integer"
@@ -192,12 +158,17 @@ en:
       double_precision: "double precision floating point number"
       fixed_precision: "fixed precision number"
       any: "any"
+      string: "string"
+      "null": "null"
+      object: "object"
+      dictionary: "dictionary"
       list: "list"
       tuple: "tuple"
       array: "array"
       map: "map"
       sequence: "sequence"
       set: "set"
+      double_extended: "double extended precision floating point number"
     plural:
       integer: "integers"
       real: "real numbers"
@@ -205,7 +176,7 @@ en:
       text: "strings"
       boolean: "booleans"
       nothing: "nothing"
-      undefined: "nothing"
+      undefined: "undefined"
       int8: "8-bit integers"
       uint8: "8-bit natural numbers"
       int16: "16-bit integers"
@@ -219,10 +190,14 @@ en:
       double_precision: "double precision floating point numbers"
       fixed_precision: "fixed precision numbers"
       any: "any"
+      string: "strings"
+      "null": "null"
+      object: "objects"
+      dictionary: "dictionaries"
       list: "lists"
       tuple: "tuples"
       array: "arrays"
       map: "maps"
       sequence: "sequences"
       set: "sets"
-
+      double_extended: "double extended precision floating point numbers"
