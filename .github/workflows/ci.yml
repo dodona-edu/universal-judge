@@ -1,6 +1,6 @@
 name: CI
 
-on: 
+on:
   push:
   pull_request_target:
     types: [labeled]
@@ -70,6 +70,23 @@ jobs:
           imageTag: dev
           push: never
           runCmd: pyright ./tested ./tests
+
+  translations:
+    needs: [build_devcontainer]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Check translation files
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: dodona/dodona-tested
+          imageTag: dev
+          push: never
+          runCmd: python -m tested.internationalization.validation
+
   # check if the JS exercises still work.
   javascript-dodona:
     needs: [build_devcontainer]
