@@ -1,5 +1,4 @@
 import logging
-from typing import Literal
 
 from attrs import define
 

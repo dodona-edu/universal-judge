@@ -36,7 +36,6 @@ from tested.languages.generation import (
 from tested.oracles import get_oracle
 from tested.oracles.common import OracleResult
 from tested.testsuite import (
-    ContentPath,
     Context,
     EmptyChannel,
     ExceptionOutput,

@@ -35,7 +35,7 @@ from tested.dodona import Message, Status, StatusMessage
 from tested.dsl import parse_string
 from tested.languages.generation import generate_statement
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
-from tested.parsing import fallback_field, get_converter
+from tested.parsing import fallback_field
 from tested.serialisation import Value
 from tested.testsuite import (
     ExceptionOutputChannel,
