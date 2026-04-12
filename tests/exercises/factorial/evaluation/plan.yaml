@@ -1,0 +1,5 @@
+- tab: "Faculteit"
+  contexts:
+    - testcases:
+        - expression: "faculteit(16)"
+          return: 20922789888000
