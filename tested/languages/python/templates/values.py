@@ -5,7 +5,12 @@ import decimal
 import io
 import json
 import math
+import sys
 import traceback
+
+# If the users make data too large, it should crash on memory issues, or other
+# resource limitations, not a crash in the encoding of values.
+sys.set_int_max_str_digits(0)
 
 
 def encode(value):

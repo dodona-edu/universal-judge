@@ -359,3 +359,17 @@ def test_typescript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Co
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "factorial",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "wrong-large-int",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]

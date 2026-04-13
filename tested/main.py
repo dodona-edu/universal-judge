@@ -3,11 +3,15 @@ Main file, responsible for running TESTed based on the input given by Dodona.
 """
 
 import os
+import sys
 from typing import IO
 
 from tested.configs import DodonaConfig, create_bundle
 from tested.dsl import parse_dsl
 from tested.testsuite import parse_test_suite
+
+# It is better to let it crash using memory or time limits
+sys.set_int_max_str_digits(0)
 
 
 def run(config: DodonaConfig, judge_output: IO):
