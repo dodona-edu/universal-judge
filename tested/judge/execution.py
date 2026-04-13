@@ -166,7 +166,13 @@ def set_up_unit(
     dependencies = filter_files(plan.files, plan.common_directory)
     dependencies = bundle.language.filter_dependencies(dependencies, unit.name)
     _logger.debug("Dependencies are %s", dependencies)
-    copy_workdir_files(bundle, execution_dir, True)
+
+    # When using a strict workdir, only the files listed in the "input_files"
+    # are available in the workdir for the execution unit.
+    # If that is the case, the "dynamic" files below will copy/generate
+    # all necessary files.
+    if not unit.has_strict_workdir():
+        copy_workdir_files(bundle, execution_dir, True)
 
     # Copy files from the common directory to the context directory.
     for file in dependencies:

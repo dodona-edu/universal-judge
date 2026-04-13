@@ -11,16 +11,14 @@ from tested.testsuite import (
 )
 
 
-def test_get_dynamically_generated_files_stdin_sorting():
-    # Test sorting when files are generated from stdin
-    # We must put them in different contexts because only the first testcase
-    # in a context can have MainInput.
+def test_get_dynamically_generated_files_stdin_not_included():
+    # stdin.path is display-only ("< hello.txt" in the description).
+    # Stdin content is delivered via the process pipe, not written to disk.
     file1 = TextData(path="stdin.txt", content=ContentPath(path="url1"))
     testcase1 = Testcase(input=MainInput(stdin=file1), input_files=[])
     context1 = Context(testcases=[testcase1])
     planned_context1 = PlannedContext(context=context1, tab_index=0, context_index=0)
 
-    # Another context with same stdin path but different url
     file2 = TextData(path="stdin.txt", content=ContentPath(path="url2"))
     testcase2 = Testcase(input=MainInput(stdin=file2), input_files=[])
     context2 = Context(testcases=[testcase2])
@@ -30,12 +28,7 @@ def test_get_dynamically_generated_files_stdin_sorting():
         contexts=[planned_context1, planned_context2], name="unit0", index=0
     )
 
-    generated_files = unit.get_dynamically_generated_files()
-    assert len(generated_files) == 2
-    assert isinstance(generated_files[0].content, ContentPath)
-    assert generated_files[0].content.path == "url1"
-    assert isinstance(generated_files[1].content, ContentPath)
-    assert generated_files[1].content.path == "url2"
+    assert unit.get_dynamically_generated_files() == []
 
 
 def test_get_dynamically_generated_files_empty():
@@ -153,3 +146,82 @@ def test_get_dynamically_generated_files_none_path():
 )
 def test_is_dynamically_generated(text_data: TextData, expected: bool):
     assert text_data.is_dynamically_generated() == expected
+
+
+def test_get_dynamically_generated_files_strict_workdir_includes_static():
+    """In strict mode, static ContentPath files (path == content.path) are included."""
+    static_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+    testcase = Testcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[static_file],
+        use_strict_workdir=True,
+    )
+    context = Context(testcases=[testcase])
+    planned = PlannedContext(context=context, tab_index=0, context_index=0)
+    unit = PlannedExecutionUnit(contexts=[planned], name="strict_unit", index=0)
+
+    generated = unit.get_dynamically_generated_files()
+
+    assert len(generated) == 1
+    assert generated[0].path == "f.txt"
+    assert isinstance(generated[0].content, ContentPath)
+    assert generated[0].content.path == "f.txt"
+
+
+def test_get_dynamically_generated_files_not_dynamic_lax_vs_strict():
+    """Same static ContentPath file: excluded in lax mode, included in strict mode."""
+    static_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
+
+    # Lax: use_strict_workdir defaults to False
+    lax_testcase = Testcase(
+        input=MainInput(stdin=EmptyChannel.NONE), input_files=[static_file]
+    )
+    lax_context = Context(testcases=[lax_testcase])
+    lax_planned = PlannedContext(context=lax_context, tab_index=0, context_index=0)
+    lax_unit = PlannedExecutionUnit(contexts=[lax_planned], name="lax_unit", index=0)
+
+    assert lax_unit.get_dynamically_generated_files() == []
+
+    # Strict: use_strict_workdir=True
+    strict_testcase = Testcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[static_file],
+        use_strict_workdir=True,
+    )
+    strict_context = Context(testcases=[strict_testcase])
+    strict_planned = PlannedContext(
+        context=strict_context, tab_index=0, context_index=0
+    )
+    strict_unit = PlannedExecutionUnit(
+        contexts=[strict_planned], name="strict_unit", index=0
+    )
+
+    assert len(strict_unit.get_dynamically_generated_files()) == 1
+
+
+def test_has_strict_workdir():
+    """has_strict_workdir() returns True when any context in the unit is strict."""
+    strict_testcase = Testcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[],
+        use_strict_workdir=True,
+    )
+    lax_testcase = Testcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+
+    strict_context = Context(testcases=[strict_testcase])
+    lax_context = Context(testcases=[lax_testcase])
+
+    strict_planned = PlannedContext(
+        context=strict_context, tab_index=0, context_index=0
+    )
+    lax_planned = PlannedContext(context=lax_context, tab_index=0, context_index=1)
+
+    mixed_unit = PlannedExecutionUnit(
+        contexts=[lax_planned, strict_planned], name="mixed_unit", index=0
+    )
+    assert mixed_unit.has_strict_workdir() is True
+
+    all_lax_unit = PlannedExecutionUnit(
+        contexts=[lax_planned], name="lax_unit", index=1
+    )
+    assert all_lax_unit.has_strict_workdir() is False

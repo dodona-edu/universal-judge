@@ -141,8 +141,11 @@ def get_readable_input(
             text = f"{args} < {stdin}"
         elif case.input.arguments and stdin:
             assert stdin[-1] == "\n", "stdin must end with a newline"
-            delimiter = _get_heredoc_token(stdin)
-            text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
+            if stdin.count("\n") == 1:
+                text = f"{args} <<< {stdin}"
+            else:
+                delimiter = _get_heredoc_token(stdin)
+                text = f"{args} << '{delimiter}'\n{stdin}{delimiter}"
         elif stdin:
             assert not case.input.arguments
             text = stdin

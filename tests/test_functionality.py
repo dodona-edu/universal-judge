@@ -780,6 +780,27 @@ def test_main_call_quotes(tmp_path: Path, pytestconfig: pytest.Config):
     )
 
 
+def test_stdin_and_arguments_single_line_use_herestring(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "bash",
+        tmp_path,
+        "two.yaml",
+        "top-level-output",
+    )
+    the_input = Testcase(
+        input=MainInput(arguments=["hello"], stdin=TextData(content="One line\n"))
+    )
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="hallo")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    actual, _ = get_readable_input(bundle, the_input)
+
+    assert actual.description == "$ submission hello <<< One line\n"
+
+
 def test_stdin_and_arguments_use_heredoc(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,

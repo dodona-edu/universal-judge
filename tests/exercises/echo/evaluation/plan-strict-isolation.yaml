@@ -1,0 +1,6 @@
+- tab: "Tests"
+  testcases:
+    - input_files:
+        - path: "other.txt"
+          content: "not used"
+      stdout: "absent"
