@@ -16,9 +16,11 @@ nl:
       runtime: "Runtime error"
       unexpected: "Onverwachte uitvoer"
     programmed:
-      student: >-
-        Er ging iets fout op bij het evalueren van de oplossing.
-        Meld dit aan de lesgever!
+      student:
+        default: >-
+          Er ging iets fout op bij het evalueren van de oplossing.
+          Meld dit aan de lesgever!
+      result: "Het resultaat van de geprogrammeerde evaluatie is ongeldig:"
       stdout: "Het evalueren van de oplossing genereerde deze uitvoer op stderr:"
       stderr: "Het evalueren van de oplossing genereerde deze uitvoer op stdout:"
     specific:
@@ -133,48 +135,6 @@ nl:
         timeout: "ShellCheck overschreed tijdslimiet."
         memory: "ShellCheck overschreed geheugenlimiet."
         output: "ShellCheck produceerde slechte uitvoer."
-  timings:
-    title: "Stats"
-    parallel: "Bij parallelle uitvoering kunnen de cumulatieve uitvoeringstijden groter zijn dan de totale uitvoeringstijd."
-    testplan: "Inlezen testplan"
-    dsl: "Parsen DSL-testplan"
-    json: "Parsen JSON-testplan"
-    bundle: "Aanmaken bundle informatie"
-    analyse:
-      supported: "Controle of het testplan ondersteund is door de programmeertaal"
-      features: "Analyseren features"
-    prepare:
-      output: "Voorbereiden feedback tabel"
-      results: "Voorbereiden resultaten"
-    linter: "Uitvoeren linter"
-    generation: "Genereren testcode"
-    submission:
-      modify: "Aanpassen indiening"
-    generate:
-      templates: "Genereren testcode vanuit de sjablonen"
-    compilation:
-      pre: "Batch compilatie"
-      individual: "Individuele compilatie"
-      batch:
-        done: "Toevoegen feedback batch compilatie"
-    run:
-      execution: "Uitvoeren van een run"
-      testcode: "Uitvoeren test-uitvoerbaar bestand"
-    dependencies:
-      copy: "Kopiëren afhankelijke bestanden"
-    evaluate:
-      results: "Evalueren van de resultaten"
-      builtin:
-        text: "Evalueren tekstuele resultaten/volledige bestanden met de ingebouwde evaluator"
-        file: "Evalueren bestand lijn per lijn met de ingebouwde evaluator"
-        value: "Evalueren returnwaarden met de ingebouwde evaluator"
-        exception: "Evalueren fouten met de ingebouwde evaluator"
-      programmed: "Evalueren resultaten met behulp van een geprogrammeerde evaluator"
-    total: "Totale uitvoeringstijd"
-    parse:
-      expression: "Parsen van expressies en statements"
-      return: "Parsen van YAML returnwaarden"
-      return-raw: "Parsen return-raw waarden"
   types:
     joiner: "of"
     singular:
@@ -198,12 +158,17 @@ nl:
       double_precision: "dubbele precisie vlottendekommagetal"
       fixed_precision: "vast kommagetal"
       any: "ieder"
+      string: "string"
+      "null": "null"
+      object: "object"
+      dictionary: "afbeelding"
       list: "lijst"
       tuple: "tuple"
       array: "array"
       map: "afbeelding"
       sequence: "sequentie"
       set: "verzameling"
+      double_extended: "dubbel uitgebreide precisie vlottendekommagetal"
     plural:
       integer: "gehele getallen"
       real: "reële getallen"
@@ -225,9 +190,14 @@ nl:
       double_precision: "dubbele precisie vlottendekommagetallen"
       fixed_precision: "vaste kommagetallen"
       any: "ieder"
+      string: "strings"
+      "null": "null"
+      object: "objecten"
+      dictionary: "afbeeldingen"
       list: "lijsten"
       tuple: "tuples"
       array: "arrays"
       map: "afbeeldingen"
       sequence: "sequenties"
       set: "verzamelingen"
+      double_extended: "dubbel uitgebreide precisie vlottendekommagetallen"

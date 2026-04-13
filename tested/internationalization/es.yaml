@@ -135,49 +135,6 @@ es:
         timeout: "ShellCheck excedió el tiempo límite"
         memory: "ShellCheck excedió el límite de memoria"
         output: "ShellCheck produjo una salida incorrecta."
-  timings:
-    parallel: "En ejecución paralela, los tiempos de ejecución acumulados pueden ser mayores que el tiempo total de ejecución."
-    title: "Estadísticas"
-    testplan: "Lectura del plan de pruebas"
-    dsl: "Análisis del plan de pruebas YAML"
-    json: "Análisis del plan de pruebas JSON"
-    bundle: "Creación de información del bundle"
-    analyse:
-      supported: "Verificar si el plan de pruebas es compatible con el lenguaje de programación"
-      features: "Analizar características"
-    prepare:
-      output: "Preparando tabla de retroalimentación"
-      results: "Preparando resultados"
-    linter: "Ejecutando linter"
-    generation: "Generando código de prueba"
-    submission:
-      modify: "Modificando envío"
-    generate:
-      templates: "Generando código de prueba a partir de plantillas"
-    compilation:
-      pre: "Compilación por lotes"
-      individual: "Compilación individual"
-      batch:
-        done: "Añadiendo retroalimentación de compilación por lotes"
-    run:
-      execution: "Ejecutando una ejecución"
-      testcode: "Ejecutando ejecutables de prueba"
-    dependencies:
-      copy: "Copiando dependencias"
-    evaluate:
-      text: "Evaluando resultados textuales/archivos completos con el evaluador integrado"
-      results: "Evaluando resultados"
-      builtin:
-        text: "Evaluando resultados textuales/archivos completos con el evaluador integrado"
-        file: "Evaluando archivo línea por línea con el evaluador integrado"
-        value: "Evaluando valores de retorno con el evaluador integrado"
-        exception: "Evaluando excepciones con el evaluador integrado"
-      programmed: "Evaluando resultados con el evaluador programado"
-    total: "Tiempo total de ejecución"
-    parse:
-      expression: "Análisis de expresiones y sentencias"
-      return: "Análisis de valores de retorno YAML"
-      return-raw: "Análisis de valores return-raw"
   types:
     joiner: "o"
     singular:
@@ -201,12 +158,17 @@ es:
       double_precision: "número de punto flotante de doble precisión"
       fixed_precision: "número de precisión fija"
       any: "any (cualquiera)"
+      string: "string"
+      "null": "nulo"
+      object: "objeto"
+      dictionary: "diccionario"
       list: "lista"
       tuple: "tupla"
       array: "arreglo"
       map: "map"
       sequence: "secuencia"
       set: "conjunto"
+      double_extended: "número de punto flotante de doble precisión extendida"
     plural:
       integer: "enteros"
       real: "números reales"
@@ -228,9 +190,14 @@ es:
       double_precision: "números de punto flotante de doble precisión"
       fixed_precision: "números de precisión fija"
       any: "any (cualquiera)"
+      string: "strings"
+      "null": "nulos"
+      object: "objetos"
+      dictionary: "diccionarios"
       list: "listas"
       tuple: "tuplas"
       array: "arreglos"
       map: "maps"
       sequence: "secuencias"
       set: "conjuntos"
+      double_extended: "números de punto flotante de doble precisión extendida"
