@@ -29,8 +29,6 @@ def find_submission() -> Path:
     # First, if we have an explicit submission, use that.
     if args.submission is not None:
         return Path(args.submission)
-    # Attempt to determine the programming language of this exercise.
-    considered = []
     # There is a bit of a chicken-and-egg problem here.
     # We need the language to complete the config, but the language needs a config.
     # We thus create a dummy config.

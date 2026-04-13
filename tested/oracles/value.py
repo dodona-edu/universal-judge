@@ -31,7 +31,6 @@ from tested.serialisation import (
     to_python_comparable,
 )
 from tested.testsuite import (
-    ExceptionOutputChannel,
     FileOutputChannel,
     OracleOutputChannel,
     OutputChannel,
