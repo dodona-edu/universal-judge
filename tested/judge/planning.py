@@ -145,6 +145,12 @@ def _flattened_contexts_to_units(
             if planned_output_file.path
         ]
 
+        current_unit_is_strict = any(
+            c.context.has_strict_workdir() for c in current_unit_contexts
+        )
+        # If this unit is strict but the others not, or the other way around, also start a new context.
+        has_strictness_conflict = strict != current_unit_is_strict
+
         # If any context wants the same input file with different content, we have a conflict.
         has_input_file_conflict = planned_input_files != current_input_files
 
@@ -160,7 +166,12 @@ def _flattened_contexts_to_units(
             != EmptyChannel.NONE
         )
 
-        if has_input_file_conflict or has_stdin_conflict or has_output_conflict:
+        if (
+            has_strictness_conflict
+            or has_input_file_conflict
+            or has_stdin_conflict
+            or has_output_conflict
+        ):
             if current_unit_contexts:
                 contexts_per_unit.append(current_unit_contexts)
             current_unit_contexts = []

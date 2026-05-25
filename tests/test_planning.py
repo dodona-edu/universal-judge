@@ -569,8 +569,9 @@ def test_planning_conflict_input_file_backward_leak(
 def test_planning_no_conflict_static_input_files_lax(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
-    # Both contexts use the same static ContentPath file in lax mode.
-    # Static files are already in the workdir, so no conflict arises.
+    # In lax mode, static ContentPath files are excluded from the conflict footprint
+    # (is_dynamically_generated() is False), so planned_input_files == {} for both
+    # contexts and they merge into 1 unit.
     static_file = TextData(path="f.txt", content=ContentPath(path="f.txt"))
     ctx_a = Context(
         testcases=[
@@ -583,6 +584,38 @@ def test_planning_no_conflict_static_input_files_lax(
         testcases=[
             SuiteTestcase(
                 input=MainInput(stdin=EmptyChannel.NONE), input_files=[static_file]
+            )
+        ]
+    )
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 1
+
+
+def test_planning_no_conflict_lax_different_static_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # In lax mode, static ContentPath files are excluded from the conflict footprint
+    # regardless of which files are listed. Two lax contexts with *different* static
+    # files still merge into 1 unit.
+    file_a = TextData(path="a.txt", content=ContentPath(path="a.txt"))
+    file_b = TextData(path="b.txt", content=ContentPath(path="b.txt"))
+    ctx_a = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_a]
+            )
+        ]
+    )
+    ctx_b = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_b]
             )
         ]
     )
@@ -680,6 +713,60 @@ def test_planning_conflict_strict_different_files(
         use_strict_workdir=True,
     )
     ctx_b = Context(testcases=[tc_b])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_conflict_strict_empty_vs_lax_empty(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A is strict with no input_files (footprint {}); ctx B is lax with no input files
+    # (also {}). File footprints are equal but strictness differs → 2 units.
+    tc_a = SuiteTestcase(
+        input=MainInput(stdin=EmptyChannel.NONE),
+        input_files=[],
+        use_strict_workdir=True,
+    )
+    ctx_a = Context(testcases=[tc_a])
+    tc_b = SuiteTestcase(input=MainInput(stdin=EmptyChannel.NONE), input_files=[])
+    ctx_b = Context(testcases=[tc_b])
+
+    tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
+    suite = Suite(tabs=[tab])
+    conf = configuration(pytestconfig, "echo-function", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+    units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
+
+    assert len(units) == 2
+
+
+def test_planning_conflict_lax_different_dynamic_paths(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # ctx A has dynamic file a.txt; ctx B has dynamic file b.txt (different paths, no overlap).
+    # The equality check treats different footprints as a conflict → 2 units.
+    file_a = TextData(path="a.txt", content="content-a")
+    ctx_a = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_a]
+            )
+        ]
+    )
+    file_b = TextData(path="b.txt", content="content-b")
+    ctx_b = Context(
+        testcases=[
+            SuiteTestcase(
+                input=MainInput(stdin=EmptyChannel.NONE), input_files=[file_b]
+            )
+        ]
+    )
 
     tab = Tab(name="tab1", contexts=[ctx_a, ctx_b])
     suite = Suite(tabs=[tab])
