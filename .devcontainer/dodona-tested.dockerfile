@@ -108,9 +108,10 @@ RUN <<EOF
 
     # Exercise dependencies
     pip install --no-cache-dir --upgrade \
-      numpy==2.3.5 \
-      pandas==3.0.1 \
-      openpyxl==3.1.5
+      numpy==2.4.6 \
+      pandas==3.0.3 \
+      openpyxl==3.1.5 \
+      matplotlib==3.10.9
 
     # Clean up caches
     apt-get clean
