@@ -26,6 +26,16 @@ RUN <<EOF
     # Update apt-get
     apt-get update
 
+    # Drop docs/man/locale from all apt-installed packages (keep copyright for licensing)
+    cat > /etc/dpkg/dpkg.cfg.d/01_nodoc <<'CFG'
+path-exclude /usr/share/doc/*
+path-include /usr/share/doc/*/copyright
+path-exclude /usr/share/man/*
+path-exclude /usr/share/groff/*
+path-exclude /usr/share/info/*
+path-exclude /usr/share/locale/*
+CFG
+
     # Install general dependencies
     apt-get install -y --no-install-recommends \
         procps \
@@ -88,6 +98,12 @@ RUN <<EOF
     cabal update
     cabal v1-install --global aeson
 
+    # GHC: drop profiling libs/interfaces, haddock/HTML docs, and debug symbols (unused at runtime)
+    find "$HASKELL_DIR/ghc" -type f \( -name '*_p.a' -o -name '*.p_o' -o -name '*.p_hi' \) -delete
+    rm -rf "$HASKELL_DIR/ghc/share/doc" "$HASKELL_DIR/ghc"/lib/*/doc
+    find "$HASKELL_DIR/ghc" -type f -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true
+    find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
@@ -119,6 +135,14 @@ RUN <<EOF
     rm -rf /root/.cache
     rm -rf /root/.npm
     rm -rf /usr/local/sdkman/tmp
+    # Haskell: downloaded Hackage tarballs and ghcup download cache (aeson lives in GHC's global db)
+    rm -rf /root/.cabal/packages /root/.cabal/logs /root/.ghcup/cache /root/.ghcup/tmp
+    # .NET: NuGet/dotnet download and first-run caches (SDK itself untouched)
+    rm -rf /root/.nuget /root/.dotnet /tmp/NuGet* /tmp/.dotnet "${HOME}/.local/share/NuGet"
+    # sdkman: extracted JDK/Kotlin zips, plus JDK sources and man pages (not needed to compile/run)
+    rm -rf "$SDKMAN_DIR/archives/"* "$SDKMAN_DIR/tmp/"*
+    rm -f  "$SDKMAN_DIR"/candidates/java/*/src.zip
+    rm -rf "$SDKMAN_DIR"/candidates/java/*/man "$SDKMAN_DIR"/candidates/kotlin/*/licenses
 
     # Setup permissions and user
     chmod 711 /mnt
