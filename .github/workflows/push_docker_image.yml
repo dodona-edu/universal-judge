@@ -18,24 +18,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Generate a token for dodona-edu/docker-images
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PUSH_TO_DOCKER_IMAGES_APP_ID }}
+          private-key: ${{ secrets.PUSH_TO_DOCKER_IMAGES_PRIVATE_KEY }}
+          owner: dodona-edu
+          repositories: docker-images
       - name: Send pull-request
         env:
           PR_NUMBER: ${{ github.event.number }}
           REPOSITORY: dodona-edu/docker-images
-          TOKEN: ${{ secrets.PUSH_TO_DOCKER_IMAGES_ACCESS_TOKEN }}
+          TOKEN: ${{ steps.app-token.outputs.token }}
           USER: dodona-server
           EMAIL: dodona@ugent.be
         run: |
           FOLDER="docker-images"
           BRANCH_NAME="update-dodona-tested-$PR_NUMBER"
-          
-          # Store the PAT in a file that can be accessed by the
+
+          # Store the app token in a file that can be accessed by the
           # GitHub CLI.
           echo "$TOKEN" > token.txt
-          
+
           # Authorize GitHub CLI for the current repository
           gh auth login --with-token < token.txt
-          
+
           gh repo clone $REPOSITORY $FOLDER -- --depth=1
           
           cd $FOLDER
