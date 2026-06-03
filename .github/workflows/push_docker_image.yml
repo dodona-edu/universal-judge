@@ -37,12 +37,9 @@ jobs:
           FOLDER="docker-images"
           BRANCH_NAME="update-dodona-tested-$PR_NUMBER"
 
-          # Store the app token in a file that can be accessed by the
-          # GitHub CLI.
-          echo "$TOKEN" > token.txt
-
-          # Authorize GitHub CLI for the current repository
-          gh auth login --with-token < token.txt
+          # Authorize GitHub CLI for the current repository, piping the token
+          # straight in so it never touches disk.
+          echo "$TOKEN" | gh auth login --with-token
 
           gh repo clone $REPOSITORY $FOLDER -- --depth=1
           
