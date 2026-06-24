@@ -467,3 +467,173 @@ def test_code_is_linked():
     )
     actual = _convert_stacktrace_to_html(stacktrace).description
     assert actual == expected
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for #596: error line numbers must point at the original
+# submission, not at the template the judge wraps it in. The wrapping
+# languages (C#, C, C++) decrement `source_offset` in `modify_solution`; the
+# offset is applied downstream by `_replace_code_line_number` (the same
+# mechanism JavaScript/TypeScript already use).
+# ---------------------------------------------------------------------------
+
+
+def test_csharp_modify_solution_wraps_and_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    solution = tmp_path / "Submission.cs"
+    solution.write_text("Console.WriteLine(foo);\n")  # top-level statements
+    language_config.modify_solution(solution)
+    wrapped = solution.read_text()
+    assert "class Submission" in wrapped
+    assert "static void Main" in wrapped
+    # 12 wrapper lines are prepended, so the compiler/runtime report line numbers
+    # 12 too high; the offset corrects for that.
+    assert language_config.config.dodona.source_offset == -12
+    # The student's first line is now physical line 13 of the wrapped file.
+    assert wrapped.splitlines()[12].strip() == "Console.WriteLine(foo);"
+
+
+def test_csharp_modify_solution_explicit_class_keeps_offset(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    original = "class Submission { static void Main() { } }\n"
+    solution = tmp_path / "Submission.cs"
+    solution.write_text(original)
+    language_config.modify_solution(solution)
+    # An explicit class is not wrapped, so nothing shifts.
+    assert solution.read_text() == original
+    assert language_config.config.dodona.source_offset == 0
+
+
+def test_c_modify_solution_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "c")
+    solution = tmp_path / "submission.c"
+    solution.write_text("int main() {\n    return 0;\n}\n")
+    language_config.modify_solution(solution)
+    assert language_config.config.dodona.source_offset == -2
+    assert solution.read_text().startswith("#pragma once\n\n")
+
+
+def test_cpp_modify_solution_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "cpp")
+    solution = tmp_path / "submission.cpp"
+    solution.write_text("int main() {\n    return 0;\n}\n")
+    language_config.modify_solution(solution)
+    assert language_config.config.dodona.source_offset == -2
+    assert solution.read_text().startswith("#pragma once\n\n")
+
+
+def test_csharp_compiler_output_offsets_annotation_row():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    language_config.config.dodona.source_offset = -12  # as set by modify_solution
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"The name 'foo' does not exist in the current context "
+        f"[{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert len(annotations) == 1
+    annotation = annotations[0]
+    assert annotation.row == 2  # 14 reported - 12 wrapper lines
+    assert annotation.column == 19
+    assert annotation.type == "error"
+    assert annotation.text == "The name 'foo' does not exist in the current context"
+
+
+def test_csharp_compiler_output_offsets_multiple_annotations():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    language_config.config.dodona.source_offset = -12
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+        f"{workdir}/Execution0/Submission.cs(16,9): warning CS0219: "
+        f"unused [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert [(a.row, a.type) for a in annotations] == [(2, "error"), (4, "warning")]
+
+
+def test_csharp_compiler_output_skips_wrapper_diagnostics():
+    # A diagnostic on the generated wrapper (e.g. an unused `using` on line 1)
+    # maps to a non-positive row after the offset and must not be annotated.
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    language_config.config.dodona.source_offset = -12
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(1,1): warning CS8019: "
+        f"Unnecessary using directive. [{workdir}/Execution0/dotnet.csproj]\n"
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    # The wrapper warning (row 1 -> -11) is skipped; only the student error stays.
+    assert [(a.row, a.type) for a in annotations] == [(2, "error")]
+
+
+def test_csharp_cleanup_stacktrace_execution_dir_compile():
+    # A real compile error surfaces from the per-unit fallback (ExecutionN/),
+    # not common/. It must still be cleaned to <code> with its csproj suffix
+    # stripped (the existing test only covers common/).
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"The name 'foo' does not exist [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    expected = "<code>:14:19: error CS0103: The name 'foo' does not exist\n"
+    assert language_config.cleanup_stacktrace(original) == expected
+
+
+def test_csharp_runtime_line_offset_end_to_end():
+    # The full path a runtime exception takes: cleanup_stacktrace -> <code>:N,
+    # then _replace_code_line_number applies the offset.
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    language_config.config.dodona.source_offset = -12
+    original = (
+        f"at Submission.Main(String[] args) in "
+        f"{workdir}/common/Submission.cs:line 15\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "at Submission.Main(String[] args) in <code>:3\n"
+
+
+def test_csharp_compile_line_offset_end_to_end():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    language_config.config.dodona.source_offset = -12
+    original = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:2:19: error CS0103: undefined\n"
+
+
+def test_c_compile_line_offset_end_to_end():
+    language_config = get_language("test", "c")
+    language_config.config.dodona.source_offset = -2
+    original = "submission.c:3:1: fout: unknown type name 'mfzej'\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:1:1: fout: unknown type name 'mfzej'\n"
+
+
+def test_cpp_compile_line_offset_end_to_end():
+    language_config = get_language("test", "cpp")
+    language_config.config.dodona.source_offset = -2
+    original = "submission.cpp:3:1: error: 'mfzej' does not name a type\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:1:1: error: 'mfzej' does not name a type\n"

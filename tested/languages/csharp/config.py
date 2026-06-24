@@ -140,6 +140,7 @@ class CSharp(Language):
             return Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
+        assert self.config
         with open(solution, "r") as file:
             contents = file.read()
 
@@ -169,18 +170,29 @@ class {class_name}
         with open(solution, "w") as file:
             file.write(result)
 
+        # The wrapper prepends 12 lines in front of the student's code, so every
+        # line number reported by the compiler or runtime is shifted down by 12.
+        # Correct it the same way JavaScript/TypeScript do (see their
+        # `modify_solution`).
+        self.config.dodona.source_offset -= 12
+
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
             rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"
         )
-        submission_location = (
-            self.config.dodona.workdir / "common" / submission_file(self)
-        )
-        submission_location_regex = rf"{submission_location.resolve()}:line ([0-9]+)"
-        compilation_location_regex = rf"{submission_location.resolve()}\((\d+),(\d+)\)"
-        compilation_suffix = f" [{self.config.dodona.workdir}/common/dotnet.csproj]"
+        # A runtime error references the submission in `common/`, but a compile
+        # error surfaces from the per-unit compilation fallback, where the
+        # submission lives in an `ExecutionN/` directory. Match either so the path
+        # is replaced with `<code>` (and the line offset applied downstream) in
+        # both cases.
+        workdir = re.escape(str(self.config.dodona.workdir.resolve()))
+        subdir = rf"(?:common|{execution}[_0-9]+)"
+        sub = re.escape(submission_file(self))
+        submission_location_regex = rf"{workdir}/{subdir}/{sub}:line ([0-9]+)"
+        compilation_location_regex = rf"{workdir}/{subdir}/{sub}\((\d+),(\d+)\)"
+        compilation_suffix_regex = rf" \[{workdir}/{subdir}/dotnet\.csproj\]"
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
@@ -195,7 +207,7 @@ class {class_name}
 
             line = re.sub(submission_location_regex, r"<code>:\1", line)
             line = re.sub(compilation_location_regex, r"<code>:\1:\2", line)
-            line = line.replace(compilation_suffix, "")
+            line = re.sub(compilation_suffix_regex, "", line)
             resulting_lines += line
 
         return resulting_lines
@@ -203,16 +215,25 @@ class {class_name}
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> tuple[list[Message], list[AnnotateCode], str, str]:
+        assert self.config
         submission = submission_name(self)
         message_regex = (
-            rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
+            rf"{submission}\.cs\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )
         messages = re.findall(message_regex, stdout)
         annotations = []
         for message in messages:
+            # The compiler reports the line number in the wrapped file; shift it
+            # back to the original submission (the offset is negative).
+            row = int(message[0]) + self.config.dodona.source_offset
+            # Diagnostics on the generated wrapper (the usings/class/Main we
+            # prepend) land on rows <= 0; they are not the student's code, so
+            # skip them rather than annotate a non-existent line.
+            if row < 1:
+                continue
             annotations.append(
                 AnnotateCode(
-                    row=int(message[0]),
+                    row=row,
                     text=message[4],
                     externalUrl="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
                     column=int(message[1]),

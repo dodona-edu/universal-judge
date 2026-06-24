@@ -114,9 +114,14 @@ class C(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
+        assert self.config
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
+        # The header prepends `header` lines in front of the student's code, so
+        # error line numbers are shifted down by that many lines. Correct it the
+        # same way JavaScript/TypeScript do (see their `modify_solution`).
+        self.config.dodona.source_offset -= header.count("\n")
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
