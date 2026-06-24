@@ -207,16 +207,20 @@ class {class_name}
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> tuple[list[Message], list[AnnotateCode], str, str]:
+        assert self.config
         submission = submission_name(self)
         message_regex = (
-            rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
+            rf"{submission}\.cs\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*) \["
         )
         messages = re.findall(message_regex, stdout)
         annotations = []
         for message in messages:
+            row = int(message[0]) + self.config.dodona.source_offset
+            if row < 1:
+                continue
             annotations.append(
                 AnnotateCode(
-                    row=int(message[0]),
+                    row=row,
                     text=message[4],
                     externalUrl="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
                     column=int(message[1]),
