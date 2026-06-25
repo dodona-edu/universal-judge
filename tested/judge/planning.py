@@ -21,7 +21,6 @@ class CompilationResult:
     status: Status
     messages: list[Message] = field(factory=list)
     annotations: list[AnnotateCode] = field(factory=list)
-    reported: bool = False
 
 
 @define

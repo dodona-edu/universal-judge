@@ -149,15 +149,26 @@ def judge(bundle: Bundle):
         _handle_time_or_memory_compilation(bundle, collector, compilation_results)
         return
 
-    # If the compilation failed, but we can fall back, do that.
-    if (
-        compilation_results.status != Status.CORRECT
-        and bundle.config.options.allow_fallback
-    ):
-        _logger.warning("Precompilation failed. Falling back to unit compilation.")
-        planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
-        plan.units = planned_units
-        compilation_results = None
+    if compilation_results.status != Status.CORRECT:
+        # Code annotations point at the student's submission (today only C#
+        # emits them, scoped to Submission.cs), not at any single test case, so
+        # emit them once here at the judgement level, mirroring run_linter
+        # above. The per-test-case compiler messages and status are still
+        # reported per context in evaluate_context_results.
+        collector.add_all(compilation_results.annotations)
+
+        # Only fall back to per-unit compilation when the failure is not pinned
+        # to the submission. If precompilation produced code annotations, the
+        # submission itself failed to compile, so every per-unit recompile would
+        # re-hit the same error: the fallback is pointless (and for C# its shared
+        # selector cannot even compile per unit). Keeping the single
+        # precompilation result here also guarantees the annotations we just
+        # emitted are never shown next to a unit that compiled and passed.
+        if bundle.config.options.allow_fallback and not compilation_results.annotations:
+            _logger.warning("Precompilation failed. Falling back to unit compilation.")
+            planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
+            plan.units = planned_units
+            compilation_results = None
 
     _logger.info("Starting execution")
 
