@@ -400,7 +400,14 @@ def test_batch_compilation_fallback(
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["compilation error"] * 2
-    assert spy.call_count == 3
+    # When precompilation pins the failure to the submission it produces code
+    # annotations, so the (pointless) per-unit fallback is skipped and compile
+    # runs once; otherwise the judge falls back and recompiles each unit
+    # (precompile + one per unit).
+    if updates.find_all("annotate-code"):
+        assert spy.call_count == 1
+    else:
+        assert spy.call_count == 3
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
@@ -435,6 +442,40 @@ def test_batch_compilation_no_fallback_runtime(
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_compile_error_annotations_emitted_once(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    # A compilation error marks the student's code, so its annotations must be
+    # emitted once, not once per test case. A failing submission is split into
+    # one execution unit per stdin test case, each recompiled on the fallback
+    # path, so without the judgement-level emit the annotations would be
+    # duplicated per test case. Compiling the same broken submission with more
+    # test cases must not multiply the annotations, while the per-test-case
+    # status is still reported.
+    one_dir = tmp_path / "one"
+    one_dir.mkdir()
+    two_dir = tmp_path / "two"
+    two_dir.mkdir()
+    conf_one = configuration(
+        pytestconfig, "echo", language, one_dir, "one.tson", "comp-error"
+    )
+    one = assert_valid_output(execute_config(conf_one), pytestconfig)
+    conf_two = configuration(
+        pytestconfig, "echo", language, two_dir, "two.tson", "comp-error"
+    )
+    two = assert_valid_output(execute_config(conf_two), pytestconfig)
+
+    assert one.find_status_enum() == ["compilation error"]
+    assert two.find_status_enum() == ["compilation error"] * 2
+    # The annotation count must not scale with the number of test cases.
+    assert len(two.find_all("annotate-code")) == len(one.find_all("annotate-code"))
+    if language == "csharp":
+        # Guard that C# actually emits compile annotations (see #655), so this
+        # test genuinely exercises the de-duplication path.
+        assert len(two.find_all("annotate-code")) >= 1
 
 
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
