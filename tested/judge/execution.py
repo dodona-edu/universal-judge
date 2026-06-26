@@ -15,7 +15,8 @@ from tested.judge.utils import (
     filter_files,
     run_command,
 )
-from tested.languages.conventionalize import selector_name
+from tested.languages.conventionalize import selector_file, selector_name
+from tested.languages.generation import generate_selector
 from tested.languages.preparation import exception_file, value_file
 from tested.testsuite import ContentPath
 from tested.utils import safe_del
@@ -215,6 +216,17 @@ def compile_unit(
     dependencies: list[Path],
 ) -> tuple[CompilationResult, list[Path]]:
     unit = plan.units[which_unit]
+    if bundle.language.needs_selector():
+        # We fell back to per-unit compilation. set_up_unit hardlinked the shared
+        # all-units selector into this directory, but it still references the
+        # sibling execution files that filter_dependencies dropped, so it would
+        # dangle (a CS0103 / "no such module" for symbol-based selectors). Drop
+        # the hardlink and regenerate a selector that names only this unit. The
+        # unlink is load-bearing: writing through the hardlink would mutate the
+        # shared selector in common/ and in every sibling unit directory.
+        selector_path = execution_dir / selector_file(bundle.language)
+        selector_path.unlink(missing_ok=True)
+        generate_selector(bundle, execution_dir, [unit.name])
     _logger.info(f"Compiling unit {unit.name}")
     remaining = plan.remaining_time()
     deps = [str(x) for x in dependencies]
