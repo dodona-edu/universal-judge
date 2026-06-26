@@ -299,6 +299,7 @@ def _generate_execution_files(
              which some languages rely on to pick the entry point.
     """
     dependencies: list[str] = []
+    seen: set[str] = set()
     execution_names: list[str] = []
     for execution_unit in units:
         _logger.debug("Generating file for execution %s", execution_unit.name)
@@ -306,13 +307,19 @@ def _generate_execution_files(
             bundle=bundle, destination=destination, execution_unit=execution_unit
         )
 
-        # Copy oracle functions to the directory.
+        # Copy oracle functions to the directory. A language-specific oracle has
+        # the same filename for every unit that uses it, so copy and list each
+        # only once: otherwise a duplicate ends up in plan.files and the per-unit
+        # hardlinking would clash.
         for evaluator in evaluators:
+            if evaluator in seen:
+                continue
+            seen.add(evaluator)
             source = Path(bundle.config.resources) / evaluator
             _logger.debug("Copying oracle from %s to %s", source, destination)
             shutil.copy2(source, destination)
+            dependencies.append(evaluator)
 
-        dependencies.extend(evaluators)
         dependencies.append(generated)
         execution_names.append(execution_unit.name)
 

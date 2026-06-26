@@ -534,6 +534,26 @@ def test_partial_compilation_full_solution(
     assert spy.call_count == 1
 
 
+def test_partial_compilation_fallback_shared_oracle(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Both tabs use the same language-specific oracle (Evaluator.cs). When the
+    # partial submission forces the fallback, that oracle must be regenerated and
+    # hardlinked once per unit, not once per tab, or set_up_unit raises
+    # FileExistsError and the judgement crashes instead of giving partial credit.
+    conf = configuration(
+        pytestconfig,
+        "partial-function",
+        "csharp",
+        tmp_path,
+        "shared-oracle.yaml",
+        "partial",
+        {"options": {"allow_fallback": True}},
+    )
+    updates = assert_valid_output(execute_config(conf), pytestconfig)
+    assert updates.find_status_enum() == ["correct", "compilation error"]
+
+
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
