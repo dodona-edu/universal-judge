@@ -478,6 +478,62 @@ def test_compile_error_annotations_emitted_once(
         assert len(two.find_all("annotate-code")) >= 1
 
 
+# The compiled languages that need a selector; only these reach the per-unit
+# fallback compilation that regenerates the execution files and selector.
+SELECTOR_LANGUAGES = ["c", "cpp", "csharp", "haskell", "java", "kotlin"]
+
+
+@pytest.mark.parametrize("language", SELECTOR_LANGUAGES)
+def test_partial_compilation_fallback(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    # A partial solution: only `triple` is implemented, not `quadruple`. The two
+    # tabs are function tests, so precompilation merges them into one unit whose
+    # harness calls the missing `quadruple` and fails to compile. The fallback
+    # must then recompile each tab on its own, so the `triple` tab compiles and
+    # passes while only the `quadruple` tab reports a compilation error.
+    lang_class = LANGUAGES[language]
+    spy = mocker.spy(lang_class, "compilation")
+    conf = configuration(
+        pytestconfig,
+        "partial-function",
+        language,
+        tmp_path,
+        "two-functions.yaml",
+        "partial",
+        {"options": {"allow_fallback": True}},
+    )
+    updates = assert_valid_output(execute_config(conf), pytestconfig)
+    assert len(updates.find_all("start-tab")) == 2
+    assert updates.find_status_enum() == ["correct", "compilation error"]
+    # The error is in the generated harness, not the submission, so it must not
+    # pin a code annotation to the submission, or the judgement-level annotation
+    # guard would skip the fallback and both tabs would fail to compile.
+    assert updates.find_all("annotate-code") == []
+    assert spy.call_count == 3  # precompile + one recompile per TAB unit
+
+
+@pytest.mark.parametrize("language", SELECTOR_LANGUAGES)
+def test_partial_compilation_full_solution(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    # Control: the complete solution precompiles in one go, no fallback.
+    lang_class = LANGUAGES[language]
+    spy = mocker.spy(lang_class, "compilation")
+    conf = configuration(
+        pytestconfig,
+        "partial-function",
+        language,
+        tmp_path,
+        "two-functions.yaml",
+        "correct",
+        {"options": {"allow_fallback": True}},
+    )
+    updates = assert_valid_output(execute_config(conf), pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+    assert spy.call_count == 1
+
+
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")

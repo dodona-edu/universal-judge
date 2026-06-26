@@ -39,7 +39,12 @@ from tested.judge.planning import (
     plan_test_suite,
 )
 from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import submission_file
+from tested.languages.conventionalize import (
+    EXECUTION_PREFIX,
+    conventionalize_namespace,
+    selector_file,
+    submission_file,
+)
 from tested.languages.generation import (
     generate_execution,
     generate_selector,
@@ -167,7 +172,22 @@ def judge(bundle: Bundle):
         if bundle.config.options.allow_fallback and not compilation_results.annotations:
             _logger.warning("Precompilation failed. Falling back to unit compilation.")
             planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
+            # The execution files (and selector) were generated for the merged
+            # precompilation plan, so they no longer match the re-planned units.
+            # Regenerate them for the TAB units, with a selector over exactly
+            # those units. The submission itself is left untouched: it was copied
+            # and modify_solution'ed once, and re-modifying it would corrupt the
+            # source offset.
+            _clear_generated_execution_files(bundle, plan.common_directory)
+            dependencies = bundle.language.initial_dependencies()
+            dependencies.append(submission_file(bundle.language))
+            generated, selector = _generate_execution_files(
+                bundle, planned_units, plan.common_directory
+            )
+            dependencies.extend(generated)
             plan.units = planned_units
+            plan.files = dependencies
+            plan.selector = selector
             compilation_results = None
 
     _logger.info("Starting execution")
@@ -259,6 +279,68 @@ def _execute_one_unit(
     return local_compilation_results, execution_result, execution_dir
 
 
+def _generate_execution_files(
+    bundle: Bundle,
+    units: list[PlannedExecutionUnit],
+    destination: Path,
+) -> tuple[list[str], str | None]:
+    """
+    Generate the execution harness file for every unit (plus its oracle files)
+    into ``destination``, and a selector over exactly those units when the
+    language needs one.
+
+    This deliberately does not touch the submission file or the initial
+    dependencies: the caller owns those. It is shared by the initial generation
+    and by the per-unit fallback, which re-plans the units and so needs fresh,
+    matching execution files and a selector that names only the new units.
+
+    :return: A tuple of the generated dependency names and the selector name (or
+             ``None`` when the language does not need one). The selector is last,
+             which some languages rely on to pick the entry point.
+    """
+    dependencies: list[str] = []
+    execution_names: list[str] = []
+    for execution_unit in units:
+        _logger.debug("Generating file for execution %s", execution_unit.name)
+        generated, evaluators = generate_execution(
+            bundle=bundle, destination=destination, execution_unit=execution_unit
+        )
+
+        # Copy oracle functions to the directory.
+        for evaluator in evaluators:
+            source = Path(bundle.config.resources) / evaluator
+            _logger.debug("Copying oracle from %s to %s", source, destination)
+            shutil.copy2(source, destination)
+
+        dependencies.extend(evaluators)
+        dependencies.append(generated)
+        execution_names.append(execution_unit.name)
+
+    selector = None
+    if bundle.language.needs_selector():
+        _logger.debug("Generating selector.")
+        selector = generate_selector(bundle, destination, execution_names)
+        dependencies.append(selector)
+    return dependencies, selector
+
+
+def _clear_generated_execution_files(bundle: Bundle, common_dir: Path) -> None:
+    """
+    Remove the previously generated execution files (and the selector) from the
+    common directory, so the fallback can regenerate them for the re-planned
+    units without leaving stale files behind. The submission, dependencies and
+    oracle files are left in place: only execution-prefixed files and the
+    selector are removed.
+    """
+    prefix = conventionalize_namespace(bundle.language, EXECUTION_PREFIX)
+    selector = (
+        selector_file(bundle.language) if bundle.language.needs_selector() else None
+    )
+    for file in common_dir.iterdir():
+        if file.is_file() and (file.name.startswith(prefix) or file.name == selector):
+            file.unlink()
+
+
 def _generate_files(
     bundle: Bundle, execution_plan: list[PlannedExecutionUnit]
 ) -> tuple[Path, list[str], str | None]:
@@ -285,32 +367,10 @@ def _generate_files(
     # Allow modifications of the submission file.
     bundle.language.modify_solution(solution_path)
 
-    # The names of the executions for the test suite.
-    execution_names = []
-    # Generate the files for each execution.
-    for execution_unit in execution_plan:
-        _logger.debug("Generating file for execution %s", execution_unit.name)
-        generated, evaluators = generate_execution(
-            bundle=bundle, destination=common_dir, execution_unit=execution_unit
-        )
-
-        # Copy functions to the directory.
-        for evaluator in evaluators:
-            source = Path(bundle.config.resources) / evaluator
-            _logger.debug("Copying oracle from %s to %s", source, common_dir)
-            shutil.copy2(source, common_dir)
-
-        dependencies.extend(evaluators)
-        dependencies.append(generated)
-        execution_names.append(execution_unit.name)
-
-    if bundle.language.needs_selector():
-        _logger.debug("Generating selector.")
-        generated = generate_selector(bundle, common_dir, execution_names)
-        dependencies.append(generated)
-    else:
-        generated = None
-    return common_dir, dependencies, generated
+    # Generate the execution files and (if needed) the selector.
+    generated, selector = _generate_execution_files(bundle, execution_plan, common_dir)
+    dependencies.extend(generated)
+    return common_dir, dependencies, selector
 
 
 def _process_results(
