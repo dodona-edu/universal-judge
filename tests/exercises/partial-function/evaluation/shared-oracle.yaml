@@ -1,0 +1,20 @@
+- tab: "triple"
+  contexts:
+    - testcases:
+        - expression: "triple(2)"
+          return: !oracle
+            oracle: specific_check
+            functions:
+              csharp:
+                file: Evaluator.cs
+                name: evaluate
+- tab: "quadruple"
+  contexts:
+    - testcases:
+        - expression: "quadruple(2)"
+          return: !oracle
+            oracle: specific_check
+            functions:
+              csharp:
+                file: Evaluator.cs
+                name: evaluate

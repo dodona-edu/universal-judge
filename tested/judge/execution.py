@@ -175,8 +175,10 @@ def set_up_unit(
         destination = execution_dir / file
         destination.parent.mkdir(parents=True, exist_ok=True)
         _logger.debug("Copying %s to %s", origin, destination)
-        if origin == destination:
-            continue  # Don't copy the file to itself
+        if origin == destination or destination.exists():
+            # Don't copy the file to itself, and don't clash if a dependency is
+            # listed more than once (e.g. an oracle shared across units).
+            continue
 
         # Use hard links instead of copying, due to issues with busy files.
         # See https://github.com/dodona-edu/universal-judge/issues/57
