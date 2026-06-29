@@ -14,3 +14,10 @@ updates:
     time: "13:00"
     timezone: Europe/Brussels
   open-pull-requests-limit: 99
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "13:00"
+    timezone: Europe/Brussels
+  open-pull-requests-limit: 99
