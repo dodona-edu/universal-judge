@@ -6,9 +6,6 @@
   },
   "postCreateCommand": "./.devcontainer/dev-dependencies.sh",
   "features" : {
-    // add git to the container
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest"
-    }
+    "ghcr.io/devcontainers/features/git:1": {}
   }
 }
