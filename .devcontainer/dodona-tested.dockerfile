@@ -127,7 +127,8 @@ CFG
       numpy==2.4.6 \
       pandas==3.0.3 \
       openpyxl==3.1.5 \
-      matplotlib==3.10.9
+      matplotlib==3.10.9 \
+      lxml==6.1.1
 
     # Clean up caches
     apt-get clean
