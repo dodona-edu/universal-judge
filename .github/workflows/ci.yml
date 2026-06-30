@@ -10,9 +10,9 @@ env:
 
 jobs:
   # Builds the tested image once and warms the GitHub Actions build cache, so the
-  # jobs that run inside it (via the load-tested-image action) get a cache hit
-  # instead of each building from scratch. No registry login or push: the image is
-  # ferried between jobs through the type=gha cache.
+  # jobs that run inside it (via the tested-image action) get a cache hit instead
+  # of each building from scratch. No registry login or push: the image is ferried
+  # between jobs through the type=gha cache.
   build:
     if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     runs-on: ubuntu-latest
@@ -21,16 +21,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: docker/setup-buildx-action@v3
-      - name: Build the tested image and warm the gha cache
-        uses: docker/build-push-action@v6
+      - uses: ./.github/actions/tested-image
         with:
-          context: .devcontainer
-          file: .devcontainer/dodona-tested.dockerfile
-          push: false
           load: false
-          tags: dodona/dodona-tested:ci
-          cache-from: type=gha,scope=dodona-tested
           cache-to: type=gha,scope=dodona-tested,mode=max
 
   test:
@@ -41,13 +34,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: ./.github/actions/load-tested-image
-      - name: Run tests in container
-        run: |
-          docker run --rm --user root \
-            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
-            dodona/dodona-tested:ci \
-            bash -c "bash .devcontainer/dev-dependencies.sh && pytest -n auto --cov=tested --cov-report=xml tests/"
+      - name: Run tests
+        uses: ./.github/actions/tested-image
+        with:
+          run: pytest -n auto --cov=tested --cov-report=xml tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
@@ -62,13 +52,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: ./.github/actions/load-tested-image
       - name: Run isort and black
-        run: |
-          docker run --rm --user root \
-            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
-            dodona/dodona-tested:ci \
-            bash -c "bash .devcontainer/dev-dependencies.sh && isort --check-only --diff ./tested ./tests && black --check ./tested ./tests"
+        uses: ./.github/actions/tested-image
+        with:
+          run: isort --check-only --diff ./tested ./tests && black --check ./tested ./tests
 
   types:
     needs: [build]
@@ -78,13 +65,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: ./.github/actions/load-tested-image
       - name: Run pyright
-        run: |
-          docker run --rm --user root \
-            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
-            dodona/dodona-tested:ci \
-            bash -c "bash .devcontainer/dev-dependencies.sh && pyright ./tested ./tests"
+        uses: ./.github/actions/tested-image
+        with:
+          run: pyright ./tested ./tests
 
   translations:
     needs: [build]
@@ -94,13 +78,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - uses: ./.github/actions/load-tested-image
       - name: Check translation files
-        run: |
-          docker run --rm --user root \
-            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
-            dodona/dodona-tested:ci \
-            bash -c "bash .devcontainer/dev-dependencies.sh && python -m tested.internationalization.validation"
+        uses: ./.github/actions/tested-image
+        with:
+          run: python -m tested.internationalization.validation
 
   # check if the JS exercises still work.
   javascript-dodona:
@@ -120,11 +101,7 @@ jobs:
           JAVASCRIPT_EXERCISES_KEY: ${{ secrets.JAVASCRIPT_EXERCISES_KEY }}
       - run: git checkout $EXERCISES_COMMIT
         working-directory: ./javascript-oefeningen
-      - uses: ./.github/actions/load-tested-image
-      - name: Run tests in container
-        run: |
-          docker run --rm --user root \
-            -e EXERCISE_REPO=javascript-oefeningen \
-            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
-            dodona/dodona-tested:ci \
-            bash -c "bash .devcontainer/dev-dependencies.sh && pytest -x -n auto tests/test_integration_javascript.py"
+      - name: Run JavaScript integration tests
+        uses: ./.github/actions/tested-image
+        with:
+          run: EXERCISE_REPO=javascript-oefeningen pytest -x -n auto tests/test_integration_javascript.py
