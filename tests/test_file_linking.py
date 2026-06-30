@@ -27,10 +27,8 @@ def test_link_files_message_single_file():
 
     assert message
     assert isinstance(message.message, ExtendedMessage)
-    assert message.message.format == "html"
-    assert 'href="media/path/to/data.txt"' in message.message.description
-    assert "data.txt</span></a>" in message.message.description
-    assert "contains-file" in message.message.description
+    assert message.message.format == "text"
+    assert "data.txt" in message.message.description
 
 
 def test_link_files_message_multiple_files():
@@ -43,15 +41,14 @@ def test_link_files_message_multiple_files():
 
     assert message
     assert isinstance(message.message, ExtendedMessage)
-    assert 'href="media/url1"' in message.message.description
-    assert "file1.txt</span></a>" in message.message.description
-    assert 'href="media/url2"' in message.message.description
-    assert "file2.txt</span></a>" in message.message.description
+    assert message.message.format == "text"
+    assert "file1.txt" in message.message.description
+    assert "file2.txt" in message.message.description
     # It should be a comma-separated list
     assert ", " in message.message.description
 
 
-def test_link_files_message_inline_content_ignored():
+def test_link_files_message_includes_inline_files():
     link_files = [
         TextData(path="inline.txt", content="some content"),
         TextData(path="linked.txt", content=ContentPath(path="linked-url")),
@@ -60,9 +57,8 @@ def test_link_files_message_inline_content_ignored():
 
     assert message
     assert isinstance(message.message, ExtendedMessage)
-    assert 'href="media/linked-url"' in message.message.description
-    assert "linked.txt</span></a>" in message.message.description
-    assert "inline.txt" not in message.message.description
+    assert "inline.txt" in message.message.description
+    assert "linked.txt" in message.message.description
 
 
 def test_link_files_message_no_path_ignored():
@@ -95,8 +91,7 @@ def test_readable_input_file_linking(tmp_path: Path, pytestconfig: pytest.Config
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="media/path/to/data.txt"' in readable.description
-    assert "data.txt</a>" in readable.description
+    assert "data.txt" in readable.description
     assert the_input.input_files[0] in seen
 
 
@@ -124,8 +119,8 @@ def test_readable_input_multiple_files(tmp_path: Path, pytestconfig: pytest.Conf
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="media/url1"' in readable.description
-    assert 'href="media/url2"' in readable.description
+    assert "file1.txt" in readable.description
+    assert "file2.txt" in readable.description
     assert len(seen) == 2
 
 
@@ -151,39 +146,8 @@ def test_readable_input_stdin_file(tmp_path: Path, pytestconfig: pytest.Config):
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    # When stdin has a path, the description is "$ submission < input.txt" (or similar)
-    # We want to check if "input.txt" is linked.
-    assert 'href="media/input-url"' in readable.description
-    assert "input.txt</a>" in readable.description
+    assert "input.txt" in readable.description
     assert the_input.input_files[0] in seen
-
-
-def test_readable_input_no_match(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "echo",
-        "python",
-        tmp_path,
-        "plan.yaml",
-        "correct",
-    )
-
-    the_input = Testcase(
-        input=MainInput(
-            arguments=["something-else.txt"],
-        ),
-        input_files=[
-            TextData(path="data.txt", content=ContentPath(path="path/to/data.txt"))
-        ],
-    )
-
-    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="test")])
-    bundle = create_bundle(conf, sys.stdout, suite)
-    readable, seen = get_readable_input(bundle, the_input)
-
-    # No link should be generated because filenames don't match -> dynamic file.
-    assert "href=" not in readable.description
-    assert len(seen) == 0
 
 
 def test_readable_input_inline_content_no_link(
@@ -209,10 +173,8 @@ def test_readable_input_inline_content_no_link(
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    # Inline content should NOT be linked currently
-    assert "href=" not in readable.description
     assert "data.txt" in readable.description
-    assert len(seen) == 0
+    assert len(seen) == 1
 
 
 def test_readable_input_legacy_files(tmp_path: Path, pytestconfig: pytest.Config):
@@ -238,32 +200,25 @@ def test_readable_input_legacy_files(tmp_path: Path, pytestconfig: pytest.Config
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="media/legacy-url"' in readable.description
-    assert "legacy.txt</a>" in readable.description
+    assert "legacy.txt" in readable.description
     assert len(seen) == 1
 
 
-def test_link_files_message_url_encoding_spaces():
+def test_link_files_message_emits_raw_filenames():
+    # URL-encoding of the link target now happens on the server. TESTed lists the
+    # filenames verbatim, including spaces and non-ASCII characters.
     link_files = [
-        TextData(path="my file.txt", content=ContentPath(path="path/to/my file.txt"))
-    ]
-    message = link_files_message(link_files)
-    assert message is not None
-    assert isinstance(message.message, ExtendedMessage)
-    assert 'href="media/path/to/my%20file.txt"' in message.message.description
-
-
-def test_link_files_message_url_encoding_unicode():
-    link_files = [
-        TextData(path="résumé.txt", content=ContentPath(path="files/résumé.txt"))
+        TextData(path="my file.txt", content=ContentPath(path="path/to/my file.txt")),
+        TextData(path="résumé.txt", content=ContentPath(path="files/résumé.txt")),
     ]
     message = link_files_message(link_files)
     assert message is not None
     assert isinstance(message.message, ExtendedMessage)
     desc = message.message.description
-    # The href must be percent-encoded, not contain raw non-ASCII chars.
-    assert 'href="media/files/r%C3%A9sum%C3%A9.txt"' in desc
-    assert 'href="files/résumé.txt"' not in desc
+    assert "my file.txt" in desc
+    assert "résumé.txt" in desc
+    assert "href=" not in desc
+    assert "%" not in desc
 
 
 def test_get_display_path_with_override():
@@ -315,8 +270,7 @@ def test_readable_input_with_display_override(
     bundle = create_bundle(conf, sys.stdout, suite)
     readable, seen = get_readable_input(bundle, the_input)
 
-    assert 'href="media/getallen1.txt"' in readable.description
-    assert "getallen1.txt</a>" in readable.description
+    assert "getallen1.txt" in readable.description
     assert the_input.input_files[0] in seen
 
 
