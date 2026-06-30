@@ -13,21 +13,52 @@ jobs:
     if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     uses: ./.github/workflows/build_devcontainer.yml
     secrets: inherit
-  test:
-    needs: [build_devcontainer]
+  # Builds the tested image once and warms the GitHub Actions build cache, so the
+  # jobs that run inside it get a cache hit instead of each building from scratch.
+  # No registry login or push: the image is ferried between jobs via type=gha.
+  build:
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Run tests in container
-        uses: devcontainers/ci@v0.3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the tested image and warm the gha cache
+        uses: docker/build-push-action@v6
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: pytest -n auto --cov=tested --cov-report=xml tests/
+          context: .devcontainer
+          file: .devcontainer/dodona-tested.dockerfile
+          push: false
+          load: false
+          tags: dodona/dodona-tested:ci
+          cache-from: type=gha,scope=dodona-tested
+          cache-to: type=gha,scope=dodona-tested,mode=max
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the tested image from the gha cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .devcontainer
+          file: .devcontainer/dodona-tested.dockerfile
+          push: false
+          load: true
+          tags: dodona/dodona-tested:ci
+          cache-from: type=gha,scope=dodona-tested
+      - name: Run tests in container
+        run: |
+          docker run --rm --user root \
+            -v "$GITHUB_WORKSPACE":/workdir -w /workdir \
+            dodona/dodona-tested:ci \
+            bash -c "bash .devcontainer/dev-dependencies.sh && pytest -n auto --cov=tested --cov-report=xml tests/"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
