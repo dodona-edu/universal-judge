@@ -35,11 +35,19 @@ class ExtendedMessage:
 
 
 @define
+class LinkedFile:
+    location: Literal["href", "inline"]
+    # Either a path (type "file") or the content (type "inline")
+    content: str
+
+
+@define
 class Metadata:
-    """Currently only used for the Python tutor"""
+    """Used for the debugger and file linking"""
 
     statements: str | None
     stdin: str | None
+    files: dict[str, LinkedFile] | None
 
 
 Message = ExtendedMessage | str

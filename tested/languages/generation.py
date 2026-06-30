@@ -2,15 +2,10 @@
 Translates items from the test suite into the actual programming language.
 """
 
-import html
-import json
 import logging
 import re
 import shlex
-import urllib.parse
-from collections.abc import Iterable
 from pathlib import Path
-from re import Match
 from typing import TYPE_CHECKING, TypeAlias
 
 from pygments import highlight
@@ -29,16 +24,8 @@ from tested.languages.preparation import (
     prepare_execution_unit,
     prepare_expression,
 )
-from tested.parsing import get_converter
 from tested.serialisation import Expression, Statement, VariableType
-from tested.testsuite import (
-    ContentPath,
-    Context,
-    LanguageLiterals,
-    MainInput,
-    Testcase,
-    TextData,
-)
+from tested.testsuite import Context, LanguageLiterals, MainInput, Testcase, TextData
 from tested.utils import is_statement_strict
 
 if TYPE_CHECKING:
@@ -75,22 +62,6 @@ def generate_execution_unit(
     :return:
     """
     return bundle.language.generate_execution_unit(prepared_execution)
-
-
-def _handle_link_files(
-    link_files: Iterable[TextData], language: str
-) -> tuple[str, str]:
-    dict_links = dict(
-        (link_file.path, get_converter().unstructure(link_file))
-        for link_file in link_files
-    )
-    files = json.dumps(dict_links)
-    return (
-        f"<div class='contains-file highlight-{language} highlighter-rouge' "
-        f"data-files={repr(files)}><pre style='padding: 2px; margin-bottom: "
-        f"1px; background: none;'><code>",
-        "</code></pre></div>",
-    )
 
 
 def _get_heredoc_token(stdin: str) -> str:
@@ -163,10 +134,6 @@ def get_readable_input(
         if case.line_comment:
             text = f"{text} {bundle.language.comment(case.line_comment)}"
 
-    # If there are no files, return now. This means we don't need to do ugly stuff.
-    if not case.input_files:
-        return ExtendedMessage(description=text, format=format_), set()
-
     # We have potential files.
     # Check if the file names are present in the string.
     # If not, we can also stop before doing ugly things.
@@ -174,50 +141,11 @@ def get_readable_input(
     file_paths = [re.escape(x.path) for x in case.input_files if x.path is not None]
 
     if not file_paths:
-        # No files to match, so bail now.
         return ExtendedMessage(description=text, format=format_), set()
 
-    simple_regex = re.compile("|".join(file_paths))
-
-    if not simple_regex.search(text):
-        # There is no match, so bail now.
-        return ExtendedMessage(description=text, format=format_), set()
-
-    # Now we need to do ugly stuff.
-    # Begin by compiling the HTML that will be displayed.
-    if format_ == "text":
-        generated_html = html.escape(text)
-    elif format_ == "console":
-        generated_html = highlight_code(text)
-    else:
-        generated_html = highlight_code(text, bundle.config.programming_language)
-
-    # Map of file URLs.
-    url_map = {html.escape(x.path): x for x in case.input_files if x.path is not None}
-
-    seen = set()
-    escaped_regex = re.compile("|".join(url_map.keys()))
-
-    # Replaces the match with the corresponding link.
-    def replace_link(match: Match) -> str:
-        filename = match.group()
-        the_file = url_map[filename]
-        the_url = the_file.get_display_path()
-        if the_url is None:
-            # TODO: how to handle inline files?
-            return filename
-
-        quoted_url = urllib.parse.quote(the_url)
-        the_replacement = (
-            f'<a href="{quoted_url}" class="file-link" target="_blank">{filename}</a>'
-        )
-        seen.add(the_file)
-        return the_replacement
-
-    generated_html = escaped_regex.sub(replace_link, generated_html)
-    prefix, suffix = _handle_link_files(seen, format_)
-    generated_html = f"{prefix}{generated_html}{suffix}"
-    return ExtendedMessage(description=generated_html, format="html"), seen
+    path_map = {x.path: x for x in case.input_files if x.path is not None}
+    seen = {path_map[m.group()] for m in re.finditer("|".join(file_paths), text)}
+    return ExtendedMessage(description=text, format=format_), seen
 
 
 def attempt_readable_input(bundle: Bundle, context: Context) -> ExtendedMessage:

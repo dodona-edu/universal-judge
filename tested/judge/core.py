@@ -10,6 +10,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
+    LinkedFile,
     Metadata,
     StartContext,
     StartJudgement,
@@ -367,11 +368,14 @@ def _process_results(
                 # Don't add empty statements
                 meta_statements = None
 
+            meta_files = _get_meta_files(bundle, planned)
+
             collector.add(
                 CloseContext(
                     data=Metadata(
                         statements=meta_statements,
                         stdin=meta_stdin,
+                        files=meta_files,
                     )
                 ),
                 planned.context_index,
@@ -382,3 +386,17 @@ def _process_results(
             return continue_, currently_open_tab
 
     return None, currently_open_tab
+
+
+def _get_meta_files(bundle: Bundle, planned: PlannedContext) -> dict[str, LinkedFile]:
+    meta_files = {}
+    for f in planned.context.get_input_files():
+        display_path = f.get_display_path()
+
+        if display_path is not None:
+            meta_files[f.path] = LinkedFile(location="href", content=display_path)
+        else:
+            contents = f.get_data_as_string(bundle.config.resources)
+            meta_files[f.path] = LinkedFile(location="inline", content=contents)
+
+    return meta_files

@@ -384,14 +384,8 @@ def link_files_message(
 ) -> AppendMessage | None:
     link_list = []
     for link_file in link_files:
-        # TODO: handle inline files somehow.
-        link_url = link_file.get_display_path()
-        if link_file.path is not None and link_url is not None:
-            the_url = urllib.parse.quote(link_url)
-            link_list.append(
-                f'<a href="{the_url}" class="file-link" target="_blank">'
-                f'<span class="code">{html.escape(link_file.path)}</span></a>'
-            )
+        if link_file.path is not None:
+            link_list.append(link_file.path)
 
     if len(link_list) == 0:
         return None  # Do not append any message if there are no files.
@@ -400,8 +394,7 @@ def link_files_message(
     file_list_str = get_i18n_string(
         "judge.evaluation.files", count=len(link_list), files=file_list
     )
-    description = f"<div class='contains-file'><p>{file_list_str}</p></div>"
-    message = ExtendedMessage(description=description, format="html")
+    message = ExtendedMessage(description=file_list_str, format="text")
     return AppendMessage(message=message)
 
 
