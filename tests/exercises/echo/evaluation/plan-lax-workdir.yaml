@@ -1,0 +1,3 @@
+- tab: "Tests"
+  testcases:
+    - stdout: "workdir content"

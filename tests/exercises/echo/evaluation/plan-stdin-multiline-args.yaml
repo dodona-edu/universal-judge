@@ -1,0 +1,7 @@
+- tab: "Tests"
+  testcases:
+    - stdin: |
+        Line1
+        Line2
+      arguments: ["arg1"]
+      stdout: "Line1"
