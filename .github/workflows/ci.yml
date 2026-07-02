@@ -9,54 +9,56 @@ env:
   EXERCISES_COMMIT: 31ef0f174efaeba2a37415115e7fd0332573d9b2
 
 jobs:
-  build_devcontainer:
+  # Builds the tested image once and warms the GitHub Actions build cache, so the
+  # jobs that run inside it (via the tested-image action) get a cache hit instead
+  # of each building from scratch. No registry login or push: the image is ferried
+  # between jobs through the type=gha cache.
+  build:
     if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
-    uses: ./.github/workflows/build_devcontainer.yml
-    secrets: inherit
-  test:
-    needs: [build_devcontainer]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Run tests in container
-        uses: devcontainers/ci@v0.3
+      - uses: ./.github/actions/tested-image
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: pytest -n auto --cov=tested --cov-report=xml tests/
+          load: false
+          cache-to: type=gha,scope=dodona-tested,mode=max
+
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Run tests
+        uses: ./.github/actions/tested-image
+        with:
+          run: pytest -n auto --cov=tested --cov-report=xml tests/
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./result/coverage.xml
+
   lint:
-    needs: [build_devcontainer]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Run isort
-        uses: devcontainers/ci@v0.3
+      - name: Run isort and black
+        uses: ./.github/actions/tested-image
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: isort --check-only --diff ./tested ./tests
-      - name: Run black
-        uses: devcontainers/ci@v0.3
-        with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: black --check ./tested ./tests
+          run: isort --check-only --diff ./tested ./tests && black --check ./tested ./tests
+
   types:
-    needs: [build_devcontainer]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -64,15 +66,12 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Run pyright
-        uses: devcontainers/ci@v0.3
+        uses: ./.github/actions/tested-image
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: pyright ./tested ./tests
+          run: pyright ./tested ./tests
 
   translations:
-    needs: [build_devcontainer]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -80,16 +79,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Check translation files
-        uses: devcontainers/ci@v0.3
+        uses: ./.github/actions/tested-image
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: python -m tested.internationalization.validation
+          run: python -m tested.internationalization.validation
 
   # check if the JS exercises still work.
   javascript-dodona:
-    needs: [build_devcontainer]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -105,14 +101,7 @@ jobs:
           JAVASCRIPT_EXERCISES_KEY: ${{ secrets.JAVASCRIPT_EXERCISES_KEY }}
       - run: git checkout $EXERCISES_COMMIT
         working-directory: ./javascript-oefeningen
-      - name: Run tests in container
-        uses: devcontainers/ci@v0.3
-        env:
-          EXERCISE_REPO: javascript-oefeningen
+      - name: Run JavaScript integration tests
+        uses: ./.github/actions/tested-image
         with:
-          imageName: dodona/dodona-tested
-          imageTag: dev
-          push: never
-          runCmd: pytest -x -n auto tests/test_integration_javascript.py
-          env: |
-            EXERCISE_REPO
+          run: EXERCISE_REPO=javascript-oefeningen pytest -x -n auto tests/test_integration_javascript.py
