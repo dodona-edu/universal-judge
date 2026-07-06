@@ -694,9 +694,11 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         the_input = MainInput(stdin=stdin, arguments=arguments)
         return_channel = None
 
+    use_strict_workdir = False
     if "input_files" in testcase:
         assert isinstance(testcase["input_files"], list)
 
+        use_strict_workdir = True
         input_files = []
         for file_object in testcase["input_files"]:
             input_files.append(_convert_text_data_required_path(file_object))
@@ -771,6 +773,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         output=output,
         input_files=input_files,
         line_comment=line_comment,
+        use_strict_workdir=use_strict_workdir,
     )
 
 
