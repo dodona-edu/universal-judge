@@ -1,0 +1,10 @@
+- tab: "triple"
+  contexts:
+    - testcases:
+        - expression: "triple(2)"
+          return: 6
+- tab: "quadruple"
+  contexts:
+    - testcases:
+        - expression: "quadruple(2)"
+          return: 8
