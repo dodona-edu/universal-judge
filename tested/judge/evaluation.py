@@ -191,13 +191,15 @@ def evaluate_context_results(
     if compilation_results.status != Status.CORRECT:
         readable_input = attempt_readable_input(bundle, context)
         collector.add(StartTestcase(description=readable_input))
-        # Report all compiler messages.
-        if not compilation_results.reported:
-            collector.add_messages(compilation_results.messages)
-            collector.add_all(compilation_results.annotations)
-            collector.add(
-                EscalateStatus(status=StatusMessage(enum=compilation_results.status))
-            )
+        # Report the compiler messages, annotations and status per test case.
+        # The same compile error annotation is emitted for every failing test
+        # case, so add_unique_annotations drops the duplicates and the student
+        # sees a single marker on the line.
+        collector.add_messages(compilation_results.messages)
+        collector.add_unique_annotations(compilation_results.annotations)
+        collector.add(
+            EscalateStatus(status=StatusMessage(enum=compilation_results.status))
+        )
 
         # Finish the evaluation, since there is nothing we can do.
         collector.add(CloseTestcase(accepted=False), 0)

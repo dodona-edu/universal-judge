@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from typing import IO, Literal
 
 from tested.dodona import (
+    AnnotateCode,
     AppendMessage,
     CloseContext,
     CloseJudgement,
@@ -38,18 +39,21 @@ class OutputManager:
         "open_stack",
         "currently_open",
         "out",
+        "seen_annotations",
     ]
 
     finalized: bool
     open_stack: list[str]
     currently_open: tuple[int, int, int]
     out: IO
+    seen_annotations: list[AnnotateCode]
 
     def __init__(self, out: IO):
         self.finalized = False
         self.open_stack = []
         self.currently_open = (0, 0, 0)
         self.out = out
+        self.seen_annotations = []
 
     def add_all(self, commands: Iterable[Update]):
         for command in commands:
@@ -57,6 +61,22 @@ class OutputManager:
 
     def add_messages(self, messages: Iterable[Message]):
         self.add_all(AppendMessage(message=m) for m in messages)
+
+    def add_unique_annotations(self, annotations: Iterable[AnnotateCode]):
+        """
+        Add code annotations, skipping any identical to one already emitted.
+
+        A compile error marks the student's submission, so the same annotation
+        is produced for every failing test case. We still want a single marker
+        on the line, so drop the duplicates here. This is only used for compiler
+        annotations; linter annotations go through add_all and are never
+        de-duplicated, since a linter may legitimately repeat itself.
+        """
+        for annotation in annotations:
+            if annotation in self.seen_annotations:
+                continue
+            self.seen_annotations.append(annotation)
+            self.add(annotation)
 
     def add(self, command: Update, index: int | None = None):
         """
