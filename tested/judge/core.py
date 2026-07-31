@@ -10,6 +10,7 @@ from tested.dodona import (
     CloseContext,
     CloseJudgement,
     CloseTab,
+    LinkedFile,
     Metadata,
     StartContext,
     StartJudgement,
@@ -367,18 +368,49 @@ def _process_results(
                 # Don't add empty statements
                 meta_statements = None
 
+            meta_files = _get_meta_files(bundle, planned)
+
             collector.add(
                 CloseContext(
                     data=Metadata(
                         statements=meta_statements,
                         stdin=meta_stdin,
+                        files=meta_files,
                     )
                 ),
                 planned.context_index,
             )
         else:
-            collector.add(CloseContext(), planned.context_index)
+            # Non-python exercises also support files, even though they don't support debugging.
+            meta_files = _get_meta_files(bundle, planned)
+            collector.add(
+                CloseContext(
+                    data=Metadata(
+                        statements=None,
+                        stdin=None,
+                        files=meta_files,
+                    )
+                ),
+                planned.context_index,
+            )
         if continue_ in (Status.TIME_LIMIT_EXCEEDED, Status.MEMORY_LIMIT_EXCEEDED):
             return continue_, currently_open_tab
 
     return None, currently_open_tab
+
+
+def _get_meta_files(
+    bundle: Bundle, planned: PlannedContext
+) -> dict[str, LinkedFile] | None:
+    meta_files = {}
+    for f in planned.context.get_input_files():
+        display_path = f.get_display_path()
+
+        if display_path is not None:
+            meta_files[f.path] = LinkedFile(location="href", content=display_path)
+        else:
+            contents = f.get_data_as_string(bundle.config.resources)
+            meta_files[f.path] = LinkedFile(location="inline", content=contents)
+
+    # Return None if empty, so it is stripped from the output.
+    return meta_files or None
