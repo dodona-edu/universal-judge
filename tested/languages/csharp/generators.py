@@ -181,9 +181,9 @@ def convert_declaration(
     elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
         return "BigInteger"
     elif tp == AdvancedNumericTypes.INT_8:
-        return "Byte"
-    elif tp == AdvancedNumericTypes.U_INT_8:
         return "SByte"
+    elif tp == AdvancedNumericTypes.U_INT_8:
+        return "Byte"
     elif tp == AdvancedNumericTypes.INT_16:
         return "Int16"
     elif tp == AdvancedNumericTypes.U_INT_16:
