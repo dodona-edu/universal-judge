@@ -131,9 +131,11 @@ class CPP(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
+        assert self.config
         with open(solution, "w") as file:
             header = "#pragma once\n\n"
             file.write(header + contents)
+        self.config.dodona.source_offset -= header.count("\n")
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.

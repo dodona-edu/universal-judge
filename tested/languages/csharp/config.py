@@ -140,6 +140,7 @@ class CSharp(Language):
             return Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
+        assert self.config
         with open(solution, "r") as file:
             contents = file.read()
 
@@ -147,7 +148,7 @@ class CSharp(Language):
             return  # No top-level statements; we are happy...
 
         class_name = submission_name(self)
-        result = f"""\
+        header = f"""\
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -160,14 +161,17 @@ class {class_name}
 {{
     public static void Main(string[] args)
     {{
-        {contents}
-    }}
-}}
-        """
+"""
+        footer = """
+    }
+}
+"""
 
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
-            file.write(result)
+            file.write(header + contents + footer)
+
+        self.config.dodona.source_offset -= header.count("\n")
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         assert self.config

@@ -467,3 +467,87 @@ def test_code_is_linked():
     )
     actual = _convert_stacktrace_to_html(stacktrace).description
     assert actual == expected
+
+
+def test_csharp_modify_solution_wraps_and_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    solution = tmp_path / "Submission.cs"
+    solution.write_text("Console.WriteLine(foo);\n")
+    language_config.modify_solution(solution)
+    wrapped = solution.read_text()
+    assert "class Submission" in wrapped
+    assert "static void Main" in wrapped
+    assert language_config.config.dodona.source_offset == -12
+    assert wrapped.splitlines()[12] == "Console.WriteLine(foo);"
+
+
+def test_csharp_modify_solution_explicit_class_keeps_offset(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    original = "class Submission { static void Main() { } }\n"
+    solution = tmp_path / "Submission.cs"
+    solution.write_text(original)
+    language_config.modify_solution(solution)
+    assert solution.read_text() == original
+    assert language_config.config.dodona.source_offset == 0
+
+
+def test_c_modify_solution_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "c")
+    assert language_config.config
+    solution = tmp_path / "submission.c"
+    solution.write_text("int main() {\n    return 0;\n}\n")
+    language_config.modify_solution(solution)
+    assert language_config.config.dodona.source_offset == -2
+    assert solution.read_text().startswith("#pragma once\n\n")
+
+
+def test_cpp_modify_solution_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "cpp")
+    assert language_config.config
+    solution = tmp_path / "submission.cpp"
+    solution.write_text("int main() {\n    return 0;\n}\n")
+    language_config.modify_solution(solution)
+    assert language_config.config.dodona.source_offset == -2
+    assert solution.read_text().startswith("#pragma once\n\n")
+
+
+def test_csharp_runtime_line_offset_end_to_end():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -12
+    original = (
+        f"at Submission.Main(String[] args) in "
+        f"{workdir}/common/Submission.cs:line 15\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "at Submission.Main(String[] args) in <code>:3\n"
+
+
+def test_c_compile_line_offset_end_to_end():
+    language_config = get_language("test", "c")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = "submission.c:3:1: fout: unknown type name 'mfzej'\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:1:1: fout: unknown type name 'mfzej'\n"
+
+
+def test_cpp_compile_line_offset_end_to_end():
+    language_config = get_language("test", "cpp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = "submission.cpp:3:1: error: 'mfzej' does not name a type\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:1:1: error: 'mfzej' does not name a type\n"
