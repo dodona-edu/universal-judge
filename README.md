@@ -171,11 +171,19 @@ The first way is:
 
 ```bash
 # Run a hard-coded exercise with logs enabled, useful for debugging
-$ python -m tested.manual
+$ python -m tested.manual_example
 ```
 
 This command is useful when debugging TESTed itself or a particularly challenging exercise.
-It will execute a hardcoded config, which is set in `tested/manual.py`.
+It will execute a hardcoded config, which is set in `tested/manual_example.py`.
+
+To run your own exercise this way, copy the file to `tested/manual.py` and edit it.
+That path is ignored by git, so your local config will not show up as a change:
+
+```bash
+$ cp tested/manual_example.py tested/manual.py
+$ python -m tested.manual
+```
 
 The second way is:
 

@@ -88,3 +88,6 @@ universal-judge.sln
 .data/current/python
 .data/current/python-packages
 .vscode/
+
+# Manual file to run TESTed locally
+tested/manual.py

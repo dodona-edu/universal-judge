@@ -2,7 +2,12 @@
 Run the judge manually from code. In this mode, the config is hardcoded into this
 file, allowing rapid testing (and, most importantly, debugging).
 
-Note: this file is ignored by git, so it is safe to modify it.
+This file can be run as-is with `python -m tested.manual_example`, but it is tracked
+by git. To use your own config, copy it to `tested/manual.py`, which is ignored by
+git and thus safe to modify:
+
+    cp tested/manual_example.py tested/manual.py
+    python -m tested.manual
 """
 
 import logging
