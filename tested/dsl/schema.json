@@ -968,7 +968,7 @@
     "yamlValue" : {
       "description" : "A value represented as YAML.",
       "format" : "tested-dsl-plain-value",
-      "$comment" : "Cannot be a value tagged with !oracle or !expression"
+      "$comment" : "Cannot be a value tagged with !oracle or !expression, and must be type-free in the JSON Schema to work"
     },
     "inheritableConfigObject": {
       "type": "object",
