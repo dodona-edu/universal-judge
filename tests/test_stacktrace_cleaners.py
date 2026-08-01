@@ -551,3 +551,30 @@ def test_cpp_compile_line_offset_end_to_end():
         language_config.config.dodona.source_offset, cleaned
     )
     assert final == "<code>:1:1: error: 'mfzej' does not name a type\n"
+
+
+def test_csharp_cleanup_stacktrace_execution_dir_compile():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"The name 'foo' does not exist [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    expected = "<code>:14:19: error CS0103: The name 'foo' does not exist\n"
+    assert language_config.cleanup_stacktrace(original) == expected
+
+
+def test_csharp_compile_line_offset_end_to_end():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -12
+    original = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:2:19: error CS0103: undefined\n"

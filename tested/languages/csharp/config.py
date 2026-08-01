@@ -179,12 +179,12 @@ class {class_name}
         execution_submission_location_regex = (
             rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"
         )
-        submission_location = (
-            self.config.dodona.workdir / "common" / submission_file(self)
-        )
-        submission_location_regex = rf"{submission_location.resolve()}:line ([0-9]+)"
-        compilation_location_regex = rf"{submission_location.resolve()}\((\d+),(\d+)\)"
-        compilation_suffix = f" [{self.config.dodona.workdir}/common/dotnet.csproj]"
+        workdir = re.escape(str(self.config.dodona.workdir.resolve()))
+        subdir = rf"(?:common|{execution}[_0-9]+)"
+        sub = re.escape(submission_file(self))
+        submission_location_regex = rf"{workdir}/{subdir}/{sub}:line ([0-9]+)"
+        compilation_location_regex = rf"{workdir}/{subdir}/{sub}\((\d+),(\d+)\)"
+        compilation_suffix_regex = rf" \[{workdir}/{subdir}/dotnet\.csproj\]"
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
@@ -199,7 +199,7 @@ class {class_name}
 
             line = re.sub(submission_location_regex, r"<code>:\1", line)
             line = re.sub(compilation_location_regex, r"<code>:\1:\2", line)
-            line = line.replace(compilation_suffix, "")
+            line = re.sub(compilation_suffix_regex, "", line)
             resulting_lines += line
 
         return resulting_lines
