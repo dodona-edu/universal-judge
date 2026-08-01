@@ -178,7 +178,7 @@ def convert_declaration(
         base_type, sub_type = extract_type_tuple(type_, False)
         converted_type = convert_declaration(base_type, None, sub_type)
         return "(" + ", ".join(converted_type for _ in range(len(value.data)))
-    elif tp in (AdvancedNumericTypes.U_INT_64, AdvancedNumericTypes.BIG_INT):
+    elif tp == AdvancedNumericTypes.BIG_INT:
         return "BigInteger"
     elif tp == AdvancedNumericTypes.INT_8:
         return "SByte"
