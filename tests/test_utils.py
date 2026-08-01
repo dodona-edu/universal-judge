@@ -1,15 +1,19 @@
 import json
+import sys
 from pathlib import Path
 
 import pytest
 import yaml
 
+from tested.configs import create_bundle
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedSequenceTypes,
     BasicNumericTypes,
 )
+from tested.judge.utils import copy_workdir_files
 from tested.serialisation import NothingType, NumberType, SequenceType
+from tested.testsuite import Suite
 from tested.utils import sorted_no_duplicates, sorting_value_extract
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -298,6 +302,53 @@ def test_valid_yaml_and_json():
                 yaml.safe_load(fd)
     # Test will always succeed if no exception is thrown
     assert True
+
+
+def test_copy_workdir_files_keeps_the_case_of_directories(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    """
+    Some languages, such as Python, are case-sensitive when importing packages,
+    so the directories from the workdir must be copied as-is.
+    """
+    workdir = tmp_path / "workdir"
+    (workdir / "ABCD").mkdir(parents=True)
+    (workdir / "ABCD" / "__init__.py").touch()
+    (workdir / "ABCD" / "Module.py").write_text("value = 1\n")
+    (workdir / "Helper.py").write_text("value = 2\n")
+    destination = tmp_path / "destination"
+    destination.mkdir()
+
+    conf = configuration(pytestconfig, "echo-function", "python", workdir)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    source_files = copy_workdir_files(bundle, destination, True)
+
+    assert (destination / "ABCD" / "__init__.py").exists()
+    assert (destination / "ABCD" / "Module.py").exists()
+    assert (destination / "Helper.py").exists()
+    assert source_files == [str(destination / "Helper.py")]
+
+
+def test_copy_workdir_files_ignores_the_directories_of_the_judge(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    """
+    The judge creates its own directories in the workdir, which must not be copied.
+    Their name is conventionalized, so the check is case-insensitive: the execution
+    directory is called "execution_0" in Python, but "Execution0" in Java.
+    """
+    workdir = tmp_path / "workdir"
+    for name in ("common", "execution_0", "Execution0", "MyExecutionHelpers"):
+        (workdir / name).mkdir(parents=True)
+        (workdir / name / "module.py").touch()
+    destination = tmp_path / "destination"
+    destination.mkdir()
+
+    conf = configuration(pytestconfig, "echo-function", "python", workdir)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    copy_workdir_files(bundle, destination, True)
+
+    assert [x.name for x in destination.iterdir()] == ["MyExecutionHelpers"]
 
 
 def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig: pytest.Config):
