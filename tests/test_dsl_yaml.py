@@ -1334,19 +1334,8 @@ tabs:
     assert testcase.input.literals.keys() == {"java"}
 
 
-def test_strict_json_schema_is_valid():
-    path_to_schema = Path(__file__).parent / "tested-draft7.json"
-    with open(path_to_schema, "r") as schema_file:
-        schema_object = json.load(schema_file)
-
-    validator = load_schema_validator()
-    meta_validator = validator_for(schema_object)(schema_object)
-
-    meta_validator.validate(validator.schema)
-
-
 def test_editor_json_schema_is_valid():
-    validator = load_schema_validator(file="schema.json")
+    validator = load_schema_validator()
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
 

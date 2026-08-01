@@ -505,7 +505,7 @@
         },
         {
           "type" : "string",
-          "format" : "tested-dsl-expression",
+          "format" : "tested-dsl-expression-value",
           "description" : "An expression in Python-syntax."
         }
       ]
@@ -747,6 +747,7 @@
         },
         {
           "type" : "object",
+          "format" : "tested-dsl-oracle",
           "additionalProperties" : false,
           "required" : [
             "value"
@@ -762,6 +763,7 @@
         },
         {
           "type" : "object",
+          "format" : "tested-dsl-oracle",
           "additionalProperties" : false,
           "required" : [
             "value",
@@ -802,6 +804,7 @@
         },
         {
           "type" : "object",
+          "format" : "tested-dsl-oracle",
           "additionalProperties" : false,
           "required" : [
             "oracle",
@@ -963,7 +966,9 @@
       ]
     },
     "yamlValue" : {
-      "description" : "A value represented as YAML."
+      "description" : "A value represented as YAML.",
+      "format" : "tested-dsl-plain-value",
+      "$comment" : "Cannot be a value tagged with !oracle or !expression"
     },
     "inheritableConfigObject": {
       "type": "object",
