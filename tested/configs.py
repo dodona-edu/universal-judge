@@ -32,30 +32,36 @@ class Options:
     disable this for exercises that already are multithreaded. It may also be worth
     investigating if the exercise is computationally heady.
     """
+
     mode: ExecutionMode = ExecutionMode.PRECOMPILATION
     """
     The default mode for the judge.
     """
+
     allow_fallback: bool = True
     """
     Indicate if the judge should attempt individual mode if the precompilation mode
     fails. If nothing is given, the language-dependent default is used. If a boolean
     is given, this value is used, regardless of the language default.
     """
+
     language: dict[str, dict[str, Any]] = field(factory=dict)
     """
     Language-specific options for the judge. These depend on the language
     implementation; the judge itself does nothing with it.
     """
+
     linter: bool = True
     """
     Controls running the linter for languages. Default is True. Of course, for
     languages without linter implementation, this does nothing.
     """
+
     optimized: bool = True
     """
-    If the Python oracles should be optimized or not.
+    Legacy option that no longer has any effect.
     """
+
     compiler_optimizations: bool = False
     """
     If compiler optimizations should be enabled for languages that support them,
