@@ -118,7 +118,8 @@ def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> li
 
     def recursive_copy(src: Path, dst: Path):
         for origin in src.iterdir():
-            file = origin.name.lower()
+            file = origin.name
+            normalized_file = file.lower()
             if origin.is_file() and (
                 all_files or bundle.language.is_source_file(origin)
             ):
@@ -127,8 +128,8 @@ def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> li
                 shutil.copy2(origin, dst)
             elif (
                 origin.is_dir()
-                and not file.startswith(EXECUTION_PREFIX)
-                and file != "common"
+                and not normalized_file.startswith(EXECUTION_PREFIX)
+                and normalized_file != "common"
             ):
                 _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
