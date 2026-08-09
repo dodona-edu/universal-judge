@@ -1,16 +1,16 @@
 {
-  "$id" : "tested:dsl:schema7",
-  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "$id" : "tested:dsl:schema",
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
   "title" : "TESTed-DSL",
   "oneOf" : [
     {
-      "$ref" : "#/definitions/_rootObject"
+      "$ref" : "#/$defs/_rootObject"
     },
     {
-      "$ref" : "#/definitions/_tabList"
+      "$ref" : "#/$defs/_tabList"
     }
   ],
-  "definitions" : {
+  "$defs" : {
     "_rootObject" : {
       "type" : "object",
       "required" : ["tabs"],
@@ -19,7 +19,7 @@
           "description" : "A list of files used in the test suite.",
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/file"
+            "$ref" : "#/$defs/file"
           }
         },
         "namespace" : {
@@ -27,13 +27,13 @@
           "description" : "Namespace of the submitted solution, in `snake_case`"
         },
         "tabs" : {
-          "$ref" : "#/definitions/_tabList"
+          "$ref" : "#/$defs/_tabList"
         },
         "language" : {
           "description" : "Indicate that all code is in a specific language.",
           "oneOf" : [
             {
-              "$ref" : "#/definitions/programmingLanguage"
+              "$ref" : "#/$defs/programmingLanguage"
             },
             {
               "const" : "tested"
@@ -45,7 +45,7 @@
           "type" : "object"
         },
         "config": {
-          "$ref": "#/definitions/inheritableConfigObject"
+          "$ref": "#/$defs/inheritableConfigObject"
         }
       }
     },
@@ -53,7 +53,7 @@
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/tab"
+        "$ref" : "#/$defs/tab"
       }
     },
     "tab" : {
@@ -66,7 +66,7 @@
         "files" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/file"
+            "$ref" : "#/$defs/file"
           }
         },
         "hidden" : {
@@ -78,7 +78,7 @@
           "type" : "object"
         },
         "config": {
-          "$ref": "#/definitions/inheritableConfigObject"
+          "$ref": "#/$defs/inheritableConfigObject"
         }
       },
       "oneOf" : [
@@ -88,7 +88,7 @@
           ],
           "properties" : {
             "contexts" : {
-              "$ref" : "#/definitions/_contextList"
+              "$ref" : "#/$defs/_contextList"
             }
           }
         },
@@ -98,7 +98,7 @@
           ],
           "properties" : {
             "testcases" : {
-              "$ref" : "#/definitions/_testcaseList"
+              "$ref" : "#/$defs/_testcaseList"
             }
           }
         }
@@ -108,14 +108,14 @@
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/context"
+        "$ref" : "#/$defs/context"
       }
     },
     "_testcaseList" : {
       "type" : "array",
       "minItems" : 1,
       "items" : {
-        "$ref" : "#/definitions/testcase"
+        "$ref" : "#/$defs/testcase"
       }
     },
     "context" : {
@@ -128,7 +128,7 @@
         "files" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/file"
+            "$ref" : "#/$defs/file"
           }
         },
         "context" : {
@@ -136,7 +136,7 @@
           "description" : "Description of this context."
         },
         "testcases" : {
-          "$ref" : "#/definitions/_testcaseList"
+          "$ref" : "#/$defs/_testcaseList"
         }
       }
     },
@@ -146,7 +146,7 @@
       "additionalProperties" : false,
       "properties" : {
         "description" : {
-          "$ref" : "#/definitions/message"
+          "$ref" : "#/$defs/message"
         },
         "stdin" : {
           "description" : "Stdin for this context",
@@ -160,7 +160,7 @@
               ]
             },
             {
-              "$ref": "#/definitions/fileData"
+              "$ref": "#/$defs/fileData"
             }
           ]
         },
@@ -178,11 +178,11 @@
         },
         "statement" : {
           "description" : "The statement to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/$defs/expressionOrStatement"
         },
         "expression" : {
           "description" : "The expression to evaluate.",
-          "$ref" : "#/definitions/expressionOrStatement"
+          "$ref" : "#/$defs/expressionOrStatement"
         },
         "exception" : {
           "description" : "Expected exception message",
@@ -206,7 +206,7 @@
                   "description" : "Language mapping of expected exception types.",
                   "type" : "object",
                   "propertyNames" : {
-                    "$ref" : "#/definitions/programmingLanguage"
+                    "$ref" : "#/$defs/programmingLanguage"
                   },
                   "additionalProperties" : {
                     "type" : "string"
@@ -220,34 +220,34 @@
           "description" : "Deprecated: use input_files instead.",
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/file"
+            "$ref" : "#/$defs/file"
           }
         },
         "input_files": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/fileDataRequiredPath"
+            "$ref": "#/$defs/fileDataRequiredPath"
           }
         },
         "return" : {
           "description" : "Expected return value",
-          "$ref" : "#/definitions/returnOutputChannel"
+          "$ref" : "#/$defs/returnOutputChannel"
         },
         "stderr" : {
           "description" : "Expected output at stderr",
-          "$ref" : "#/definitions/textOutputChannel"
+          "$ref" : "#/$defs/textOutputChannel"
         },
         "stdout" : {
           "description" : "Expected output at stdout",
-          "$ref" : "#/definitions/textOutputChannel"
+          "$ref" : "#/$defs/textOutputChannel"
         },
         "file": {
           "description" : "Deprecated: use output_files instead.",
-          "$ref" : "#/definitions/fileOutputChannel"
+          "$ref" : "#/$defs/fileOutputChannel"
         },
         "output_files": {
           "description" : "Expected files generated by the submission.",
-          "$ref" : "#/definitions/fileOutputChannel"
+          "$ref" : "#/$defs/fileOutputChannel"
         },
         "exit_code" : {
           "type" : "integer",
@@ -267,7 +267,7 @@
           "type" : "object",
           "minProperties" : 1,
           "propertyNames" : {
-            "$ref" : "#/definitions/programmingLanguage"
+            "$ref" : "#/$defs/programmingLanguage"
           },
           "additionalProperties" : {
             "type" : "string",
@@ -279,7 +279,7 @@
     "yamlValueOrPythonExpression" : {
       "oneOf" : [
         {
-          "$ref" : "#/definitions/yamlValue"
+          "$ref" : "#/$defs/yamlValue"
         },
         {
           "type" : "string",
@@ -328,14 +328,14 @@
           "type" : "array",
           "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
           "items" : {
-            "$ref" : "#/definitions/yamlValueOrPythonExpression"
+            "$ref" : "#/$defs/yamlValueOrPythonExpression"
           }
         },
         "languages": {
           "type" : "array",
           "description" : "Which programming languages are supported by this oracle.",
           "items" : {
-            "$ref" : "#/definitions/programmingLanguage"
+            "$ref" : "#/$defs/programmingLanguage"
           }
         }
       }
@@ -343,7 +343,7 @@
     "textOutputChannel" : {
       "anyOf" : [
         {
-          "$ref" : "#/definitions/textualType"
+          "$ref" : "#/$defs/textualType"
         },
         {
           "type" : "object",
@@ -353,13 +353,13 @@
           ],
           "properties" : {
             "data" : {
-              "$ref" : "#/definitions/textualType"
+              "$ref" : "#/$defs/textualType"
             },
             "oracle" : {
               "const" : "builtin"
             },
             "config" : {
-              "$ref" : "#/definitions/textConfigurationOptions"
+              "$ref" : "#/$defs/textConfigurationOptions"
             }
           }
         },
@@ -367,7 +367,7 @@
           "description" : "Custom oracle for text values.",
           "allOf" : [
             {
-              "$ref" : "#/definitions/customCheckOracle"
+              "$ref" : "#/$defs/customCheckOracle"
             },
             {
               "type" : "object",
@@ -378,7 +378,7 @@
               ],
               "properties" : {
                 "data" : {
-                  "$ref" : "#/definitions/textualType"
+                  "$ref" : "#/$defs/textualType"
                 }
               }
             }
@@ -408,7 +408,7 @@
               "const" : "builtin"
             },
             "config" : {
-              "$ref" : "#/definitions/fileConfigurationOptions"
+              "$ref" : "#/$defs/fileConfigurationOptions"
             }
           }
         },
@@ -423,14 +423,14 @@
               "type" : "array",
               "description" : "Files to expect.",
               "items" : {
-                "$ref" : "#/definitions/fileDataFullyRequired"
+                "$ref" : "#/$defs/fileDataFullyRequired"
               }
             },
             "oracle" : {
               "const" : "builtin"
             },
             "config" : {
-              "$ref" : "#/definitions/fileConfigurationOptions"
+              "$ref" : "#/$defs/fileConfigurationOptions"
             }
           }
         },
@@ -438,14 +438,14 @@
           "type" : "array",
           "description" : "Built-in oracle for files.",
           "items" : {
-            "$ref" : "#/definitions/fileDataFullyRequired"
+            "$ref" : "#/$defs/fileDataFullyRequired"
           }
         },
         {
           "description" : "Custom oracle for file values.",
           "allOf" : [
             {
-              "$ref" : "#/definitions/customCheckOracle"
+              "$ref" : "#/$defs/customCheckOracle"
             },
             {
               "type" : "object",
@@ -472,7 +472,7 @@
           "description" : "Custom oracle for file values.",
           "allOf" : [
             {
-              "$ref" : "#/definitions/customCheckOracle"
+              "$ref" : "#/$defs/customCheckOracle"
             },
             {
               "type" : "object",
@@ -485,7 +485,7 @@
                   "type" : "array",
                   "description" : "Files to expect.",
                   "items" : {
-                    "$ref" : "#/definitions/fileDataFullyRequired"
+                    "$ref" : "#/$defs/fileDataFullyRequired"
                   }
                 }
               }
@@ -497,7 +497,7 @@
     "returnOutputChannel" : {
       "oneOf" : [
         {
-          "$ref" : "#/definitions/yamlValueOrPythonExpression"
+          "$ref" : "#/$defs/yamlValueOrPythonExpression"
         },
         {
           "type" : "object",
@@ -511,7 +511,7 @@
               "const" : "builtin"
             },
             "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+              "$ref" : "#/$defs/yamlValueOrPythonExpression"
             }
           }
         },
@@ -529,7 +529,7 @@
               "const" : "custom_check"
             },
             "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+              "$ref" : "#/$defs/yamlValueOrPythonExpression"
             },
             "file" : {
               "type" : "string",
@@ -544,14 +544,14 @@
               "type" : "array",
               "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
               "items" : {
-                "$ref" : "#/definitions/yamlValueOrPythonExpression"
+                "$ref" : "#/$defs/yamlValueOrPythonExpression"
               }
             },
             "languages": {
               "type" : "array",
               "description" : "Which programming languages are supported by this oracle.",
               "items" : {
-                "$ref" : "#/definitions/programmingLanguage"
+                "$ref" : "#/$defs/programmingLanguage"
               }
             }
           }
@@ -573,7 +573,7 @@
               "description" : "Language mapping of oracle functions.",
               "type" : "object",
               "propertyNames" : {
-                "$ref" : "#/definitions/programmingLanguage"
+                "$ref" : "#/$defs/programmingLanguage"
               },
               "additionalProperties" : {
                 "type" : "object",
@@ -598,7 +598,7 @@
               "description" : "Language mapping of oracle arguments.",
               "type" : "object",
               "propertyNames" : {
-                "$ref" : "#/definitions/programmingLanguage"
+                "$ref" : "#/$defs/programmingLanguage"
               },
               "additionalProperties" : {
                 "type" : "array",
@@ -610,7 +610,7 @@
               }
             },
             "value" : {
-              "$ref" : "#/definitions/yamlValueOrPythonExpression"
+              "$ref" : "#/$defs/yamlValueOrPythonExpression"
             }
           }
         }
@@ -696,7 +696,7 @@
     "fileConfigurationOptions": {
       "anyOf" : [
         {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         },
         {
           "type" : "object",
@@ -728,13 +728,13 @@
       "type": "object",
       "properties" : {
         "stdout": {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         },
         "stderr": {
-          "$ref" : "#/definitions/textConfigurationOptions"
+          "$ref" : "#/$defs/textConfigurationOptions"
         },
         "file": {
-          "$ref" : "#/definitions/fileConfigurationOptions"
+          "$ref" : "#/$defs/fileConfigurationOptions"
         }
       }
     },
@@ -768,7 +768,7 @@
       "description" : "A file where the path must be given.",
       "allOf" : [
         {
-          "$ref" : "#/definitions/fileData"
+          "$ref" : "#/$defs/fileData"
         },
         {
           "required" : [
@@ -781,7 +781,7 @@
       "description" : "A file where both the path and the content must be given.",
       "allOf" : [
         {
-          "$ref" : "#/definitions/fileData"
+          "$ref" : "#/$defs/fileData"
         },
         {
           "required" : [
