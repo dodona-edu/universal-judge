@@ -4,19 +4,12 @@
   "title" : "TESTed-DSL",
   "oneOf" : [
     {
-      "$ref" : "#/$defs/_rootObject"
-    },
-    {
-      "$ref" : "#/$defs/_tabList"
-    }
-  ],
-  "$defs" : {
-    "_rootObject" : {
+      "title" : "Root object of the test suite",
       "type" : "object",
       "required" : ["tabs"],
       "properties" : {
         "files" : {
-          "description" : "A list of files used in the test suite.",
+          "deprecated" : true,
           "type" : "array",
           "items" : {
             "$ref" : "#/$defs/file"
@@ -27,16 +20,22 @@
           "description" : "Namespace of the submitted solution, in `snake_case`"
         },
         "tabs" : {
-          "$ref" : "#/$defs/_tabList"
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/$defs/tab"
+          }
         },
         "language" : {
-          "description" : "Indicate that all code is in a specific language.",
+          "title" : "Programming language",
+          "description" : "Indicate that all code is in a specific programming language.",
           "oneOf" : [
             {
               "$ref" : "#/$defs/programmingLanguage"
             },
             {
-              "const" : "tested"
+              "const" : "tested",
+              "description" : "The TESTed-DSL specification language"
             }
           ]
         },
@@ -44,26 +43,29 @@
           "description" : "Define hashes to use elsewhere.",
           "type" : "object"
         },
-        "config": {
-          "$ref": "#/$defs/inheritableConfigObject"
+        "config" : {
+          "$ref" : "#/$defs/inheritableConfigObject"
         }
       }
     },
-    "_tabList" : {
+    {
+      "title" : "Tab list",
+      "description" : "Shorthand for defining a list of tabs with the default options.",
       "type" : "array",
       "minItems" : 1,
       "items" : {
         "$ref" : "#/$defs/tab"
       }
-    },
+    }
+  ],
+  "$defs" : {
     "tab" : {
       "type" : "object",
       "description" : "A tab in the test suite.",
-      "required" : [
-        "tab"
-      ],
+      "required" : ["tab"],
       "properties" : {
         "files" : {
+          "deprecated" : true,
           "type" : "array",
           "items" : {
             "$ref" : "#/$defs/file"
@@ -71,61 +73,53 @@
         },
         "hidden" : {
           "type" : "boolean",
-          "description" : "Defines if the tab is hidden for the student or not"
+          "description" : "If the tab is hidden for the student or not"
         },
         "definitions" : {
-          "description" : "Define objects to use elsewhere.",
+          "description" : "Objects to use elsewhere.",
           "type" : "object"
         },
-        "config": {
-          "$ref": "#/$defs/inheritableConfigObject"
+        "config" : {
+          "description" : "Configuration options for the tab, inherited by all tests in this tab.",
+          "$ref" : "#/$defs/inheritableConfigObject"
         }
       },
       "oneOf" : [
         {
-          "required" : [
-            "contexts"
-          ],
+          "required" : ["contexts"],
           "properties" : {
             "contexts" : {
-              "$ref" : "#/$defs/_contextList"
+              "description" : "The contexts in this tab.",
+              "type" : "array",
+              "minItems" : 1,
+              "items" : {
+                "$ref" : "#/$defs/context"
+              }
             }
           }
         },
         {
-          "required" : [
-            "testcases"
-          ],
+          "required" : ["testcases"],
           "properties" : {
             "testcases" : {
-              "$ref" : "#/$defs/_testcaseList"
+              "description" : "The testcases in this tab, which will be automatically organized in contexts for you.",
+              "type" : "array",
+              "minItems" : 1,
+              "items" : {
+                "$ref" : "#/$defs/testcase"
+              }
             }
           }
         }
       ]
     },
-    "_contextList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/$defs/context"
-      }
-    },
-    "_testcaseList" : {
-      "type" : "array",
-      "minItems" : 1,
-      "items" : {
-        "$ref" : "#/$defs/testcase"
-      }
-    },
     "context" : {
       "type" : "object",
       "description" : "A set of testcase in the same context.",
-      "required" : [
-        "testcases"
-      ],
+      "required" : ["testcases"],
       "properties" : {
         "files" : {
+          "deprecated" : true,
           "type" : "array",
           "items" : {
             "$ref" : "#/$defs/file"
@@ -133,10 +127,15 @@
         },
         "context" : {
           "type" : "string",
-          "description" : "Description of this context."
+          "description" : "Description or name of this context."
         },
         "testcases" : {
-          "$ref" : "#/$defs/_testcaseList"
+          "description" : "List of testcases in this context.",
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "$ref" : "#/$defs/testcase"
+          }
         }
       }
     },
@@ -146,10 +145,11 @@
       "additionalProperties" : false,
       "properties" : {
         "description" : {
+          "description" : "Override the description of this test. If not set, TESTed generates it based on its content (recommended).",
           "$ref" : "#/$defs/message"
         },
         "stdin" : {
-          "description" : "Stdin for this context",
+          "description" : "Stdin for this context. Only the first testcase of a context may define stdin.",
           "oneOf" : [
             {
               "type" : [
@@ -160,13 +160,13 @@
               ]
             },
             {
-              "$ref": "#/$defs/fileData"
+              "$ref" : "#/$defs/fileData"
             }
           ]
         },
         "arguments" : {
           "type" : "array",
-          "description" : "Array of program call arguments",
+          "description" : "Array of command line arguments for the student's submission.",
           "items" : {
             "type" : [
               "string",
@@ -185,7 +185,7 @@
           "$ref" : "#/$defs/expressionOrStatement"
         },
         "exception" : {
-          "description" : "Expected exception message",
+          "description" : "The expected exception message.",
           "oneOf" : [
             {
               "type" : "string",
@@ -193,9 +193,7 @@
             },
             {
               "type" : "object",
-              "required" : [
-                "types"
-              ],
+              "required" : ["types"],
               "properties" : {
                 "message" : {
                   "type" : "string",
@@ -217,41 +215,44 @@
           ]
         },
         "files" : {
-          "description" : "Deprecated: use input_files instead.",
+          "deprecated" : true,
+          "description" : "Use input_files instead.",
           "type" : "array",
           "items" : {
             "$ref" : "#/$defs/file"
           }
         },
-        "input_files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/fileDataRequiredPath"
+        "input_files" : {
+          "description" : "List of files available to this test. These will be linked in the description of the test on Dodona.",
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/fileDataRequiredPath"
           }
         },
         "return" : {
-          "description" : "Expected return value",
+          "description" : "Expected return value.",
           "$ref" : "#/$defs/returnOutputChannel"
         },
         "stderr" : {
-          "description" : "Expected output at stderr",
+          "description" : "Expected output on stderr.",
           "$ref" : "#/$defs/textOutputChannel"
         },
         "stdout" : {
-          "description" : "Expected output at stdout",
+          "description" : "Expected output on stdout.",
           "$ref" : "#/$defs/textOutputChannel"
         },
-        "file": {
-          "description" : "Deprecated: use output_files instead.",
+        "file" : {
+          "deprecated" : true,
+          "description" : "Use output_files instead.",
           "$ref" : "#/$defs/fileOutputChannel"
         },
-        "output_files": {
+        "output_files" : {
           "description" : "Expected files generated by the submission.",
           "$ref" : "#/$defs/fileOutputChannel"
         },
         "exit_code" : {
           "type" : "integer",
-          "description" : "Expected exit code for the run"
+          "description" : "Expected exit code for the context. Only the last testcase of a context may define exit_code."
         }
       }
     },
@@ -289,8 +290,9 @@
       ]
     },
     "file" : {
+      "deprecated" : true,
       "type" : "object",
-      "description" : "A file used in the test suite.",
+      "description" : "Use input_files or output_files instead.",
       "required" : [
         "name",
         "url"
@@ -309,7 +311,6 @@
     },
     "customCheckOracle" : {
       "type" : "object",
-      "description" : "The properties shared by every custom check oracle.",
       "$comment" : "This only contributes properties; each usage keeps its own 'required', because they differ per channel.",
       "properties" : {
         "oracle" : {
@@ -331,7 +332,7 @@
             "$ref" : "#/$defs/yamlValueOrPythonExpression"
           }
         },
-        "languages": {
+        "languages" : {
           "type" : "array",
           "description" : "Which programming languages are supported by this oracle.",
           "items" : {
@@ -386,11 +387,12 @@
         }
       ]
     },
-    "fileOutputChannel": {
+    "fileOutputChannel" : {
       "anyOf" : [
         {
           "type" : "object",
-          "description" : "Built-in oracle for files.",
+          "deprecated" : true,
+          "description" : "Use data: instead for defining expected files.",
           "required" : [
             "content",
             "location"
@@ -442,7 +444,8 @@
           }
         },
         {
-          "description" : "Custom oracle for file values.",
+          "deprecated" : true,
+          "description" : "Use data to define expected files instead.",
           "allOf" : [
             {
               "$ref" : "#/$defs/customCheckOracle"
@@ -516,45 +519,27 @@
           }
         },
         {
-          "type" : "object",
+          "description" : "Custom oracle for return values.",
           "format" : "tested-dsl-oracle",
-          "additionalProperties" : false,
-          "required" : [
-            "value",
-            "oracle",
-            "file"
-          ],
-          "properties" : {
-            "oracle" : {
-              "const" : "custom_check"
+          "unevaluatedProperties" : false,
+          "allOf" : [
+            {
+              "$ref" : "#/$defs/customCheckOracle"
             },
-            "value" : {
-              "$ref" : "#/$defs/yamlValueOrPythonExpression"
-            },
-            "file" : {
-              "type" : "string",
-              "description" : "The path to the file containing the custom check function."
-            },
-            "name" : {
-              "type" : "string",
-              "description" : "The name of the custom check function.",
-              "default" : "evaluate"
-            },
-            "arguments" : {
-              "type" : "array",
-              "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
-              "items" : {
-                "$ref" : "#/$defs/yamlValueOrPythonExpression"
-              }
-            },
-            "languages": {
-              "type" : "array",
-              "description" : "Which programming languages are supported by this oracle.",
-              "items" : {
-                "$ref" : "#/$defs/programmingLanguage"
+            {
+              "type" : "object",
+              "required" : [
+                "value",
+                "oracle",
+                "file"
+              ],
+              "properties" : {
+                "value" : {
+                  "$ref" : "#/$defs/yamlValueOrPythonExpression"
+                }
               }
             }
-          }
+          ]
         },
         {
           "type" : "object",
@@ -693,7 +678,7 @@
         }
       }
     },
-    "fileConfigurationOptions": {
+    "fileConfigurationOptions" : {
       "anyOf" : [
         {
           "$ref" : "#/$defs/textConfigurationOptions"
@@ -701,7 +686,7 @@
         {
           "type" : "object",
           "properties" : {
-            "mode": {
+            "mode" : {
               "type" : "string",
               "enum" : ["full", "line"],
               "default" : "full"
@@ -724,22 +709,22 @@
       "format" : "tested-dsl-plain-value",
       "$comment" : "Cannot be a value tagged with !oracle or !expression, and must be type-free in the JSON Schema to work"
     },
-    "inheritableConfigObject": {
-      "type": "object",
+    "inheritableConfigObject" : {
+      "type" : "object",
       "properties" : {
-        "stdout": {
+        "stdout" : {
           "$ref" : "#/$defs/textConfigurationOptions"
         },
-        "stderr": {
+        "stderr" : {
           "$ref" : "#/$defs/textConfigurationOptions"
         },
-        "file": {
+        "file" : {
           "$ref" : "#/$defs/fileConfigurationOptions"
         }
       }
     },
-    "fileData": {
-      "type": "object",
+    "fileData" : {
+      "type" : "object",
       "additionalProperties" : false,
       "anyOf" : [
         {
@@ -753,18 +738,18 @@
           ]
         }
       ],
-      "properties": {
-        "content": {
-          "type": "string",
+      "properties" : {
+        "content" : {
+          "type" : "string",
           "description" : "Content of the file, which will be provided inline or written to disk in the workdir. If a !path, the file contents will be read from the provided path."
         },
-        "path": {
-          "type": "string",
+        "path" : {
+          "type" : "string",
           "description" : "Path to the file, relative to the workdir. Used to display in the output."
         }
       }
     },
-    "fileDataRequiredPath": {
+    "fileDataRequiredPath" : {
       "description" : "A file where the path must be given.",
       "allOf" : [
         {
@@ -777,7 +762,7 @@
         }
       ]
     },
-    "fileDataFullyRequired": {
+    "fileDataFullyRequired" : {
       "description" : "A file where both the path and the content must be given.",
       "allOf" : [
         {
