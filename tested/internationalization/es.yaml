@@ -96,6 +96,11 @@ es:
       linter:
         crashed: "Pylint se detuvo inesperadamente"
         output: "Pylint produjo una salida incorrecta."
+      ruff:
+        timeout: "Ruff excedió el límite de tiempo"
+        memory: "Ruff excedió el límite de memoria"
+        crashed: "Ruff se detuvo inesperadamente"
+        output: "Ruff produjo una salida incorrecta."
     typescript:
       runtime:
         invalid:

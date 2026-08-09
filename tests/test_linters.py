@@ -148,14 +148,14 @@ def test_ktlint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("python"))
-def test_pylint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
+def test_ruff(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "counter",
         "python",
         tmp_path,
         "plan.yaml",
-        "solution-pylint",
+        "solution-ruff",
         config,
     )
     result = execute_config(conf)
