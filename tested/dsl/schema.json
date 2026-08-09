@@ -71,7 +71,7 @@
         },
         "hidden" : {
           "type" : "boolean",
-          "description" : "Defines if the unit/tab is hidden for the student or not"
+          "description" : "Defines if the tab is hidden for the student or not"
         },
         "definitions" : {
           "description" : "Define objects to use elsewhere.",
@@ -208,7 +208,7 @@
                   "propertyNames" : {
                     "$ref" : "#/definitions/programmingLanguage"
                   },
-                  "items" : {
+                  "additionalProperties" : {
                     "type" : "string"
                   }
                 }
@@ -269,7 +269,7 @@
           "propertyNames" : {
             "$ref" : "#/definitions/programmingLanguage"
           },
-          "items" : {
+          "additionalProperties" : {
             "type" : "string",
             "description" : "A language-specific literal, which will be used verbatim."
           }
@@ -575,7 +575,7 @@
               "propertyNames" : {
                 "$ref" : "#/definitions/programmingLanguage"
               },
-              "items" : {
+              "additionalProperties" : {
                 "type" : "object",
                 "required" : [
                   "file"
@@ -600,7 +600,7 @@
               "propertyNames" : {
                 "$ref" : "#/definitions/programmingLanguage"
               },
-              "items" : {
+              "additionalProperties" : {
                 "type" : "array",
                 "description" : "List of YAML (or tagged expression) values to use as arguments to the function.",
                 "items" : {

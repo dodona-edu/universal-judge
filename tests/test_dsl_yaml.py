@@ -1538,3 +1538,111 @@ tabs:
         return False
 
     assert check_error(excinfo.value)
+
+
+_LANGUAGE_MAPPING_SUITES = [
+    pytest.param(
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      exception:
+        message: 'Boom'
+        types:
+          python: 'AssertionError'
+""",
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      exception:
+        message: 'Boom'
+        types:
+          python: 42
+""",
+        id="exception-types",
+    ),
+    pytest.param(
+        """
+- tab: 'Test'
+  testcases:
+    - expression:
+        python: 'test()'
+      return: 5
+""",
+        """
+- tab: 'Test'
+  testcases:
+    - expression:
+        python: 42
+      return: 5
+""",
+        id="language-specific-expression",
+    ),
+    pytest.param(
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      return: !oracle
+        oracle: 'specific_check'
+        functions:
+          python:
+            file: 'test.py'
+""",
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      return: !oracle
+        oracle: 'specific_check'
+        functions:
+          python: 'test.py'
+""",
+        id="specific-check-functions",
+    ),
+    pytest.param(
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      return: !oracle
+        oracle: 'specific_check'
+        functions:
+          python:
+            file: 'test.py'
+        arguments:
+          python:
+            - 'yes'
+""",
+        """
+- tab: 'Test'
+  testcases:
+    - expression: 'test()'
+      return: !oracle
+        oracle: 'specific_check'
+        functions:
+          python:
+            file: 'test.py'
+        arguments:
+          python: 5
+""",
+        id="specific-check-arguments",
+    ),
+]
+
+
+@pytest.mark.parametrize("valid,invalid", _LANGUAGE_MAPPING_SUITES)
+def test_language_mapping_values_are_validated(valid, invalid):
+    translate_to_test_suite(valid)
+    with pytest.raises(Exception):
+        translate_to_test_suite(invalid)
+
+
+@pytest.mark.parametrize(
+    "valid", [pytest.param(p.values[0], id=p.id) for p in _LANGUAGE_MAPPING_SUITES]
+)
+def test_language_mapping_keys_must_be_known_languages(valid):
+    translate_to_test_suite(valid)
+    with pytest.raises(Exception):
+        translate_to_test_suite(valid.replace("python", "cobol"))
