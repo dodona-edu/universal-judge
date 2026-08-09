@@ -96,6 +96,11 @@ nl:
       linter:
         crashed: "Pylint gecrasht"
         output: "Pylint produceerde slechte uitvoer."
+      ruff:
+        timeout: "Ruff overschreed de tijdslimiet"
+        memory: "Ruff overschreed de geheugenlimiet"
+        crashed: "Ruff gecrasht"
+        output: "Ruff produceerde slechte uitvoer."
     typescript:
       runtime:
         invalid:
