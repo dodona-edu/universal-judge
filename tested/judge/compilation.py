@@ -111,10 +111,12 @@ def process_compile_results(
 
     # Report errors if needed.
     if results.timeout:
+        messages.append(get_i18n_string("judge.compilation.time-limit"))
         status = Status.TIME_LIMIT_EXCEEDED
-    if results.memory:
+    elif results.memory:
+        messages.append(get_i18n_string("judge.compilation.memory-limit"))
         status = Status.MEMORY_LIMIT_EXCEEDED
-    if results.exit != 0:
+    elif results.exit != 0:
         if not shown_messages:
             messages.append(
                 get_i18n_string("judge.compilation.exitcode", exitcode=results.exit)
