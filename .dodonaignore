@@ -1,0 +1,17 @@
+# Paths Dodona leaves out when syncing this repository to the judge's files
+# directory, which is copied into the sandbox for every submission. `run`
+# executes `python -m tested`, and everything TESTed reads at judging time
+# (language templates, linter configs, translations) lives under tested/.
+# tests/ is only used by the judge's own CI and local development.
+# Patterns are rsync exclude patterns, anchored to the repository root.
+# See https://github.com/dodona-edu/dodona/issues/8763
+
+/tests/
+/.devcontainer/
+/.github/
+/.editorconfig
+/.gitignore
+/CITATION.cff
+/pyproject.toml
+/README.md
+/tested/manual_example.py
