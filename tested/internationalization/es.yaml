@@ -50,6 +50,8 @@ es:
   judge:
     compilation:
       exitcode: "Código de salida %{exitcode}."
+      memory-limit: "Límite de memoria excedido durante la compilación."
+      time-limit: "Tiempo límite excedido durante la compilación."
     core:
       unsupported:
         language: "Lenguaje de programación no soportado"

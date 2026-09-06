@@ -50,6 +50,8 @@ nl:
   judge:
     compilation:
       exitcode: "Exitcode %{exitcode}."
+      memory-limit: "Geheugenlimiet overschreden tijdens compilatie."
+      time-limit: "Tijdslimiet overschreden tijdens compilatie."
     core:
       unsupported:
         language: "Niet-ondersteunde programmeertaal"
