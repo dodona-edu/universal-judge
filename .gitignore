@@ -91,3 +91,8 @@ universal-judge.sln
 
 # Manual file to run TESTed locally
 tested/manual.py
+
+# Nix prototype: build symlinks and scratch files
+/result
+/result-*
+/scratch-*

@@ -8,7 +8,7 @@ buildNpmPackage {
   pname = "tested-ts-tooling";
   version = "1.0.0";
   src = ./ts-tooling;
-  npmDepsHash = "sha256-o+Df07kjr8dUJUBAob3iaMM9zq/opkcPkln7Nip27MM=";
+  npmDepsHash = "sha256-ElygfqKfWSXOOmRWCrBcUTpqef0Iw9/rSV2HGA0ouUI=";
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
 
