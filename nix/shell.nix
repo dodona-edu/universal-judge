@@ -25,10 +25,21 @@ let
         inherit pkgs withDev;
         manifestPythonPackages = r.merged.pythonPackages;
       };
-      envVars = r.merged.env;
+      # Same merged env as the image, so NODE_PATH resolves the js/ts globals.
+      env = pkgs.buildEnv {
+        name = "tested-devshell-env";
+        paths = r.tools ++ [ py.env ];
+        pathsToLink = [ "/bin" "/lib" "/share" ];
+        ignoreCollisions = true;
+      };
+      envVars = {
+        LANG = "C.UTF-8";
+        LC_ALL = "C.UTF-8";
+        NODE_PATH = "${env}/lib/node_modules";
+      } // r.merged.env;
     in
     pkgs.mkShellNoCC {
-      packages = r.tools ++ [ py.env ];
+      packages = [ env ];
       shellHook = lib.concatStringsSep "\n" (
         [ "export HOME=$(mktemp -d)  # isolate tool config (shellcheck, pylint, dotnet) from the host" ]
         ++ lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg (toString v)}") envVars
