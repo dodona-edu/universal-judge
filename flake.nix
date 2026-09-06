@@ -15,13 +15,11 @@
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
       pkgsFor = system: import nixpkgs { inherit system; };
-    in
-    {
-      packages = forAllSystems (
+
+      buildFor =
         system:
         let
           pkgs = pkgsFor system;
-          images = import ./nix/images.nix { inherit pkgs pyproject-nix; };
           manifest = import ./nix/lib/manifest.nix { inherit (pkgs) lib; };
           depsDir = ./deps;
           packagesDir = ./nix/packages;
@@ -36,22 +34,20 @@
             in
             pkgs.runCommand "manifest-${name}" { } ''
               mkdir -p $out
-              cat > $out/chain.txt <<'EOF'
-              ${builtins.concatStringsSep "\n" chain}
-              EOF
-              cat > $out/tools.txt <<'EOF'
-              ${builtins.concatStringsSep "\n" (map (t: "${t}") tools)}
-              EOF
-              cat > $out/env.json <<'EOF'
-              ${builtins.toJSON merged.env}
-              EOF
+              printf '%s\n' ${nixpkgs.lib.escapeShellArgs chain} > $out/chain.txt
+              printf '%s\n' ${nixpkgs.lib.escapeShellArgs (map (t: "${t}") tools)} > $out/tools.txt
+              cp ${pkgs.writeText "env.json" (builtins.toJSON merged.env)} $out/env.json
             '';
         in
         {
           manifests = nixpkgs.lib.genAttrs [ "core" "userland" "bash" "python" "dev" ] manifestCheck;
-          images = images.images;
-        }
-      );
+          images = (import ./nix/images.nix { inherit pkgs pyproject-nix; }).images;
+        };
+    in
+    {
+      # Nested (manifests.*, images.*), so kept out of `packages` which
+      # `nix flake check` requires to be flat derivations.
+      legacyPackages = forAllSystems buildFor;
 
       devShells = forAllSystems (
         system: import ./nix/shell.nix { pkgs = pkgsFor system; inherit pyproject-nix; }
@@ -59,9 +55,12 @@
 
       checks = forAllSystems (
         system:
-        let pkgs = pkgsFor system; in
+        let b = buildFor system; in
         {
-          manifests-eval = self.packages.${system}.manifests.python;
+          manifests-core = b.manifests.core;
+          manifests-python = b.manifests.python;
+          manifests-bash = b.manifests.bash;
+          image-tested-core = b.images.tested-core;
         }
       );
     };

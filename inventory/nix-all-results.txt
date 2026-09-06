@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/runner/workdir
+configfile: pyproject.toml
+plugins: cov-7.1.0, mock-3.15.1, xdist-3.8.0, syrupy-5.5.3
+created: 12/12 workers
+12 workers [148 items]
+
+........................................................................ [ 48%]
+........................................................................ [ 97%]
+....                                                                     [100%]
+============================= 148 passed in 10.06s =============================
+
+[exited with code 0]

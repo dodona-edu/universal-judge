@@ -1,0 +1,41 @@
+# Prototype workflow: builds the Nix images and runs the Bash/Python test
+# selection inside tested-all. Added alongside the existing Docker CI, which is
+# unchanged. Does not push any image.
+name: Nix prototype
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "deps/**"
+      - "nix/**"
+      - "flake.nix"
+      - "flake.lock"
+      - "pyproject.toml"
+      - ".github/workflows/nix.yml"
+  workflow_dispatch:
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: nix flake check
+        run: nix flake check --print-build-logs
+
+      - name: Build and load tested-all
+        run: |
+          nix build .#images.tested-all --print-build-logs
+          ./result | docker load
+
+      - name: Run the Bash/Python test selection inside tested-all
+        run: |
+          docker run --rm --user runner \
+            -v "$GITHUB_WORKSPACE":/home/runner/workdir -w /home/runner/workdir \
+            tested-all:nix \
+            pytest -n auto tests/ -k "bash or python or pylint or shellcheck"

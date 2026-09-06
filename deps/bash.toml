@@ -5,6 +5,7 @@ includes = ["core", "userland"]
 
 [tools]
 shellcheck = "0.11"
+ncurses = "6"          # clear, tput, reset, infocmp, tset (in the old image)
 bc = "1"
 binutils = "2"
 cowsay = "3"

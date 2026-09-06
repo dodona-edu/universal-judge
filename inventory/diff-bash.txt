@@ -1,0 +1,572 @@
+2a3,16
+> .cowsay-wrapped
+> .get_gprof-wrapped
+> .get_objgraph-wrapped
+> .gzip-wrapped
+> .isort-identify-imports-wrapped
+> .isort-wrapped
+> .jsonpath_ng-wrapped
+> .jsonschema-wrapped
+> .pygmentize-wrapped
+> .pylint-config-wrapped
+> .pylint-wrapped
+> .pyreverse-wrapped
+> .symilar-wrapped
+> .undill-wrapped
+9,10d22
+< add-shell
+< addgroup
+13d24
+< adduser
+16,22d26
+< apt
+< apt-cache
+< apt-cdrom
+< apt-config
+< apt-get
+< apt-key
+< apt-mark
+24d27
+< arch
+28d30
+< badblocks
+37a40
+> bits
+39a43
+> blkpr
+43a48,58
+> bunzip2
+> bzcat
+> bzcmp
+> bzdiff
+> bzegrep
+> bzfgrep
+> bzgrep
+> bzip2
+> bzip2recover
+> bzless
+> bzmore
+45,50d59
+< c89
+< c89-gcc
+< c99
+< c99-gcc
+< c_rehash
+< cabal
+56,57d64
+< catchsegv
+< cc
+59,60c66
+< chage
+< chattr
+---
+> cfdisk
+63d68
+< checkstyle
+65d69
+< chgpasswd
+72d75
+< chpasswd
+78d80
+< clear_console
+91c93,97
+< corelist
+---
+> copyfilerange
+> coresched
+> coreutils
+> cowsay
+> cowthink
+93,100d98
+< cpan
+< cpan5.32-x86_64-linux-gnu
+< cpgr
+< cpp
+< cpp-10
+< cppcheck
+< cppcheck-htmlreport
+< cppw
+106a105
+> dc
+108,117d106
+< deb-systemd-helper
+< deb-systemd-invoke
+< debconf
+< debconf-apt-progress
+< debconf-communicate
+< debconf-copydb
+< debconf-escape
+< debconf-set-selections
+< debconf-show
+< debugfs
+119d107
+< delgroup
+121d108
+< deluser
+131d117
+< dnsdomainname
+133d118
+< domainname
+136,148d120
+< dotnet
+< dpkg
+< dpkg-deb
+< dpkg-divert
+< dpkg-fsys-usrunmess
+< dpkg-maintscript-helper
+< dpkg-preconfigure
+< dpkg-query
+< dpkg-realpath
+< dpkg-reconfigure
+< dpkg-split
+< dpkg-statoverride
+< dpkg-trigger
+150d121
+< dumpe2fs
+152,161d122
+< e2freefrag
+< e2fsck
+< e2image
+< e2label
+< e2mmpstatus
+< e2scrub
+< e2scrub_all
+< e2undo
+< e4crypt
+< e4defrag
+164d124
+< editor
+165a126
+> eject
+170,171c131
+< enc2xs
+< encguess
+---
+> enosys
+175a136
+> exch
+179d139
+< expiry
+182d141
+< f2py
+184,185c143
+< faillock
+< faillog
+---
+> fadvise
+189c147
+< fdformat
+---
+> fdisk
+194,195d151
+< figlet-figlet
+< figlet-toilet
+198d153
+< filefrag
+206d160
+< fonttools
+211,213d164
+< fsck.ext2
+< fsck.ext3
+< fsck.ext4
+216d166
+< fstab-decode
+220,233c170,171
+< gcc
+< gcc-10
+< gcc-ar
+< gcc-ar-10
+< gcc-nm
+< gcc-nm-10
+< gcc-ranlib
+< gcc-ranlib-10
+< gcov
+< gcov-10
+< gcov-dump
+< gcov-dump-10
+< gcov-tool
+< gcov-tool-10
+---
+> gawk
+> gencat
+237c175
+< getent
+---
+> getino
+240,243d177
+< getty
+< gold
+< gpasswd
+< gpgv
+246,249d179
+< groupadd
+< groupdel
+< groupmems
+< groupmod
+251,253d180
+< grpck
+< grpconv
+< grpunconv
+257,258c184
+< h2ph
+< h2xs
+---
+> hardlink
+263d188
+< helpztags
+267c192
+< hostname
+---
+> hugetop
+281,283d205
+< installkernel
+< instmodsh
+< invoke-rc.d
+288c210
+< ischroot
+---
+> irqtop
+292,311d213
+< jar
+< jarsigner
+< java
+< javac
+< javadoc
+< javap
+< jcmd
+< jconsole
+< jdb
+< jdeprscan
+< jdeps
+< jexec
+< jfr
+< jhsdb
+< jimage
+< jinfo
+< jjs
+< jlink
+< jmap
+< jmod
+314,319c216
+< jpackage
+< jps
+< jrunscript
+< js
+< jshell
+< json_pp
+---
+> jsonpath_ng
+321,326d217
+< jstack
+< jstat
+< jstatd
+< jwebserver
+< kapt
+< keytool
+328,335d218
+< killall5
+< kotlin
+< kotlinc
+< kotlinc-js
+< kotlinc-jvm
+< kotlinc-wasm
+< kotlinr
+< ktlint
+338,339c221
+< lastlog
+< lcf
+---
+> lastlog2
+342a225
+> ld.so
+345a229,230
+> less
+> lesskey
+347d231
+< libnetcfg
+359d242
+< logsave
+363d245
+< lsattr
+364a247
+> lsclocks
+365a249
+> lsfd
+366a251
+> lsirq
+371c256,266
+< lto-dump-10
+---
+> lzcat
+> lzcmp
+> lzdiff
+> lzegrep
+> lzfgrep
+> lzgrep
+> lzless
+> lzma
+> lzmadec
+> lzmainfo
+> lzmore
+372a268
+> makedb
+374d269
+< mawk
+377d271
+< md5sum.textutils
+380d273
+< mke2fs
+385,387d277
+< mkfs.ext2
+< mkfs.ext3
+< mkfs.ext4
+389,390d278
+< mkhomedir_helper
+< mklost+found
+396a285
+> mtrace
+399,402d287
+< nawk
+< ncal
+< newgrp
+< newusers
+404d288
+< nisdomainname
+407,408d290
+< node
+< nodejs
+411a294
+> nscd
+414d296
+< numpy-config
+418,423d299
+< openssl
+< pack200
+< pager
+< pam-auth-update
+< pam_getenv
+< pam_timestamp_check
+425d300
+< passwd
+428,436c303
+< pdb3
+< pdb3.9
+< perl
+< perl5.32-x86_64-linux-gnu
+< perl5.32.1
+< perlbug
+< perldoc
+< perlivp
+< perlthanks
+---
+> pcprofiledump
+438d304
+< piconv
+442,444c308
+< pip
+< pip3
+< pip3.12
+---
+> pipesz
+447d310
+< pl2pm
+450,455d312
+< pod2html
+< pod2man
+< pod2text
+< pod2usage
+< podchecker
+< policy-rc.d
+461d317
+< prove
+463,465d318
+< ptar
+< ptardiff
+< ptargrep
+468,469d320
+< pwck
+< pwconv
+472,475d322
+< pwunconv
+< py3clean
+< py3compile
+< py3versions
+479,483d325
+< pydoc3.9
+< pyftmerge
+< pyftsubset
+< pygettext3
+< pygettext3.9
+494d335
+< python3.9
+496,497d336
+< raw
+< rbash
+506c345
+< remove-shell
+---
+> rename
+509d347
+< resize2fs
+513c351
+< rgrep
+---
+> rfkill
+516,519d353
+< rmid
+< rmiregistry
+< rmt
+< rmt-tar
+521,522d354
+< run-parts
+< runantlr
+527d358
+< savelog
+534,537d364
+< select-editor
+< sensible-browser
+< sensible-editor
+< sensible-pager
+539,540d365
+< serialver
+< service
+542a368
+> setpgid
+546c372
+< sg
+---
+> sfdisk
+553,554d378
+< shadowconfig
+< shasum
+562d385
+< skill
+565c388
+< snice
+---
+> sln
+566a390
+> sotruss
+568d391
+< splain
+570c393
+< start-stop-daemon
+---
+> sprof
+573d395
+< streamzip
+577d398
+< su
+592d412
+< tarcat
+595d414
+< tempfile
+603d421
+< toe
+615d432
+< ttx
+617d433
+< tune2fs
+620d435
+< tzconfig
+622,624c437
+< ucf
+< ucfq
+< ucfr
+---
+> uclampset
+630a444
+> uname26
+637,638d450
+< unix_chkpwd
+< unix_update
+640c452
+< unpack200
+---
+> unlzma
+643a456
+> unxz
+646,650d458
+< update-alternatives
+< update-ca-certificates
+< update-java-alternatives
+< update-passwd
+< update-rc.d
+652,654d459
+< useradd
+< userdel
+< usermod
+656a462,464
+> uuidd
+> uuidgen
+> uuidparse
+660d467
+< vigr
+662d468
+< vim.basic
+665d470
+< vipw
+668a474
+> waitpid
+671a478
+> wcurl
+674d480
+< wheel
+682d487
+< write.ul
+684,719d488
+< x86_64-linux-gnu-addr2line
+< x86_64-linux-gnu-ar
+< x86_64-linux-gnu-as
+< x86_64-linux-gnu-c++filt
+< x86_64-linux-gnu-cpp
+< x86_64-linux-gnu-cpp-10
+< x86_64-linux-gnu-dwp
+< x86_64-linux-gnu-elfedit
+< x86_64-linux-gnu-gcc
+< x86_64-linux-gnu-gcc-10
+< x86_64-linux-gnu-gcc-ar
+< x86_64-linux-gnu-gcc-ar-10
+< x86_64-linux-gnu-gcc-nm
+< x86_64-linux-gnu-gcc-nm-10
+< x86_64-linux-gnu-gcc-ranlib
+< x86_64-linux-gnu-gcc-ranlib-10
+< x86_64-linux-gnu-gcov
+< x86_64-linux-gnu-gcov-10
+< x86_64-linux-gnu-gcov-dump
+< x86_64-linux-gnu-gcov-dump-10
+< x86_64-linux-gnu-gcov-tool
+< x86_64-linux-gnu-gcov-tool-10
+< x86_64-linux-gnu-gold
+< x86_64-linux-gnu-gprof
+< x86_64-linux-gnu-ld
+< x86_64-linux-gnu-ld.bfd
+< x86_64-linux-gnu-ld.gold
+< x86_64-linux-gnu-lto-dump-10
+< x86_64-linux-gnu-nm
+< x86_64-linux-gnu-objcopy
+< x86_64-linux-gnu-objdump
+< x86_64-linux-gnu-ranlib
+< x86_64-linux-gnu-readelf
+< x86_64-linux-gnu-size
+< x86_64-linux-gnu-strings
+< x86_64-linux-gnu-strip
+721c490
+< xsubpp
+---
+> xtrace
+722a492,501
+> xz
+> xzcat
+> xzcmp
+> xzdec
+> xzdiff
+> xzegrep
+> xzfgrep
+> xzgrep
+> xzless
+> xzmore
+724d502
+< ypdomainname
+736d513
+< zipdetails
