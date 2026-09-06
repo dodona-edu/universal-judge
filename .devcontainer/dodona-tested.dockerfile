@@ -23,6 +23,22 @@ ENV NODE_PATH=/usr/lib/node_modules
 # Install dependencies
 # hadolint ignore=DL3013,DL3016
 RUN <<EOF
+    # Fail the build on the first error instead of silently caching a
+    # half-installed image (heredoc RUN does not set this by default).
+    # This runs under dash, so no `pipefail`; the pipe-sensitive steps below
+    # already run through `bash -c "set -o pipefail && ..."`.
+    set -eux
+
+    # TEMPORARY: Debian 11 (bullseye) reached end-of-life on 2026-08-31. Its
+    # security pocket is being torn down from the mirrors (some .debs 404) and is
+    # not on archive.debian.org yet, which breaks the NodeSource setup script and
+    # anything else pulling from bullseye-security. Serve the base distro from
+    # archive.debian.org and drop the security pocket. Remove once the base image
+    # is bumped to bookworm.
+    printf 'deb http://archive.debian.org/debian bullseye main\n' > /etc/apt/sources.list
+    rm -f /etc/apt/sources.list.d/*.list
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
     # Update apt-get
     apt-get update
 
