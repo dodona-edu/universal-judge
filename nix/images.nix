@@ -13,10 +13,28 @@ let
     ln -s ${pkgs.dash}/bin/dash $out/bin/sh
   '';
 
+  # /etc/passwd + /etc/group with the runner user. fakeNss points passwd at a
+  # read-only store path, so useradd in fakeRootCommands cannot work; ship the
+  # files directly instead.
+  etcFiles = pkgs.runCommand "tested-etc" { } ''
+    mkdir -p $out/etc/pam.d
+    cat > $out/etc/passwd <<'EOF'
+    root:x:0:0:root:/root:/bin/sh
+    runner:x:1000:1000:runner:/home/runner:/bin/sh
+    nobody:x:65534:65534:nobody:/var/empty:/bin/sh
+    EOF
+    cat > $out/etc/group <<'EOF'
+    root:x:0:
+    runner:x:1000:
+    nogroup:x:65534:
+    EOF
+    echo 'hosts: files dns' > $out/etc/nsswitch.conf
+  '';
+
   baseContents = [
     binShDash
+    etcFiles
     pkgs.dockerTools.usrBinEnv
-    pkgs.dockerTools.fakeNss
     pkgs.dockerTools.caCertificates
   ];
 
@@ -25,8 +43,6 @@ let
     mkdir -p tmp && chmod 1777 tmp
     mkdir -p mnt && chmod 711 mnt
     mkdir -p home/runner/workdir
-    ${pkgs.shadow}/bin/groupadd -g 1000 runner || true
-    ${pkgs.shadow}/bin/useradd -u 1000 -g 1000 -m -d /home/runner runner || true
     chown -R 1000:1000 home/runner
     cp ${../.devcontainer/main.sh} main.sh
     chmod 0755 main.sh
@@ -90,12 +106,10 @@ in
     tested-bash = mkImage {
       name = "tested-bash";
       manifestNames = [ "bash" ];
-      fromImage = tested-core;
     };
     tested-python = mkImage {
       name = "tested-python";
       manifestNames = [ "python" ];
-      fromImage = tested-core;
     };
     tested-all = mkImage {
       name = "tested-all";

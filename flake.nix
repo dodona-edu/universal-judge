@@ -49,8 +49,8 @@
         in
         {
           manifests = nixpkgs.lib.genAttrs [ "core" "userland" "bash" "python" "dev" ] manifestCheck;
+          images = images.images;
         }
-        // images.images
       );
 
       devShells = forAllSystems (
