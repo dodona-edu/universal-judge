@@ -1,15 +1,17 @@
 # Why this override exists:
-# The Haskell templates import Data.Aeson (tested/languages/haskell/templates/
-# Values.hs), so the judge's GHC must have aeson (and its transitive text /
-# bytestring) in its package database. The Dockerfile does this with
-# `cabal v1-install --global aeson`; here it is a ghcWithPackages wrapper.
 #
-# The wrapper's `settings` file points GHC at the exact cc/binutils it needs to
-# link student programs at runtime; those stay in the closure, so no extra PATH
-# entry is required for linking (the manifest still ships gcc/binutils for
-# student code that shells out to a C compiler).
-{ haskellPackages }:
-haskellPackages.ghcWithPackages (p: [
+# 1. The Haskell templates import Data.Aeson (tested/languages/haskell/templates/
+#    Values.hs), so the judge's GHC needs aeson (+ transitive text/bytestring)
+#    in its package database. The Dockerfile does `cabal v1-install --global
+#    aeson`; here it is a ghcWithPackages wrapper.
+#
+# 2. GHC must be 9.6, not the nixpkgs default. The Dockerfile installs
+#    `ghcup install ghc 9.6`. GHC 9.8+ added -Wx-partial (a stderr warning for
+#    `head`/`tail`), which breaks tests/test_io_exercises.py::test_file_combinations
+#    [runhaskell] (it expects clean stderr). ghc967 = 9.6.7, closest to the
+#    old image's 9.6.x.
+{ haskell }:
+haskell.packages.ghc967.ghcWithPackages (p: [
   p.aeson
   p.text
   p.bytestring
