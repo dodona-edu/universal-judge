@@ -33,9 +33,15 @@ jobs:
           nix build .#images.tested-all --print-build-logs
           ./result | docker load
 
-      - name: Run the Bash/Python test selection inside tested-all
+      - name: Run the full test suite inside tested-all
         run: |
           docker run --rm --user runner \
             -v "$GITHUB_WORKSPACE":/home/runner/workdir -w /home/runner/workdir \
             tested-all:nix \
-            pytest -n auto tests/ -k "bash or python or pylint or shellcheck"
+            pytest -n 4 tests/
+
+      - name: Lint checks inside the dev shell
+        run: |
+          nix develop -c black --check tested tests
+          nix develop -c isort --check-only tested tests
+          nix develop -c pyright tested tests

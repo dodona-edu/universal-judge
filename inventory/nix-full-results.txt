@@ -15,42 +15,9 @@ bringing up nodes...
 ........................................................................ [ 71%]
 ........................................................................ [ 77%]
 ........................................................................ [ 83%]
-.............F.......................................................... [ 89%]
+........................................................................ [ 89%]
 ........................................................................ [ 95%]
 ...................................................                      [100%]
-=================================== FAILURES ===================================
-__________________ test_specific_oracle_exception_wrong[cpp] ___________________
-[gw0] linux -- Python 3.12.14 /nix/store/vy42hsx2sbnimf2dc6adny2gz77rlcgb-python3-3.12.14-env/bin/python3.12
-
-lang = 'cpp'
-tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw0/test_specific_oracle_exception11')
-pytestconfig = <_pytest.config.Config object at 0x7bbec8b67800>
-
->   ???
-E   AssertionError: assert 2 == 1
-E    +  where 2 = len([{'message': 'Hier ontbreekt uitvoer.', 'command': 'append-message'}, {'message': 'Ontbrekend resultaat', 'command': 'append-message'}])
-E    +    where [{'message': 'Hier ontbreekt uitvoer.', 'command': 'append-message'}, {'message': 'Ontbrekend resultaat', 'command': 'append-message'}] = find_all('append-message')
-E    +      where find_all = [{'command': 'start-judgement'}, {'title': 'Feedback', 'command': 'start-tab'}, {'command': 'start-context'}, {'descri... 'close-testcase'}, {'data': {}, 'command': 'close-context'}, {'command': 'close-tab'}, {'command': 'close-judgement'}].find_all
-
-/workdir/tests/test_oracles_specific.py:51: AssertionError
------------------------------ Captured stdout call -----------------------------
-{"command": "start-judgement"}
-{"title": "Feedback", "command": "start-tab"}
-{"command": "start-context"}
-{"description": {"description": "Uitvoeren code", "format": "text"}, "command": "start-testcase"}
-{"expected": "", "channel": "exception", "command": "start-test"}
-{"message": "Hier ontbreekt uitvoer.", "command": "append-message"}
-{"message": "Ontbrekend resultaat", "command": "append-message"}
-{"generated": "", "status": {"enum": "wrong", "human": "Ontbrekende uitvoer."}, "command": "close-test"}
-{"command": "close-testcase"}
-{"data": {}, "command": "close-context"}
-{"command": "close-tab"}
-{"command": "close-judgement"}
-
------------------------------- Captured log call -------------------------------
-WARNING  tested.languages.conventionalize:conventionalize.py:250 A name 'Evaluator' is not in snake_case. This might cause problems.
-=========================== short test summary info ============================
-FAILED tests/test_oracles_specific.py::test_specific_oracle_exception_wrong[cpp]
-1 failed, 1202 passed in 435.52s (0:07:15)
+1203 passed in 311.79s (0:05:11)
 
 [exited with code 0]

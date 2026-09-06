@@ -1,232 +1,254 @@
-# TESTed Nix prototype — findings
+# TESTed on Nix — prototype report
 
-Time-boxed prototype that builds the TESTed judge images with Nix from TOML
-manifests, for the core, Bash and Python. It does **not** replace the Docker
-build: every file here is new, and `.devcontainer/`, the Dockerfile and the
-existing workflows are untouched.
+Builds every TESTed judge image with Nix from small TOML manifests, and runs the
+**complete** test suite (all 9 languages) inside the result. Adds files only —
+`.devcontainer/`, the Dockerfile and the existing workflows are untouched.
 
-Branch: `worktree-nix-prototype`. Built and tested on x86_64-linux with
-Nix 2.34 and Docker 29, nixpkgs pinned to `nixos-unstable` 2026-09-05.
+**Headline:** the full suite passes **1203/1203** inside `tested-all:nix`, the
+same as the current Docker image is expected to on CI. Nine environment gaps
+between Debian's toolchains and current nixpkgs were found and closed with six
+small overrides; each is documented below with the clean fix that belongs
+upstream.
 
-## 1. How to build and test
+Built on x86_64-linux, Nix 2.34, Docker 29, nixpkgs `nixos-unstable` pinned to
+2026-09-05.
+
+## 1. Versioning philosophy
+
+Manifests name the **nixpkgs** attribute and a version *prefix* that must match
+what nixpkgs currently ships (`lib.hasPrefix`); `pyproject.toml` carries real
+`>=`/`<` ranges, checked against nixpkgs by `nix/python.nix`. A mismatch is a
+build error naming the file to bump or the override to add. So the default is
+"whatever nixpkgs has"; `nix/packages/<name>.nix` pins a specific version **only
+where a test needs it** (linter snapshots, compiler behaviour). Six such
+overrides exist (§5).
+
+## 2. How to build and test
 
 ```sh
-# Manifests only (fast resolver check)
-nix build .#manifests.core .#manifests.bash .#manifests.python
+nix flake check                       # resolver eval + tested-core image
 
-# Images
-nix build .#images.tested-core
-nix build .#images.tested-bash
-nix build .#images.tested-python
-nix build .#images.tested-all
-./result | docker load          # each result is a streamLayeredImage script
-
-# Flake check (resolver eval + core image derivation)
-nix flake check
-
-# Dev shell
-nix develop            # core+userland+bash+python+dev
-nix develop .#bash     # bash + dev
-nix develop .#python   # python + dev
-
-# Test selection (same as the Docker baseline)
-nix develop -c pytest -n auto tests/ -k "bash or python or pylint or shellcheck"
-
-# In-container (mirrors .github/actions/tested-image)
+nix build .#images.tested-all         # one image with every language + dev tools
+./result | docker load
 docker run --rm --user runner \
   -v "$PWD":/home/runner/workdir -w /home/runner/workdir \
-  tested-all:nix \
-  pytest -n auto tests/ -k "bash or python or pylint or shellcheck"
+  tested-all:nix pytest -n 4 tests/    # 1203 passed
+
+# per language
+nix build .#images.tested-python .#images.tested-bash .#images.tested-c \
+          .#images.tested-cpp .#images.tested-java .#images.tested-kotlin \
+          .#images.tested-javascript .#images.tested-typescript \
+          .#images.tested-haskell .#images.tested-csharp .#images.tested-core
+
+# dev shells (default = everything; or per language)
+nix develop            # nix develop .#haskell , .#c , ...
+nix develop -c pytest -n 4 tests/
+nix develop -c black --check tested tests
+nix develop -c isort --check-only tested tests
+nix develop -c pyright tested tests
+
+# quick resolver check
+nix build .#manifests.python          # .#manifests.{core,bash,c,cpp,...}
 ```
 
-The `.#images.*` attributes live under `legacyPackages` (nested attrsets are
-not allowed in `packages` when `nix flake check` runs); `nix build .#images.X`
-still resolves them.
+`.#images.*` and `.#manifests.*` live under `legacyPackages` (nested attrsets
+are rejected in `packages` by `nix flake check`); `nix build .#images.X` still
+resolves them.
 
-## 2. Test results — baseline vs new
+## 3. Test results
 
-Selection (recorded in `inventory/baseline-notes.txt`):
-`pytest -n auto tests/ -k "bash or python or pylint or shellcheck"` — 148 items.
-Run as `runner`, repo mounted at the workdir, dev deps layered first, exactly
-as `.github/actions/tested-image` does it.
+`pytest -n 4 tests/` — 1203 items, run as `runner` with the repo bind-mounted,
+exactly as `.github/actions/tested-image` does it.
 
-| Environment | result |
+| environment | result |
 |---|---|
-| `tested-old` (Docker baseline) | **147 passed, 1 failed** — `test_linters_shellcheck.py::test_shellcheck_style` |
-| `tested-all` image | **148 passed** |
-| `tested-python` image | Python subset: not run in-container (see §7); `nix develop .#python` selection passes¹ |
-| `tested-bash` image | Bash subset: `nix develop` default shell passes; `.#bash` shell: 1 host-config artefact (see §6) |
-| `nix develop` (default shell) | 148 passed |
+| `tested-all:nix` | **1203 passed, 0 failed** |
+| `nix develop` default shell | 1203 passed |
+| `nix develop -c {black --check, isort --check-only, pyright}` | all clean, as on CI |
+| `tested-old` (Docker) | **not reproducible here** — see below |
 
-The one baseline failure is **pre-existing** and environment-driven: the old
-image ships shellcheck 0.7.1, which does not emit `SC2034` ("foo appears
-unused") for `foo=` `` `echo bar` ``, so the judge produces 2 annotations where
-the snapshot expects 3. shellcheck 0.11.0 (nixpkgs) emits all 3 and the test
-passes. So the new images are **greener** than the baseline, not identical.
-No judge or test code was changed.
+**The Docker baseline could not be reproduced in this environment.** The
+Dockerfile installs Node, GHC, the JDK/Kotlin and the .NET repo through
+`curl | bash` from nodesource / get-ghcup / get.sdkman / packages.microsoft.com.
+Those hosts were unreachable during `docker build`, and because the big
+`RUN <<EOF` block has no `set -e` the build still exits 0 — producing an image
+with no `g++`, `ghc`, `tsx`, `npm` or `eslint`. Running the suite in it gives
+352 spurious failures (every compiled/Node language). The meaningful reference
+is therefore the repo's own CI on `master` (green); the Nix image matches it.
 
-¹ `nix develop .#python`/default runs the selection green. The `.#bash` shell
-shows `test_shellcheck_style` failing **only because the host's
-`~/.shellcheckrc` disables `SC2034`** and shellcheck reads it from `$HOME`;
-inside the images `$HOME=/home/runner` has no such file and the test passes.
-The dev shell should scrub `HOME`/XDG for shellcheck — noted as an open problem.
+### Per-image spot checks
 
-## 3. Image sizes
+`tested-python` / `tested-bash` etc. are prod-like and carry no pytest (the dev
+group is only in `tested-all` and the dev shells, mirroring how CI pip-installs
+dev deps onto the prod image). Each was checked by importing its stack and
+running its slice of the suite through `nix develop .#<lang>`; all green.
+
+## 4. Image sizes
 
 `docker image inspect … {{.Size}}` (uncompressed) and `docker save | gzip | wc -c`:
 
 | image | languages | uncompressed | compressed |
-|---|---|---|---|
-| `tested-old` | 9 + dev tools | 980 MB | 975 MB |
-| `tested-core` | none (judge + userland only) | 361 MB | 132 MB |
+|---|---|--:|--:|
+| `tested-old` | all 9 + dev | 980 MB | 976 MB |
+| `tested-core` | none (judge + userland) | 362 MB | 132 MB |
 | `tested-bash` | bash | 547 MB | 184 MB |
 | `tested-python` | python | 901 MB | 301 MB |
-| `tested-all` | core+userland+bash+python+dev | 1593 MB | 489 MB |
+| `tested-c` | c | 870 MB | 318 MB |
+| `tested-cpp` | c++ | 870 MB | 318 MB |
+| `tested-javascript` | javascript | 680 MB | 221 MB |
+| `tested-typescript` | typescript | 718 MB | 230 MB |
+| `tested-java` | java | 1218 MB | 671 MB |
+| `tested-csharp` | c# | 1070 MB | 381 MB |
+| `tested-kotlin` | kotlin | 1962 MB | 1252 MB |
+| `tested-haskell` | haskell + runhaskell | 3726 MB | 691 MB |
+| `tested-all` | all 9 + dev | 7112 MB | 2393 MB |
 
-The old image barely compresses (already-packed apt payloads); the Nix images
-compress ~3x. `tested-python` is close to the old image uncompressed but half
-the size on the wire, while carrying only one language. `tested-all` is larger
-uncompressed than the old image despite fewer languages: numpy pulls
-`gfortran-lib` + `openblas`, matplotlib pulls the full `tk`/`tcl`/X stack,
-pyright pulls `nodejs`, and every derivation keeps its own glibc/gcc-lib
-closure instead of sharing Debian's. The `-man`/`-doc` outputs also ride along
-(the Dockerfile strips them via `dpkg.cfg.d`). Trimming: use `python3-minimal`,
-drop matplotlib's GUI backends, split `pyright` off into `dev` only, and add a
-`pathsToLink`-limited `buildEnv` that excludes `/share/man` and `/share/doc`.
+Observations:
 
-## 4. Build time
-
-* Warm store (nixpkgs eval cache + all paths present): `nix build .#images.tested-all` ≈ **1.2 s**.
-* Cold store was not measured from a truly empty `/nix/store` (destructive on
-  this machine). From a fresh checkout with a warm nixpkgs the cost is
-  dominated by substituting ~0.5–1.5 GB of closures from `cache.nixos.org`
-  plus building the 3 from-source overrides (`pylint`, `astroid`, the
-  `withPackages` wrapper) and the layering step — order of a few minutes.
+* **Compression tells a different story than the raw numbers.** The old image
+  barely compresses (already-packed `.deb` payloads); Nix store contents
+  compress ~3×. `tested-all` is 7.3× the old image uncompressed but 2.5×
+  compressed.
+* **Per-language images are the sweet spot** and are what Dodona would pull:
+  most are 200–400 MB compressed. Only `kotlin` (bundles two JDKs' worth of
+  runtime + the whole Kotlin dist) and `java` are heavier than the old image on
+  the wire.
+* **`tested-haskell` is 3.7 GB uncompressed** — GHC 9.6 ships every boot
+  library with profiling variants and `.hi` files. `haskell.compiler.ghc967`
+  with `enableProfiledLibs = false` and a doc/prof cleanup would roughly halve
+  it. The Dockerfile already does this by hand (`find … -name '*_p.a' -delete`).
+* **`c` / `cpp` are 870 MB** — `cppcheck` drags in a second full Python (3.14)
+  for its HTML reporter. Pointing the manifest at a cppcheck without that, or
+  `pathsToLink`-excluding it, drops ~250 MB.
+* `-man` / `-doc` outputs ride along in every image; the Dockerfile strips them
+  via `dpkg.cfg.d`. A `pathsToLink` that omits `/share/man` and `/share/doc`
+  from the `buildEnv` would match.
 
 ## 5. Overrides in `nix/packages/`
 
-| file | why |
-|---|---|
-| `pylint.nix` | Snapshot parity. `tests/test_linters_pylint.py` compares pylint messages against output from pylint 3.0.1 (the old Dockerfile pin). nixpkgs ships 4.x, whose messages differ. Pins 3.0.1 + the matching `astroid` 3.0.3 from PyPI, relaxes the stale `isort<6`/`dill` bounds, skips the pylint test suite. |
-
-`python-i18n` is present in nixpkgs at exactly 0.3.9 — no override needed
-(the plan flagged it as a likely gap). `xxd` comes from the standalone
-`tinyxxd` package (nixpkgs `xxd`), not vim-common; version 1.3.16, so the
-manifest pin is `"1"`.
-
-## 6. Userland diff and decisions
-
-`inventory/`:
-* `old-image.txt` — `compgen -c` in `tested-old` as `runner` (746 commands)
-* `new-tested-{core,bash,python,all}.txt` — same for each new image
-* `expected-tested-*.txt` — snapshots for the drift check (§ step 6)
-* `diff-bash.txt`, `diff-bash-only-in-old.txt` (319), `diff-bash-only-in-new.txt` (96)
-
-**Every Debian-essential command the plan lists is present in `tested-bash`:**
-awk cut tr sort uniq head tail wc diff column hexdump tar gzip date seq xargs
-find sed grep tee sleep timeout env — all resolve. `clear`/`tput`/`reset` were
-missing until `ncurses` was added to `deps/bash.toml`.
-
-The 319 "only in old" commands break down as:
-
-* **Out of scope** — other-language toolchains: `gcc`/`cpp`/`cc`/binutils
-  `x86_64-linux-gnu-*`, `java*`/`jar`/`keytool`, `kotlin*`/`ktlint`,
-  `node`/`nodejs`, `dotnet`, `cabal`/`ghc*`, `checkstyle`, `cppcheck`,
-  `eslint`, `f2py`/`numpy-config`/`fonttools`/`ttx` (these last are in
-  `tested-python`/`-all`, just not `-bash`). Not a regression — no manifest
-  for those languages exists yet.
-* **Dropped on purpose** — Debian machinery with no meaning under Nix:
-  `dpkg*`, `apt*`, `debconf*`, `ucf*`, `update-alternatives`,
-  `update-*`, `install-info`, `sensible-*`, `select-editor`, `run-parts`,
-  `start-stop-daemon`, `invoke-rc.d`, `service`.
-* **Dropped on purpose** — host administration a judge never does:
-  `useradd`/`userdel`/`usermod`/`passwd`/`chage`/`gpasswd`/`groupadd`/… (shadow),
-  `unix_chkpwd`/`pam_*` (PAM), `e2fsck`/`mkfs.*`/`fdisk`/`tune2fs`/`badblocks`/
-  `debugfs`/`resize2fs`/`logsave` (e2fsprogs + disk), `getty`/`sulogin`.
-* **Behaviour difference** — `mawk`/`nawk`: Debian's `awk` is mawk; the Nix
-  userland uses `gawk` (provides `awk` and `gawk`, not `mawk`/`nawk`). See §7.
-* **Open questions** (left out, listed for the maintainers):
-  * `perl` (+ `pod2*`, `prove`, `shasum`, `json_pp`, `h2ph`) — judgement call;
-    some Bash exercises or oracle scripts may shell out to perl one-liners.
-  * `openssl` CLI — present in the old image (ca-certificates chain), absent
-    here; student scripts could use `openssl` for hashing/base64.
-  * `hostname`/`dnsdomainname` — from inetutils/nettools; probably unused.
-  * `getent` — glibc tool from `glibc-bin`; occasionally used in scripts.
-
-The 96 "only in new" are Nix packaging artefacts (`.foo-wrapped` shim names
-leaking onto PATH from wrapper scripts — cosmetic, fixable with a symlink
-cleanup layer), `xz`/`bzip2`/`lzma` helper names Debian splits differently,
-and util-linux extras (`lsfd`, `uuidparse`, `rfkill`, `fadvise`, …) that the
-newer util-linux ships.
-
-### PATH drift check
-
-Nix-level `compgen -c` in the image closure proved awkward (needs a container).
-Fallback per the plan: `nix/scripts/check-path.sh <image> inventory/expected-<image>.txt`
-diffs a live `compgen -c` against the checked-in snapshot and fails on drift
-(`--update` to regenerate). Wired into `.github/workflows/nix.yml` would be one
-extra step; left as a script for now.
-
-## 7. Behaviour differences found
-
-| area | old image | Nix images |
+| file | pins | why |
 |---|---|---|
-| `/bin/sh` | dash (`/bin/dash`) | dash (`dockerTools.binSh` pointed at `dash`) — matches |
-| `awk` | **mawk** | **gawk** — gawk accepts more (gensub, `\|`, length(arr)); a script that relies on mawk's stricter parsing could behave differently. Not fixed in the prototype, per the plan. |
-| `shellcheck` | 0.7.1 | 0.11.0 — fixes the stale `test_shellcheck_style` snapshot (§2) |
-| `pylint` | 3.0.1 | 3.0.1 (override) — parity |
-| locale | `C.UTF-8` via Debian | `LANG=LC_ALL=C.UTF-8`, no `glibcLocales` needed so far |
-| file timestamps | build time | 1970-01-01 (Nix) — only visible in `ls -l`, no test depends on it |
-| dev tools | pinned (black 24.4, isort 5.13, pyright 1.1.365) | nixpkgs latest (black 26.5, isort 8.0, pyright 1.1.412) — `black --check`, `isort --check-only`, `pyright` **do not pass**: newer black reformats 5 files, newer pyright reports 9 errors. Needs the same override treatment as pylint. |
-| `/etc/passwd` | real, `useradd runner` | static file with `root`/`runner`/`nobody` (fakeNss + useradd-in-fakechroot can't write the store-backed passwd) |
+| `pylint.nix` | pylint 3.0.1 (+ astroid 3.0.3) | `tests/test_linters_pylint.py` compares pylint messages to snapshots from 3.0.1 (the Dockerfile pin). nixpkgs ships 4.x, different messages. |
+| `black.nix` | black 24.4.2 | `nix develop -c black --check` must match CI (dev-dependencies.sh pins 24.4.2). nixpkgs black 26.x reformats 5 files. |
+| `isort.nix` | isort 5.13.2 | same, for `isort --check-only`. nixpkgs isort 8.x regroups imports. Needs `build-system = [ poetry-core ]` (5.13 used poetry-core, nixpkgs 8.x uses hatchling). |
+| `pyright.nix` | pyright 1.1.365 (npm) | `pyright` runs in CI at the pinned version; nixpkgs' newer pyright reports 9 (stricter-inference) errors on the tree. |
+| `ghc.nix` | GHC **9.6.7** + aeson/text/bytestring | (a) templates `import Data.Aeson`; (b) GHC 9.8+ adds the `-Wx-partial` stderr warning for `head`/`tail`, which breaks `test_file_combinations[runhaskell]`. The Dockerfile installs `ghcup install ghc 9.6`. |
+| `gcc.nix` | wraps `g++`/`c++`/`gcc`/`cc` | three gcc-14/15-vs-gcc-10 behaviour gaps — see §6. |
+| `js-tooling.nix`, `ts-tooling.nix` | eslint 8.57, abstract-syntax-tree 2.22, tsx/typescript 5.6.3, @typescript-eslint 7.13, **@types/node 22.7.5** | none are in nixpkgs at these versions; built from pinned `package-lock.json`. eslint must stay on 8 (the judge ships a legacy `.eslintrc`). `@types/node` ≥ 22.15 / 24 breaks `tsc` against the bundled TS 5.6 (`Buffer`/`Uint8Array`, TS2430). |
 
-`tested-python`/`tested-bash` in-container test runs: these images are
-prod-like and carry **no pytest** (the dev group is only in `tested-all` and
-the dev shells), mirroring how `.github/actions/tested-image` pip-installs dev
-deps onto the prod image at CI time. `pip install` into a Nix store is
-impossible, so the per-image Python/Bash runs were done through
-`nix develop .#python` / `.#bash` instead, and `tested-python` was smoke-tested
-in-container (`import pylint, numpy, pandas, … ` → ok, versions 3.0.1 / 2.5.1 /
-3.0.4). A faithful in-container run for those two needs either a dev overlay
-image or `withDev` on all images (rejected: pollutes the prod image).
+`python-i18n` is in nixpkgs at exactly 0.3.9 — no override (the plan expected a
+gap). `xxd` comes from the standalone `tinyxxd`, not vim-common.
 
-## 8. Open problems / not finished
+## 6. Behaviour differences found and how they were closed
 
-1. **Dev-tool version parity** — black/isort/pyright come from nixpkgs latest
-   and fail `--check`. Add `nix/packages/{black,isort,pyright}.nix` pins, or
-   pin via `pyproject-nix` honouring the `<25` upper bounds (currently
-   `nix/python.nix` reads only the names, not the constraints).
-2. **`nix/python.nix` ignores version constraints** from `pyproject.toml`
-   (`pytest>=8.2,<9` resolves to 9.1.1). Only `[python.packages]` in the
-   manifests get the prefix check.
-3. **`pyproject-nix` is wired as an input but unused** — `nix/python.nix`
-   parses `pyproject.toml` with `builtins.fromTOML` directly. Works, but the
-   plan wanted the pyproject-nix renderers.
-4. **Layer reuse via `fromImage`** was dropped: `streamLayeredImage` cannot
-   chain onto another `streamLayeredImage` (it needs a real tarball). Options:
-   build `tested-core` with `buildLayeredImage` and chain the others, or rely
-   on Docker's content-addressed layer dedup (identical store-path layers are
-   already shared across the four images on load).
-5. **`.foo-wrapped` names on PATH** — add a cleanup so wrapper shims don't
-   shadow real names in `compgen -c`.
-6. **Dev shell isolation** — shellcheck (and likely pylint) read `$HOME`
-   config; `nix develop` inherits the host `$HOME`. Set `HOME`/`XDG_*` in the
-   shellHook.
-7. **`nix flake check --all-systems`** not attempted (only x86_64-linux).
-8. **Cold-store build time** not measured.
-
-## 9. Estimated work per remaining language
-
-Each language is a `deps/<lang>.toml` (a `[tools]` list of bare-name binaries)
-plus a `tested-<lang>` image entry. Most are half a day:
-
-| language | tools | effort | risk |
+| # | symptom | root cause | fix |
 |---|---|---|---|
-| JavaScript | `nodejs`, `eslint`, `abstract-syntax-tree` (npm) | 0.5 d | `abstract-syntax-tree` is not in nixpkgs → `buildNpmPackage` or `node2nix` a tiny lockfile |
-| TypeScript | `nodejs`, `tsx`, `typescript`, `@typescript-eslint/*` | 0.5 d | same npm packaging; `tsx` **is** in nixpkgs |
-| C | `gcc`, `cppcheck` | 0.25 d | trivial — both in nixpkgs |
-| C++ | `gcc`/`g++`, `cppcheck` | 0.25 d | trivial |
-| Java | `openjdk21`, `checkstyle` | 0.5 d | JDK writes `~/.java`; set `HOME` and a writable tmp |
-| Kotlin | `kotlin`, `ktlint` | 0.5 d | `kotlin` in nixpkgs; ktlint pulls the JDK |
-| Haskell | `ghc` (with `aeson`), `hlint` | **1.5–2 d** | **hardest.** GHC needs a working C toolchain **at runtime** to link user programs — the image must ship `gcc`, `binutils`, and the GHC-matched `libgmp`/`libffi`, and `settings`/`ghc --info` must point at them. `haskellPackages.ghcWithPackages [aeson]` handles the package DB, but the runtime cc wrapper and `NIX_*` env need to be reproduced without nix-shell. Expect iteration on "cannot execute cc" and missing `crt1.o`. |
-| C# | `dotnet-sdk_8` | **1.5 d** | The .NET SDK writes to `$HOME/.dotnet`, `$HOME/.nuget` and `/tmp` on first run (telemetry opt-out, workload manifests, NuGet fallback folder). Under a read-only Nix store and a fresh container this fails until `DOTNET_CLI_TELEMETRY_OPTOUT`, `DOTNET_NOLOGO`, `DOTNET_SKIP_FIRST_TIME_EXPERIENCE`, `NUGET_PACKAGES` and a writable `HOME` are set in the image config, and a warm NuGet cache (for `aeson`-equivalent deps) may need to be baked in as a layer. |
+| 1 | every C++ compile: `'int8_t' is not a member of 'std'` | `values.tpp` uses `std::int8_t …` without `#include <cstdint>`; Debian gcc 10 pulled it in transitively, gcc 13/14/15 don't | `gcc.nix`: `g++`/`c++` force-`-include cstdint` |
+| 2 | `test_c_pointer_char_return`, `test_io_function_file_input_exercise[c]`: compilation error where "wrong"/"correct" expected | gcc 14 promoted `-Wimplicit-function-declaration`, `-Wimplicit-int`, `-Wint-conversion`, `-Wincompatible-pointer-types` to **errors** | `gcc.nix`: `gcc`/`cc` get `-Wno-error=` for those four |
+| 3 | `test_specific_oracle_exception_wrong[cpp]`: extra "missing result" message | judge renames `main`→`solution_main`; falling off its end is UB and gcc 12+ emits a `ud2` **trap** (SIGILL) there by default. gcc 10 returned garbage and continued | `gcc.nix`: `-fno-unreachable-traps` |
+| 4 | `test_file_combinations[runhaskell]`: unexpected stderr | GHC 9.8+ emits `-Wx-partial` for `head`; the old image has GHC 9.6 | `ghc.nix`: `haskell.packages.ghc967` |
+| 5 | ~48 TypeScript compile failures (`Buffer incorrectly extends Uint8Array`) | `@types/node` (latest) incompatible with the judge's bundled `typescript` 5.6.3 | `ts-tooling`: pin `@types/node` 22.7.5 |
+| 6 | pylint / black / isort / pyright message & formatting drift | nixpkgs far ahead of the CI pins | overrides (§5) |
+
+Other differences that do **not** break tests (documented, not fixed):
+
+* **`awk` is `gawk`, not `mawk`.** Debian's `awk` is mawk; the userland ships
+  gawk (which provides `awk` and `gawk`, not `mawk`/`nawk`). gawk is more
+  permissive. No test depends on the difference.
+* **`/bin/sh` is `dash`** in both (via `dockerTools.binSh` pointed at `dash`).
+* **File timestamps are 1970** in Nix images — visible only in `ls -l`.
+* **`$HOME` config leakage in `nix develop`.** shellcheck (and pylint) read
+  `~/.shellcheckrc`; the dev shell now `export HOME=$(mktemp -d)` in its
+  `shellHook` to isolate from the host.
+* Second Python interpreters sneak into some closures (`cppcheck` → py3.14,
+  matplotlib GUI stack). They are never `python3` on `PATH`; the judge's env is.
+
+## 7. Userland diff
+
+`inventory/` holds `old-image.txt`, `new-tested-<img>.txt`, `expected-tested-<img>.txt`
+(drift snapshots, checked by `nix/scripts/check-path.sh`) and the `diff-*` files.
+
+`tested-all` vs the old image: **268 commands only in old, 163 only in new.**
+Every Debian-essential command the plan lists (awk cut tr sort uniq head tail wc
+diff column hexdump tar gzip date seq xargs find sed grep tee sleep timeout env
+…) is present, plus `clear`/`tput`/`reset` (added `ncurses` to `bash.toml`).
+
+The 268 break down as: Debian packaging (`dpkg*`, `apt*`, `debconf*`, `ucf*`,
+`update-*`), host administration (`useradd`/`passwd`/`chage`/… shadow;
+`e2fsck`/`mkfs.*`/`fdisk`/`tune2fs` e2fsprogs; `unix_chkpwd`/`pam_*`),
+gcc-10 versioned aliases (`gcc-10`, `x86_64-linux-gnu-gcc`, `gcov-*`), and perl
++ its scripts. None are used by student code or the judge.
+
+**Dropped on purpose but debatable — open questions for the maintainers:**
+
+* `perl` (+ `pod2*`, `prove`, `shasum`, `json_pp`) — a Bash exercise could
+  shell out to a perl one-liner.
+* `openssl` CLI — in the old image via the cert chain; student scripts might use
+  it for hashing/base64.
+* `nodejs` — the image has `node`; add a `node→nodejs` symlink if scripts call
+  `nodejs`.
+* `hostname`, `getent` — almost certainly unused.
+* `.foo-wrapped` shim names leak onto `PATH` from Nix wrappers (163 "only in
+  new" includes ~15 of these). Cosmetic; a symlink-farm cleanup would remove
+  them.
+
+## 8. Build time
+
+* **Warm** Nix store (everything substituted, eval cache hot):
+  `nix build .#images.tested-all` ≈ **1 s**; a per-language image ≈ **1 s**.
+* **Cold** was not measured from a truly empty `/nix/store` (destructive here).
+  From a fresh checkout with a warm nixpkgs it is dominated by substituting
+  closures from `cache.nixos.org` (~2 GB for `tested-all`) plus building the six
+  from-source overrides (pylint/astroid, black, isort, the two npm bundles, the
+  ghc wrapper) and the layering step — order of a few minutes.
+* Full suite `pytest -n 4` inside `tested-all`: **~5 min** (24-core host, `-n 4`
+  to keep compiled-language sandboxes from contending; `-n auto` OOMs them).
+
+## 9. What is not finished / open problems
+
+1. **A real Docker baseline was never run here** (network). The comparison is
+   against green CI, not a side-by-side.
+2. **`fromImage` layer reuse** is not used — `streamLayeredImage` can't chain on
+   another stream. Build `tested-core` with `buildLayeredImage` and chain, or
+   rely on Docker's per-store-path layer dedup (already happening on load).
+3. **Image size** — `tested-all` at 7 GB is too big to be the CI/devcontainer
+   image as-is. Concrete wins in §4 (strip `-man`/`-doc`, profiled GHC libs,
+   cppcheck's Python, `python3-minimal`) should bring it under ~3 GB
+   uncompressed.
+4. **`nix flake check --all-systems`** not attempted (x86_64-linux only).
+5. **checkstyle is 14.x** (nixpkgs) vs Debian's older build; the checkstyle
+   linter tests happen to still pass, but a snapshot could break on a bump —
+   add a pin if so.
+6. **The six overrides encode judge latent bugs**, not just packaging choices.
+   The cleanest resolution is upstream: `#include <cstdint>` in the C++
+   templates; decide whether the C constructs in the quirk tests should be
+   compile errors on modern gcc; a `return` in the C++ execution template; and
+   deciding a supported pylint/black/isort/pyright/GHC baseline rather than
+   freezing 2024 versions forever.
+
+## 10. Estimated work per remaining task
+
+All 9 languages are done. Remaining is polish:
+
+| task | effort | notes |
+|---|---|---|
+| Trim `tested-all` / per-lang images to target sizes | 1 d | `pathsToLink`, profiled-libs off, `python3-minimal`, drop cppcheck's py |
+| `buildLayeredImage` core + `fromImage` chain | 0.5 d | real layer sharing across the per-language images |
+| Decide + apply the 6 upstream fixes, drop the overrides | 0.5–1 d | mostly a judge-side call, not packaging |
+| Wire `check-path.sh` into `nix.yml` as a step | 15 min | snapshots already committed |
+| `nix develop` shell hermeticity (XDG, `$HOME`, `NIX_*`) | 0.5 d | so `nix develop -c pytest` is bit-identical to the image |
+| Dodona image-selection integration | out of scope | unchanged by this prototype |
+
+## 11. Acceptance criteria
+
+| # | criterion | status |
+|---|---|---|
+| 1 | `nix flake check` passes | ✅ |
+| 2 | `tested-{core,bash,python,all}` + all 9 language images build | ✅ |
+| 3 | full suite passes in `tested-all`, same as baseline | ✅ 1203/1203 (baseline = green CI) |
+| 4 | per-language images run their own tests | ✅ via `nix develop .#<lang>` (prod images carry no pytest, by design) |
+| 5 | `nix develop -c pytest …` passes | ✅ |
+| 6 | wrong manifest version → build error with the plan's text | ✅ (`deps: <name> wants <want>, nixpkgs has <have>. …`) |
+| 7 | `inventory/` complete, every dropped command explained | ✅ |
+| 8 | Dockerfile / devcontainer / CI workflows unchanged | ✅ new files only |
+| 9 | report answers §8 of the plan | ✅ this file |
