@@ -1,0 +1,16 @@
+[image]
+name = "dodona-tested-bash"
+languages = ["bash"]
+includes = ["core", "userland"]
+
+[tools]
+shellcheck = "0.10"
+bc = "1"
+binutils = "2"
+cowsay = "3"
+ed = "1"
+figlet = "2"
+toilet = "0.3"
+tree = "2"
+vim = "9"
+xxd = { version = "9", nixpkgs = "xxd" }

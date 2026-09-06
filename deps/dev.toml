@@ -1,0 +1,7 @@
+# Development tools layered on top of an image for the dev shell and the
+# tested-all image. The Python dev packages (pytest, black, isort, ...) come
+# from the [dependency-groups] dev table in pyproject.toml, not from here.
+[tools]
+pyright = "1"
+
+[env]

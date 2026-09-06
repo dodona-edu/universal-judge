@@ -1,0 +1,22 @@
+[image]
+name = "dodona-tested-core"
+languages = []
+includes = ["userland"]
+
+[tools]
+procps = "4"
+dos2unix = "7"
+curl = "8"
+wget = "1"
+zip = "3"
+unzip = "6"
+bashInteractive = { version = "5", nixpkgs = "bashInteractive" }
+coreutils = "9"
+
+[python]
+interpreter = { version = "3.12", nixpkgs = "python312" }
+# The judge packages come from pyproject.toml.
+
+[env]
+LANG = "C.UTF-8"
+LC_ALL = "C.UTF-8"

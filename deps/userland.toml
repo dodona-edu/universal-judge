@@ -1,0 +1,19 @@
+# The POSIX userland that student code can use. This is a deliberate list.
+# Section 8 of the plan explains how it is filled; the inventory diff in
+# docs/nix-prototype-report.md records every deviation from the old image.
+[tools]
+coreutils = "9"
+findutils = "4"
+gnugrep = "3"
+gnused = "4"
+gawk = "5"
+diffutils = "3"
+util-linux = "2"
+gnutar = "1"
+gzip = "1"
+bzip2 = "1"
+xz = "5"
+less = "6"
+which = "2"
+dash = "0.5"
+file = "5"

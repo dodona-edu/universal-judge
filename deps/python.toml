@@ -1,0 +1,22 @@
+[image]
+name = "dodona-tested-python"
+languages = ["python"]
+includes = ["core", "userland"]
+
+[tools]
+# python itself comes from [python] below; the judge needs no extra PATH tools.
+
+[python]
+interpreter = { version = "3.12", nixpkgs = "python312" }
+
+[python.packages]
+# Packages for the single Python environment of this image.
+# The judge packages from pyproject.toml are always added.
+pylint = "3.0.1"
+numpy = "2.4"
+pandas = "3.0"
+openpyxl = "3.1"
+matplotlib = "3.10"
+lxml = "6.1"
+
+[env]
