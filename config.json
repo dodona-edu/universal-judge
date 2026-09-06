@@ -1,7 +1,11 @@
 {
     "judge": "TESTed",
     "image": "dodona-tested",
-    "memory_limit": 500000000,
+    "memory_limit": 512000000,
+    "memory_limit_by_language": {
+        "haskell": 1000000000,
+        "kotlin": 750000000
+    },
     "precompile": {
         "python": "3.12"
     }
