@@ -62,10 +62,20 @@ exactly as `.github/actions/tested-image` does it.
 
 | environment | result |
 |---|---|
-| `tested-all:nix` | **1203 passed, 0 failed** |
-| `nix develop` default shell | 1203 passed |
+| `tested-all:nix` | **1203 passed, 0 failed** (`inventory/nix-full-results.txt`) |
+| `nix develop` default shell | **1203 passed, 0 failed** (`inventory/nix-devshell-results.txt`) |
 | `nix develop -c {black --check, isort --check-only, pyright}` | all clean, as on CI |
 | `tested-old` (Docker) | **not reproducible here** — see below |
+
+One caveat that is **not** a Nix issue: `tests/test_linters_shellcheck.py`'s
+`test_shellcheck_warning` / `test_shellcheck_config` write to
+`$HOME/.shellcheckrc` and never remove it, so `test_shellcheck_config`'s
+`disable=SC2034` can leak into a later test that expects SC2034. With `-n auto`
+and cross-file workers (`test_linters.py` vs `test_linters_shellcheck.py`) this
+is a genuine race in the suite itself. The dev shell now sets
+`HOME=$(mktemp -d)` in its `shellHook` so a run starts from a clean file; a
+`tests/conftest.py` autouse fixture that snapshots/restores `~/.shellcheckrc`
+would fix it properly.
 
 **The Docker baseline could not be reproduced in this environment.** The
 Dockerfile installs Node, GHC, the JDK/Kotlin and the .NET repo through
@@ -247,7 +257,7 @@ All 9 languages are done. Remaining is polish:
 | 2 | `tested-{core,bash,python,all}` + all 9 language images build | ✅ |
 | 3 | full suite passes in `tested-all`, same as baseline | ✅ 1203/1203 (baseline = green CI) |
 | 4 | per-language images run their own tests | ✅ via `nix develop .#<lang>` (prod images carry no pytest, by design) |
-| 5 | `nix develop -c pytest …` passes | ✅ |
+| 5 | `nix develop -c pytest …` passes | ✅ 1203/1203 |
 | 6 | wrong manifest version → build error with the plan's text | ✅ (`deps: <name> wants <want>, nixpkgs has <have>. …`) |
 | 7 | `inventory/` complete, every dropped command explained | ✅ |
 | 8 | Dockerfile / devcontainer / CI workflows unchanged | ✅ new files only |
