@@ -6,8 +6,8 @@ bringing up nodes...
 ........................................................................ [ 17%]
 ........................................................................ [ 23%]
 ........................................................................ [ 29%]
-.........................................F.............................. [ 35%]
-......................F............F.................................... [ 41%]
+........................................................................ [ 35%]
+........................................................................ [ 41%]
 ........................................................................ [ 47%]
 ........................................................................ [ 53%]
 ........................................................................ [ 59%]
@@ -15,125 +15,16 @@ bringing up nodes...
 ........................................................................ [ 71%]
 ........................................................................ [ 77%]
 ........................................................................ [ 83%]
-.....................F.................................................. [ 89%]
+.............F.......................................................... [ 89%]
 ........................................................................ [ 95%]
 ...................................................                      [100%]
 =================================== FAILURES ===================================
-___________________ test_io_function_file_input_exercise[c] ____________________
+__________________ test_specific_oracle_exception_wrong[cpp] ___________________
 [gw0] linux -- Python 3.12.14 /nix/store/vy42hsx2sbnimf2dc6adny2gz77rlcgb-python3-3.12.14-env/bin/python3.12
 
-language = 'c'
-tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw0/test_io_function_file_input_ex1')
-pytestconfig = <_pytest.config.Config object at 0x79a28ee1d280>
-
->   ???
-E   AssertionError: assert ['compilation error'] == ['correct']
-E     
-E     At index 0 diff: 'compilation error' != 'correct'
-E     Use -v to get more diff
-
-/workdir/tests/test_io_exercises.py:155: AssertionError
------------------------------ Captured stdout call -----------------------------
-{"command": "start-judgement"}
-{"title": "Tab", "command": "start-tab"}
-{"command": "start-context"}
-{"description": {"description": "echo_file(\"data.txt\")", "format": "c"}, "command": "start-testcase"}
-{"message": {"description": "<div class='code'>&lt;code&gt;: In function ‘echo_file’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"22\">&lt;code&gt;:22</a>:16: error: implicit declaration of function ‘malloc’ [-Wimplicit-function-declaration]<br>   24 |       buffer = malloc (length);<br>      |                ^~~~~~<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:1: note: include ‘&lt;stdlib.h&gt;’ or provide a declaration of ‘malloc’<br>    3 | #include &lt;ctype.h&gt;<br>  +++ |+#include &lt;stdlib.h&gt;<br>    4 | <br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"22\">&lt;code&gt;:22</a>:16: warning: incompatible implicit declaration of built-in function ‘malloc’ [-Wbuiltin-declaration-mismatch]<br>   24 |       buffer = malloc (length);<br>      |                ^~~~~~<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"22\">&lt;code&gt;:22</a>:16: note: include ‘&lt;stdlib.h&gt;’ or provide a declaration of ‘malloc’</div>", "format": "html", "permission": "student"}, "command": "append-message"}
-{"status": {"enum": "compilation error"}, "command": "escalate-status"}
-{"accepted": false, "command": "close-testcase"}
-{"data": {}, "command": "close-context"}
-{"command": "close-tab"}
-{"command": "close-judgement"}
-
------------------------------- Captured log call -------------------------------
-WARNING  tested.judge.core:core.py:158 Precompilation failed. Falling back to unit compilation.
-______________________ test_file_combinations[runhaskell] ______________________
-[gw2] linux -- Python 3.12.14 /nix/store/vy42hsx2sbnimf2dc6adny2gz77rlcgb-python3-3.12.14-env/bin/python3.12
-
-language = 'runhaskell'
-tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw2/test_file_combinations_runhask0')
-pytestconfig = <_pytest.config.Config object at 0x734b5358b800>
-
->   ???
-E   AssertionError: assert ['correct', '... 'wrong', ...] == ['correct', '...t', 'correct']
-E     
-E     At index 1 diff: 'wrong' != 'correct'
-E     Left contains 4 more items, first extra item: 'correct'
-E     Use -v to get more diff
-
-/workdir/tests/test_io_exercises.py:329: AssertionError
------------------------------ Captured stdout call -----------------------------
-{"command": "start-judgement"}
-{"title": "Main", "command": "start-tab"}
-{"command": "start-context"}
-{"description": {"description": "Dave\n", "format": "console"}, "command": "start-testcase"}
-{"expected": "Dave\n", "channel": "datafile.txt", "command": "start-test"}
-{"generated": "Dave\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "", "channel": "stderr", "command": "start-test"}
-{"generated": "Submission.hs:13:60: warning: [GHC-63394] [-Wx-partial]\n    In the use of ‘head’\n    (imported from Prelude, but defined in GHC.Internal.List):\n    \"This is a partial function, it throws an error on empty lists. Use pattern matching, 'Data.List.uncons' or 'Data.Maybe.listToMaybe' instead. Consider refactoring to use \"Data.List.NonEmpty\".\"\n   |\n13 |             return $ if null (lines contents) then \"\" else head (lines contents)\n   |                                                            ^^^^\n\n", "status": {"enum": "wrong", "human": "Onverwachte uitvoer"}, "command": "close-test"}
-{"expected": "Hello, I don't believe we have met.\nNice to meet you Dave.\n", "channel": "stdout", "command": "start-test"}
-{"generated": "Hello, I don't believe we have met.\nNice to meet you Dave.\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"message": "Ontbrekend resultaat", "command": "append-message"}
-{"status": {"enum": "wrong", "human": "Ontbrekend resultaat"}, "command": "escalate-status"}
-{"message": {"description": "Standaarduitvoer was:\nHello, I don't believe we have met.\nNice to meet you Dave.\n", "format": "code"}, "command": "append-message"}
-{"message": {"description": "Standaardfout was:\nSubmission.hs:13:60: warning: [GHC-63394] [-Wx-partial]\n    In the use of ‘head’\n    (imported from Prelude, but defined in GHC.Internal.List):\n    \"This is a partial function, it throws an error on empty lists. Use pattern matching, 'Data.List.uncons' or 'Data.Maybe.listToMaybe' instead. Consider refactoring to use \"Data.List.NonEmpty\".\"\n   |\n13 |             return $ if null (lines contents) then \"\" else head (lines contents)\n   |                                                            ^^^^\n\n", "format": "code"}, "command": "append-message"}
-{"command": "close-testcase"}
-{"message": {"description": "Bestand: datafile.txt", "format": "text"}, "command": "append-message"}
-{"data": {"files": {"datafile.txt": {"location": "inline", "content": ""}}}, "command": "close-context"}
-{"command": "start-context"}
-{"description": {"description": "$ Submission", "format": "console"}, "command": "start-testcase"}
-{"expected": "Craig\n", "channel": "datafile.txt", "command": "start-test"}
-{"generated": "Craig\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"expected": "", "channel": "stderr", "command": "start-test"}
-{"generated": "Submission.hs:13:60: warning: [GHC-63394] [-Wx-partial]\n    In the use of ‘head’\n    (imported from Prelude, but defined in GHC.Internal.List):\n    \"This is a partial function, it throws an error on empty lists. Use pattern matching, 'Data.List.uncons' or 'Data.Maybe.listToMaybe' instead. Consider refactoring to use \"Data.List.NonEmpty\".\"\n   |\n13 |             return $ if null (lines contents) then \"\" else head (lines contents)\n   |                                                            ^^^^\n\n", "status": {"enum": "wrong", "human": "Onverwachte uitvoer"}, "command": "close-test"}
-{"expected": "It's good to see you again, Craig.\n", "channel": "stdout", "command": "start-test"}
-{"generated": "It's good to see you again, Craig.\n", "status": {"enum": "correct"}, "command": "close-test"}
-{"message": "Ontbrekend resultaat", "command": "append-message"}
-{"status": {"enum": "wrong", "human": "Ontbrekend resultaat"}, "command": "escalate-status"}
-{"message": {"description": "Standaarduitvoer was:\nIt's good to see you again, Craig.\n", "format": "code"}, "command": "append-message"}
-{"message": {"description": "Standaardfout was:\nSubmission.hs:13:60: warning: [GHC-63394] [-Wx-partial]\n    In the use of ‘head’\n    (imported from Prelude, but defined in GHC.Internal.List):\n    \"This is a partial function, it throws an error on empty lists. Use pattern matching, 'Data.List.uncons' or 'Data.Maybe.listToMaybe' instead. Consider refactoring to use \"Data.List.NonEmpty\".\"\n   |\n13 |             return $ if null (lines contents) then \"\" else head (lines contents)\n   |                                                            ^^^^\n\n", "format": "code"}, "command": "append-message"}
-{"command": "close-testcase"}
-{"message": {"description": "Bestand: datafile.txt", "format": "text"}, "command": "append-message"}
-{"data": {"files": {"datafile.txt": {"location": "inline", "content": "Craig\n"}}}, "command": "close-context"}
-{"command": "close-tab"}
-{"command": "close-judgement"}
-
------------------------------- Captured log call -------------------------------
-WARNING  tested.judge.evaluation:evaluation.py:230 Missing output in context testcase.
-WARNING  tested.judge.evaluation:evaluation.py:230 Missing output in context testcase.
-__________________________ test_c_pointer_char_return __________________________
-[gw2] linux -- Python 3.12.14 /nix/store/vy42hsx2sbnimf2dc6adny2gz77rlcgb-python3-3.12.14-env/bin/python3.12
-
-tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw2/test_c_pointer_char_return0')
-pytestconfig = <_pytest.config.Config object at 0x734b5358b800>
-
->   ???
-E   AssertionError: assert ['compilation error'] == ['wrong']
-E     
-E     At index 0 diff: 'compilation error' != 'wrong'
-E     Use -v to get more diff
-
-/workdir/tests/test_language_quirks.py:40: AssertionError
------------------------------ Captured stdout call -----------------------------
-{"command": "start-judgement"}
-{"title": "Tab", "command": "start-tab"}
-{"command": "start-context"}
-{"description": {"description": "echo(\"input-1\")", "format": "c"}, "command": "start-testcase"}
-{"message": {"description": "<div class='code'>&lt;code&gt;: In function ‘echo’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:12: error: returning ‘char *’ from a function with return type ‘char’ makes integer from pointer without a cast [-Wint-conversion]<br>    4 |     return content;<br>      |            ^~~~~~~</div>", "format": "html", "permission": "student"}, "command": "append-message"}
-{"status": {"enum": "compilation error"}, "command": "escalate-status"}
-{"accepted": false, "command": "close-testcase"}
-{"data": {}, "command": "close-context"}
-{"command": "close-tab"}
-{"command": "close-judgement"}
-
------------------------------- Captured log call -------------------------------
-WARNING  tested.judge.core:core.py:158 Precompilation failed. Falling back to unit compilation.
-__________________ test_specific_oracle_exception_wrong[cpp] ___________________
-[gw2] linux -- Python 3.12.14 /nix/store/vy42hsx2sbnimf2dc6adny2gz77rlcgb-python3-3.12.14-env/bin/python3.12
-
 lang = 'cpp'
-tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw2/test_specific_oracle_exception11')
-pytestconfig = <_pytest.config.Config object at 0x734b5358b800>
+tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw0/test_specific_oracle_exception11')
+pytestconfig = <_pytest.config.Config object at 0x7bbec8b67800>
 
 >   ???
 E   AssertionError: assert 2 == 1
@@ -159,10 +50,7 @@ E    +      where find_all = [{'command': 'start-judgement'}, {'title': 'Feedbac
 ------------------------------ Captured log call -------------------------------
 WARNING  tested.languages.conventionalize:conventionalize.py:250 A name 'Evaluator' is not in snake_case. This might cause problems.
 =========================== short test summary info ============================
-FAILED tests/test_io_exercises.py::test_io_function_file_input_exercise[c] - ...
-FAILED tests/test_io_exercises.py::test_file_combinations[runhaskell] - Asser...
-FAILED tests/test_language_quirks.py::test_c_pointer_char_return - AssertionE...
 FAILED tests/test_oracles_specific.py::test_specific_oracle_exception_wrong[cpp]
-4 failed, 1199 passed in 427.71s (0:07:07)
+1 failed, 1202 passed in 435.52s (0:07:15)
 
 [exited with code 0]
