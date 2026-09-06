@@ -1,0 +1,9 @@
+[image]
+name = "dodona-tested-javascript"
+languages = ["javascript"]
+includes = ["core", "userland"]
+
+[tools]
+nodejs = { version = "22", nixpkgs = "nodejs_22" }
+# eslint 8 + abstract-syntax-tree, from nix/packages/js-tooling.nix
+js-tooling = "1"

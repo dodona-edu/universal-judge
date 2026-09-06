@@ -1,0 +1,15 @@
+[image]
+name = "dodona-tested-csharp"
+languages = ["csharp"]
+includes = ["core", "userland"]
+
+[tools]
+"dotnet-sdk_8" = { version = "8", nixpkgs = "dotnet-sdk_8" }
+
+[env]
+# The .NET SDK writes caches on first run; keep it quiet and out of $HOME.
+DOTNET_CLI_TELEMETRY_OPTOUT = "1"
+DOTNET_NOLOGO = "1"
+DOTNET_SKIP_FIRST_TIME_EXPERIENCE = "1"
+DOTNET_CLI_HOME = "/tmp"
+NUGET_PACKAGES = "/tmp/nuget"

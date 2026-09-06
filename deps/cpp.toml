@@ -1,0 +1,8 @@
+[image]
+name = "dodona-tested-cpp"
+languages = ["cpp"]
+includes = ["core", "userland"]
+
+[tools]
+gcc = "15"       # provides g++
+cppcheck = "2"

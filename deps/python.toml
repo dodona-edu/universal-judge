@@ -10,9 +10,8 @@ includes = ["core", "userland"]
 interpreter = { version = "3.12", nixpkgs = "python312" }
 
 [python.packages]
-# Packages for the single Python environment of this image.
-# The judge packages from pyproject.toml are always added.
-pylint = "3.0.1"
+# Exercise libraries for the single Python environment of this image.
+# The judge packages (incl. the pinned pylint) come from pyproject.toml.
 numpy = "2.5"
 pandas = "3.0"
 openpyxl = "3.1"

@@ -1,0 +1,10 @@
+[image]
+name = "dodona-tested-java"
+languages = ["java"]
+includes = ["core", "userland"]
+
+[tools]
+jdk21 = { version = "21", nixpkgs = "jdk21" }
+checkstyle = "14"
+
+[env]

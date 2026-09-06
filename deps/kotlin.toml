@@ -1,0 +1,9 @@
+[image]
+name = "dodona-tested-kotlin"
+languages = ["kotlin"]
+includes = ["core", "userland"]
+
+[tools]
+kotlin = "2"     # provides kotlinc + kotlin
+ktlint = "1"
+jdk21 = { version = "21", nixpkgs = "jdk21" }

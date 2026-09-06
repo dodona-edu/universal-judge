@@ -1,0 +1,9 @@
+[image]
+name = "dodona-tested-typescript"
+languages = ["typescript"]
+includes = ["core", "userland"]
+
+[tools]
+nodejs = { version = "22", nixpkgs = "nodejs_22" }
+# tsx + typescript + eslint 8 + typescript-eslint, from nix/packages/ts-tooling.nix
+ts-tooling = "1"

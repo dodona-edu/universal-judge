@@ -1,0 +1,12 @@
+[image]
+name = "dodona-tested-haskell"
+languages = ["haskell", "runhaskell"]
+includes = ["core", "userland"]
+
+[tools]
+# ghc comes from nix/packages/ghc.nix (ghcWithPackages: aeson + text + bytestring).
+# It also provides runghc / runhaskell for the runhaskell language.
+ghc = "9"
+hlint = "3"
+gcc = "15"       # GHC links student programs through cc at runtime
+binutils = "2"

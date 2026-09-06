@@ -2,6 +2,7 @@
 # tested-all image. The Python dev packages (pytest, black, isort, ...) come
 # from the [dependency-groups] dev table in pyproject.toml, not from here.
 [tools]
-pyright = "1"
+pyright = "1"                                          # nix/packages/pyright.nix (pinned 1.1.365)
+nodejs = { version = "22", nixpkgs = "nodejs_22" }     # pyright's runtime
 
 [env]

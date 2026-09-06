@@ -1,16 +1,12 @@
 {
-  description = "Nix prototype for the TESTed judge images (core, bash, python)";
+  description = "Nix prototype for the TESTed judge images";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
-    { self, nixpkgs, pyproject-nix }:
+    { self, nixpkgs }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
@@ -38,10 +34,11 @@
               printf '%s\n' ${nixpkgs.lib.escapeShellArgs (map (t: "${t}") tools)} > $out/tools.txt
               cp ${pkgs.writeText "env.json" (builtins.toJSON merged.env)} $out/env.json
             '';
+          allManifests = [ "core" "userland" "bash" "python" "c" "cpp" "haskell" "java" "kotlin" "javascript" "typescript" "csharp" "dev" ];
         in
         {
-          manifests = nixpkgs.lib.genAttrs [ "core" "userland" "bash" "python" "dev" ] manifestCheck;
-          images = (import ./nix/images.nix { inherit pkgs pyproject-nix; }).images;
+          manifests = nixpkgs.lib.genAttrs allManifests manifestCheck;
+          images = (import ./nix/images.nix { inherit pkgs; }).images;
         };
     in
     {
@@ -49,9 +46,7 @@
       # `nix flake check` requires to be flat derivations.
       legacyPackages = forAllSystems buildFor;
 
-      devShells = forAllSystems (
-        system: import ./nix/shell.nix { pkgs = pkgsFor system; inherit pyproject-nix; }
-      );
+      devShells = forAllSystems (system: import ./nix/shell.nix { pkgs = pkgsFor system; });
 
       checks = forAllSystems (
         system:

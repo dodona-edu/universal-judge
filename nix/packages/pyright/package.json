@@ -1,0 +1,9 @@
+{
+  "name": "tested-pyright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "pyright pinned to the version dev-dependencies.sh installs",
+  "dependencies": {
+    "pyright": "1.1.365"
+  }
+}

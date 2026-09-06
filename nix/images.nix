@@ -1,11 +1,13 @@
 # Image definitions. Built with dockerTools.streamLayeredImage; load with
 # `nix build .#images.tested-core && ./result | docker load`.
-{ pkgs, pyproject-nix ? null }:
+{ pkgs }:
 let
   lib = pkgs.lib;
   manifest = import ./lib/manifest.nix { inherit (pkgs) lib; };
   depsDir = ../deps;
   packagesDir = ./packages;
+
+  languages = [ "bash" "python" "c" "cpp" "haskell" "java" "kotlin" "javascript" "typescript" "csharp" ];
 
   # Base files every image needs (pitfalls in section 6 of the plan).
   binShDash = pkgs.runCommand "bin-sh-dash" { } ''
@@ -17,7 +19,7 @@ let
   # read-only store path, so useradd in fakeRootCommands cannot work; ship the
   # files directly instead.
   etcFiles = pkgs.runCommand "tested-etc" { } ''
-    mkdir -p $out/etc/pam.d
+    mkdir -p $out/etc
     cat > $out/etc/passwd <<'EOF'
     root:x:0:0:root:/root:/bin/sh
     runner:x:1000:1000:runner:/home/runner:/bin/sh
@@ -53,37 +55,35 @@ let
       name,
       manifestNames,
       withDev ? false,
-      fromImage ? null,
     }:
     let
       chain = lib.concatMap (manifest.manifestChain depsDir) manifestNames;
       merged = manifest.merge depsDir chain;
       tools = manifest.resolveTools { inherit pkgs; inherit (pkgs) lib; inherit packagesDir; } merged.tools;
-      pythonPkgs = manifest.resolvePythonPackages {
-        python = pkgs.python312;
-        inherit (pkgs) lib;
-        inherit packagesDir;
-      } merged.pythonPackages;
       py = import ./python.nix {
-        inherit pkgs pyproject-nix withDev;
-        extraPythonPackages = pythonPkgs;
+        inherit pkgs withDev;
+        manifestPythonPackages = merged.pythonPackages;
       };
       runtimeEnv = pkgs.buildEnv {
         name = "${name}-env";
         paths = tools ++ [ py.env ];
         pathsToLink = [ "/bin" "/lib" "/share" ];
+        # tsx and node bins collide on a `.bin` dir; last wins is fine here.
+        ignoreCollisions = true;
       };
       envList =
         [
           "PATH=${runtimeEnv}/bin:/bin:/usr/bin"
           "LANG=C.UTF-8"
           "LC_ALL=C.UTF-8"
-          "NODE_PATH=/usr/lib/node_modules"
+          # matches the Dockerfile; ts/js tooling installs node_modules here
+          "NODE_PATH=${runtimeEnv}/lib/node_modules"
+          "HOME=/home/runner"
         ]
         ++ lib.mapAttrsToList (k: v: "${k}=${toString v}") merged.env;
     in
     pkgs.dockerTools.streamLayeredImage {
-      inherit name fromImage;
+      inherit name;
       tag = "nix";
       contents = baseContents ++ [ runtimeEnv ];
       enableFakechroot = true;
@@ -95,26 +95,19 @@ let
       };
     };
 
-  tested-core = mkImage {
-    name = "tested-core";
-    manifestNames = [ "core" ];
-  };
+  languageImage = l: mkImage { name = "tested-${l}"; manifestNames = [ l ]; };
 in
 {
   images = {
-    inherit tested-core;
-    tested-bash = mkImage {
-      name = "tested-bash";
-      manifestNames = [ "bash" ];
-    };
-    tested-python = mkImage {
-      name = "tested-python";
-      manifestNames = [ "python" ];
+    tested-core = mkImage {
+      name = "tested-core";
+      manifestNames = [ "core" ];
     };
     tested-all = mkImage {
       name = "tested-all";
-      manifestNames = [ "core" "userland" "bash" "python" "dev" ];
+      manifestNames = [ "core" "userland" "dev" ] ++ languages;
       withDev = true;
     };
-  };
+  }
+  // lib.genAttrs (map (l: "tested-${l}") languages) (n: languageImage (lib.removePrefix "tested-" n));
 }

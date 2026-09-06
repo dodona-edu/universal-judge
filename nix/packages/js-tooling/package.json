@@ -1,0 +1,10 @@
+{
+  "name": "tested-js-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Global npm tools for the JavaScript judge (mirrors the Dockerfile)",
+  "dependencies": {
+    "abstract-syntax-tree": "2.22.0",
+    "eslint": "8.57.0"
+  }
+}
