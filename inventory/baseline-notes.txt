@@ -1,0 +1,15 @@
+old image (tested-old, .devcontainer/dodona-tested.dockerfile)
+uncompressed size: 980480035 bytes (935 MiB)
+sh -> /bin/dash
+awk: mawk (bsdmainutils/mawk; "awk --version" unsupported, GNU-only option)
+python3: 3.12.4
+bash: 5.1.4
+shellcheck: 0.7.1
+
+baseline test command (run as user runner, repo mounted at workdir,
+dev deps layered first like .github/actions/tested-image):
+  pytest -n auto tests/ -k "bash or python or pylint or shellcheck"
+
+baseline result: 1 failed, 147 passed
+  FAILED tests/test_linters_shellcheck.py::test_shellcheck_style
+  (shellcheck 0.7.1 reports 2 annotations, snapshot expects 3)

@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.4, pytest-8.2.1, pluggy-1.6.0
+rootdir: /home/runner/workdir
+configfile: pyproject.toml
+plugins: syrupy-4.6.1, xdist-3.6.1, mock-3.14.0, cov-5.0.0
+created: 12/12 workers
+12 workers [148 items]
+
+........................................................................ [ 48%]
+.......................F................................................ [ 97%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+____________________________ test_shellcheck_style _____________________________
+[gw10] linux -- Python 3.12.4 /usr/local/bin/python
+
+tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/popen-gw10/test_shellcheck_style0')
+pytestconfig = <_pytest.config.Config object at 0x7007c82e9b20>
+
+    def test_shellcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
+        conf = configuration(
+            pytestconfig,
+            "linter",
+            "bash",
+            tmp_path,
+            "plan.tson",
+            "style",
+            {"options": {"linter": True}},
+        )
+        result = execute_config(conf)
+        updates = assert_valid_output(result, pytestconfig)
+        annotations = updates.find_all("annotate-code")
+>       assert len(annotations) == 3
+E       AssertionError: assert 2 == 3
+E        +  where 2 = len([{'column': 4, 'columns': 10, 'command': 'annotate-code', 'externalUrl': 'https://github.com/koalaman/shellcheck/wiki/..., 'columns': 10, 'command': 'annotate-code', 'externalUrl': 'https://github.com/koalaman/shellcheck/wiki/SC2116', ...}])
+
+tests/test_linters_shellcheck.py:115: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"command": "start-judgement"}
+{"row": 1, "text": "Use $(...) notation instead of legacy backticked `...`.", "externalUrl": "https://github.com/koalaman/shellcheck/wiki/SC2006", "column": 4, "type": "info", "rows": 1, "columns": 10, "command": "annotate-code"}
+{"row": 1, "text": "Useless echo? Instead of 'cmd $(echo foo)', just use 'cmd foo'.", "externalUrl": "https://github.com/koalaman/shellcheck/wiki/SC2116", "column": 4, "type": "info", "rows": 1, "columns": 10, "command": "annotate-code"}
+{"title": "Tab", "command": "start-tab"}
+{"command": "start-context"}
+{"description": {"description": "test\n", "format": "console"}, "command": "start-testcase"}
+{"expected": "test\n", "channel": "stdout", "command": "start-test"}
+{"generated": "test\n", "status": {"enum": "correct"}, "command": "close-test"}
+{"command": "close-testcase"}
+{"data": {}, "command": "close-context"}
+{"command": "close-tab"}
+{"command": "close-judgement"}
+
+=========================== short test summary info ============================
+FAILED tests/test_linters_shellcheck.py::test_shellcheck_style - AssertionErr...
+======================== 1 failed, 147 passed in 9.55s =========================
+
+[exited with code 1]
