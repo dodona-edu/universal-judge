@@ -2,6 +2,12 @@
     "judge": "TESTed",
     "image": "dodona-tested",
     "memory_limit": 500000000,
+    "memory_limit_by_language": {
+        "python": 256000000,
+        "cpp": 512000000,
+        "csharp": 512000000,
+        "kotlin": 750000000
+    },
     "precompile": {
         "python": "3.12"
     }
