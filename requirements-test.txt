@@ -1,0 +1,9 @@
+pytest==8.2.1
+pytest-mock==3.14.0
+pytest-cov==5.0.0
+pytest-xdist==3.6.1
+syrupy==4.6.1
+
+# Used by tests/test_problem_statements.py to render problem statements.
+jinja2==3.1.4
+marko==2.0.3

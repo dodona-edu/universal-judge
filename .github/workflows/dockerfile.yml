@@ -1,0 +1,16 @@
+name: Dockerfile
+
+on:
+  push:
+
+jobs:
+  dockerfile-matches-image:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/dodona-edu/dodona-tested:latest
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the dockerfile against the image it built
+        run: ./devel/dockerfile_delta.sh

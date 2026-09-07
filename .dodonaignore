@@ -7,11 +7,14 @@
 # See https://github.com/dodona-edu/dodona/issues/8763
 
 /tests/
+/devel/
 /.devcontainer/
 /.github/
 /.editorconfig
 /.gitignore
 /CITATION.cff
 /pyproject.toml
+/requirements-test.txt
+/requirements-dev.txt
 /README.md
 /tested/manual_example.py

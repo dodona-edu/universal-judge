@@ -37,12 +37,12 @@ jobs:
       - name: Run tests
         uses: ./.github/actions/tested-image
         with:
-          run: pytest -n auto --cov=tested --cov-report=xml tests/
+          run: ./devel/run-tests.sh
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./result/coverage.xml
+          files: ./coverage.xml
 
   lint:
     needs: [build]
@@ -52,23 +52,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Run isort and black
+      - name: Run the linters
         uses: ./.github/actions/tested-image
         with:
-          run: isort --check-only --diff ./tested ./tests && black --check ./tested ./tests
-
-  types:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Run pyright
-        uses: ./.github/actions/tested-image
-        with:
-          run: pyright ./tested ./tests
+          run: ./devel/check.sh
 
   translations:
     needs: [build]

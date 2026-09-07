@@ -1,0 +1,45 @@
+name: E2E
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Judge image to run the suite in
+        type: string
+        default: ghcr.io/dodona-edu/dodona-tested:latest
+      ref:
+        description: universal-judge ref to test
+        type: string
+        default: master
+  workflow_dispatch:
+    inputs:
+      image:
+        description: Judge image to run the suite in
+        type: string
+        default: ghcr.io/dodona-edu/dodona-tested:latest
+      ref:
+        description: universal-judge ref to test
+        type: string
+        default: master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: dodona-edu/universal-judge
+          ref: ${{ inputs.ref }}
+      - name: Install test dependencies
+        run: ./devel/install_test_deps.sh
+      - name: Run tests
+        run: ./devel/run-tests.sh
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage.xml

@@ -1,5 +1,5 @@
 # This is the Dockerfile for the tested judge.
-# It can be downloaded using docker pull dodona/dodona-tested.
+# It can be downloaded using docker pull ghcr.io/dodona-edu/dodona-tested.
 
 # This docker image is run in our production environment.
 # It should not contain any development tools or dependencies.
@@ -182,3 +182,6 @@ USER runner
 WORKDIR /home/runner/workdir
 
 COPY main.sh /main.sh
+# Ship the recipe the image was built from, so the judge's CI can check its
+# own copy against it.
+COPY dodona-tested.dockerfile /dodona-tested.dockerfile
