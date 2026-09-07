@@ -1,4 +1,4 @@
-# this jobs compares ./devcontainer/dodona-tested.dockerfile with the dockerfile in the repository dodona-edu/docker-images
+# this jobs compares ./.devcontainer/dodona-tested.dockerfile with the dockerfile in the repository dodona-edu/docker-images
 # if they are different, a pull request is created in the dodona-edu/docker-images repository
 
 name: Create pr for docker image
@@ -54,7 +54,8 @@ jobs:
           # straight in so it never touches disk.
           echo "$TOKEN" | gh auth login --with-token
 
-          gh repo clone $REPOSITORY $FOLDER -- --depth=1
+          # docker-images builds and stages images from dev; master only publishes them.
+          gh repo clone $REPOSITORY $FOLDER -- --depth=1 --branch dev
           
           cd $FOLDER
           
@@ -91,4 +92,4 @@ jobs:
             --title "$PR_TITLE" \
             --body "$PR_BODY" \
             --head "$BRANCH_NAME" \
-            --base "master"
+            --base "dev"
