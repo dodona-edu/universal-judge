@@ -22,7 +22,7 @@ This means that you can use the provided `.devcontainer/devcontainer.json` to op
 Modern IDEs like [Visual Studio Code](https://code.visualstudio.com/) and [PyCharm](https://www.jetbrains.com/pycharm/) support devcontainers out of the box.
 
 If you prefer installing all dependencies on your local machine, you can find the installed dependencies in the [dockerfile](./.devcontainer/dodona-tested.dockerfile).
-The extra development dependencies are listed in the [dev-dependencies.sh](./devcontainer/dev-dependencies.sh) file.
+The extra development dependencies are installed by [dev-dependencies.sh](./.devcontainer/dev-dependencies.sh), and listed in [requirements-dev.txt](./requirements-dev.txt).
 
 ## Running TESTed
 
@@ -233,16 +233,20 @@ pytest tests/test_functionality.py
 You can run the full test suite with:
 
 ```bash
-pytest -n auto tests/
+./devel/run-tests.sh
 ```
 
 We use `black` and `isort` for code formatting. `pyright` is used for type checking.
-You can run them with:
+You can check them with:
 
 ```bash
-black ./tested ./tests
-isort ./tested ./tests
-pyright ./tested ./tests
+./devel/check.sh
+```
+
+Or apply the formatting with:
+
+```bash
+./devel/format.sh
 ```
 
 
