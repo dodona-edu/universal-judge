@@ -70,27 +70,6 @@ jobs:
         with:
           run: pyright ./tested ./tests
 
-  # Dodona compiles the synced judge with the Python from config.json
-  # (dodona-edu/dodona#8996). A file that does not compile only loses its own
-  # bytecode there, so check here that every file Dodona syncs compiles.
-  bytecode:
-    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'run tests') }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - id: config
-        run: echo "python=$(jq -r .precompile.python config.json)" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ steps.config.outputs.python }}
-      - name: Sync the judge the way Dodona does
-        run: rsync -a --exclude=.git --exclude=preparation/ --exclude=/.dodonaignore --exclude-from=.dodonaignore ./ "$RUNNER_TEMP/judge/"
-      - name: Compile the synced judge
-        run: python -m compileall -q --invalidation-mode unchecked-hash "$RUNNER_TEMP/judge"
-
   translations:
     needs: [build]
     runs-on: ubuntu-latest

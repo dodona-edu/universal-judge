@@ -5,8 +5,5 @@
     "memory_limit_by_language": {
         "haskell": 1000000000,
         "kotlin": 750000000
-    },
-    "precompile": {
-        "python": "3.12"
     }
 }
