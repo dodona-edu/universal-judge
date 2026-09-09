@@ -41,13 +41,12 @@ RUN <<EOF
     # among them ca-certificates (2021 vs 2025), openjdk-11-jre-headless (11.0.24
     # vs 11.0.32), libc6 (u11 vs u14) and the whole GnuPG suite.
     #
-    # Remove both lines once the base image is bumped to bookworm.
+    # Remove this whole workaround once the base image is bumped to bookworm.
     cat > /etc/apt/sources.list <<'SOURCES'
-deb http://archive.debian.org/debian bullseye main
-deb http://snapshot.debian.org/archive/debian-security/20260831T000000Z bullseye-security main
+deb [check-valid-until=no] http://archive.debian.org/debian bullseye main
+deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260831T000000Z bullseye-security main
 SOURCES
     rm -f /etc/apt/sources.list.d/*.list
-    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
 
     # Update apt-get
     apt-get update
