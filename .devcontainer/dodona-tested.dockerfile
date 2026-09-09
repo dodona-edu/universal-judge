@@ -23,10 +23,6 @@ ENV NODE_PATH=/usr/lib/node_modules
 # Install dependencies
 # hadolint ignore=DL3013,DL3016
 RUN <<EOF
-    # Fail the build on the first error instead of silently caching a
-    # half-installed image (heredoc RUN does not set this by default).
-    # This runs under dash, so no `pipefail`; the pipe-sensitive steps below
-    # already run through `bash -c "set -o pipefail && ..."`.
     set -eux
 
     # TEMPORARY: Debian 11 (bullseye) reached end-of-life on 2026-08-31 and its
