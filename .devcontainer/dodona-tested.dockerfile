@@ -5,7 +5,7 @@
 # It should not contain any development tools or dependencies.
 # Add those to dev-dependencies.sh instead.
 
-FROM python:3.12.4-slim-bullseye
+FROM python:3.13.6-slim-bullseye
 
 # Set up the environment
 
