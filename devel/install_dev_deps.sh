@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-ROOT="$(dirname "$(dirname "$0")")"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 pip3 install -r "$ROOT/requirements-dev.txt"
