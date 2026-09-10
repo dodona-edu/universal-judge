@@ -7,7 +7,6 @@ cd "$ROOT"
 
 pytest -n auto \
     --cov=tested \
-    --cov-branch \
     --cov-report xml \
     tests/ \
     "$@"
