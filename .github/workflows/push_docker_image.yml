@@ -1,4 +1,4 @@
-# this jobs compares ./.devcontainer/dodona-tested.dockerfile with the dockerfile in the repository dodona-edu/docker-images
+# this job compares ./.devcontainer/dodona-tested.dockerfile with the dockerfile in the repository dodona-edu/docker-images
 # if they are different, a pull request is created in the dodona-edu/docker-images repository
 
 name: Create pr for docker image
