@@ -8,10 +8,9 @@ from typing import Any, Literal, Type, TypeVar, cast
 
 import yaml
 from attrs import define, evolve, field
-from jsonschema import TypeChecker
+from jsonschema import FormatChecker
 from jsonschema.exceptions import ValidationError
 from jsonschema.protocols import Validator
-from jsonschema.validators import extend as extend_validator
 from jsonschema.validators import validator_for
 
 from tested.datatypes import (
@@ -200,59 +199,55 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
         raise exc
 
 
-def is_oracle(_checker: TypeChecker, instance: Any) -> bool:
-    return isinstance(instance, ReturnOracle)
-
-
-def is_expression(_checker: TypeChecker, instance: Any) -> bool:
-    return isinstance(instance, ExpressionString)
-
-
-def is_path(_checker: TypeChecker, instance: Any) -> bool:
-    return isinstance(instance, ContentPathString)
-
-
-def load_schema_validator(
-    dsl_object: YamlObject = None, file: str = "schema-strict.json"
-) -> Validator:
+def load_schema_validator(dsl_object: YamlObject = None) -> Validator:
     """
     Load the JSON Schema validator used to check DSL test suites.
     """
-    # if the programming language is set in the root, tested_dsl_expressions don't need to be parseable
+    # if the programming language is set in the root,
+    # tested-dsl-expressions don't need to be parseable
     language_present = (
         dsl_object is not None
         and isinstance(dsl_object, dict)
         and "language" in dsl_object
     )
 
-    def validate_tested_dsl_expression(value: object) -> bool:
+    path_to_schema = Path(__file__).parent / "schema.json"
+    with open(path_to_schema, "r") as schema_file:
+        schema_object = json.load(schema_file)
+
+    original_validator: Type[Validator] = validator_for(schema_object)
+    format_checker = FormatChecker()
+
+    @format_checker.checks("tested-dsl-expression", raises=SyntaxError)
+    def _is_python_expression(value: object) -> bool:
         if not isinstance(value, str):
-            return False
+            return True  # Rejected by the type checker instead.
         if language_present:
-            return True
+            return True  # No need to parse anything
+
         import ast
 
         ast.parse(value)
         return True
 
-    path_to_schema = Path(__file__).parent / file
-    with open(path_to_schema, "r") as schema_file:
-        schema_object = json.load(schema_file)
+    @format_checker.checks("tested-dsl-expression-value", raises=SyntaxError)
+    def _is_python_expression_value(value: object) -> bool:
+        if not isinstance(value, ExpressionString):
+            return False
 
-    original_validator: Type[Validator] = validator_for(schema_object)
-    type_checker = original_validator.TYPE_CHECKER.redefine_many(
-        {
-            "oracle": is_oracle,
-            "expression": is_expression,
-            "path": is_path,
-        }
-    )
-    format_checker = original_validator.FORMAT_CHECKER
-    format_checker.checks("tested-dsl-expression", SyntaxError)(
-        validate_tested_dsl_expression
-    )
-    tested_validator = extend_validator(original_validator, type_checker=type_checker)
-    return tested_validator(schema_object, format_checker=format_checker)
+        return _is_python_expression(value)
+
+    @format_checker.checks("tested-dsl-oracle")
+    def _is_oracle(value: object) -> bool:
+        if not isinstance(value, dict):
+            return True  # Rejected by the type checker instead.
+        return isinstance(value, ReturnOracle)
+
+    @format_checker.checks("tested-dsl-plain-value")
+    def _is_plain_value(value: object) -> bool:
+        return not isinstance(value, (ReturnOracle, ExpressionString))
+
+    return original_validator(schema_object, format_checker=format_checker)
 
 
 class DslValidationError(ValueError):

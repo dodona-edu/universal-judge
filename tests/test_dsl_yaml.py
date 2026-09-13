@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema.validators import validator_for
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -380,6 +379,42 @@ def test_expression_with_explicit_language():
     test0, test1 = testcases0[0], testcases1[0]
     assert isinstance(test0.input, FunctionCall)
     assert isinstance(test1.input, FunctionCall)
+
+
+def test_unparseable_expression_is_rejected():
+    yaml_str = """
+- tab: "Feedback"
+  testcases:
+  - expression: "heir(8, 10"
+"""
+    with pytest.raises(ExceptionGroup) as excinfo:
+        translate_to_test_suite(yaml_str)
+
+    def has_syntax_error(exc):
+        if isinstance(exc, SyntaxError):
+            return True
+        if isinstance(exc, ExceptionGroup):
+            return any(has_syntax_error(e) for e in exc.exceptions)
+        return False
+
+    assert has_syntax_error(excinfo.value)
+
+
+def test_unparseable_expression_is_allowed_for_explicit_language():
+    # The expression is not Python, so it may only be accepted because the root
+    # language disables parsing it as such.
+    yaml_str = """
+language: "java"
+tabs:
+- tab: "Feedback"
+  testcases:
+  - expression: "Numbers.oddValues(new int[]{1, 2})"
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.input, LanguageLiterals)
+    assert testcase.input.literals.keys() == {"java"}
 
 
 def test_invalid_yaml():
@@ -926,6 +961,45 @@ def test_value_specific_checks_weird_arguments():
         translate_to_test_suite(yaml_str)
 
 
+def test_untagged_mapping_is_not_an_oracle():
+    # Only a mapping tagged with !oracle is an oracle; an untagged one that happens
+    # to have the same shape must stay an ordinary map value.
+    yaml_str = """
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - expression: 'test()'
+          return:
+            value: 5
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result.oracle, GenericValueOracle)
+    assert isinstance(result.value, ObjectType)
+    assert result.value.type == BasicObjectTypes.MAP
+    (pair,) = result.value.data
+    assert pair.key.data == "value"
+    assert pair.value.data == 5
+
+
+def test_tagged_mapping_is_an_oracle():
+    yaml_str = """
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - expression: 'test()'
+          return: !oracle
+            value: 5
+"""
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result.oracle, GenericValueOracle)
+    assert isinstance(result.value, NumberType)
+    assert result.value.data == 5
+
+
 def test_yaml_set_tag_is_supported():
     yaml_str = """
 - tab: 'Test'
@@ -1334,19 +1408,8 @@ tabs:
     assert testcase.input.literals.keys() == {"java"}
 
 
-def test_strict_json_schema_is_valid():
-    path_to_schema = Path(__file__).parent / "tested-draft7.json"
-    with open(path_to_schema, "r") as schema_file:
-        schema_object = json.load(schema_file)
-
-    validator = load_schema_validator()
-    meta_validator = validator_for(schema_object)(schema_object)
-
-    meta_validator.validate(validator.schema)
-
-
 def test_editor_json_schema_is_valid():
-    validator = load_schema_validator(file="schema.json")
+    validator = load_schema_validator()
     assert isinstance(validator.schema, dict)
     validator.check_schema(validator.schema)
 
