@@ -578,3 +578,52 @@ def test_csharp_compile_line_offset_end_to_end():
         language_config.config.dodona.source_offset, cleaned
     )
     assert final == "<code>:2:19: error CS0103: undefined\n"
+
+
+def test_csharp_compiler_output_offsets_annotation_row():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -12
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"The name 'foo' does not exist in the current context "
+        f"[{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert len(annotations) == 1
+    annotation = annotations[0]
+    assert annotation.row == 2
+    assert annotation.column == 19
+    assert annotation.type == "error"
+    assert annotation.text == "The name 'foo' does not exist in the current context"
+
+
+def test_csharp_compiler_output_offsets_multiple_annotations():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -12
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+        f"{workdir}/Execution0/Submission.cs(16,9): warning CS0219: "
+        f"unused [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert [(a.row, a.type) for a in annotations] == [(2, "error"), (4, "warning")]
+
+
+def test_csharp_compiler_output_skips_wrapper_diagnostics():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -12
+    stdout = (
+        f"{workdir}/Execution0/Submission.cs(1,1): warning CS8019: "
+        f"Unnecessary using directive. [{workdir}/Execution0/dotnet.csproj]\n"
+        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert [(a.row, a.type) for a in annotations] == [(2, "error")]
