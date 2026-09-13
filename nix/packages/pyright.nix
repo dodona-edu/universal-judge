@@ -6,7 +6,13 @@
 # pyright downloads a matching node at first run unless one is on PATH — the
 # wrapper forces the bundled resolution off by exporting PYRIGHT_PYTHON is not
 # relevant here (that is the pip shim); the npm package just needs `node`.
-{ lib, buildNpmPackage, nodejs }:
+#
+# Pinned to nodejs_22, not the default `nodejs`: every other JS/TS manifest
+# pins nodejs_22 (deps/javascript.toml, deps/typescript.toml, deps/dev.toml),
+# but this file used the unversioned default, which nixpkgs currently points
+# at nodejs_24 — a second ~90MB Node closure duplicated alongside the pinned
+# one for no reason.
+{ lib, buildNpmPackage, nodejs_22 }:
 buildNpmPackage {
   pname = "tested-pyright";
   version = "1.1.365";
@@ -14,7 +20,8 @@ buildNpmPackage {
   npmDepsHash = "sha256-BQlV9v4Jj//ci6AyYHqCGdqcCi6rRa0T5cB8TUXx4qA=";
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
-  nativeBuildInputs = [ nodejs ];
+  nodejs = nodejs_22;
+  nativeBuildInputs = [ nodejs_22 ];
 
   installPhase = ''
     runHook preInstall
