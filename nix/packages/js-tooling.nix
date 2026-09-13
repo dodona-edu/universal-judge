@@ -4,12 +4,17 @@
 # Neither is in nixpkgs at the versions the Dockerfile installs globally, so
 # build a node_modules bundle from a pinned package-lock.json. Bins land in
 # $out/bin; the tree is exposed at $out/lib/node_modules for NODE_PATH.
-{ lib, buildNpmPackage }:
+#
+# Deps come from the lockfile via importNpmLock rather than a fixed-output
+# npmDepsHash: the lockfile is the only thing to bump. Same in ts-tooling.nix
+# and pyright.nix.
+{ lib, buildNpmPackage, importNpmLock }:
 buildNpmPackage {
   pname = "tested-js-tooling";
   version = "1.0.0";
   src = ./js-tooling;
-  npmDepsHash = "sha256-YA8YoIpCYbtqayMX8bVcrQgXGueGbcZusQMK6xxMwQQ=";
+  npmDeps = importNpmLock { npmRoot = ./js-tooling; };
+  npmConfigHook = importNpmLock.npmConfigHook;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
 

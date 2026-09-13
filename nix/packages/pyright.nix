@@ -12,12 +12,13 @@
 # but this file used the unversioned default, which nixpkgs currently points
 # at nodejs_24 — a second ~90MB Node closure duplicated alongside the pinned
 # one for no reason.
-{ lib, buildNpmPackage, nodejs_22 }:
+{ lib, buildNpmPackage, importNpmLock, nodejs_22 }:
 buildNpmPackage {
   pname = "tested-pyright";
   version = "1.1.365";
   src = ./pyright;
-  npmDepsHash = "sha256-BQlV9v4Jj//ci6AyYHqCGdqcCi6rRa0T5cB8TUXx4qA=";
+  npmDeps = importNpmLock { npmRoot = ./pyright; };
+  npmConfigHook = importNpmLock.npmConfigHook;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
   nodejs = nodejs_22;

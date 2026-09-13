@@ -3,12 +3,13 @@
 # tested/languages/typescript/parseAst.ts), eslint 8 and the matching
 # @typescript-eslint/* plugins and @types/node. Built from a pinned lockfile;
 # same layout as js-tooling.nix.
-{ lib, buildNpmPackage }:
+{ lib, buildNpmPackage, importNpmLock }:
 buildNpmPackage {
   pname = "tested-ts-tooling";
   version = "1.0.0";
   src = ./ts-tooling;
-  npmDepsHash = "sha256-ElygfqKfWSXOOmRWCrBcUTpqef0Iw9/rSV2HGA0ouUI=";
+  npmDeps = importNpmLock { npmRoot = ./ts-tooling; };
+  npmConfigHook = importNpmLock.npmConfigHook;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
 
