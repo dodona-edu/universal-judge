@@ -73,6 +73,10 @@
           "type" : "boolean",
           "description" : "Defines if the unit/tab is hidden for the student or not"
         },
+        "tab" : {
+          "type" : "string",
+          "description" : "The name of this tab."
+        },
         "definitions" : {
           "description" : "Define objects to use elsewhere.",
           "type" : "object"
