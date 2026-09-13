@@ -1,0 +1,4 @@
+# Only report unused variables (F841), so the unused import (F401) in
+# warning.py is not reported.
+[lint]
+select = ["F841"]

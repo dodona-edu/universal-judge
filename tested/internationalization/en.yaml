@@ -96,6 +96,11 @@ en:
       linter:
         crashed: "Pylint crashed"
         output: "Pylint produced bad output."
+      ruff:
+        timeout: "Ruff exceeded time limit"
+        memory: "Ruff exceeded memory limit"
+        crashed: "Ruff crashed"
+        output: "Ruff produced bad output."
     javascript:
       runtime:
         invalid:

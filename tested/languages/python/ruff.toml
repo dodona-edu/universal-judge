@@ -1,0 +1,51 @@
+# Default ruff configuration used to lint Python submissions.
+#
+# This replaces the old pylint configuration. Ruff enables almost nothing by
+# default, so where pylint started from "everything" and disabled the noisy
+# rules, here we have to select the rules we want. The selection below aims to
+# match what the pylint configuration enabled: the semantic checks are kept,
+# while formatting and naming rules are left out.
+#
+# Deliberately not selected, because pylint had them disabled too:
+#   N     naming conventions      (C0103 invalid-name)
+#   D     docstrings              (C0111 missing-docstring)
+#   E5    line length             (C0301 line-too-long)
+#   W2/W3 whitespace and newlines (C0303, C0304, C0305)
+#   A     builtin shadowing       (W0622 redefined-builtin)
+#
+# Ruff has no equivalent for pylint's inference-based rules (no-member,
+# no-value-for-parameter, not-callable). Those mistakes surface as a TypeError
+# while the tests run instead.
+
+target-version = "py312"
+
+[lint]
+select = [
+    "F",      # pyflakes: undefined names, unused imports and variables, format strings
+    "E4",     # imports on one line (C0410 multiple-imports)
+    "E7",     # statement and comparison pitfalls (C0321, C0121, W0702)
+    "E9",     # syntax and IO errors
+    "PL",     # the pylint rules ruff reimplements
+    "B",      # bugbear: mutable defaults (W0102), loop variable binding (W0640), ...
+    "ARG",    # unused arguments (W0613)
+    "C4",     # comprehensions (R1717, R1718, R1721, R1728, R1729)
+    "RET",    # return statements (R1705, R1710, R1711, R1720, R1723, R1724)
+    "SIM",    # simplifications (R1703, R1719, R1726, R1732)
+    "UP",     # outdated idioms (C0209, R0205, R1725, W1406)
+    "PIE",    # unnecessary pass and ellipsis (W0107, W2301)
+    "ISC",    # implicit string concatenation (W1404)
+    "BLE",    # blind excepts (W0718 broad-exception-caught)
+    "SLF",    # private member access (W0212 protected-access)
+    "S102",   # exec used (W0122)
+    "S307",   # eval used (W0123)
+    "TRY002", # raising a plain Exception (W0719 broad-exception-raised)
+]
+
+# Selected by "PL" above, but pylint had them disabled.
+# R0902 (too-many-instance-attributes) and R0903 (too-few-public-methods) have no
+# ruff equivalent, and PLR0904 (R0904) only exists as a preview rule, so none of
+# those need to be listed here.
+ignore = [
+    "PLR0911", # R0911 too-many-return-statements
+    "PLR0917", # No pylint equivalent, and it doubles up with PLR0913 (R0913)
+]
