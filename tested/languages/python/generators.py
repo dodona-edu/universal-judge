@@ -50,11 +50,11 @@ def convert_arguments(
     return ", ".join(results)
 
 
-def convert_value(value: Value) -> str:
+def convert_value(value: Value, with_namespace=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data)})"  # pyright: ignore
+        return f"({convert_arguments(value.data, with_namespace)})"  # pyright: ignore
     elif value.type in (
         AdvancedNumericTypes.DOUBLE_EXTENDED,
         AdvancedNumericTypes.FIXED_PRECISION,
@@ -88,17 +88,17 @@ def convert_value(value: Value) -> str:
         return "None"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data)}]"  # pyright: ignore
+        return f"[{convert_arguments(value.data, with_namespace)}]"  # pyright: ignore
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"{{{convert_arguments(value.data)}}}"  # pyright: ignore
+        return f"{{{convert_arguments(value.data, with_namespace)}}}"  # pyright: ignore
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "{"
         for i, pair in enumerate(value.data):
-            result += convert_statement(pair.key, True)
+            result += convert_statement(pair.key, with_namespace)
             result += ": "
-            result += convert_statement(pair.value, True)
+            result += convert_statement(pair.value, with_namespace)
             if i != len(value.data) - 1:
                 result += ", "
         result += "}"
@@ -128,7 +128,7 @@ def convert_statement(statement: Statement, with_namespace=False) -> str:
     elif isinstance(statement, FunctionCall):
         return convert_function_call(statement, with_namespace)
     elif isinstance(statement, Value):
-        return convert_value(statement)
+        return convert_value(statement, with_namespace)
     elif isinstance(statement, PropertyAssignment):
         return (
             f"{convert_statement(statement.property)} = "
