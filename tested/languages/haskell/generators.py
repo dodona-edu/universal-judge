@@ -37,8 +37,8 @@ from tested.testsuite import MainInput
 from tested.utils import is_statement_strict
 
 
-def convert_arguments(arguments: list[Expression], annotate=True) -> str:
-    return ", ".join(convert_statement(arg, annotate=annotate) for arg in arguments)
+def convert_arguments(arguments: list[Expression], display=False) -> str:
+    return ", ".join(convert_statement(arg, display=display) for arg in arguments)
 
 
 def convert_number(data) -> str:
@@ -51,13 +51,13 @@ def convert_number(data) -> str:
     return str(data)
 
 
-def convert_value(value: Value, annotate=True) -> str:
+def convert_value(value: Value, display=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data, annotate)})"
+        return f"({convert_arguments(value.data, display)})"
     elif isinstance(value.type, AdvancedNumericTypes):
-        if not annotate:
+        if display:
             return convert_number(value.data)
         return f"({convert_number(value.data)} :: {convert_declaration(value.type)})"
     elif value.type == AdvancedStringTypes.CHAR:
@@ -72,24 +72,24 @@ def convert_value(value: Value, annotate=True) -> str:
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data)
     elif value.type == BasicNothingTypes.NOTHING:
-        return "(Nothing :: Maybe Integer)" if annotate else "Nothing"
+        return "Nothing" if display else "(Nothing :: Maybe Integer)"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data, annotate)}]"
+        return f"[{convert_arguments(value.data, display)}]"
     elif value.type == BasicStringTypes.UNKNOWN:
         assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
-def convert_function_call(function: FunctionCall, annotate=True) -> str:
+def convert_function_call(function: FunctionCall, display=False) -> str:
     result = ""
     if function.namespace:
-        result += convert_statement(function.namespace, annotate=annotate) + "."
+        result += convert_statement(function.namespace, display=display) + "."
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
         assert not isinstance(argument, NamedArgument)
-        converted = convert_statement(argument, annotate=annotate)
+        converted = convert_statement(argument, display=display)
         if isinstance(argument, Value) and not converted.startswith("-"):
             result += converted
         else:
@@ -140,7 +140,7 @@ def convert_declaration(tp: AllTypes | VariableType) -> str:
     raise AssertionError(f"Unknown type: {tp!r}")
 
 
-def convert_statement(statement: Statement, lifting=False, annotate=True) -> str:
+def convert_statement(statement: Statement, lifting=False, display=False) -> str:
     if isinstance(statement, Expression):
         result = ""
         if lifting:
@@ -148,16 +148,16 @@ def convert_statement(statement: Statement, lifting=False, annotate=True) -> str
         if isinstance(statement, Identifier):
             result += statement
         elif isinstance(statement, FunctionCall):
-            result += convert_function_call(statement, annotate)
+            result += convert_function_call(statement, display)
         else:
             assert isinstance(statement, Value)
-            result += convert_value(statement, annotate)
+            result += convert_value(statement, display)
         if lifting:
             result += ")"
         return result
     else:
         assert isinstance(statement, VariableAssignment)
-        expression = convert_statement(statement.expression, annotate=annotate)
+        expression = convert_statement(statement.expression, display=display)
         return f"let {statement.variable} = {expression}"
 
 

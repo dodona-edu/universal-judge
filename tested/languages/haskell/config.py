@@ -168,7 +168,7 @@ class Haskell(Language):
         from tested.languages.haskell import generators
 
         # Only used to show statements and values, which need no type annotations.
-        return generators.convert_statement(statement, annotate=False)
+        return generators.convert_statement(statement, display=True)
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         from tested.languages.haskell import generators
