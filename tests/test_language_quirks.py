@@ -15,6 +15,11 @@ from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
+from tested.languages.haskell.config import (
+    PRECOMPILED_DIRECTORY,
+    PRECOMPILED_FILES,
+    has_precompiled_modules,
+)
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -373,3 +378,22 @@ def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Conf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.skipif(
+    not has_precompiled_modules(), reason="No precompiled Haskell modules"
+)
+def test_haskell_uses_precompiled_modules(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+    # Recompiled means the image is outdated or its flags differ from ghc_flags.
+    for file in PRECOMPILED_FILES:
+        precompiled = PRECOMPILED_DIRECTORY / file
+        used = tmp_path / "common" / file
+        assert used.read_bytes() == precompiled.read_bytes(), file
+        assert used.stat().st_mtime == precompiled.stat().st_mtime, file

@@ -114,6 +114,7 @@ CFG
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
         hlint \
+        lld \
         autoconf \
         build-essential \
         zlib1g-dev \
@@ -176,6 +177,21 @@ CFG
     useradd -m runner
     mkdir /home/runner/workdir
     chown -R runner:runner /home/runner/workdir
+EOF
+
+# Precompile TESTed's Haskell helper modules with the flags of ghc_flags in
+# tested/languages/haskell/config.py. Rebuild the image when they change.
+# Compile in place: -outputdir changes the flags GHC compares.
+ARG TESTED_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates
+RUN <<EOF
+    set -eux
+    mkdir -p /tmp/tested-haskell /usr/local/share/tested/haskell
+    for module in EvaluationUtils Values; do
+        curl -fsSL -o "/tmp/tested-haskell/$module.hs" "$TESTED_TEMPLATES/$module.hs"
+    done
+    bash -c "cd /tmp/tested-haskell && ghc -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
+    cp /tmp/tested-haskell/*.hi /tmp/tested-haskell/*.o /usr/local/share/tested/haskell
+    rm -rf /tmp/tested-haskell
 EOF
 
 USER runner

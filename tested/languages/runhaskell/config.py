@@ -6,6 +6,9 @@ from tested.languages.language import CallbackResult, Command
 
 
 class RunHaskell(Haskell):
+    def _use_precompiled(self) -> bool:
+        return False
+
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))

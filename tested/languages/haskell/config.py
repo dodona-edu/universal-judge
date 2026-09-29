@@ -1,4 +1,7 @@
+import functools
 import re
+import shutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,10 +29,48 @@ from tested.serialisation import Statement, Value
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
+HELPER_MODULES = ["EvaluationUtils", "Values"]
+
+# Built by the Docker image. GHC recompiles them if the templates changed.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
+PRECOMPILED_FILES = [f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")]
+
+
+def ghc_flags(optimise: bool) -> list[str]:
+    return ["-fno-cse", "-fno-full-laziness", "-O3" if optimise else "-O0"]
+
+
+@functools.cache
+def linker_flags() -> list[str]:
+    # lld links a lot faster than the default GNU linker.
+    if sys.platform.startswith("linux") and shutil.which("ld.lld"):
+        return ["-optl-fuse-ld=lld"]
+    return []
+
+
+@functools.cache
+def has_precompiled_modules() -> bool:
+    return all((PRECOMPILED_DIRECTORY / f).is_file() for f in PRECOMPILED_FILES)
+
 
 class Haskell(Language):
+    def _use_precompiled(self) -> bool:
+        assert self.config
+        if self.config.options.compiler_optimizations:
+            return False
+        return has_precompiled_modules()
+
     def initial_dependencies(self) -> list[str]:
-        return ["Values.hs", "EvaluationUtils.hs"]
+        dependencies = [f"{m}.hs" for m in HELPER_MODULES]
+        if self._use_precompiled():
+            dependencies += PRECOMPILED_FILES
+        return dependencies
+
+    def path_to_dependencies(self) -> list[Path]:
+        paths = super().path_to_dependencies()
+        if self._use_precompiled():
+            paths.insert(0, PRECOMPILED_DIRECTORY)
+        return paths
 
     def needs_selector(self):
         return True
@@ -90,9 +131,8 @@ class Haskell(Language):
         assert self.config
         return [
             "ghc",
-            "-fno-cse",
-            "-fno-full-laziness",
-            "-O3" if self.config.options.compiler_optimizations else "-O0",
+            *ghc_flags(self.config.options.compiler_optimizations),
+            *linker_flags(),
             main_,
             "-main-is",
             exec_,
