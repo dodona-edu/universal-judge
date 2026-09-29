@@ -29,6 +29,10 @@ runs:
         push: false
         load: ${{ inputs.load }}
         tags: dodona/dodona-tested:ci
+        # Precompile the Haskell helper modules of the commit under test, so
+        # tests/test_language_quirks.py can check they are used as-is.
+        build-args: |
+          TESTED_TEMPLATES=https://raw.githubusercontent.com/${{ github.event.pull_request.head.repo.full_name || github.repository }}/${{ github.event.pull_request.head.sha || github.sha }}/tested/languages/haskell/templates
         cache-from: type=gha,scope=dodona-tested
         cache-to: ${{ inputs.cache-to }}
     - if: ${{ inputs.run != '' }}

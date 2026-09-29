@@ -1,5 +1,4 @@
 import functools
-import os
 import re
 import shutil
 import sys
@@ -33,18 +32,17 @@ if TYPE_CHECKING:
 # Helper modules from the templates folder that are compiled with every submission.
 HELPER_MODULES = ["EvaluationUtils", "Values"]
 
-# Folder with the precompiled helper modules (.hi and .o files), which the Docker
-# image (.devcontainer/dodona-tested.dockerfile) builds. GHC checks the hash of the
-# sources and the flags, so it recompiles them if they do not match the judge.
-PRECOMPILED_ENV = "TESTED_HASKELL_PRECOMPILED"
-PRECOMPILED_DEFAULT = "/usr/local/share/tested/haskell"
+# The Docker image (.devcontainer/dodona-tested.dockerfile) precompiles the helper
+# modules into this folder. GHC recompiles them if their sources differ from the
+# templates of the judge, but it does not always notice different flags.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
+PRECOMPILED_FILES = [f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")]
 
 
 def ghc_flags(optimise: bool) -> list[str]:
     """
     The flags used to compile all Haskell modules. The Docker image precompiles the
-    helper modules with the flags for optimise=False; keep them in sync, or GHC
-    will recompile the helper modules for every submission.
+    helper modules with the flags for optimise=False: keep them in sync.
     """
     return ["-fno-cse", "-fno-full-laziness", "-O3" if optimise else "-O0"]
 
@@ -52,50 +50,41 @@ def ghc_flags(optimise: bool) -> list[str]:
 @functools.cache
 def linker_flags() -> list[str]:
     """
-    Use a faster linker if one is available. Linking the executable with the default
-    GNU linker (bfd) takes several seconds, since aeson and its dependencies are
-    linked statically; lld and gold are a lot faster.
+    Link with lld if it is installed. Linking the executable with the default GNU
+    linker takes several seconds, since aeson and its dependencies are linked
+    statically, while lld only takes a fraction of that.
     """
-    if not sys.platform.startswith("linux"):
-        return []
-    for linker in ("lld", "gold"):
-        if shutil.which(f"ld.{linker}"):
-            return [f"-optl-fuse-ld={linker}"]
+    if sys.platform.startswith("linux") and shutil.which("ld.lld"):
+        return ["-optl-fuse-ld=lld"]
     return []
 
 
-def precompiled_directory() -> Path | None:
-    """
-    Get the folder with the precompiled helper modules, if it exists and is complete.
-    """
-    directory = Path(os.environ.get(PRECOMPILED_ENV, PRECOMPILED_DEFAULT))
-    files = [f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")]
-    if all((directory / file).is_file() for file in files):
-        return directory
-    return None
+@functools.cache
+def has_precompiled_modules() -> bool:
+    return all((PRECOMPILED_DIRECTORY / f).is_file() for f in PRECOMPILED_FILES)
 
 
 class Haskell(Language):
-    def _use_precompiled(self) -> Path | None:
+    def _use_precompiled(self) -> bool:
         # The precompiled modules are only built without optimisations.
         assert self.config
         if self.config.options.compiler_optimizations:
-            return None
-        return precompiled_directory()
+            return False
+        return has_precompiled_modules()
 
     def initial_dependencies(self) -> list[str]:
         dependencies = [f"{m}.hs" for m in HELPER_MODULES]
         if self._use_precompiled():
-            dependencies += [
-                f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")
-            ]
+            dependencies += PRECOMPILED_FILES
         return dependencies
 
     def path_to_dependencies(self) -> list[Path]:
-        # The sources always come from the templates folder, which is searched first.
+        # Search the precompiled folder first, so stray .hi/.o files in the
+        # templates folder are never used. It contains no sources, so those
+        # always come from the templates folder.
         paths = super().path_to_dependencies()
-        if directory := self._use_precompiled():
-            paths.append(directory)
+        if self._use_precompiled():
+            paths.insert(0, PRECOMPILED_DIRECTORY)
         return paths
 
     def needs_selector(self):

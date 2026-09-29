@@ -242,7 +242,7 @@ runTestcase action onValue onException =
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for i1, tc in enumerate(ctx.testcases):
+        for tc in ctx.testcases:
             result += indent + "writeSeparator\n"
 
             if tc.testcase.is_main_testcase():

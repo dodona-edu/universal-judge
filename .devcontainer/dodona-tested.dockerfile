@@ -131,19 +131,6 @@ CFG
     find "$HASKELL_DIR/ghc" -type f -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true
     find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 
-    # Precompile TESTed's Haskell helper modules, so they are not compiled for every
-    # submission. Use the flags of ghc_flags in tested/languages/haskell/config.py.
-    # GHC recompiles them if the sources or flags of the judge differ. Compile in the
-    # source folder: options such as -outputdir change the flags GHC compares.
-    mkdir -p /tmp/tested-haskell /usr/local/share/tested/haskell
-    for module in EvaluationUtils Values; do
-        curl -fsSL -o "/tmp/tested-haskell/$module.hs" \
-            "https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates/$module.hs"
-    done
-    bash -c "cd /tmp/tested-haskell && ghc --make -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
-    cp /tmp/tested-haskell/*.hi /tmp/tested-haskell/*.o /usr/local/share/tested/haskell
-    rm -rf /tmp/tested-haskell
-
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
@@ -190,6 +177,24 @@ CFG
     useradd -m runner
     mkdir /home/runner/workdir
     chown -R runner:runner /home/runner/workdir
+EOF
+
+# Precompile TESTed's Haskell helper modules, so they are not compiled for every
+# submission. This is a separate step, so changing the templates does not rebuild the
+# rest of the image. TESTed's CI passes the templates of the commit it tests; the
+# published image uses those of master, so rebuild it after changing the templates.
+# Use the flags of ghc_flags in tested/languages/haskell/config.py. Compile in the
+# source folder: options such as -outputdir change the flags GHC compares.
+ARG TESTED_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates
+RUN <<EOF
+    set -eux
+    mkdir -p /tmp/tested-haskell /usr/local/share/tested/haskell
+    for module in EvaluationUtils Values; do
+        curl -fsSL -o "/tmp/tested-haskell/$module.hs" "$TESTED_TEMPLATES/$module.hs"
+    done
+    bash -c "cd /tmp/tested-haskell && ghc -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
+    cp /tmp/tested-haskell/*.hi /tmp/tested-haskell/*.o /usr/local/share/tested/haskell
+    rm -rf /tmp/tested-haskell
 EOF
 
 USER runner
