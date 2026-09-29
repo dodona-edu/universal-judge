@@ -1,4 +1,8 @@
+import functools
+import os
 import re
+import shutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -26,10 +30,73 @@ from tested.serialisation import Statement, Value
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
+# Helper modules from the templates folder that are compiled with every submission.
+HELPER_MODULES = ["EvaluationUtils", "Values"]
+
+# Folder with the precompiled helper modules (.hi and .o files), which the Docker
+# image (.devcontainer/dodona-tested.dockerfile) builds. GHC checks the hash of the
+# sources and the flags, so it recompiles them if they do not match the judge.
+PRECOMPILED_ENV = "TESTED_HASKELL_PRECOMPILED"
+PRECOMPILED_DEFAULT = "/usr/local/share/tested/haskell"
+
+
+def ghc_flags(optimise: bool) -> list[str]:
+    """
+    The flags used to compile all Haskell modules. The Docker image precompiles the
+    helper modules with the flags for optimise=False; keep them in sync, or GHC
+    will recompile the helper modules for every submission.
+    """
+    return ["-fno-cse", "-fno-full-laziness", "-O3" if optimise else "-O0"]
+
+
+@functools.cache
+def linker_flags() -> list[str]:
+    """
+    Use a faster linker if one is available. Linking the executable with the default
+    GNU linker (bfd) takes several seconds, since aeson and its dependencies are
+    linked statically; lld and gold are a lot faster.
+    """
+    if not sys.platform.startswith("linux"):
+        return []
+    for linker in ("lld", "gold"):
+        if shutil.which(f"ld.{linker}"):
+            return [f"-optl-fuse-ld={linker}"]
+    return []
+
+
+def precompiled_directory() -> Path | None:
+    """
+    Get the folder with the precompiled helper modules, if it exists and is complete.
+    """
+    directory = Path(os.environ.get(PRECOMPILED_ENV, PRECOMPILED_DEFAULT))
+    files = [f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")]
+    if all((directory / file).is_file() for file in files):
+        return directory
+    return None
+
 
 class Haskell(Language):
+    def _use_precompiled(self) -> Path | None:
+        # The precompiled modules are only built without optimisations.
+        assert self.config
+        if self.config.options.compiler_optimizations:
+            return None
+        return precompiled_directory()
+
     def initial_dependencies(self) -> list[str]:
-        return ["Values.hs", "EvaluationUtils.hs"]
+        dependencies = [f"{m}.hs" for m in HELPER_MODULES]
+        if self._use_precompiled():
+            dependencies += [
+                f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")
+            ]
+        return dependencies
+
+    def path_to_dependencies(self) -> list[Path]:
+        # The sources always come from the templates folder, which is searched first.
+        paths = super().path_to_dependencies()
+        if directory := self._use_precompiled():
+            paths.append(directory)
+        return paths
 
     def needs_selector(self):
         return True
@@ -90,9 +157,8 @@ class Haskell(Language):
         assert self.config
         return [
             "ghc",
-            "-fno-cse",
-            "-fno-full-laziness",
-            "-O3" if self.config.options.compiler_optimizations else "-O0",
+            *ghc_flags(self.config.options.compiler_optimizations),
+            *linker_flags(),
             main_,
             "-main-is",
             exec_,

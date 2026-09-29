@@ -1,11 +1,15 @@
 from pathlib import Path
 
 from tested.languages.conventionalize import submission_file
-from tested.languages.haskell.config import Haskell
+from tested.languages.haskell.config import HELPER_MODULES, Haskell
 from tested.languages.language import CallbackResult, Command
 
 
 class RunHaskell(Haskell):
+    def initial_dependencies(self) -> list[str]:
+        # runhaskell interprets the modules, so the precompiled ones are not used.
+        return [f"{m}.hs" for m in HELPER_MODULES]
+
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))

@@ -114,6 +114,7 @@ CFG
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
         hlint \
+        lld \
         autoconf \
         build-essential \
         zlib1g-dev \
@@ -129,6 +130,19 @@ CFG
     rm -rf "$HASKELL_DIR/ghc/share/doc" "$HASKELL_DIR/ghc"/lib/*/doc
     find "$HASKELL_DIR/ghc" -type f -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true
     find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+    # Precompile TESTed's Haskell helper modules, so they are not compiled for every
+    # submission. Use the flags of ghc_flags in tested/languages/haskell/config.py.
+    # GHC recompiles them if the sources or flags of the judge differ. Compile in the
+    # source folder: options such as -outputdir change the flags GHC compares.
+    mkdir -p /tmp/tested-haskell /usr/local/share/tested/haskell
+    for module in EvaluationUtils Values; do
+        curl -fsSL -o "/tmp/tested-haskell/$module.hs" \
+            "https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates/$module.hs"
+    done
+    bash -c "cd /tmp/tested-haskell && ghc --make -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
+    cp /tmp/tested-haskell/*.hi /tmp/tested-haskell/*.o /usr/local/share/tested/haskell
+    rm -rf /tmp/tested-haskell
 
     # C# dependencies
     curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
