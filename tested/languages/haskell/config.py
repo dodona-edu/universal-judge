@@ -9,6 +9,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+    submission_name,
 )
 from tested.languages.language import (
     CallbackResult,
@@ -16,11 +17,7 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import (
-    cleanup_description,
-    executable_name,
-    haskell_solution,
-)
+from tested.languages.utils import executable_name, haskell_solution
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -113,7 +110,11 @@ class Haskell(Language):
         return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+        # Every function or constructor of the submission is prefixed, not only the first.
+        return re.sub(rf"\b{submission_name(self)}\.", "", statement)
+
+    def cleanup_literal_description(self, literal: str) -> str:
+        return self.cleanup_description(literal)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)

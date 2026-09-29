@@ -14,7 +14,7 @@ from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTy
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
-from tested.languages.generation import generate_statement
+from tested.languages.generation import generate_statement, get_readable_input
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -22,7 +22,14 @@ from tested.serialisation import (
     NumberType,
     StringType,
 )
-from tested.testsuite import Suite
+from tested.testsuite import (
+    Context,
+    LanguageLiterals,
+    Suite,
+    SupportedLanguage,
+    Tab,
+    Testcase,
+)
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -387,3 +394,44 @@ def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Conf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize(
+    "language,literal,expected",
+    [
+        (
+            SupportedLanguage.HASKELL,
+            "Submission.search 5 (Submission.insert 5 empty)",
+            "search 5 (insert 5 empty)",
+        ),
+        (
+            SupportedLanguage.JAVASCRIPT,
+            "submission.search(5, submission.insert(5, empty))",
+            "submission.search(5, submission.insert(5, empty))",
+        ),
+    ],
+)
+def test_description_of_language_literal(
+    language: SupportedLanguage,
+    literal: str,
+    expected: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    testcase = Testcase(input=LanguageLiterals(literals={language: literal}))
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[testcase])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    readable, _ = get_readable_input(bundle, testcase)
+    assert readable.description == expected
+
+
+def test_haskell_description_of_nested_calls(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    testcase = Testcase(input=parse_string("search(5, insert(5, empty))"))
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[testcase])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    readable, _ = get_readable_input(bundle, testcase)
+    assert "Submission." not in readable.description

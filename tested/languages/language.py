@@ -406,6 +406,15 @@ class Language(ABC):
         """
         return statement
 
+    def cleanup_literal_description(self, literal: str) -> str:
+        """
+        Allow the language implementation to modify a language-specific expression
+        or statement from the test suite for use as description.
+
+        :param literal: The expression or statement from the test suite.
+        """
+        return literal
+
     @abstractmethod
     def generate_statement(self, statement: Statement) -> str:
         """
