@@ -109,12 +109,8 @@ class Haskell(Language):
         assert self.config
         return linter.run_hlint(self.config.dodona, remaining)
 
-    def cleanup_description(self, statement: str) -> str:
-        # Every function or constructor of the submission is prefixed, not only the first.
-        return re.sub(rf"\b{submission_name(self)}\.", "", statement)
-
     def cleanup_literal_description(self, literal: str) -> str:
-        return self.cleanup_description(literal)
+        return re.sub(rf"\b{re.escape(submission_name(self))}\.", "", literal)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)
