@@ -132,6 +132,7 @@ def get_readable_input(
     else:
         assert isinstance(case.input, LanguageLiterals)
         text = case.input.get_for(bundle.config.programming_language)
+        text = bundle.language.cleanup_literal_description(text)
         format_ = bundle.config.programming_language
 
         if case.line_comment:

@@ -13,8 +13,7 @@ from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
-from tested.languages.conventionalize import submission_name
-from tested.languages.generation import generate_statement
+from tested.languages.generation import generate_statement, get_readable_input
 from tested.serialisation import (
     BooleanType,
     FunctionCall,
@@ -22,7 +21,14 @@ from tested.serialisation import (
     NumberType,
     StringType,
 )
-from tested.testsuite import Suite
+from tested.testsuite import (
+    Context,
+    LanguageLiterals,
+    Suite,
+    SupportedLanguage,
+    Tab,
+    Testcase,
+)
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -246,7 +252,7 @@ def test_haskell_function_arguments_without_brackets(
     )
 
     result = generate_statement(bundle, statement)
-    assert result == f'{submission_name(bundle.language)}.test 5.5 "hallo" True'
+    assert result == 'test 5.5 "hallo" True'
 
 
 def test_haskell_numbers_without_type_annotations(
@@ -387,3 +393,52 @@ def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Conf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+def _readable_input(conf, testcase: Testcase) -> str:
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[testcase])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    readable, _ = get_readable_input(bundle, testcase)
+    return readable.description
+
+
+@pytest.mark.parametrize(
+    "language,literal,expected",
+    [
+        (
+            SupportedLanguage.HASKELL,
+            "Submission.search 5 (Submission.insert 5 empty)",
+            "search 5 (insert 5 empty)",
+        ),
+        (
+            SupportedLanguage.JAVASCRIPT,
+            "submission.search(5, submission.insert(5, empty))",
+            "submission.search(5, submission.insert(5, empty))",
+        ),
+    ],
+)
+def test_description_of_language_literal(
+    language: SupportedLanguage,
+    literal: str,
+    expected: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    testcase = Testcase(input=LanguageLiterals(literals={language: literal}))
+    assert _readable_input(conf, testcase) == expected
+
+
+@pytest.mark.parametrize(
+    "statement,expected",
+    [
+        ("search(5, insert(5, empty))", "search 5 (insert 5 (empty))"),
+        ('echo("Submission.x")', 'echo "Submission.x"'),
+    ],
+)
+def test_haskell_description_without_submission_prefix(
+    statement: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    testcase = Testcase(input=parse_string(statement))
+    assert _readable_input(conf, testcase) == expected

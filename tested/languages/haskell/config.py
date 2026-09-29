@@ -9,6 +9,7 @@ from tested.languages.conventionalize import (
     Conventionable,
     NamingConventions,
     submission_file,
+    submission_name,
 )
 from tested.languages.language import (
     CallbackResult,
@@ -16,11 +17,7 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import (
-    cleanup_description,
-    executable_name,
-    haskell_solution,
-)
+from tested.languages.utils import executable_name, haskell_solution
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -112,8 +109,8 @@ class Haskell(Language):
         assert self.config
         return linter.run_hlint(self.config.dodona, remaining)
 
-    def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+    def cleanup_literal_description(self, literal: str) -> str:
+        return re.sub(rf"\b{re.escape(submission_name(self))}\.", "", literal)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)
