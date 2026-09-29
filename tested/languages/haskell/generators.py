@@ -225,9 +225,7 @@ handleException :: Exception e => (Either e a) -> Maybe e
 handleException (Left e) = Just e
 handleException (Right _) = Nothing
 
--- Run one testcase: evaluate it, pass the result to the value handler and
--- any exception to the exception handler. Sharing this function keeps the
--- generated code small, which makes compiling it a lot faster.
+-- Shared by all testcases: inlining this makes compilation a lot slower.
 runTestcase :: IO a -> (a -> IO ()) -> (Maybe SomeException -> IO ()) -> IO ()
 runTestcase action onValue onException =
     catch (action >>= onValue) (\\e -> onException (Just e))
@@ -268,7 +266,6 @@ runTestcase action onValue onException =
                         + "\n"
                     )
                 else:
-                    # Evaluate the input, send the result as 'r' and any exception as 'ee'.
                     action = convert_statement(
                         tc.input.unwrapped_input_statement(), True
                     )

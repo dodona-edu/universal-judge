@@ -391,8 +391,7 @@ def test_haskell_uses_precompiled_modules(tmp_path: Path, pytestconfig: pytest.C
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
-    # GHC must not have recompiled them: if it did, the image is outdated or its
-    # flags differ from ghc_flags.
+    # Recompiled means the image is outdated or its flags differ from ghc_flags.
     for file in PRECOMPILED_FILES:
         precompiled = PRECOMPILED_DIRECTORY / file
         used = tmp_path / "common" / file

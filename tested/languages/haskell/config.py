@@ -29,31 +29,20 @@ from tested.serialisation import Statement, Value
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
-# Helper modules from the templates folder that are compiled with every submission.
 HELPER_MODULES = ["EvaluationUtils", "Values"]
 
-# The Docker image (.devcontainer/dodona-tested.dockerfile) precompiles the helper
-# modules into this folder. GHC recompiles them if their sources differ from the
-# templates of the judge, but it does not always notice different flags.
+# Built by the Docker image. GHC recompiles them if the templates changed.
 PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
 PRECOMPILED_FILES = [f"{m}.{ext}" for m in HELPER_MODULES for ext in ("hi", "o")]
 
 
 def ghc_flags(optimise: bool) -> list[str]:
-    """
-    The flags used to compile all Haskell modules. The Docker image precompiles the
-    helper modules with the flags for optimise=False: keep them in sync.
-    """
     return ["-fno-cse", "-fno-full-laziness", "-O3" if optimise else "-O0"]
 
 
 @functools.cache
 def linker_flags() -> list[str]:
-    """
-    Link with lld if it is installed. Linking the executable with the default GNU
-    linker takes several seconds, since aeson and its dependencies are linked
-    statically, while lld only takes a fraction of that.
-    """
+    # lld links a lot faster than the default GNU linker.
     if sys.platform.startswith("linux") and shutil.which("ld.lld"):
         return ["-optl-fuse-ld=lld"]
     return []
@@ -66,7 +55,6 @@ def has_precompiled_modules() -> bool:
 
 class Haskell(Language):
     def _use_precompiled(self) -> bool:
-        # The precompiled modules are only built without optimisations.
         assert self.config
         if self.config.options.compiler_optimizations:
             return False
@@ -79,9 +67,6 @@ class Haskell(Language):
         return dependencies
 
     def path_to_dependencies(self) -> list[Path]:
-        # Search the precompiled folder first, so stray .hi/.o files in the
-        # templates folder are never used. It contains no sources, so those
-        # always come from the templates folder.
         paths = super().path_to_dependencies()
         if self._use_precompiled():
             paths.insert(0, PRECOMPILED_DIRECTORY)

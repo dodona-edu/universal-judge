@@ -179,12 +179,9 @@ CFG
     chown -R runner:runner /home/runner/workdir
 EOF
 
-# Precompile TESTed's Haskell helper modules, so they are not compiled for every
-# submission. This is a separate step, so changing the templates does not rebuild the
-# rest of the image. TESTed's CI passes the templates of the commit it tests; the
-# published image uses those of master, so rebuild it after changing the templates.
-# Use the flags of ghc_flags in tested/languages/haskell/config.py. Compile in the
-# source folder: options such as -outputdir change the flags GHC compares.
+# Precompile TESTed's Haskell helper modules with the flags of ghc_flags in
+# tested/languages/haskell/config.py. Rebuild the image when they change.
+# Compile in place: -outputdir changes the flags GHC compares.
 ARG TESTED_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates
 RUN <<EOF
     set -eux

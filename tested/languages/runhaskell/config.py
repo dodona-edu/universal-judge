@@ -7,7 +7,6 @@ from tested.languages.language import CallbackResult, Command
 
 class RunHaskell(Haskell):
     def _use_precompiled(self) -> bool:
-        # runhaskell interprets the modules, so the precompiled ones are not used.
         return False
 
     def compilation(self, files: list[str]) -> CallbackResult:
