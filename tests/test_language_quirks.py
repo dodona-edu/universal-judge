@@ -15,7 +15,10 @@ from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
+from tested.languages.preparation import prepare_assignment, prepare_expression
+from tested.languages.python.generators import convert_statement
 from tested.serialisation import (
+    Assignment,
     BooleanType,
     FunctionCall,
     FunctionType,
@@ -373,3 +376,65 @@ def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Conf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+def test_python_nested_namespace(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "nested-namespace",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 7
+
+
+@pytest.mark.parametrize(
+    "expression, expected",
+    [
+        (
+            "[Grocery('Milk', 3, True), MILK]",
+            "[submission.Grocery('Milk', 3, True), submission.MILK]",
+        ),
+        (
+            "{Grocery('Milk', 3, True), MILK}",
+            "{submission.Grocery('Milk', 3, True), submission.MILK}",
+        ),
+        (
+            "(Grocery('Milk', 3, True), MILK)",
+            "(submission.Grocery('Milk', 3, True), submission.MILK)",
+        ),
+        (
+            "{'milk': Grocery('Milk', 3, True), 'global': MILK}",
+            "{'milk': submission.Grocery('Milk', 3, True), 'global': submission.MILK}",
+        ),
+        (
+            "[[Grocery('Milk', 3, True)], {'milk': MILK}]",
+            "[[submission.Grocery('Milk', 3, True)], {'milk': submission.MILK}]",
+        ),
+        (
+            "groceries = [Grocery('Milk', 3, True), MILK]",
+            "groceries = [submission.Grocery('Milk', 3, True), submission.MILK]",
+        ),
+        (
+            "basket_total(Basket([MILK]))",
+            "submission.basket_total(submission.Basket([submission.MILK]))",
+        ),
+    ],
+)
+def test_python_nested_values_keep_submission_namespace(
+    expression: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", "python", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+
+    statement = parse_string(expression)
+    if isinstance(statement, Assignment):
+        statement = prepare_assignment(bundle, statement)
+    else:
+        statement = prepare_expression(bundle, statement)
+
+    assert convert_statement(statement, True) == expected

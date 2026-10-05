@@ -1,0 +1,24 @@
+- tab: "Nested namespace"
+  contexts:
+    - testcases:
+        - statement: "groceries = [Grocery('Milk', 3, True), Grocery('Eggs', 5, False)]"
+        - expression: "sum_groceries(groceries)"
+          return: 3
+    - testcases:
+        - expression: "sum_groceries([Grocery('Milk', 3, True), Grocery('Eggs', 5, True)])"
+          return: 8
+    - testcases:
+        - expression: "sum_groceries({Grocery('Milk', 3, True), Grocery('Eggs', 5, True)})"
+          return: 8
+    - testcases:
+        - expression: "sum_groceries((Grocery('Milk', 3, True), Grocery('Eggs', 5, True)))"
+          return: 8
+    - testcases:
+        - expression: "sum_groceries({'milk': Grocery('Milk', 3, True), 'eggs': Grocery('Eggs', 5, True)})"
+          return: 8
+    - testcases:
+        - expression: "sum_groceries([MILK, Grocery('Eggs', 5, True)])"
+          return: 8
+    - testcases:
+        - expression: "basket_total(Basket([MILK, Grocery('Eggs', 5, True)]))"
+          return: 8
