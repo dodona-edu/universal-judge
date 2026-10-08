@@ -272,15 +272,20 @@ class DslContext:
         return evolve(self, files=the_files, config=the_config)
 
     def merge_inheritable_with_specific_config(
-        self, level: YamlObject, config_name: str
+        self, level: YamlObject, *config_names: str
     ) -> dict:
-        inherited_options = self.config.get(config_name, dict())
+        # The inherited options of later config names override those of earlier ones.
+        inherited_options: dict = dict()
+        for config_name in config_names:
+            inherited_options = recursive_dict_merge(
+                inherited_options, self.config.get(config_name, dict())
+            )
         specific_options = (
             level.get("config", dict()) if isinstance(level, dict) else dict()
         )
         assert isinstance(
             specific_options, dict
-        ), f"The config options for {config_name} must be a dictionary, not a {type(specific_options)}"
+        ), f"The config options for {config_names[-1]} must be a dictionary, not a {type(specific_options)}"
         return recursive_dict_merge(inherited_options, specific_options)
 
 
@@ -484,10 +489,10 @@ def _convert_text_output_channel(
 
 
 def _convert_file_output_channel(
-    stream: YamlObject, context: DslContext, config_name: str
+    stream: YamlObject, context: DslContext, *config_names: str
 ) -> FileOutputChannel:
 
-    config = context.merge_inheritable_with_specific_config(stream, config_name)
+    config = context.merge_inheritable_with_specific_config(stream, *config_names)
     if "mode" not in config:
         config["mode"] = "full"
     assert config["mode"] in (
@@ -689,7 +694,11 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if (file := testcase.get("file")) is not None:
         output.file = _convert_file_output_channel(file, context, "file")
     if (file := testcase.get("output_files")) is not None:
-        output.file = _convert_file_output_channel(file, context, "output_files")
+        # The schema only defines "file" as inheritable config for expected files,
+        # so inherit from it; "output_files" is still read to stay backwards compatible.
+        output.file = _convert_file_output_channel(
+            file, context, "file", "output_files"
+        )
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
