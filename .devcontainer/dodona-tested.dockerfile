@@ -20,6 +20,12 @@ ENV PATH=$HASKELL_DIR/cabal:$PATH
 # Node
 ENV NODE_PATH=/usr/lib/node_modules
 
+# .NET: every submission runs in a fresh container, so each dotnet call is a first run
+ENV DOTNET_NOLOGO=1
+ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
+ENV DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
 # Install dependencies
 # hadolint ignore=DL3013,DL3016
 RUN <<EOF
