@@ -190,7 +190,7 @@ def test_structure_every_union():
     the_type = Union[Identifier, int]
     result = structure_every_union("my_id", the_type)
     assert isinstance(result, Identifier)
-    assert result == "my_id"
+    assert result == Identifier("my_id")
 
     # Test failure
     with pytest.raises(TypeError):
@@ -244,3 +244,170 @@ def test_parse_json_suite_and_to_json():
     back_to_json = suite_to_json(suite)
     # The default Suite might have other fields, but namespace should be there if not default
     assert "test_namespace" in back_to_json
+
+
+# Backwards compatibility: legacy JSON (with "namespace" and "property") is mapped onto
+# the scope model on input.
+
+
+def _structure_statement(data):
+    from tested.serialisation import Statement
+
+    return get_converter().structure(data, Statement)  # pyright: ignore
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"type": "function", "name": "f"},
+        {"type": "function", "name": "f", "namespace": None},
+        {"type": "function", "name": "f", "namespace": ""},
+        {"type": "function", "name": "f", "scope": "submission"},
+    ],
+)
+def test_legacy_function_without_namespace(data):
+    from tested.serialisation import FunctionCall, FunctionType, ScopeType
+
+    assert _structure_statement(data) == FunctionCall(
+        type=FunctionType.FUNCTION, name="f", scope=ScopeType.SUBMISSION
+    )
+
+
+def test_legacy_function_with_identifier_namespace():
+    from tested.serialisation import FunctionCall, FunctionType, Identifier
+
+    data = {"type": "function", "name": "get", "namespace": "ex", "arguments": []}
+    assert _structure_statement(data) == FunctionCall(
+        type=FunctionType.FUNCTION, name="get", scope=Identifier("ex")
+    )
+
+
+def test_legacy_function_with_constructor_namespace():
+    from tested.serialisation import FunctionCall, FunctionType, ScopeType
+
+    data = {
+        "type": "function",
+        "name": "check",
+        "namespace": {"type": "constructor", "name": "EqualChecker", "arguments": []},
+    }
+    assert _structure_statement(data) == FunctionCall(
+        type=FunctionType.FUNCTION,
+        name="check",
+        scope=FunctionCall(
+            type=FunctionType.CONSTRUCTOR,
+            name="EqualChecker",
+            scope=ScopeType.SUBMISSION,
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"type": "property", "name": "global_var"},
+        {"type": "property", "name": "global_var", "namespace": None},
+        {"type": "property", "name": "global_var", "namespace": ""},
+    ],
+)
+def test_legacy_property_without_namespace_is_submission_global(data):
+    from tested.serialisation import Identifier, ScopeType
+
+    assert _structure_statement(data) == Identifier(
+        "global_var", scope=ScopeType.SUBMISSION
+    )
+
+
+def test_legacy_property_with_namespace():
+    from tested.serialisation import Identifier
+
+    data = {"type": "property", "name": "x", "namespace": "a"}
+    assert _structure_statement(data) == Identifier("x", scope=Identifier("a"))
+
+
+def test_legacy_method_on_submission_global():
+    from tested.serialisation import FunctionCall, FunctionType, Identifier, ScopeType
+
+    data = {
+        "type": "function",
+        "name": "y",
+        "namespace": {"type": "property", "name": "x"},
+    }
+    assert _structure_statement(data) == FunctionCall(
+        type=FunctionType.FUNCTION,
+        name="y",
+        scope=Identifier("x", scope=ScopeType.SUBMISSION),
+    )
+
+
+def test_legacy_property_assignment():
+    from tested.serialisation import Identifier, PropertyAssignment
+
+    data = {
+        "property": {"type": "property", "name": "x", "namespace": "a"},
+        "expression": {"type": "integer", "data": 5},
+    }
+    result = _structure_statement(data)
+    assert isinstance(result, PropertyAssignment)
+    assert result.target == Identifier("x", scope=Identifier("a"))
+
+
+def test_legacy_variable_assignment():
+    from tested.serialisation import Identifier, VariableAssignment
+
+    data = {
+        "type": "sequence",
+        "variable": "codes01",
+        "expression": {"type": "function", "name": "get", "namespace": "ex"},
+    }
+    result = _structure_statement(data)
+    assert isinstance(result, VariableAssignment)
+    assert result.variable == Identifier("codes01")
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        # Writing a global of the submission is not supported.
+        {
+            "property": {"type": "property", "name": "x"},
+            "expression": {"type": "integer", "data": 5},
+        },
+        # Constructors with a namespace are not supported.
+        {"type": "constructor", "name": "Foo", "namespace": "a"},
+    ],
+)
+def test_legacy_rejected(data):
+    with pytest.raises(TypeError):
+        _structure_statement(data)
+
+
+def test_identifier_object_form():
+    from tested.serialisation import Identifier, ScopeType
+
+    assert _structure_statement({"name": "x", "scope": "a"}) == Identifier(
+        "x", scope=Identifier("a")
+    )
+    assert _structure_statement({"name": "x", "scope": "submission"}) == Identifier(
+        "x", scope=ScopeType.SUBMISSION
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        # "namespace": "" and "namespace": "ex", plus a variable assignment.
+        "isbn/evaluation/one-with-crashing-assignment-java.tson",
+        # A property without namespace (a submission global).
+        "global/evaluation/one.tson",
+        # A constructor as namespace.
+        "objects/evaluation/chained.tson",
+        "objects/evaluation/plan.tson",
+    ],
+)
+def test_legacy_exercise_suites_parse(path: str):
+    from pathlib import Path
+
+    from tested.parsing import parse_json_suite
+
+    suite_file = Path(__file__).parent / "exercises" / path
+    parse_json_suite(suite_file.read_text())

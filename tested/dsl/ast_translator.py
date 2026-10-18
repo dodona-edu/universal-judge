@@ -12,9 +12,11 @@ Some useful notes:
 - The parser will convert "casts" in the Python code to one of our types.
 - Two special values exist: Null and Undefined.
 - Function calls whose name begins with a capital are considered constructors.
-- Identifiers in call caps are considered "global" variables.
+- Identifiers in all caps are considered "global" variables by default and are read
+  from the submission. This can be overridden by adding an explicit scope.
 
-From the Python grammar (at https://docs.python.org/3/library/ast.html#abstract-grammar),
+From the Python grammar (at https://docs.python.org/3/library/ast.html#abstract
+-grammar),
 the following is supported:
 
 - Assignments (without type annotation if it is a simple expression)
@@ -24,6 +26,12 @@ the following is supported:
 - Function calls
 - Keyword arguments (i.e. named arguments)
 - Properties (i.e. attributes)
+
+Some identifiers are reserved and cannot be used generally:
+
+- tested
+- suite
+- submission
 """
 
 import ast
@@ -55,6 +63,7 @@ from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,
     PropertyAssignment,
+    ScopeType,
     SequenceType,
     Statement,
     Value,
@@ -67,6 +76,42 @@ from tested.utils import get_args
 
 class InvalidDslError(Exception):
     pass
+
+
+# Names that refer to a scope when used as the left-hand side of an attribute,
+# e.g. `submission.foo()`. Using them on their own is an error.
+_SCOPE_KEYWORDS = {
+    "submission": ScopeType.SUBMISSION,
+    "suite": ScopeType.SUITE,
+    "tested": ScopeType.TESTED,
+}
+
+
+def _scope_keyword(node: ast.expr) -> ScopeType | None:
+    """
+    Check if the node is a scope keyword, e.g. the `submission` in
+    `submission.foo()`, and return the corresponding scope type.
+    """
+    if isinstance(node, ast.Name):
+        return _SCOPE_KEYWORDS.get(node.id)
+    return None
+
+
+def _function_type_for(name: str) -> FunctionType:
+    # Consider function calls that start with a capital to be constructors.
+    return FunctionType.CONSTRUCTOR if name[0].isupper() else FunctionType.FUNCTION
+
+
+def _scoped_identifier(name: str, scope_type: ScopeType) -> Identifier:
+    """A variable in an explicit scope, e.g. `submission.x` or `suite.x`."""
+    if scope_type == ScopeType.TESTED:
+        raise InvalidDslError(
+            f"The 'tested' scope is reserved for future use, got 'tested.{name}'"
+        )
+    if scope_type == ScopeType.SUBMISSION and name.isupper():
+        # Consistent with the legacy bare `X` form; casing is decided per language.
+        name = name.lower()
+    return Identifier(name=name, scope=scope_type)
 
 
 def _is_and_get_allowed_empty(node: ast.Call) -> Value | None:
@@ -98,23 +143,59 @@ def _is_type_cast(node: ast.expr) -> bool:
     return any(node.func.id in x.__members__.values() for x in get_args(AllTypes))
 
 
+def _convert_assignment_target(node: ast.expr) -> Identifier:
+    if isinstance(node, ast.Name):
+        if _scope_keyword(node) is not None:
+            raise InvalidDslError(
+                f"'{node.id}' is reserved and cannot be used as a variable name"
+            )
+
+        return Identifier(name=node.id, scope=ScopeType.SUITE)
+    elif isinstance(node, ast.Attribute):
+        name = node.attr
+        scope = _scope_keyword(node.value)
+        if scope is ScopeType.SUBMISSION:
+            raise InvalidDslError(
+                f"Cannot assign to a global in the submission scope, "
+                f"got 'submission.{name}'"
+            )
+        elif scope is ScopeType.SUITE:
+            return Identifier(name=name, scope=scope)
+        elif scope is ScopeType.TESTED:
+            raise InvalidDslError(
+                f"The 'tested' scope is reserved for future use, got 'tested.{name}'"
+            )
+        else:
+            return Identifier(
+                name=name, scope=_convert_expression(node.value, is_return=False)
+            )
+    else:
+        raise InvalidDslError(f"Unsupported assignment target type: {type(node)}")
+
+
 def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
-    if not isinstance(node.target, ast.Name):
+    target = _convert_assignment_target(node.target)
+    if target.scope is not ScopeType.SUITE:
         actual = ast.dump(node)
         raise InvalidDslError(
             f"""
             You can only assign to simple variables when using type hints.
-            You are trying to assign to a target of type {type(node.target)}.
             The full assignment is:
             {actual}
             """
         )
-    assert node.value
+
+    if not node.value:
+        actual = ast.dump(node)
+        raise InvalidDslError(f"Assignment must have a value, got {actual}")
+
     value = _convert_expression(node.value, False)
     if isinstance(node.annotation, ast.Name):
         type_ = node.annotation.id
-    elif isinstance(node.annotation, ast.Str):
-        type_ = node.annotation.s
+    elif isinstance(node.annotation, ast.Constant) and isinstance(
+        node.annotation.value, str
+    ):
+        type_ = node.annotation.value
     else:
         raise InvalidDslError("Type hints should be simple values.")
 
@@ -124,22 +205,23 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
         type_ = VariableType(data=type_)
 
     return VariableAssignment(
-        variable=node.target.id,
+        variable=target,
         expression=value,
         type=cast(VariableType | AllTypes, type_),
     )
 
 
 def _convert_assignment(node: ast.Assign) -> Assignment:
-    if n := len(node.targets) != 1:
+    if (n := len(node.targets)) != 1:
         raise InvalidDslError(
             f"You must assign to exactly one variable, but got {n} variables."
         )
-    variable = node.targets[0]
+
+    target = _convert_assignment_target(node.targets[0])
     value = _convert_expression(node.value, False)
 
-    if isinstance(variable, ast.Name):
-        # Support a few obvious ones, such as constructor calls or literal values.
+    if target.scope is ScopeType.SUITE:
+        # Attempt to determine the type of the variable we are creating in the suite.
         type_ = None
         if isinstance(value, Value):
             type_ = value.type
@@ -148,35 +230,41 @@ def _convert_assignment(node: ast.Assign) -> Assignment:
 
         if not type_:
             raise InvalidDslError(
-                f"Could not deduce the type of variable {variable.id}: add a type annotation."
+                f"Could not deduce the type of variable {target.name}: add a type "
+                f"annotation."
             )
 
         assert isinstance(type_, AllTypes | VariableType)
-        return VariableAssignment(variable=variable.id, expression=value, type=type_)
-    elif isinstance(variable, ast.Attribute):
-        property_access = _convert_expression(variable, False)
-        assert isinstance(property_access, FunctionCall)
-        return PropertyAssignment(property=property_access, expression=value)
-    else:
-        actual = ast.dump(node)
-        raise InvalidDslError(
-            f"You can only assign to simple variables or attributes, got: {actual}."
-        )
+        return VariableAssignment(variable=target, expression=value, type=type_)
+
+    # The helper guarantees the scope is an expression.
+    return PropertyAssignment(target=target, expression=value)
 
 
 def _convert_call(node: ast.Call) -> FunctionCall:
-    # We consider function calls that start with a capital to be constructors.
     if isinstance(node.func, ast.Name):
-        if node.func.id[0].isupper():
-            our_type = FunctionType.CONSTRUCTOR
+        if _scope_keyword(node.func) is not None:
+            raise InvalidDslError(f"'{node.func.id}' is reserved and cannot be used")
+        our_type = _function_type_for(node.func.id)
+        name = node.func.id
+        scope = ScopeType.SUBMISSION
+    elif isinstance(node.func, ast.Attribute):
+        name = node.func.attr
+        scope = _scope_keyword(node.func.value)
+        if scope is ScopeType.SUBMISSION:
+            our_type = _function_type_for(name)
+        elif scope is ScopeType.SUITE:
+            raise InvalidDslError(
+                f"A test suite cannot define and thus call functions, got 'suite."
+                f"{name}'"
+            )
+        elif scope is ScopeType.TESTED:
+            raise InvalidDslError(
+                f"The 'tested' scope is reserved for future use, got 'tested.{name}'"
+            )
         else:
             our_type = FunctionType.FUNCTION
-        name = node.func.id
-        namespace = None
-    elif isinstance(node.func, ast.Attribute):
-        our_type = FunctionType.FUNCTION
-        name = node.func.attr
-        namespace = _convert_expression(node.func.value, False)
+            scope = _convert_expression(node.func.value, False)
     else:
         raise InvalidDslError(f"Unknown function type: {type(node.func)}")
 
@@ -193,12 +281,7 @@ def _convert_call(node: ast.Call) -> FunctionCall:
             )
         )
 
-    if our_type == FunctionType.PROPERTY and len(arguments) != 0:
-        raise InvalidDslError("Passing arguments to property calls is not supported.")
-
-    return FunctionCall(
-        type=our_type, name=name, namespace=namespace, arguments=arguments
-    )
+    return FunctionCall(type=our_type, name=name, scope=scope, arguments=arguments)
 
 
 def _convert_constant(node: ast.Constant) -> Value:
@@ -213,7 +296,8 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
         assert isinstance(node, ast.Call)
         assert isinstance(node.func, ast.Name)
 
-        # "Casts" of sequence types can also be used a constructor for an empty sequence.
+        # "Casts" of sequence types can also be used a constructor for an empty
+        # sequence.
         # For example, "set()", "map()", ...
         nr_of_args = len(node.args)
         if (empty_value := _is_and_get_allowed_empty(node)) and nr_of_args == 0:
@@ -223,14 +307,18 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             if nr_of_args != 1:
                 if _is_and_get_allowed_empty(node) is not None:
                     error = f"""
-                    The cast function '{node.func.id}' must have either zero or one arguments:
-                    - Zero if you want to use it to represent an empty value, e.g. '{node.func.id}()'
-                    - One if you want to cast another value to the type '{node.func.id}'.
+                    The cast function '{node.func.id}' must have either zero or one 
+                    arguments:
+                    - Zero if you want to use it to represent an empty value, 
+                    e.g. '{node.func.id}()'
+                    - One if you want to cast another value to the type '
+{node.func.id}'.
                     """
                     raise InvalidDslError(error)
                 else:
                     error = f"""
-                    The cast function '{node.func.id}' must have exact one argument, but found {nr_of_args}.
+                    The cast function '{node.func.id}' must have exact one argument, 
+                    but found {nr_of_args}.
                     For example, '{node.func.id}(...)', where '...' is the value.
                     """
                     raise InvalidDslError(error)
@@ -257,11 +345,13 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             raise InvalidDslError(
                 "You cannot use an attribute in the expected return value."
             )
-        return FunctionCall(
-            type=FunctionType.PROPERTY,
+        scope = _scope_keyword(node.value)
+        if scope is not None:
+            return _scoped_identifier(node.attr, scope)
+
+        return Identifier(
             name=node.attr,
-            namespace=_convert_expression(node.value, is_return),
-            arguments=[],
+            scope=_convert_expression(node.value, is_return),
         )
     elif isinstance(node, ast.Name):
         # We have special support for "Null" and "Undefined"
@@ -269,10 +359,12 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
             return serialize_from_python(None, BasicNothingTypes.NOTHING)
         elif node.id == "Undefined":
             return serialize_from_python(None, AdvancedNothingTypes.UNDEFINED)
+        elif _scope_keyword(node) is not None:
+            raise InvalidDslError(f"'{node.id}' is reserved and cannot be used")
         elif node.id.isupper():
-            return FunctionCall(type=FunctionType.PROPERTY, name=node.id.lower())
+            return Identifier(name=node.id.lower(), scope=ScopeType.SUBMISSION)
         else:
-            return Identifier(node.id)
+            return Identifier(name=node.id, scope=ScopeType.SUITE)
     elif isinstance(node, ast.List):
         elements = [_convert_expression(e, is_return) for e in node.elts]
         return SequenceType(type=BasicSequenceTypes.SEQUENCE, data=elements)
@@ -356,7 +448,7 @@ def extract_comment(code: str) -> str:
 
 
 @overload
-def parse_string(code: str, is_return: Literal[True]) -> Value: ...
+def parse_string(code: str, is_return: Literal[True]) -> Expression: ...
 
 
 @overload
@@ -374,5 +466,7 @@ def parse_string(code: str, is_return=False) -> Statement:
     try:
         tree = ast.parse(code, mode="single")
         return _translate_to_ast(tree, is_return)
+    except InvalidDslError:
+        raise
     except Exception as e:
         raise InvalidDslError("Invalid DSL") from e

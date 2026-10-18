@@ -103,8 +103,7 @@ def test_tab_legacy_runs():
     assert result.contexts[0].testcases[0].input.arguments == ["arg1"]
 
     assert isinstance(result.contexts[1].testcases[0].input, Identifier)
-    assert len(result.contexts[1].testcases[0].input) == 1
-    assert result.contexts[1].testcases[0].input == "5"
+    assert result.contexts[1].testcases[0].input == Identifier("5")
 
 
 def test_ignore_fields():
