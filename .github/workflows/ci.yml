@@ -5,6 +5,9 @@ on:
   pull_request_target:
     types: [labeled]
 
+permissions:
+  contents: read
+
 env:
   EXERCISES_COMMIT: 31ef0f174efaeba2a37415115e7fd0332573d9b2
 
@@ -19,8 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
       - uses: ./.github/actions/tested-image
         with:
           load: false
@@ -32,8 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
       - name: Run tests
         uses: ./.github/actions/tested-image
         with:
@@ -50,8 +55,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
       - name: Run the linters
         uses: ./.github/actions/tested-image
         with:
@@ -63,8 +69,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
       - name: Check translation files
         uses: ./.github/actions/tested-image
         with:
@@ -77,8 +84,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
+          persist-credentials: false
       - run: |
           echo "$JAVASCRIPT_EXERCISES_KEY" > private
           chmod 0600 private

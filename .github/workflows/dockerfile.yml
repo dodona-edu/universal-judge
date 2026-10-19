@@ -3,6 +3,9 @@ name: Dockerfile
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   dockerfile-matches-image:
     runs-on: ubuntu-latest
@@ -12,5 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Check the dockerfile against the image it built
         run: ./devel/dockerfile_delta.sh
