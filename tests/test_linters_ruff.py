@@ -209,6 +209,60 @@ def test_ruff_custom_config_extends_the_default_rules(
     assert "multiple-statements-on-one-line" in annotations[0]["externalUrl"]
 
 
+@pytest.mark.parametrize(
+    ("solution", "remarks"), [("warning", 0), ("refactor", 0), ("convention", 1)]
+)
+def test_ruff_custom_pyproject_config(
+    tmp_path: Path, pytestconfig: pytest.Config, solution: str, remarks: int
+):
+    # It ignores F401 and allows 6 arguments; E701 in convention.py is still
+    # reported.
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        solution,
+        {
+            "options": {
+                "language": {
+                    "python": {
+                        "linter": True,
+                        "ruff_config": "pyproject/pyproject.toml",
+                    }
+                }
+            }
+        },
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) == remarks
+
+
+def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.Config):
+    # Python's compiler raises a RecursionError on such a sum, instead of a
+    # SyntaxError; ruff itself overflows its stack on it.
+    source = tmp_path / "deep.py"
+    source.write_text("x = " + "+".join(["1"] * 10000) + "\n")
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "correct",
+        {"source": source, "options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # Judging goes on (the compilation fails as well), with a message that the
+    # linter failed.
+    messages = [m["message"] for m in updates.find_all("append-message")]
+    assert "Ruff gecrasht" in messages
+    assert updates.find_all("close-judgement")
+
+
 def test_ruff_missing_custom_config_is_reported(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

@@ -6,8 +6,10 @@ The rules ruff checks (rules/ruff.toml) and the texts students see
 both judges.
 """
 
+import datetime
 import json
 import logging
+import re
 import tomllib
 import warnings
 from pathlib import Path
@@ -162,7 +164,8 @@ def _configuration(config: DodonaConfig, directory: Path) -> Path:
     exercise's own configuration if it has one.
 
     An exercise's configuration only has to say what differs from the judge's
-    rules (for example `lint.ignore`), unless it sets `extend` itself.
+    rules (for example `lint.ignore`), unless it sets `extend` itself. Like ruff,
+    a file named pyproject.toml has its settings in the `tool.ruff` table.
     """
     path = config.config_for().get("ruff_config", None)
     if not path:
@@ -170,16 +173,44 @@ def _configuration(config: DodonaConfig, directory: Path) -> Path:
     assert isinstance(path, str)
     own = (config.resources / path).absolute()
     try:
-        text = own.read_text()
-        if "extend" in tomllib.loads(text):
-            return own
+        with own.open("rb") as file:
+            settings = tomllib.load(file)
     except (OSError, tomllib.TOMLDecodeError):
         # Ruff reports what is wrong with it.
         return own
+    if own.name == "pyproject.toml":
+        settings = settings.get("tool", {}).get("ruff", {})
+    if "extend" in settings:
+        return own
     extended = directory / "ruff.toml"
-    # A JSON string is a valid TOML string.
-    extended.write_text(f"extend = {json.dumps(str(RULES.absolute()))}\n{text}")
+    lines = [f"extend = {_toml_value(str(RULES.absolute()))}"]
+    lines += [
+        f"{_toml_key(key)} = {_toml_value(value)}" for key, value in settings.items()
+    ]
+    extended.write_text("\n".join(lines) + "\n")
     return extended
+
+
+def _toml_key(key: str) -> str:
+    return key if re.fullmatch(r"[A-Za-z0-9_-]+", key) else _toml_value(key)
+
+
+def _toml_value(value) -> str:
+    """A value read with tomllib, written as TOML (tables become inline tables)."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        # A JSON string is a valid TOML string.
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml_value(v) for v in value) + "]"
+    if isinstance(value, dict):
+        pairs = (f"{_toml_key(k)} = {_toml_value(v)}" for k, v in value.items())
+        return "{" + ", ".join(pairs) + "}"
+    if isinstance(value, (datetime.date, datetime.time)):
+        return value.isoformat()
+    # Integers and floats (repr writes inf and nan as TOML does).
+    return repr(value)
 
 
 def _syntax_error(config: DodonaConfig) -> AnnotateCode | None:
@@ -210,7 +241,8 @@ def _syntax_error(config: DodonaConfig) -> AnnotateCode | None:
             type=Severity.ERROR,
             format="markdown",
         )
-    except (ValueError, OSError):
-        # Unreadable, or a null byte: ruff reports what it can.
+    except (ValueError, OSError, RecursionError, MemoryError):
+        # Unreadable, a null byte, or too deeply nested for the compiler (such
+        # as a sum of thousands of terms): ruff reports what it can.
         return None
     return None

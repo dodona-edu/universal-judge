@@ -1,0 +1,7 @@
+# A pyproject.toml has ruff's settings in tool.ruff. Like ruff_config.toml, it
+# only says what differs from the judge's rules.
+[tool.ruff.lint]
+ignore = ["F401"]
+
+[tool.ruff.lint.pylint]
+max-args = 6

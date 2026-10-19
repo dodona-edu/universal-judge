@@ -124,6 +124,21 @@ def test_every_template_has_english_and_dutch_texts_with_only_its_own_placeholde
             assert used.count("") == allowed.count(""), f"{code} {language}: {text!r}"
 
 
+def test_no_template_is_hidden_by_an_earlier_one():
+    # Messages are matched against the templates in order, so a template that an
+    # earlier one also matches is never used.
+    hidden = [
+        (code, later["original"])
+        for code, rule in messages_data().items()
+        for i, earlier in enumerate(rule["messages"])
+        for later in rule["messages"][i + 1 :]
+        if template_pattern(earlier["original"]).fullmatch(
+            PLACEHOLDER.sub("value", later["original"])
+        )
+    ]
+    assert hidden == []
+
+
 def test_every_template_matches_the_messages_it_produces():
     for code, entry in entries():
         example = PLACEHOLDER.sub("value", entry["original"])

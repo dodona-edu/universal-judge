@@ -5,10 +5,11 @@
 # or info). Each [[CODE.messages]] entry holds an English message template the
 # linter writes (`original`, with placeholders such as `{name}`, or `{}` by
 # position) and the text per language. A message is matched against the
-# templates of its rule in this order; the values of its placeholders are filled
-# in the text of the student's language. A language without a text falls back
-# to `en`, a message without a matching template to the linter's own message.
-# A translation may leave out a placeholder, but not add one.
+# templates of its rule in this order, so a more specific template goes first;
+# the values of its placeholders are filled in the text of the student's
+# language. A language without a text falls back to `en`, a message without a
+# matching template to the linter's own message. A translation may leave out a
+# placeholder, but not add one.
 #
 # `syntax-error` is not a ruff rule: it is Python's own message for a submission
 # that doesn't compile.
@@ -442,11 +443,6 @@ en = "The key `{name}` appears more than once in this dictionary. Only the last 
 nl = "De sleutel `{name}` komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
 
 [[F601.messages]]
-original = "Dictionary key literal `{name}` repeated"
-en = "The key `{name}` appears more than once in this dictionary. Only the last value is kept."
-nl = "De sleutel `{name}` komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
-
-[[F601.messages]]
 original = "Dictionary key literal `{name}` repeated (`{name}` hashes to the same value as `{existing}`)"
 en = "The keys `{existing}` and `{name}` are equal, so this dictionary contains the same key twice. Only the last value is kept."
 nl = "De sleutels `{existing}` en `{name}` zijn gelijk, dus deze dictionary bevat twee keer dezelfde sleutel. Enkel de laatste waarde blijft over."
@@ -719,14 +715,14 @@ nl = "Zet deze `import` bovenaan het bestand en niet in een functie of ander blo
 type = "info"
 
 [[PLC1802.messages]]
-original = "`len({expression})` used as condition without comparison"
-en = "No need for `len()` in a condition: write just `{expression}`. An empty list or string counts as false."
-nl = "Je hebt `len()` niet nodig in een voorwaarde: schrijf gewoon `{expression}`. Een lege lijst of string telt als onwaar."
-
-[[PLC1802.messages]]
 original = "`len(SEQUENCE)` used as condition without comparison"
 en = "No need for `len()` in a condition: use the list or string itself. An empty one counts as false."
 nl = "Je hebt `len()` niet nodig in een voorwaarde: gebruik de lijst of string zelf. Een lege telt als onwaar."
+
+[[PLC1802.messages]]
+original = "`len({expression})` used as condition without comparison"
+en = "No need for `len()` in a condition: write just `{expression}`. An empty list or string counts as false."
+nl = "Je hebt `len()` niet nodig in een voorwaarde: schrijf gewoon `{expression}`. Een lege lijst of string telt als onwaar."
 
 [PLC2401]  # non-ascii-name
 type = "info"
