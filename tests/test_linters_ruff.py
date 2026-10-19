@@ -188,7 +188,8 @@ def test_ruff_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
 
 def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.Config):
     # Python's compiler raises a RecursionError on such a sum, instead of a
-    # SyntaxError; ruff itself overflows its stack on it.
+    # SyntaxError. What ruff makes of it depends on the platform: on macOS it
+    # overflows its stack.
     source = tmp_path / "deep.py"
     source.write_text("x = " + "+".join(["1"] * 10000) + "\n")
     conf = configuration(
@@ -202,11 +203,10 @@ def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    # Judging goes on (the compilation fails as well), with a message that the
-    # linter failed.
-    messages = [m["message"] for m in updates.find_all("append-message")]
-    assert "Ruff gecrasht" in messages
-    assert updates.find_all("close-judgement")
+    # Judging goes on to the compilation, which fails as well.
+    statuses = [u["status"]["enum"] for u in updates.find_all("escalate-status")]
+    assert "internal error" not in statuses
+    assert "compilation error" in statuses
 
 
 def test_ruff_missing_custom_config_is_reported(
