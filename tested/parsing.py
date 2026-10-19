@@ -42,6 +42,7 @@ def unstructure_decimal(obj: Decimal) -> str:
 
 
 def structure_every_union(to_convert: Any, the_type: Any) -> Any:
+    from tested.dodona import ExtendedMessage
     from tested.serialisation import Identifier
     from tested.testsuite import ContentPath
 
@@ -70,10 +71,11 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
                 assert isinstance(to_convert, float)
             if possible_class is Identifier:
                 assert isinstance(to_convert, str)
-            # A structure that none of the other types accept is not text: as
-            # text, a message an evaluator meant for educators only (with a
-            # permission TESTed doesn't know) would be shown to students.
-            if possible_class is str:
+            # In a message, a structure that ExtendedMessage doesn't accept is not
+            # text: as text, a message an evaluator meant for educators only (with
+            # a permission TESTed doesn't know) would be shown to students. Other
+            # text, like the readable values of an oracle, can be a student's list.
+            if possible_class is str and ExtendedMessage in get_args(the_type):
                 assert not isinstance(to_convert, (dict, list))
             result = _suite_converter.structure(to_convert, possible_class)
             _logger.debug("%s accepted.", debug_message)

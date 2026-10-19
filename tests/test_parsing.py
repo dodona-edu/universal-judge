@@ -266,3 +266,10 @@ def test_text_and_messages_still_parse_in_a_union():
     message = {"description": "for everyone", "format": "text"}
     parsed = converter.structure(message, Message)  # pyright: ignore
     assert parsed == ExtendedMessage(description="for everyone", format="text")
+
+
+@pytest.mark.parametrize("value", [["correct"], {"value": "correct"}])
+def test_a_structure_still_becomes_text_outside_a_message(value):
+    # The readable values of an oracle can be a student's list or dict.
+    converter = get_converter()
+    assert converter.structure(value, str | None) == str(value)  # pyright: ignore

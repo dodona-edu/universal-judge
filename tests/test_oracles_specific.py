@@ -28,6 +28,25 @@ def test_specific_oracle_return(
     assert len(updates.find_all("append-message")) == 2
 
 
+def test_specific_oracle_shows_a_list_answer_as_wrong(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "two-specific.tson",
+        "wrong-list",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The evaluator passes the student's list as its readable actual value.
+    assert updates.find_status_enum() == ["wrong", "wrong"]
+    generated = [t["generated"] for t in updates.find_all("close-test")]
+    assert generated == ["['input-1']", "['correct']"]
+
+
 def test_specific_oracle_messages_keep_their_permission(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
