@@ -1,4 +1,14 @@
-from tested.judge.linter import AnnotationLocation, get_linter_position
+from io import StringIO
+
+import pytest
+
+from tested.dodona import report_update
+from tested.judge.linter import (
+    AnnotationLocation,
+    annotation_from_position,
+    get_linter_position,
+)
+from tests.manual_utils import assert_valid_output
 
 
 def test_get_linter_position_defaults():
@@ -270,3 +280,15 @@ def test_get_linter_position_start_row_base_0_with_offset():
         row_base=0,
     )
     assert result.row == 5
+
+
+def test_annotation_format_is_reported_only_when_given(pytestconfig: pytest.Config):
+    position = AnnotationLocation(row=0, rows=1, column=7, columns=2)
+    out = StringIO()
+    report_update(out, annotation_from_position(position, "`os` is not used"))
+    report_update(
+        out, annotation_from_position(position, "`os` is not used", format="markdown")
+    )
+    plain, markdown = assert_valid_output(out.getvalue(), pytestconfig)
+    assert "format" not in plain
+    assert markdown["format"] == "markdown"

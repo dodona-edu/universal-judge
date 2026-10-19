@@ -159,6 +159,8 @@ class AnnotateCode:
     type: Severity | None = None
     rows: Index | None = None
     columns: Index | None = None
+    format: Literal["plain", "markdown"] | None = None
+    """How Dodona renders the text; plain (monospace) when not given."""
     command: Literal["annotate-code"] = "annotate-code"
 
 

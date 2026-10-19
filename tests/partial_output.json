@@ -84,12 +84,14 @@
             "row":     { "$ref": "#/definitions/index" },
             "column":  { "$ref": "#/definitions/index" },
             "text":    { "type": "string" },
+            "externalUrl":  { "type": "string" },
             "type":    { "$ref": "#/definitions/severity" },
             "rows":    {
               "type": "integer",
               "minimum": 1
             },
-            "columns": { "type": "integer" }
+            "columns": { "type": "integer" },
+            "format":  { "$ref": "#/definitions/annotation-format" }
         }
     },
     "escalate-status": {
@@ -211,6 +213,10 @@
     "severity": {
       "type": "string",
       "enum": ["error", "warning", "info"]
+    },
+    "annotation-format": {
+      "enum": ["plain", "markdown"],
+      "description": "How the annotation text is rendered: 'plain' (the default) or 'markdown'. The rendered markdown is sanitised like a markdown message."
     }
   }
 }
