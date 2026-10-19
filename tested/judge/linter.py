@@ -1,4 +1,5 @@
 import logging
+from typing import Literal
 
 from attrs import define
 
@@ -124,6 +125,7 @@ def annotation_from_position(
     text: str,
     external_url: str | None = None,
     type: Severity | None = None,
+    format: Literal["plain", "markdown"] | None = None,
 ) -> AnnotateCode:
     return AnnotateCode(
         row=position.row,
@@ -133,4 +135,5 @@ def annotation_from_position(
         text=text,
         externalUrl=external_url,
         type=type,
+        format=format,
     )
