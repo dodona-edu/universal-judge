@@ -86,7 +86,8 @@ CFG
         pyyaml==6.0.1 \
         Pygments==2.18.0 \
         python-i18n==0.3.9 \
-        pylint==3.0.1
+        pylint==3.0.1 \
+        ruff==0.17.0
 
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \
