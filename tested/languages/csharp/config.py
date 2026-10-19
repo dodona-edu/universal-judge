@@ -160,10 +160,13 @@ class CSharp(Language):
         }
 
     def compilation(self, files: list[str]) -> CallbackResult:
-        def file_filter(file: Path) -> bool:
-            return file.suffix in (".dll", ".pdb")
-
         name = Path(files[-1]).stem
+
+        # Only the compiler's own output: the directory also holds the workdir's
+        # subdirectories, which may contain other .dll files.
+        def file_filter(file: Path) -> bool:
+            return file.name in (f"{name}.dll", f"{name}.pdb")
+
         compiler, references = _compiler_and_references()
         args = [
             "dotnet",

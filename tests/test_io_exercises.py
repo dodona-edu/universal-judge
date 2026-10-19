@@ -212,6 +212,27 @@ def test_csharp_compiles_source_files_in_workdir_subdirectories(
     assert updates.find_status_enum() == ["correct"]
 
 
+def test_csharp_ignores_dll_files_in_workdir_subdirectories(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function-additional-source-files",
+        "csharp",
+        tmp_path,
+        "one.tson",
+        "correct",
+    )
+    # Only the compiler's output is copied as a dependency: the execution gets
+    # the workdir's subdirectories anyway, and copying a file twice crashes.
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "Library.dll").write_bytes(b"not an assembly")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_function_escape_exercise(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
