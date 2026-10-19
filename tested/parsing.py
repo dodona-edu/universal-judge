@@ -69,7 +69,7 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
             if possible_class is float:
                 assert isinstance(to_convert, float)
             if possible_class is Identifier:
-                assert isinstance(to_convert, str)
+                assert isinstance(to_convert, (str, dict))
             result = _suite_converter.structure(to_convert, possible_class)
             _logger.debug("%s accepted.", debug_message)
             return result
@@ -80,7 +80,78 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
     )
 
 
+_identifier_from_dict: Callable[[dict[str, Any], type], Any] | None = None
+
+
+def structure_identifier(obj: Any, cl: type) -> Any:
+    """
+    Structure an identifier, which is either a plain string (a variable in the test
+    suite) or a dict with a name and a scope.
+    """
+    from tested.serialisation import Identifier, Scope, ScopeType
+
+    if isinstance(obj, str):
+        return Identifier(name=obj)
+    if isinstance(obj, dict) and obj.get("type") == "property":
+        # Legacy: properties were function calls of type "property". Without a
+        # namespace, it is a global of the submission; otherwise, the namespace
+        # is the receiver of the property.
+        namespace = obj.get("namespace")
+        if namespace in (None, ""):
+            return Identifier(name=obj["name"], scope=ScopeType.SUBMISSION)
+        return Identifier(
+            name=obj["name"],
+            scope=_suite_converter.structure(namespace, Scope),  # pyright: ignore
+        )
+    if isinstance(obj, dict):
+        # Generated lazily, since it needs the hooks for the fields to be registered.
+        global _identifier_from_dict
+        if _identifier_from_dict is None:
+            _identifier_from_dict = make_dict_structure_fn(Identifier, _suite_converter)
+        return _identifier_from_dict(obj, cl)
+    raise TypeError(f"An identifier must be a string or an object, got {obj!r}.")
+
+
+def _legacy_namespace(d: dict[str, Any], cl: type, next_hook):
+    """
+    Legacy: function calls used to have a "namespace" instead of a "scope". A missing,
+    null or empty namespace meant a function from the submission, which is now the
+    default scope.
+    """
+    if "namespace" in d:
+        if "scope" in d:
+            raise ValueError("You cannot use 'namespace' and 'scope' simultaneously.")
+        namespace = d.pop("namespace")
+        if namespace not in (None, ""):
+            if d.get("type") == "constructor":
+                raise ValueError("Constructors with a namespace are not supported.")
+            d["scope"] = namespace
+    return next_hook(d, cl)
+
+
+def _legacy_property(d: dict[str, Any], cl: type, next_hook):
+    """
+    Legacy: property assignments used to have a "property" (a function call of type
+    "property") instead of a "target". The property itself is converted by
+    `structure_identifier`.
+    """
+    if "property" in d:
+        if "target" in d:
+            raise ValueError("You cannot use 'property' and 'target' simultaneously.")
+        prop = d.pop("property")
+        if not isinstance(prop, dict) or prop.get("type") != "property":
+            raise ValueError(f"Assigning requires a property, got {prop!r}.")
+        if prop.get("namespace") in (None, ""):
+            raise ValueError(
+                "Assigning to a global of the submission is not supported."
+            )
+        d["target"] = prop
+    return next_hook(d, cl)
+
+
 def initialise_converter():
+    from tested.serialisation import FunctionCall, Identifier, PropertyAssignment
+
     global initialized
     if initialized:
         return
@@ -88,9 +159,14 @@ def initialise_converter():
 
     _suite_converter.register_structure_hook(Decimal, structure_decimal)
     _suite_converter.register_unstructure_hook(Decimal, unstructure_decimal)
+    _suite_converter.register_structure_hook(Identifier, structure_identifier)
     _suite_converter.register_structure_hook_factory(
         lambda t: bool(is_union_type(t)), lambda _: structure_every_union
     )
+    # Legacy formats; registered last, since generating these hooks needs the hooks
+    # above (e.g. for the unions in the fields).
+    _chain_structure_hook(FunctionCall, _legacy_namespace)
+    _chain_structure_hook(PropertyAssignment, _legacy_property)
 
 
 def parse_json_value(value: str) -> "Value":

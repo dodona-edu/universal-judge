@@ -27,6 +27,7 @@ from tested.serialisation import (
     ObjectKeyValuePair,
     ObjectType,
     PropertyAssignment,
+    ScopeType,
     SequenceType,
     StringType,
     VariableAssignment,
@@ -328,10 +329,10 @@ def test_parse_fun_assign():
     assign = parse_string("data: integer = first([object.gen_int()])")
     assert isinstance(assign, VariableAssignment)
     assert assign.type == BasicNumericTypes.INTEGER
-    assert assign.variable == "data"
+    assert assign.variable == Identifier("data")
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
-    assert expr.namespace is None
+    assert expr.scope == ScopeType.SUBMISSION
     assert expr.name == "first"
     assert expr.type == FunctionType.FUNCTION
     assert len(expr.arguments) == 1
@@ -341,7 +342,7 @@ def test_parse_fun_assign():
     data = arg.data[0]
     assert isinstance(data, FunctionCall)
     assert data.type == FunctionType.FUNCTION
-    assert data.namespace == "object"
+    assert data.scope == Identifier("object")
     assert data.name == "gen_int"
     assert len(data.arguments) == 0
 
@@ -351,10 +352,10 @@ def test_parse_constructor_assign():
     assert isinstance(assign, VariableAssignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
-    assert assign.variable == "cont"
+    assert assign.variable == Identifier("cont")
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
-    assert expr.namespace is None
+    assert expr.scope == ScopeType.SUBMISSION
     assert expr.name == "Container"
     assert expr.type == FunctionType.CONSTRUCTOR
     assert len(expr.arguments) == 1
@@ -362,11 +363,7 @@ def test_parse_constructor_assign():
     assert arg.type == BasicSequenceTypes.SET
     assert len(arg.data) == 1
     data = arg.data[0]
-    assert isinstance(data, FunctionCall)
-    assert data.type == FunctionType.PROPERTY
-    assert data.namespace == "object"
-    assert data.name == "version"
-    assert len(data.arguments) == 0
+    assert data == Identifier("version", scope=Identifier("object"))
 
 
 def test_parse_constructor_assign2():
@@ -374,10 +371,10 @@ def test_parse_constructor_assign2():
     assert isinstance(assign, VariableAssignment)
     assert isinstance(assign.type, VariableType)
     assert assign.type.data == "Container"
-    assert assign.variable == "cont"
+    assert assign.variable == Identifier("cont")
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
-    assert expr.namespace is None
+    assert expr.scope == ScopeType.SUBMISSION
     assert expr.name == "Container"
     assert expr.type == FunctionType.CONSTRUCTOR
     assert len(expr.arguments) == 1
@@ -385,18 +382,14 @@ def test_parse_constructor_assign2():
     assert arg.type == BasicSequenceTypes.SET
     assert len(arg.data) == 1
     data = arg.data[0]
-    assert isinstance(data, FunctionCall)
-    assert data.type == FunctionType.PROPERTY
-    assert data.namespace == "object"
-    assert data.name == "version"
-    assert len(data.arguments) == 0
+    assert data == Identifier("version", scope=Identifier("object"))
 
 
 def test_parse_value_assign():
     assign = parse_string("lijst: list = list([Container(5, true)])")
     assert isinstance(assign, VariableAssignment)
     assert assign.type == AdvancedSequenceTypes.LIST
-    assert assign.variable == "lijst"
+    assert assign.variable == Identifier("lijst")
     expr = assign.expression
     assert isinstance(expr, SequenceType)
     assert expr.type == AdvancedSequenceTypes.LIST
@@ -404,24 +397,22 @@ def test_parse_value_assign():
     elem = expr.data[0]
     assert isinstance(elem, FunctionCall)
     assert elem.type == FunctionType.CONSTRUCTOR
-    assert elem.namespace is None
+    assert elem.scope == ScopeType.SUBMISSION
     assert elem.name == "Container"
     assert len(elem.arguments) == 2
     assert elem.arguments[0].type == BasicNumericTypes.INTEGER
     assert elem.arguments[0].data == 5
     assert isinstance(elem.arguments[1], Identifier)
-    assert elem.arguments[1] == "true"
+    assert elem.arguments[1] == Identifier("true")
 
 
 def test_parse_attribute_assign():
     assign = parse_string("the_object.data = first([object.gen_int()])")
     assert isinstance(assign, PropertyAssignment)
-    assert assign.property.type == FunctionType.PROPERTY
-    assert assign.property.name == "data"
-    assert assign.property.namespace == "the_object"
+    assert assign.target == Identifier("data", scope=Identifier("the_object"))
     expr = assign.expression
     assert isinstance(expr, FunctionCall)
-    assert expr.namespace is None
+    assert expr.scope == ScopeType.SUBMISSION
     assert expr.name == "first"
     assert expr.type == FunctionType.FUNCTION
     assert len(expr.arguments) == 1
@@ -431,7 +422,7 @@ def test_parse_attribute_assign():
     data = arg.data[0]
     assert isinstance(data, FunctionCall)
     assert data.type == FunctionType.FUNCTION
-    assert data.namespace == "object"
+    assert data.scope == Identifier("object")
     assert data.name == "gen_int"
     assert len(data.arguments) == 0
 
@@ -445,7 +436,7 @@ def test_parse_function():
     function = parse_string('generate({"size": get_size()})')
     assert isinstance(function, FunctionCall)
     assert function.type == FunctionType.FUNCTION
-    assert function.namespace is None
+    assert function.scope == ScopeType.SUBMISSION
     assert function.name == "generate"
     assert len(function.arguments) == 1
     arg = function.arguments[0]
@@ -458,7 +449,7 @@ def test_parse_function():
     assert key.data == "size"
     assert isinstance(value, FunctionCall)
     assert value.type == FunctionType.FUNCTION
-    assert value.namespace is None
+    assert value.scope == ScopeType.SUBMISSION
     assert value.name == "get_size"
     assert len(value.arguments) == 0
 
@@ -466,7 +457,7 @@ def test_parse_function():
 def test_parse_identifier():
     parsed = parse_string("id")
     assert isinstance(parsed, Identifier)
-    assert parsed == "id"
+    assert parsed == Identifier("id", scope=ScopeType.SUITE)
 
 
 def test_parse_value():
@@ -484,54 +475,202 @@ def test_parse_cast_set():
 
 def test_parse_property():
     parsed = parse_string("alpha.beta")
-    assert parsed.type == FunctionType.PROPERTY
-    assert parsed.arguments == []
-    assert parsed.name == "beta"
-    assert parsed.namespace == "alpha"
+    assert parsed == Identifier("beta", scope=Identifier("alpha"))
 
 
 def test_parse_chained_constructor():
     parsed = parse_string("Container(5).get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
-    namespace = parsed.namespace
-    assert namespace.namespace is None
-    assert namespace.type == FunctionType.CONSTRUCTOR
+    receiver = parsed.scope
+    assert receiver.scope == ScopeType.SUBMISSION
+    assert receiver.type == FunctionType.CONSTRUCTOR
 
 
 def test_parse_chained_function():
     parsed = parse_string("get_container().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
-    namespace = parsed.namespace
-    assert namespace.namespace is None
-    assert namespace.type == FunctionType.FUNCTION
-    assert namespace.name == "get_container"
+    receiver = parsed.scope
+    assert receiver.scope == ScopeType.SUBMISSION
+    assert receiver.type == FunctionType.FUNCTION
+    assert receiver.name == "get_container"
 
 
 def test_parse_chained_function2():
     parsed = parse_string("get_container().get().get()")
     assert parsed.type == FunctionType.FUNCTION
     assert parsed.name == "get"
-    namespace = parsed.namespace
-    assert namespace.namespace is not None
-    assert namespace.type == FunctionType.FUNCTION
-    assert namespace.name == "get"
-    namespace = namespace.namespace
-    assert namespace.namespace is None
-    assert namespace.type == FunctionType.FUNCTION
-    assert namespace.name == "get_container"
+    receiver = parsed.scope
+    assert isinstance(receiver, FunctionCall)
+    assert receiver.type == FunctionType.FUNCTION
+    assert receiver.name == "get"
+    receiver = receiver.scope
+    assert receiver.scope == ScopeType.SUBMISSION
+    assert receiver.type == FunctionType.FUNCTION
+    assert receiver.name == "get_container"
 
 
 def test_parse_chained_property():
     parsed = parse_string("get_container().property.data")
-    assert parsed.type == FunctionType.PROPERTY
-    assert parsed.name == "data"
-    namespace = parsed.namespace
-    assert namespace.namespace is not None
-    assert namespace.type == FunctionType.PROPERTY
-    assert namespace.name == "property"
-    namespace = namespace.namespace
-    assert namespace.namespace is None
-    assert namespace.type == FunctionType.FUNCTION
-    assert namespace.name == "get_container"
+    assert parsed == Identifier(
+        "data",
+        scope=Identifier(
+            "property",
+            scope=FunctionCall(type=FunctionType.FUNCTION, name="get_container"),
+        ),
+    )
+
+
+# Scopes: implicit defaults, explicit scopes and their precedence.
+
+
+def test_parse_bare_name_is_suite_variable():
+    assert parse_string("x") == Identifier("x", scope=ScopeType.SUITE)
+
+
+def test_parse_all_caps_name_is_submission_global():
+    assert parse_string("THIS_IS_IT") == Identifier(
+        "this_is_it", scope=ScopeType.SUBMISSION
+    )
+
+
+@pytest.mark.parametrize("code", ["submission.x", "submission.X"])
+def test_parse_explicit_submission_identifier(code: str):
+    assert parse_string(code) == Identifier("x", scope=ScopeType.SUBMISSION)
+
+
+def test_parse_explicit_submission_identifier_keeps_mixed_case():
+    assert parse_string("submission.fooBar") == Identifier(
+        "fooBar", scope=ScopeType.SUBMISSION
+    )
+
+
+def test_parse_explicit_suite_identifier_overrides_all_caps():
+    assert parse_string("suite.X") == Identifier("X", scope=ScopeType.SUITE)
+
+
+def test_parse_explicit_submission_function_equals_implicit():
+    explicit = parse_string("submission.foo(5)")
+    assert explicit == parse_string("foo(5)")
+    assert explicit.type == FunctionType.FUNCTION
+    assert explicit.scope == ScopeType.SUBMISSION
+
+
+def test_parse_explicit_submission_constructor():
+    parsed = parse_string("submission.Foo()")
+    assert parsed == parse_string("Foo()")
+    assert parsed.type == FunctionType.CONSTRUCTOR
+    assert parsed.scope == ScopeType.SUBMISSION
+
+
+def test_parse_capitalised_method_is_not_a_constructor():
+    assert parse_string("a.Foo()") == FunctionCall(
+        type=FunctionType.FUNCTION, name="Foo", scope=Identifier("a")
+    )
+
+
+def test_parse_property_on_submission_global():
+    assert parse_string("X.y") == Identifier(
+        "y", scope=Identifier("x", scope=ScopeType.SUBMISSION)
+    )
+
+
+def test_parse_method_on_submission_global():
+    assert parse_string("X.y()") == FunctionCall(
+        type=FunctionType.FUNCTION,
+        name="y",
+        scope=Identifier("x", scope=ScopeType.SUBMISSION),
+    )
+
+
+def test_parse_property_chain_with_explicit_scope():
+    assert parse_string("submission.obj.x") == Identifier(
+        "x", scope=Identifier("obj", scope=ScopeType.SUBMISSION)
+    )
+
+
+def test_parse_property_on_call_result():
+    assert parse_string("f().x") == Identifier(
+        "x", scope=FunctionCall(type=FunctionType.FUNCTION, name="f")
+    )
+
+
+def test_parse_all_caps_assignment_is_suite_variable():
+    assign = parse_string("X = 5")
+    assert isinstance(assign, VariableAssignment)
+    assert assign.variable == Identifier("X", scope=ScopeType.SUITE)
+    assert assign.type == BasicNumericTypes.INTEGER
+
+
+def test_parse_explicit_suite_assignment():
+    assign = parse_string("suite.x = 5")
+    assert isinstance(assign, VariableAssignment)
+    assert assign.variable == Identifier("x", scope=ScopeType.SUITE)
+    assert assign.type == BasicNumericTypes.INTEGER
+
+
+def test_parse_explicit_suite_assignment_hinted():
+    assign = parse_string("suite.x: integer = 5")
+    assert isinstance(assign, VariableAssignment)
+    assert assign.variable == Identifier("x", scope=ScopeType.SUITE)
+    assert assign.type == BasicNumericTypes.INTEGER
+
+
+def test_parse_property_assignment_on_submission_global():
+    assign = parse_string("X.y = 5")
+    assert isinstance(assign, PropertyAssignment)
+    assert assign.target == Identifier(
+        "y", scope=Identifier("x", scope=ScopeType.SUBMISSION)
+    )
+
+
+@pytest.mark.parametrize(
+    "code,message",
+    [
+        # Reserved names used as a name.
+        ("submission", "reserved"),
+        ("suite", "reserved"),
+        ("tested", "reserved"),
+        ("submission()", "reserved"),
+        ("f(suite)", "reserved"),
+        ("submission = 5", "reserved"),
+        ("tested: integer = 5", "reserved"),
+        # The tested scope is a placeholder.
+        ("tested.x", "tested"),
+        ("tested.foo()", "tested"),
+        ("tested.x = 5", "tested"),
+        # The test suite does not define functions.
+        ("suite.foo()", "suite.foo"),
+        ("suite.Foo()", "suite.Foo"),
+        # Submission globals are read-only.
+        ("submission.x = 5", "submission.x"),
+        # Type hints only on suite variables, and only with a value.
+        ("a.x: integer = 5", "type hints"),
+        ("submission.x: integer = 5", "submission.x"),
+        ("x: integer", "value"),
+    ],
+)
+def test_parse_scope_errors(code: str, message: str):
+    with pytest.raises(InvalidDslError, match=message):
+        parse_string(code)
+
+
+def test_reserved_names_allowed_as_attribute_and_keyword_names():
+    assert parse_string("a.suite") == Identifier("suite", scope=Identifier("a"))
+    call = parse_string("f(suite=1)")
+    assert isinstance(call, FunctionCall)
+    assert call.arguments[0].name == "suite"
+
+
+def test_parse_return_mode_allows_names():
+    # Return mode is also used to display oracle results, where names are allowed.
+    assert parse_string("X", is_return=True) == Identifier(
+        "x", scope=ScopeType.SUBMISSION
+    )
+
+
+@pytest.mark.parametrize("code", ["a.x", "submission.x", "f()"])
+def test_parse_return_mode_rejects_attributes_and_calls(code: str):
+    with pytest.raises(InvalidDslError):
+        parse_string(code, is_return=True)

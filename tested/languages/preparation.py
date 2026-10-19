@@ -213,7 +213,7 @@ def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
     elif isinstance(assignment, PropertyAssignment):
         prepared = prepare_expression(bundle, assignment.property)
         assert isinstance(prepared, FunctionCall)
-        assignment = assignment.replace_property(prepared)
+        assignment = assignment.replace_target(prepared)
     else:
         raise AssertionError(
             f"Unknown assignment class {type(assignment)} for {assignment}"
