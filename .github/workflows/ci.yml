@@ -91,4 +91,4 @@ jobs:
       - name: Run JavaScript integration tests
         uses: ./.github/actions/tested-image
         with:
-          run: EXERCISE_REPO=javascript-oefeningen pytest -x -n auto tests/test_integration_javascript.py
+          run: EXERCISE_REPO=javascript-oefeningen pytest -x -n logical tests/test_integration_javascript.py
