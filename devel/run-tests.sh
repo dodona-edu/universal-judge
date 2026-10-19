@@ -8,5 +8,4 @@ cd "$ROOT"
 pytest -n auto \
     --cov=tested \
     --cov-report xml \
-    tests/ \
     "$@"

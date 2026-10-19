@@ -6,6 +6,8 @@ from pytest_mock import MockerFixture
 from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
+pytestmark = pytest.mark.kotlin
+
 
 def test_ktlint_correct(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(

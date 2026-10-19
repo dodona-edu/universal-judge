@@ -20,6 +20,8 @@ from tested.languages.python.lint_messages import (
 )
 from tested.languages.python.linter import RULES, SYNTAX_ERROR
 
+pytestmark = pytest.mark.python
+
 DOCKERFILE = (
     Path(__file__).resolve().parents[1] / ".devcontainer" / "dodona-tested.dockerfile"
 )

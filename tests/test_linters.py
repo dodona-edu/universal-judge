@@ -13,6 +13,7 @@ def _get_config_options(language: str) -> list[dict]:
 
 
 @pytest.mark.parametrize("config", _get_config_options("c"))
+@pytest.mark.c
 def test_cppcheck_c(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -29,6 +30,7 @@ def test_cppcheck_c(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("c"))
+@pytest.mark.c
 def test_cppcheck_c_bad_column(
     tmp_path: Path, config: dict, pytestconfig: pytest.Config
 ):
@@ -47,6 +49,7 @@ def test_cppcheck_c_bad_column(
 
 
 @pytest.mark.parametrize("config", _get_config_options("cpp"))
+@pytest.mark.cpp
 def test_cppcheck(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -63,6 +66,7 @@ def test_cppcheck(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("java"))
+@pytest.mark.java
 def test_checkstyle(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -79,6 +83,7 @@ def test_checkstyle(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("javascript"))
+@pytest.mark.javascript
 def test_eslint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -95,6 +100,7 @@ def test_eslint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("typescript"))
+@pytest.mark.typescript
 def test_eslint_typescript(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -138,6 +144,7 @@ def test_hlint(
 
 
 @pytest.mark.parametrize("config", _get_config_options("kotlin"))
+@pytest.mark.kotlin
 def test_ktlint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "counter", "kotlin", tmp_path, "plan.yaml", "solution", config
@@ -148,6 +155,7 @@ def test_ktlint(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("python"))
+@pytest.mark.python
 def test_ruff(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -164,6 +172,7 @@ def test_ruff(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
 
 
 @pytest.mark.parametrize("config", _get_config_options("bash"))
+@pytest.mark.bash
 def test_shellcheck_wrong(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "echo", "bash", tmp_path, "one.tson", "wrong", config
@@ -174,6 +183,7 @@ def test_shellcheck_wrong(tmp_path: Path, config: dict, pytestconfig: pytest.Con
 
 
 @pytest.mark.parametrize("config", _get_config_options("bash"))
+@pytest.mark.bash
 def test_shellcheck_warning(tmp_path: Path, config: dict, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig, "echo", "bash", tmp_path, "one.tson", "warning", config

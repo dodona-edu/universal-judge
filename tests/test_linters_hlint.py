@@ -7,6 +7,8 @@ from tested.dodona import Severity
 from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
+pytestmark = pytest.mark.haskell
+
 
 @pytest.mark.parametrize("language", ["haskell", "runhaskell"])
 def test_hlint_correct(tmp_path: Path, pytestconfig: pytest.Config, language: str):

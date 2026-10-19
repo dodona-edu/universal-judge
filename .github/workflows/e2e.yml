@@ -26,11 +26,31 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  shard:
+    name: shard (${{ matrix.shard }})
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
       options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: kotlin
+            marker: kotlin
+          - shard: haskell
+            marker: haskell or runhaskell
+          - shard: typescript
+            marker: typescript
+          - shard: java-csharp
+            marker: java or csharp
+          - shard: cpp
+            marker: cpp
+          - shard: rest
+            # not (every marker above)
+            marker: not (kotlin or haskell or runhaskell or typescript or java or csharp or cpp)
+    env:
+      MARKER: ${{ matrix.marker }}
 
     steps:
       - uses: actions/checkout@v7
@@ -41,9 +61,19 @@ jobs:
       - name: Install test dependencies
         run: ./devel/install_test_deps.sh
       - name: Run tests
-        run: ./devel/run-tests.sh
+        run: ./devel/run-tests.sh -m "$MARKER"
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
-          name: coverage
+          name: coverage-${{ matrix.shard }}
           path: coverage.xml
+
+  # Required check "integration-test / test": one name for the ruleset, whatever the matrix.
+  test:
+    needs: [shard]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail when a shard did not succeed
+        if: ${{ needs.shard.result != 'success' }}
+        run: exit 1

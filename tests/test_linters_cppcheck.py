@@ -8,6 +8,7 @@ from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
+@pytest.mark.c
 def test_cppcheck_correct(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -23,6 +24,7 @@ def test_cppcheck_correct(tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("annotate-code")) == 0
 
 
+@pytest.mark.c
 def test_cppcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -49,6 +51,7 @@ def test_cppcheck_error(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[1]["column"] == 9
 
 
+@pytest.mark.c
 def test_cppcheck_warning(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -69,6 +72,7 @@ def test_cppcheck_warning(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[0]["column"] == 4
 
 
+@pytest.mark.c
 def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -89,6 +93,7 @@ def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[0]["column"] == 10
 
 
+@pytest.mark.c
 def test_cppcheck_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
@@ -113,6 +118,7 @@ def test_cppcheck_bad_output(
     assert len(messages) == 2  # Educator and student warning
 
 
+@pytest.mark.cpp
 def test_cppcheck_cpp_correct(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -128,6 +134,7 @@ def test_cppcheck_cpp_correct(tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("annotate-code")) == 0
 
 
+@pytest.mark.cpp
 def test_cppcheck_cpp_error(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
