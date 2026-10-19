@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 from attrs import define
 
+from tested.dodona import ExtendedMessage, Message
 from tested.parsing import fallback_field, get_converter, ignore_field
 
 
@@ -244,3 +245,24 @@ def test_parse_json_suite_and_to_json():
     back_to_json = suite_to_json(suite)
     # The default Suite might have other fields, but namespace should be there if not default
     assert "test_namespace" in back_to_json
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"description": "secret", "format": "text", "permission": "teacher"},
+        ["secret"],
+    ],
+)
+def test_a_structure_no_type_accepts_does_not_become_text(value):
+    # As text, a message meant for educators would be shown to students.
+    with pytest.raises(TypeError):
+        get_converter().structure(value, Message)  # pyright: ignore
+
+
+def test_text_and_messages_still_parse_in_a_union():
+    converter = get_converter()
+    assert converter.structure("plain", Message) == "plain"  # pyright: ignore
+    message = {"description": "for everyone", "format": "text"}
+    parsed = converter.structure(message, Message)  # pyright: ignore
+    assert parsed == ExtendedMessage(description="for everyone", format="text")

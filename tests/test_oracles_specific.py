@@ -55,6 +55,27 @@ def test_specific_oracle_messages_keep_their_permission(
     ]
 
 
+def test_specific_oracle_message_with_unknown_permission_is_not_shown_to_students(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "specific-unknown-permission.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The oracle's result can't be read, so only educators see it.
+    assert updates.find_status_enum() == ["internal error"]
+    messages = [m["message"] for m in updates.find_all("append-message")]
+    shown = [m for m in messages if "secret for teachers" in str(m)]
+    assert shown
+    assert all(isinstance(m, dict) and m.get("permission") == "educator" for m in shown)
+
+
 @pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
 def test_specific_oracle_exception_correct(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config

@@ -70,6 +70,11 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
                 assert isinstance(to_convert, float)
             if possible_class is Identifier:
                 assert isinstance(to_convert, str)
+            # A structure that none of the other types accept is not text: as
+            # text, a message an evaluator meant for educators only (with a
+            # permission TESTed doesn't know) would be shown to students.
+            if possible_class is str:
+                assert not isinstance(to_convert, (dict, list))
             result = _suite_converter.structure(to_convert, possible_class)
             _logger.debug("%s accepted.", debug_message)
             return result
