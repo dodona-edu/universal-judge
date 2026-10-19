@@ -192,6 +192,26 @@ def test_io_function_additional_source_files(
     assert updates.find_status_enum() == ["correct"]
 
 
+def test_csharp_compiles_source_files_in_workdir_subdirectories(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function-additional-source-files",
+        "csharp",
+        tmp_path,
+        "one.tson",
+        "correct",
+    )
+    # dotnet build compiled **/*.cs, so exercises may keep helpers in a subdirectory.
+    helpers = tmp_path / "helpers"
+    helpers.mkdir()
+    shutil.move(tmp_path / "EchoClass.cs", helpers)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_function_escape_exercise(
     language: str, tmp_path: Path, pytestconfig: pytest.Config

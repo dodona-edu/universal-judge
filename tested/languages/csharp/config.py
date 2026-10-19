@@ -1,6 +1,6 @@
 import logging
 import re
-import shutil
+import subprocess
 from collections.abc import Iterable
 from functools import cache
 from pathlib import Path
@@ -51,10 +51,13 @@ DEFINES = [
 ]
 
 
-def _newest(paths: Iterable[Path], version_part: int) -> Path:
+def _newest(paths: Iterable[Path], version_part: int, what: str) -> Path:
     def version(path: Path) -> tuple[int, ...]:
         return tuple(int(x) for x in re.findall(r"\d+", path.parts[version_part]))
 
+    paths = list(paths)
+    if not paths:
+        raise FileNotFoundError(f"No {what} found in the .NET installation")
     return max(paths, key=version)
 
 
@@ -67,12 +70,24 @@ def _compiler_and_references() -> tuple[Path, list[Path]]:
     for a project that never changes, and leaves a compiler server running that
     competes with the executions for the CPU.
     """
-    dotnet = shutil.which("dotnet")
-    assert dotnet is not None, "dotnet is not on the PATH"
-    root = Path(dotnet).resolve().parent
-    compiler = _newest(root.glob("sdk/*/Roslyn/bincore/csc.dll"), -4)
-    references = _newest(root.glob("packs/Microsoft.NETCore.App.Ref/*/ref/net8.0"), -3)
-    return compiler, sorted(references.glob("*.dll"))
+    # dotnet can be a launcher script (as with Homebrew), so ask it where the
+    # SDKs are. Each line looks like "8.0.405 [/usr/share/dotnet/sdk]".
+    listing = subprocess.run(
+        ["dotnet", "--list-sdks"], capture_output=True, text=True, check=True
+    ).stdout
+    sdks = [
+        Path(directory) / version
+        for version, directory in re.findall(r"^(\S+) \[(.+)\]$", listing, re.M)
+    ]
+    sdk = _newest(sdks, -1, ".NET SDK")
+    roots = {x.parent.parent for x in sdks}
+    packs = [
+        reference
+        for root in roots
+        for reference in root.glob("packs/Microsoft.NETCore.App.Ref/*/ref/net8.0")
+    ]
+    references = _newest(packs, -3, "net8.0 reference assemblies")
+    return sdk / "Roslyn" / "bincore" / "csc.dll", sorted(references.glob("*.dll"))
 
 
 class CSharp(Language):
@@ -150,7 +165,6 @@ class CSharp(Language):
 
         name = Path(files[-1]).stem
         compiler, references = _compiler_and_references()
-        sources = [x for x in files if x.endswith(".cs")]
         args = [
             "dotnet",
             str(compiler),
@@ -170,7 +184,9 @@ class CSharp(Language):
             "-nowarn:1701,1702",
             f"-define:{';'.join(DEFINES)}",
             *(f"-r:{x}" for x in references),
-            *sources,
+            # Like `dotnet build`, compile every source file in the directory,
+            # including those in subdirectories copied from the workdir.
+            "-recurse:*.cs",
         ]
 
         return args, file_filter
