@@ -28,6 +28,33 @@ def test_specific_oracle_return(
     assert len(updates.find_all("append-message")) == 2
 
 
+def test_specific_oracle_messages_keep_their_permission(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "specific-permissions.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    messages = [m["message"] for m in updates.find_all("append-message")]
+    # Dodona's former "staff" is still accepted, as "educator": a message that
+    # isn't understood would become text that students see.
+    assert messages == [
+        {
+            "description": "for educators (staff)",
+            "format": "text",
+            "permission": "educator",
+        },
+        {"description": "for educators", "format": "text", "permission": "educator"},
+        {"description": "for everyone", "format": "text"},
+    ]
+
+
 @pytest.mark.parametrize("lang", EXCEPTION_LANGUAGES)
 def test_specific_oracle_exception_correct(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config

@@ -26,6 +26,14 @@ class Permission(StrEnum):
     STUDENT = auto()
     ZEUS = auto()
 
+    @classmethod
+    def _missing_(cls, value):
+        # Dodona's former name for educator, which evaluators may still use:
+        # without it, their messages would not be restricted at all.
+        if value == "staff":
+            return cls.EDUCATOR
+        return None
+
 
 @define
 class ExtendedMessage:
