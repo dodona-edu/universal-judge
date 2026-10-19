@@ -62,7 +62,7 @@ def run_eslint(
         return [
             get_i18n_string("languages.javascript.linter.output"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
         ], []
     annotations = []

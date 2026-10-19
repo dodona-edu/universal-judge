@@ -22,9 +22,17 @@ from cattrs.preconf.json import make_converter
 class Permission(StrEnum):
     """To which level of user this message is visible."""
 
-    STAFF = auto()
+    EDUCATOR = auto()
     STUDENT = auto()
     ZEUS = auto()
+
+    @classmethod
+    def _missing_(cls, value):
+        # Dodona's former name for educator, which evaluators may still use:
+        # without it, their messages would not be restricted at all.
+        if value == "staff":
+            return cls.EDUCATOR
+        return None
 
 
 @define

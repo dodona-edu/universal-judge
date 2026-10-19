@@ -61,12 +61,12 @@ def run_ktlint(
         return [
             get_i18n_string("languages.kotlin.linter.output"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
             ExtendedMessage(
                 description=execution_results.stdout,
                 format="code",
-                permission=Permission.STAFF,
+                permission=Permission.EDUCATOR,
             ),
         ], []
     annotations = []

@@ -61,7 +61,7 @@ def run_checkstyle(
         return [
             get_i18n_string("languages.java.linter.output"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
         ], []
     annotations = []

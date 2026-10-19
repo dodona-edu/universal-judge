@@ -28,3 +28,17 @@ def evaluate_sum(actual, the_sum):
     correct = the_sum == 10
     return EvaluationResult(correct, "correct", actual, [Message("Hallo")])
 
+
+def evaluate_permissions(actual):
+    # "staff" is Dodona's former name for "educator"
+    return EvaluationResult(actual == "correct", "correct", actual, [
+        Message("for educators (staff)", permission="staff"),
+        Message("for educators", permission="educator"),
+        Message("for everyone"),
+    ])
+
+
+def evaluate_unknown_permission(actual):
+    return EvaluationResult(actual == "correct", "correct", actual, [
+        Message("secret for teachers", permission="teacher"),
+    ])

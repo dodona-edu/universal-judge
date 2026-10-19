@@ -1,0 +1,9 @@
+- tab: "Tab"
+  testcases:
+    - expression: echo('correct')
+      return: !oracle
+        oracle: specific_check
+        functions:
+          python:
+            file: evaluator.py
+            name: evaluate_permissions

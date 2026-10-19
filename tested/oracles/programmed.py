@@ -166,12 +166,14 @@ def _evaluate_programmed(
             ExtendedMessage(
                 description="The custom check oracle failed with the following syntax error:",
                 format="text",
-                permission=Permission.STAFF,
+                permission=Permission.EDUCATOR,
             )
         )
         tb = traceback.format_exc()
         messages.append(
-            ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
+            ExtendedMessage(
+                description=tb, format="code", permission=Permission.EDUCATOR
+            )
         )
     except Exception as e:
         _logger.exception(e)
@@ -179,12 +181,14 @@ def _evaluate_programmed(
             ExtendedMessage(
                 description="The custom check oracle failed with the following exception:",
                 format="text",
-                permission=Permission.STAFF,
+                permission=Permission.EDUCATOR,
             )
         )
         tb = traceback.format_exc()
         messages.append(
-            ExtendedMessage(description=tb, format="code", permission=Permission.STAFF)
+            ExtendedMessage(
+                description=tb, format="code", permission=Permission.EDUCATOR
+            )
         )
 
     if stdout_:
@@ -293,30 +297,30 @@ def evaluate(
                 ExtendedMessage(
                     description=get_i18n_string("oracles.programmed.result"),
                     format="text",
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
                 ExtendedMessage(
                     description=traceback.format_exc(),
                     format="code",
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
                 ExtendedMessage(
                     description=get_i18n_string("oracles.programmed.stdout"),
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
                 ExtendedMessage(
                     description=result.stdout,
                     format="code",
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
                 ExtendedMessage(
                     description=get_i18n_string("oracles.programmed.stderr"),
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
                 ExtendedMessage(
                     description=result.stderr,
                     format="code",
-                    permission=Permission.STAFF,
+                    permission=Permission.EDUCATOR,
                 ),
             ]
             return OracleResult(

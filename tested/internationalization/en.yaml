@@ -1,7 +1,7 @@
 en:
   oracles:
     exception:
-      staff: >-
+      educator: >-
         Expected an exception value, but received %{actual}, which caused an exception
         while parsing: %{exception}
       student: >-
@@ -32,7 +32,7 @@ en:
         status: "Missing output."
         message: "Output is missing here."
       status: "Error while evaluating the result."
-      staff: >-
+      educator: >-
         Received invalid output for specific evaluation: %{actual}.
         Either the test suite is invalid, the evaluation code has a bug or the student
         is trying to cheat: %{e}

@@ -171,7 +171,9 @@ def is_supported(language: "Language") -> list[Message] | None:
         One solution is to use less-specific types, e.g. using a sequence instead of
         a tuple.
         """
-        return [ExtendedMessage(description=message_text, permission=Permission.STAFF)]
+        return [
+            ExtendedMessage(description=message_text, permission=Permission.EDUCATOR)
+        ]
 
     mapping = fallback_type_support_map(language)
     for t in required.types:
@@ -182,7 +184,9 @@ def is_supported(language: "Language") -> list[Message] | None:
             The test suite requires type {t}, which is not supported.
             """
             return [
-                ExtendedMessage(description=message_text, permission=Permission.STAFF)
+                ExtendedMessage(
+                    description=message_text, permission=Permission.EDUCATOR
+                )
             ]
 
     # Check language-specific oracles
@@ -204,7 +208,7 @@ def is_supported(language: "Language") -> list[Message] | None:
                         """
                         return [
                             ExtendedMessage(
-                                description=message_text, permission=Permission.STAFF
+                                description=message_text, permission=Permission.EDUCATOR
                             )
                         ]
 
@@ -265,7 +269,9 @@ def is_supported(language: "Language") -> list[Message] | None:
             a tuple.
             """
             return [
-                ExtendedMessage(description=message_text, permission=Permission.STAFF)
+                ExtendedMessage(
+                    description=message_text, permission=Permission.EDUCATOR
+                )
             ]
 
     return None
