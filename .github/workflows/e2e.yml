@@ -22,6 +22,9 @@ on:
         type: string
         default: master
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -34,6 +37,7 @@ jobs:
         with:
           repository: dodona-edu/universal-judge
           ref: ${{ inputs.ref }}
+          persist-credentials: false
       - name: Install test dependencies
         run: ./devel/install_test_deps.sh
       - name: Run tests
