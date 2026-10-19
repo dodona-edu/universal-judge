@@ -156,6 +156,7 @@ def test_ruff_syntax_error(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[0]["type"] == Severity.ERROR
     # Syntax errors have no rule, and so no documentation page.
     assert annotations[0].get("externalUrl") is None
+    assert annotations[0].get("format") is None
     assert annotations[0]["row"] == 0
     assert annotations[0]["rows"] == 1
     assert annotations[0]["column"] == 20

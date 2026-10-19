@@ -237,9 +237,10 @@ def _syntax_error(config: DodonaConfig) -> AnnotateCode | None:
         )
         return annotation_from_position(
             position=position,
+            # Plain text: Python's message doesn't mark code, so markdown could
+            # garble names such as `__debug__`.
             text=messages().text(SYNTAX_ERROR, e.msg, config.natural_language),
             type=Severity.ERROR,
-            format="markdown",
         )
     except (ValueError, OSError, RecursionError, MemoryError):
         # Unreadable, a null byte, or too deeply nested for the compiler (such
