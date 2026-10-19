@@ -1,4 +1,4 @@
-# Only says what differs from the judge's rules: the unused import (F401) in
-# warning.py is not reported, the other rules still are.
+# Only report unused variables (F841), so the unused import (F401) in
+# warning.py is not reported.
 [lint]
-ignore = ["F401"]
+select = ["F841"]

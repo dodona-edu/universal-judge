@@ -6,14 +6,10 @@ The rules ruff checks (rules/ruff.toml) and the texts students see
 both judges.
 """
 
-import datetime
 import json
 import logging
-import re
-import tomllib
 import warnings
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
@@ -47,25 +43,33 @@ def run_ruff(
     if annotation := _syntax_error(config):
         return [], [annotation]
 
-    with TemporaryDirectory() as directory:
-        execution_results = run_command(
-            directory=submission.parent,
-            timeout=remaining,
-            command=[
-                "ruff",
-                "check",
-                # Passing a config file also stops ruff from picking up a stray
-                # pyproject.toml or ruff.toml next to the submission.
-                "--config",
-                str(_configuration(config, Path(directory))),
-                "--output-format",
-                "json",
-                # Don't leave a .ruff_cache behind in the submission directory.
-                "--no-cache",
-                "--quiet",
-                str(submission.absolute()),
-            ],
-        )
+    language_options = config.config_for()
+    if path := language_options.get("ruff_config", None):
+        assert isinstance(path, str)
+        config_path = config.resources / path
+    else:
+        # Use the default file.
+        config_path = RULES
+    config_path = str(config_path.absolute())
+
+    execution_results = run_command(
+        directory=submission.parent,
+        timeout=remaining,
+        command=[
+            "ruff",
+            "check",
+            # Passing a config file also stops ruff from picking up a stray
+            # pyproject.toml or ruff.toml next to the submission.
+            "--config",
+            config_path,
+            "--output-format",
+            "json",
+            # Don't leave a .ruff_cache behind in the submission directory.
+            "--no-cache",
+            "--quiet",
+            str(submission.absolute()),
+        ],
+    )
 
     if execution_results is None:
         return [], []
@@ -156,61 +160,6 @@ def run_ruff(
         )
 
     return [], annotations
-
-
-def _configuration(config: DodonaConfig, directory: Path) -> Path:
-    """
-    The configuration ruff lints with: the judge's rules, extended by the
-    exercise's own configuration if it has one.
-
-    An exercise's configuration only has to say what differs from the judge's
-    rules (for example `lint.ignore`), unless it sets `extend` itself. Like ruff,
-    a file named pyproject.toml has its settings in the `tool.ruff` table.
-    """
-    path = config.config_for().get("ruff_config", None)
-    if not path:
-        return RULES
-    assert isinstance(path, str)
-    own = (config.resources / path).absolute()
-    try:
-        with own.open("rb") as file:
-            settings = tomllib.load(file)
-    except (OSError, tomllib.TOMLDecodeError):
-        # Ruff reports what is wrong with it.
-        return own
-    if own.name == "pyproject.toml":
-        settings = settings.get("tool", {}).get("ruff", {})
-    if "extend" in settings:
-        return own
-    extended = directory / "ruff.toml"
-    lines = [f"extend = {_toml_value(str(RULES.absolute()))}"]
-    lines += [
-        f"{_toml_key(key)} = {_toml_value(value)}" for key, value in settings.items()
-    ]
-    extended.write_text("\n".join(lines) + "\n")
-    return extended
-
-
-def _toml_key(key: str) -> str:
-    return key if re.fullmatch(r"[A-Za-z0-9_-]+", key) else _toml_value(key)
-
-
-def _toml_value(value) -> str:
-    """A value read with tomllib, written as TOML (tables become inline tables)."""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, str):
-        # A JSON string is a valid TOML string.
-        return json.dumps(value, ensure_ascii=False)
-    if isinstance(value, list):
-        return "[" + ", ".join(_toml_value(v) for v in value) + "]"
-    if isinstance(value, dict):
-        pairs = (f"{_toml_key(k)} = {_toml_value(v)}" for k, v in value.items())
-        return "{" + ", ".join(pairs) + "}"
-    if isinstance(value, (datetime.date, datetime.time)):
-        return value.isoformat()
-    # Integers and floats (repr writes inf and nan as TOML does).
-    return repr(value)
 
 
 def _syntax_error(config: DodonaConfig) -> AnnotateCode | None:

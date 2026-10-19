@@ -163,7 +163,8 @@ def test_ruff_syntax_error(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 def test_ruff_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
-    # This config ignores F401 (unused-import), the only remark on warning.py.
+    # This config replaces the judge's rules and only enables F841
+    # (unused-variable), so the unused import (F401) in warning.py is not reported.
     conf = configuration(
         pytestconfig,
         "linter",
@@ -183,62 +184,6 @@ def test_ruff_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 0
-
-
-def test_ruff_custom_config_extends_the_default_rules(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "python",
-        tmp_path,
-        "plan.tson",
-        "convention",
-        {
-            "options": {
-                "language": {
-                    "python": {"linter": True, "ruff_config": "ruff_config.toml"}
-                }
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    annotations = updates.find_all("annotate-code")
-    assert len(annotations) == 1
-    assert "multiple-statements-on-one-line" in annotations[0]["externalUrl"]
-
-
-@pytest.mark.parametrize(
-    ("solution", "remarks"), [("warning", 0), ("refactor", 0), ("convention", 1)]
-)
-def test_ruff_custom_pyproject_config(
-    tmp_path: Path, pytestconfig: pytest.Config, solution: str, remarks: int
-):
-    # It ignores F401 and allows 6 arguments; E701 in convention.py is still
-    # reported.
-    conf = configuration(
-        pytestconfig,
-        "linter",
-        "python",
-        tmp_path,
-        "plan.tson",
-        solution,
-        {
-            "options": {
-                "language": {
-                    "python": {
-                        "linter": True,
-                        "ruff_config": "pyproject/pyproject.toml",
-                    }
-                }
-            }
-        },
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert len(updates.find_all("annotate-code")) == remarks
 
 
 def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.Config):
