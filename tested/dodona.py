@@ -22,7 +22,7 @@ from cattrs.preconf.json import make_converter
 class Permission(StrEnum):
     """To which level of user this message is visible."""
 
-    STAFF = auto()
+    EDUCATOR = auto()
     STUDENT = auto()
     ZEUS = auto()
 

@@ -51,7 +51,7 @@ def run_pylint(
         return [
             get_i18n_string("languages.python.linter.crashed"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
         ], []
 
@@ -62,7 +62,7 @@ def run_pylint(
         return [
             get_i18n_string("languages.python.linter.output"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
         ], []
 

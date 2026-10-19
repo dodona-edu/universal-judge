@@ -39,12 +39,12 @@ def evaluate(
         actual = get_converter().loads(actual_str, BooleanEvalResult)
     except Exception as e:
         _logger.exception(e)
-        staff_message = ExtendedMessage(
+        educator_message = ExtendedMessage(
             description=get_i18n_string(
-                "oracles.specific.staff", actual=actual_str, e=traceback.format_exc()
+                "oracles.specific.educator", actual=actual_str, e=traceback.format_exc()
             ),
             format="text",
-            permission=Permission.STAFF,
+            permission=Permission.EDUCATOR,
         )
         student_message = get_i18n_string("oracles.specific.student.default")
         return OracleResult(
@@ -54,7 +54,7 @@ def evaluate(
             ),
             readable_expected="",
             readable_actual="",
-            messages=[staff_message, student_message],
+            messages=[educator_message, student_message],
         )
 
     return actual.to_oracle_result(config.bundle, channel, "", "")

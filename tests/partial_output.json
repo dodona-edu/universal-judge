@@ -170,6 +170,7 @@
       "enum": [
         "student",
         "staff",
+        "educator",
         "zeus"
       ]
     },

@@ -64,14 +64,14 @@ def evaluate(
         actual = try_as_exception(actual_str)
     except Exception as e:
         _logger.exception(e)
-        staff_message = ExtendedMessage(
+        educator_message = ExtendedMessage(
             description=get_i18n_string(
-                "oracles.exception.staff",
+                "oracles.exception.educator",
                 actual=actual_str,
                 exception=traceback.format_exc(),
             ),
             format="text",
-            permission=Permission.STAFF,
+            permission=Permission.EDUCATOR,
         )
         student_message = get_i18n_string("oracles.exception.student")
         return OracleResult(
@@ -81,7 +81,7 @@ def evaluate(
             ),
             readable_expected=readable_expected,
             readable_actual="",
-            messages=[staff_message, student_message],
+            messages=[educator_message, student_message],
         )
 
     expected_type = expected.get_type(language)

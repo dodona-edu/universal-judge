@@ -1,7 +1,7 @@
 nl:
   oracles:
     exception:
-      staff: >-
+      educator: >-
         Verwachte een foutwaarde, maar %{actual} gekregen, welke een fout
         veroorzaakte tijdens het parsen: %{exception}
       student: >-
@@ -32,7 +32,7 @@ nl:
         status: "Ontbrekende uitvoer."
         message: "Hier ontbreekt uitvoer."
       status: "Fout bij beoordelen resultaat."
-      staff: >-
+      educator: >-
         Ongeldige uitvoer ontvangen voor de specifieke evaluatie: %{actual}
         Ofwel is het testplan ongeldige, ofwel bevat de evaluatie code een bug,
         ofwel probeert de student vals te spelen: %{e}

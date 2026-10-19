@@ -127,4 +127,4 @@ def test_checkstyle_bad_output(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     messages = updates.find_all("append-message")
-    assert len(messages) == 2  # Staff and student warning
+    assert len(messages) == 2  # Educator and student warning

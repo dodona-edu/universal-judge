@@ -48,7 +48,7 @@ def evaluate_no_return(
     except Exception as e:
         raw_message = f"Could not parse {actual}, which caused {e} for get_values."
         message = ExtendedMessage(
-            description=raw_message, format="text", permission=Permission.STAFF
+            description=raw_message, format="text", permission=Permission.EDUCATOR
         )
         return OracleResult(
             result=StatusMessage(enum=Status.INTERNAL_ERROR),

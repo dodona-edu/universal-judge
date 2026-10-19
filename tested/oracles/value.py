@@ -124,7 +124,7 @@ def _get_value_value(
     except Exception as e:
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
-            description=raw_message, format="text", permission=Permission.STAFF
+            description=raw_message, format="text", permission=Permission.EDUCATOR
         )
         student = "An error occurred while collecting the return value. Contact staff for more information."
         return OracleResult(

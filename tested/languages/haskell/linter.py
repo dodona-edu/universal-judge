@@ -66,7 +66,7 @@ def run_hlint(
         return [
             get_i18n_string("languages.haskell.linter.output"),
             ExtendedMessage(
-                description=str(e), format="code", permission=Permission.STAFF
+                description=str(e), format="code", permission=Permission.EDUCATOR
             ),
         ], []
     annotations = []

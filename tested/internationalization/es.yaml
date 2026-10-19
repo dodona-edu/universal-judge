@@ -1,7 +1,7 @@
 es:
   oracles:
     exception:
-      staff: >-
+      educator: >-
         Se esperaba un valor de excepción, pero se recibió %{actual}, lo cual
         causó un error durante el análisis: %{exception}
       student: >-
@@ -32,7 +32,7 @@ es:
         status: "Falta la salida."
         message: "Falta la salida aquí."
       status: "Error al evaluar el resultado."
-      staff: >-
+      educator: >-
         Se recibió una salida no válida para la evaluación específica: %{actual}.
         O bien el plan de pruebas no es válido, o el código de evaluación tiene un
         error, o el estudiante está intentando hacer trampa: %{e}
