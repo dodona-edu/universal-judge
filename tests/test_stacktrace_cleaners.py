@@ -195,13 +195,11 @@ def test_csharp_exception():
 def test_csharp_compilation():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
-    original = f"""Determining projects to restore...
-    Restored {workdir}/common/dotnet.csproj (in 81 ms).
-    {workdir}/common/Submission.cs(13,20): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
-    {workdir}/common/Submission.cs(13,26): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
-    {workdir}/common/Submission.cs(13,30): error CS1001: Identifier expected [{workdir}/common/dotnet.csproj]
-    {workdir}/common/Submission.cs(13,30): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
-    {workdir}/common/Submission.cs(13,34): error CS1002: ; expected [{workdir}/common/dotnet.csproj]
+    original = f"""    {workdir}/common/Submission.cs(13,20): error CS1002: ; expected
+    {workdir}/common/Submission.cs(13,26): error CS1002: ; expected
+    {workdir}/common/Submission.cs(13,30): error CS1001: Identifier expected
+    {workdir}/common/Submission.cs(13,30): error CS1002: ; expected
+    {workdir}/common/Submission.cs(13,34): error CS1002: ; expected
     """
     expected = f"""    <code>:13:20: error CS1002: ; expected
     <code>:13:26: error CS1002: ; expected
@@ -558,7 +556,7 @@ def test_csharp_cleanup_stacktrace_execution_dir_compile():
     language_config = get_language(workdir, "csharp")
     original = (
         f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
-        f"The name 'foo' does not exist [{workdir}/Execution0/dotnet.csproj]\n"
+        "The name 'foo' does not exist\n"
     )
     expected = "<code>:14:19: error CS0103: The name 'foo' does not exist\n"
     assert language_config.cleanup_stacktrace(original) == expected
@@ -569,10 +567,7 @@ def test_csharp_compile_line_offset_end_to_end():
     language_config = get_language(workdir, "csharp")
     assert language_config.config
     language_config.config.dodona.source_offset = -12
-    original = (
-        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
-        f"undefined [{workdir}/Execution0/dotnet.csproj]\n"
-    )
+    original = f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
         language_config.config.dodona.source_offset, cleaned
