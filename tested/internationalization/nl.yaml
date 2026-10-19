@@ -94,9 +94,6 @@ nl:
       not-found: "%{linter} niet gevonden!"
     python:
       linter:
-        crashed: "Pylint gecrasht"
-        output: "Pylint produceerde slechte uitvoer."
-      ruff:
         timeout: "Ruff overschreed de tijdslimiet"
         memory: "Ruff overschreed de geheugenlimiet"
         crashed: "Ruff gecrasht"

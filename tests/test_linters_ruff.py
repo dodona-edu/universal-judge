@@ -45,6 +45,28 @@ def test_ruff_error(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[0]["rows"] == 1
     assert annotations[0]["column"] == 11
     assert annotations[0]["columns"] == 18
+    # The Dutch text of messages.toml, with the name ruff reported.
+    assert annotations[0]["text"].startswith(
+        "`undefined_variable` is niet gedefinieerd."
+    )
+    assert annotations[0]["format"] == "markdown"
+
+
+def test_ruff_text_in_the_natural_language(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "error",
+        {"natural_language": "en", "options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    assert len(annotations) == 1
+    assert annotations[0]["text"].startswith("`undefined_variable` is not defined.")
 
 
 def test_ruff_warning(tmp_path: Path, pytestconfig: pytest.Config):
@@ -102,15 +124,16 @@ def test_ruff_refactor(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
-    assert len(annotations) == 1
+    # Too many arguments (PLR0913) and too many positional arguments (PLR0917).
+    assert len(annotations) == 2
+    [annotation] = [a for a in annotations if "too-many-arguments" in a["externalUrl"]]
 
-    assert annotations[0]["type"] == Severity.INFO
-    assert "too-many-arguments" in annotations[0]["externalUrl"]
-    assert annotations[0]["row"] == 0
-    assert annotations[0]["rows"] == 1
+    assert annotation["type"] == Severity.INFO
+    assert annotation["row"] == 0
+    assert annotation["rows"] == 1
     # Ruff marks the function name, not the whole signature.
-    assert annotations[0]["column"] == 4
-    assert annotations[0]["columns"] == 17
+    assert annotation["column"] == 4
+    assert annotation["columns"] == 17
 
 
 def test_ruff_syntax_error(tmp_path: Path, pytestconfig: pytest.Config):
@@ -126,19 +149,20 @@ def test_ruff_syntax_error(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
-    assert len(annotations) > 0
 
+    # One annotation with Python's own message, not those of ruff's parser.
+    assert len(annotations) == 1
+    assert annotations[0]["text"] == "Syntaxfout: invalid syntax"
+    assert annotations[0]["type"] == Severity.ERROR
     # Syntax errors have no rule, and so no documentation page.
-    assert all(a["type"] == Severity.ERROR for a in annotations)
-    assert all(a.get("externalUrl") is None for a in annotations)
-    # The annotation must not run past the line the error is on.
-    assert all(a["row"] == 0 for a in annotations)
-    assert all(a["rows"] == 1 for a in annotations)
+    assert annotations[0].get("externalUrl") is None
+    assert annotations[0]["row"] == 0
+    assert annotations[0]["rows"] == 1
+    assert annotations[0]["column"] == 20
 
 
 def test_ruff_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
-    # This config only enables F841 (unused-variable).
-    # Our warning.py has an unused import (F401), which should be disabled.
+    # This config ignores F401 (unused-import), the only remark on warning.py.
     conf = configuration(
         pytestconfig,
         "linter",
@@ -160,11 +184,59 @@ def test_ruff_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
     assert len(annotations) == 0
 
 
+def test_ruff_custom_config_extends_the_default_rules(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "convention",
+        {
+            "options": {
+                "language": {
+                    "python": {"linter": True, "ruff_config": "ruff_config.toml"}
+                }
+            }
+        },
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    assert len(annotations) == 1
+    assert "multiple-statements-on-one-line" in annotations[0]["externalUrl"]
+
+
+def test_ruff_missing_custom_config_is_reported(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "warning",
+        {
+            "options": {
+                "language": {"python": {"linter": True, "ruff_config": "missing.toml"}}
+            }
+        },
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    messages = updates.find_all("append-message")
+    assert len(messages) == 2  # Staff and student warning
+    assert len(updates.find_all("annotate-code")) == 0
+
+
 def test_ruff_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     mocker.patch(
-        "tested.languages.python.ruff_linter.run_command",
+        "tested.languages.python.linter.run_command",
         return_value=BaseExecutionResult(
             stdout="invalid json", stderr="", exit=0, timeout=False, memory=False
         ),
@@ -190,7 +262,7 @@ def test_ruff_failure_is_reported(
     # Ruff writes nothing to stdout when it fails, which must not be mistaken
     # for a submission without any problems.
     mocker.patch(
-        "tested.languages.python.ruff_linter.run_command",
+        "tested.languages.python.linter.run_command",
         return_value=BaseExecutionResult(
             stdout="",
             stderr="ruff failed\n  Cause: Unknown rule selector `XYZ123`",

@@ -160,10 +160,10 @@ class Python(Language):
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
-        from tested.languages.python import ruff_linter
+        from tested.languages.python import linter
 
         assert self.config
-        return ruff_linter.run_ruff(self.config.dodona, remaining)
+        return linter.run_ruff(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
     def cleanup_stacktrace(self, stacktrace: str) -> str:

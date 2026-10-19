@@ -1,0 +1,187 @@
+# The rules ruff checks in submitted code. Shared with TESTed's Python linter:
+# keep this file and messages.toml (the texts students see) the same in both judges.
+#
+# The selection matches the remarks pylint gave with the judges' former pylint
+# configuration: every check pylint ran by default that ruff implements as a
+# stable rule, except the ones that configuration switched off (names,
+# docstrings, line length, whitespace, too many attributes, methods or returns)
+# and three left out on purpose: no-else-return (RET505),
+# missing-maxsplit-arg (PLC0207) and implicit-return (RET503). Every rule here
+# needs an entry in messages.toml.
+target-version = "py312"
+
+[lint]
+select = [
+    # Pyflakes: mistakes such as undefined or unused names, and broken format strings
+    "F401",  # unused-import
+    "F402",  # import-shadowed-by-loop-var
+    "F403",  # undefined-local-with-import-star
+    "F404",  # late-future-import
+    "F405",  # undefined-local-with-import-star-usage
+    "F406",  # undefined-local-with-nested-import-star-usage
+    "F407",  # future-feature-not-defined
+    "F501",  # percent-format-invalid-format
+    "F502",  # percent-format-expected-mapping
+    "F503",  # percent-format-expected-sequence
+    "F504",  # percent-format-extra-named-arguments
+    "F505",  # percent-format-missing-argument
+    "F506",  # percent-format-mixed-positional-and-named
+    "F507",  # percent-format-positional-count-mismatch
+    "F508",  # percent-format-star-requires-sequence
+    "F509",  # percent-format-unsupported-format-character
+    "F521",  # string-dot-format-invalid-format
+    "F522",  # string-dot-format-extra-named-arguments
+    "F523",  # string-dot-format-extra-positional-arguments
+    "F524",  # string-dot-format-missing-arguments
+    "F525",  # string-dot-format-mixing-automatic
+    "F541",  # f-string-missing-placeholders
+    "F601",  # multi-value-repeated-key-literal
+    "F602",  # multi-value-repeated-key-variable
+    "F621",  # expressions-in-star-assignment
+    "F622",  # multiple-starred-expressions
+    "F631",  # assert-tuple
+    "F632",  # is-literal
+    "F633",  # invalid-print-syntax
+    "F634",  # if-tuple
+    "F701",  # break-outside-loop
+    "F702",  # continue-outside-loop
+    "F704",  # yield-outside-function
+    "F706",  # return-outside-function
+    "F707",  # default-except-not-last
+    "F722",  # forward-annotation-syntax-error
+    "F811",  # redefined-while-unused
+    "F821",  # undefined-name
+    "F822",  # undefined-export
+    "F823",  # undefined-local
+    "F841",  # unused-variable
+    "F842",  # unused-annotation
+    "F901",  # raise-not-implemented
+    # Pylint: the checks pylint reported by default
+    "PLC0105",  # type-name-incorrect-variance
+    "PLC0131",  # type-bivariance
+    "PLC0132",  # type-param-name-mismatch
+    "PLC0205",  # single-string-slots
+    "PLC0206",  # dict-index-missing-items
+    "PLC0208",  # iteration-over-set
+    "PLC0414",  # useless-import-alias
+    "PLC0415",  # import-outside-top-level
+    "PLC1802",  # len-test
+    "PLC2401",  # non-ascii-name
+    "PLC2403",  # non-ascii-import-name
+    "PLC3002",  # unnecessary-direct-lambda-call
+    "PLE0100",  # yield-in-init
+    "PLE0101",  # return-in-init
+    "PLE0115",  # nonlocal-and-global
+    "PLE0117",  # nonlocal-without-binding
+    "PLE0118",  # load-before-global-declaration
+    "PLE0237",  # non-slot-assignment
+    "PLE0241",  # duplicate-bases
+    "PLE0302",  # unexpected-special-method-signature
+    "PLE0303",  # invalid-length-return-type
+    "PLE0304",  # invalid-bool-return-type
+    "PLE0305",  # invalid-index-return-type
+    "PLE0307",  # invalid-str-return-type
+    "PLE0308",  # invalid-bytes-return-type
+    "PLE0309",  # invalid-hash-return-type
+    "PLE0604",  # invalid-all-object
+    "PLE0605",  # invalid-all-format
+    "PLE0643",  # potential-index-error
+    "PLE0704",  # misplaced-bare-raise
+    "PLE1132",  # repeated-keyword-argument
+    "PLE1142",  # await-outside-async
+    "PLE1205",  # logging-too-many-args
+    "PLE1206",  # logging-too-few-args
+    "PLE1300",  # bad-string-format-character
+    "PLE1307",  # bad-string-format-type
+    "PLE1310",  # bad-str-strip-call
+    "PLE1507",  # invalid-envvar-value
+    "PLE1519",  # singledispatch-method
+    "PLE1520",  # singledispatchmethod-function
+    "PLE1700",  # yield-from-in-async-function
+    "PLE2502",  # bidirectional-unicode
+    "PLE2510",  # invalid-character-backspace
+    "PLE2512",  # invalid-character-sub
+    "PLE2513",  # invalid-character-esc
+    "PLE2514",  # invalid-character-nul
+    "PLE2515",  # invalid-character-zero-width-space
+    "PLR0124",  # comparison-with-itself
+    "PLR0133",  # comparison-of-constant
+    "PLR0206",  # property-with-parameters
+    "PLR0402",  # manual-from-import
+    "PLR0912",  # too-many-branches
+    "PLR0913",  # too-many-arguments
+    "PLR0915",  # too-many-statements
+    "PLR0917",  # too-many-positional-arguments
+    "PLR1704",  # redefined-argument-from-local
+    "PLR1708",  # stop-iteration-return
+    "PLR1711",  # useless-return
+    "PLR1714",  # repeated-equality-comparison
+    "PLR1716",  # boolean-chained-comparison
+    "PLR1722",  # sys-exit-alias
+    "PLR1730",  # if-stmt-min-max
+    "PLR1733",  # unnecessary-dict-index-lookup
+    "PLR1736",  # unnecessary-list-index-lookup
+    "PLW0108",  # unnecessary-lambda
+    "PLW0120",  # useless-else-on-loop
+    "PLW0127",  # self-assigning-variable
+    "PLW0128",  # redeclared-assigned-name
+    "PLW0129",  # assert-on-string-literal
+    "PLW0131",  # named-expr-without-context
+    "PLW0133",  # useless-exception-statement
+    "PLW0177",  # nan-comparison
+    "PLW0211",  # bad-staticmethod-argument
+    "PLW0245",  # super-without-brackets
+    "PLW0406",  # import-self
+    "PLW0602",  # global-variable-not-assigned
+    "PLW0603",  # global-statement
+    "PLW0604",  # global-at-module-level
+    "PLW0642",  # self-or-cls-assignment
+    "PLW0711",  # binary-op-exception
+    "PLW1501",  # bad-open-mode
+    "PLW1507",  # shallow-copy-environ
+    "PLW1508",  # invalid-envvar-default
+    "PLW1509",  # subprocess-popen-preexec-fn
+    "PLW1510",  # subprocess-run-without-check
+    "PLW2101",  # useless-with-lock
+    "PLW3301",  # nested-min-max
+    # pycodestyle: statements and imports (layout rules such as line length stay off)
+    "E401",  # multiple-imports-on-one-line
+    "E402",  # module-import-not-at-top-of-file
+    "E701",  # multiple-statements-on-one-line-colon
+    "E702",  # multiple-statements-on-one-line-semicolon
+    "E703",  # useless-semicolon
+    "E711",  # none-comparison
+    "E712",  # true-false-comparison
+    "E713",  # not-in-test
+    "E721",  # type-comparison
+    "E722",  # bare-except
+    "E731",  # lambda-assignment
+    "W605",  # invalid-escape-sequence
+    # Pylint checks that ruff implements in other plugins
+    "ARG001",  # unused-function-argument
+    "ARG002",  # unused-method-argument
+    "B006",  # mutable-argument-default
+    "B012",  # jump-statement-in-finally
+    "B018",  # useless-expression
+    "B023",  # function-uses-loop-variable
+    "B033",  # duplicate-value
+    "B904",  # raise-without-from-inside-except
+    "C403",  # unnecessary-list-comprehension-set
+    "C408",  # unnecessary-collection-call
+    "C416",  # unnecessary-comprehension
+    "C419",  # unnecessary-comprehension-in-call
+    "RET506",  # superfluous-else-raise
+    "RET507",  # superfluous-else-continue
+    "RET508",  # superfluous-else-break
+    "S307",  # suspicious-eval-usage
+    "SIM101",  # duplicate-isinstance-call
+    "SIM103",  # needless-bool
+    "SIM115",  # open-file-with-context-handler
+    "SIM118",  # in-dict-keys
+    "SIM210",  # if-expr-with-true-false
+    "UP004",  # useless-object-inheritance
+    "UP008",  # super-call-with-parameters
+    "UP028",  # yield-in-for-loop
+    "UP032",  # f-string
+    "UP034",  # extraneous-parentheses
+]

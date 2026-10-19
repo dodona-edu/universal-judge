@@ -94,9 +94,6 @@ en:
       not-found: "%{linter} not found!"
     python:
       linter:
-        crashed: "Pylint crashed"
-        output: "Pylint produced bad output."
-      ruff:
         timeout: "Ruff exceeded time limit"
         memory: "Ruff exceeded memory limit"
         crashed: "Ruff crashed"
