@@ -163,7 +163,7 @@ class Python(Language):
         from tested.languages.python import linter
 
         assert self.config
-        return linter.run_pylint(self.config.dodona, remaining)
+        return linter.run_ruff(self.config.dodona, remaining)
 
     # Idea and original code: dodona/judge-pythia
     def cleanup_stacktrace(self, stacktrace: str) -> str:

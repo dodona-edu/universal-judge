@@ -6,6 +6,5 @@ class Counter:
         self.counter += 1
 
     def get(self):
-        if True:
-            return self.counter
-        return 0
+        unused_variable = 0
+        return self.counter

@@ -1,0 +1,1599 @@
+# The texts of lint remarks. Shared with TESTed's Python linter: keep this file and
+# ruff.toml (which rules run) the same in both judges.
+#
+# One table per rule: `type` is the annotation type Dodona shows (error, warning
+# or info). Each [[CODE.messages]] entry holds an English message template the
+# linter writes (`original`, with placeholders such as `{name}`, or `{}` by
+# position) and the text per language. A message is matched against the
+# templates of its rule in this order, so a more specific template goes first;
+# the values of its placeholders are filled in the text of the student's
+# language. A language without a text falls back to `en`, a message without a
+# matching template to the linter's own message. A translation may leave out a
+# placeholder, but not add one.
+#
+# `syntax-error` is not a ruff rule: it is Python's own message for a submission
+# that doesn't compile.
+
+[ARG001]  # unused-function-argument
+type = "warning"
+
+[[ARG001.messages]]
+original = "Unused function argument: `{name}`"
+en = "The parameter `{name}` is never used in this function. Use it, or remove it if you don't need it."
+nl = "De parameter `{name}` wordt nergens gebruikt in deze functie. Gebruik hem, of verwijder hem als je hem niet nodig hebt."
+
+[ARG002]  # unused-method-argument
+type = "warning"
+
+[[ARG002.messages]]
+original = "Unused method argument: `{name}`"
+en = "The parameter `{name}` is never used in this method. Use it, or remove it if you don't need it."
+nl = "De parameter `{name}` wordt nergens gebruikt in deze methode. Gebruik hem, of verwijder hem als je hem niet nodig hebt."
+
+[B006]  # mutable-argument-default
+type = "warning"
+
+[[B006.messages]]
+original = "Do not use mutable data structures for argument defaults"
+en = "Don't use a list, dictionary or set as the default value of a parameter: all calls of the function share that same object. Use `None` as the default and create a new one inside the function."
+nl = "Gebruik geen lijst, dictionary of verzameling als standaardwaarde van een parameter: alle oproepen van de functie delen dan hetzelfde object. Gebruik `None` als standaardwaarde en maak binnen de functie een nieuw object aan."
+
+[B012]  # jump-statement-in-finally
+type = "warning"
+
+[[B012.messages]]
+original = "`{name}` inside `finally` blocks cause exceptions to be silenced"
+en = "A `{name}` in a `finally` block silently cancels any exception that was raised. Move it out of the `finally` block."
+nl = "Een `{name}` in een `finally`-blok laat elke opgegooide exception ongemerkt verdwijnen. Zet die opdracht buiten het `finally`-blok."
+
+[B018]  # useless-expression
+type = "warning"
+
+[[B018.messages]]
+original = "Found useless expression. Either assign it to a variable or remove it."
+en = "This expression has no effect, because its result is not used. Store it in a variable or remove it. To call a function or method, add parentheses, like `print()` or `numbers.sort()`."
+nl = "Deze uitdrukking heeft geen effect, want het resultaat wordt niet gebruikt. Bewaar het in een variabele of verwijder de uitdrukking. Wil je een functie of methode oproepen, zet er dan haakjes achter, zoals `print()` of `getallen.sort()`."
+
+[[B018.messages]]
+original = "Found useless attribute access. Either assign it to a variable or remove it."
+en = "This attribute access has no effect. To call a method, add parentheses, like `numbers.sort()`. Otherwise store the value in a variable or remove it."
+nl = "Het opvragen van dit attribuut heeft geen effect. Wil je een methode oproepen, zet er dan haakjes achter, zoals `getallen.sort()`. Bewaar anders de waarde in een variabele of verwijder het."
+
+[B023]  # function-uses-loop-variable
+type = "warning"
+
+[[B023.messages]]
+original = "Function definition does not bind loop variable `{name}`"
+en = "This function uses the loop variable `{name}`, but only looks up its value when it is called. If that happens after the loop, it gets the value from the last round. Bind the current value with a default value, like `{name}={name}` among the parameters."
+nl = "Deze functie gebruikt de lusvariabele `{name}`, maar zoekt de waarde pas op wanneer ze opgeroepen wordt. Gebeurt dat na de lus, dan krijgt ze de waarde uit de laatste ronde. Leg de huidige waarde vast met een standaardwaarde, zoals `{name}={name}` bij de parameters."
+
+[B033]  # duplicate-value
+type = "warning"
+
+[[B033.messages]]
+original = "Sets should not contain duplicate item `{value}`"
+en = "The item `{value}` appears more than once in this set. Remove the duplicate."
+nl = "Het element `{value}` komt meer dan één keer voor in deze verzameling. Verwijder het dubbele element."
+
+[[B033.messages]]
+original = "Sets should not contain duplicate items, but `{existing}` and `{value}` has the same value"
+en = "This set contains the same value twice: `{existing}` and `{value}` are equal. Remove one of them."
+nl = "Deze verzameling bevat twee keer dezelfde waarde: `{existing}` en `{value}` zijn gelijk. Verwijder er één."
+
+[B904]  # raise-without-from-inside-except
+type = "info"
+
+[[B904.messages]]
+original = "Within an `except*` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling"
+en = "When you raise a new exception in an `except*` block, link it to the caught one: write `except* ... as err:` and `raise ... from err`, or use `raise ... from None` to leave the caught one out. Then the error message shows clearly where the problem started."
+nl = "Als je in een `except*`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception: schrijf `except* ... as err:` en `raise ... from err`, of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
+
+[[B904.messages]]
+original = "Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling"
+en = "When you raise a new exception in an `except` block, link it to the caught one: write `except ... as err:` and `raise ... from err`, or use `raise ... from None` to leave the caught one out. Then the error message shows clearly where the problem started."
+nl = "Als je in een `except`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception: schrijf `except ... as err:` en `raise ... from err`, of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
+
+[C403]  # unnecessary-list-comprehension-set
+type = "info"
+
+[[C403.messages]]
+original = "Unnecessary list comprehension (rewrite as a set comprehension)"
+en = "No need to build a list first. Write a set comprehension directly, with curly brackets, instead of `set([...])`."
+nl = "Je hoeft niet eerst een lijst te maken. Schrijf meteen een set comprehension met accolades, in plaats van `set([...])`."
+
+[C408]  # unnecessary-collection-call
+type = "info"
+
+[[C408.messages]]
+original = "Unnecessary `list()` call (rewrite as a literal)"
+en = "No need to call `list()`. Write `[]` for an empty list."
+nl = "Je hoeft `list()` niet op te roepen. Schrijf `[]` voor een lege lijst."
+
+[[C408.messages]]
+original = "Unnecessary `dict()` call (rewrite as a literal)"
+en = "No need to call `dict()`. Write the dictionary directly with curly brackets, like `{\"a\": 1}` instead of `dict(a=1)`."
+nl = "Je hoeft `dict()` niet op te roepen. Schrijf de dictionary rechtstreeks met accolades, zoals `{\"a\": 1}` in plaats van `dict(a=1)`."
+
+[[C408.messages]]
+original = "Unnecessary `tuple()` call (rewrite as a literal)"
+en = "No need to call `tuple()`. Write `()` for an empty tuple."
+nl = "Je hoeft `tuple()` niet op te roepen. Schrijf `()` voor een lege tuple."
+
+[[C408.messages]]
+original = "Unnecessary `{kind}()` call (rewrite as a literal)"
+en = "No need to call `{kind}()`. Write the value directly with brackets."
+nl = "Je hoeft `{kind}()` niet op te roepen. Schrijf de waarde rechtstreeks met haakjes."
+
+[C416]  # unnecessary-comprehension
+type = "info"
+
+[[C416.messages]]
+original = "Unnecessary {kind} comprehension (rewrite using `{kind}()`)"
+en = "This {kind} comprehension copies the elements without changing them. Use `{kind}()` instead."
+nl = "Deze {kind} comprehension neemt de elementen ongewijzigd over. Gebruik gewoon `{kind}()`."
+
+[C419]  # unnecessary-comprehension-in-call
+type = "info"
+
+[[C419.messages]]
+original = "Unnecessary list comprehension"
+en = "No need to build a list here. Leave out the square brackets, so the values are produced one by one (a generator expression)."
+nl = "Je hoeft hier geen lijst te maken. Laat de rechte haken weg, zodat de waarden één voor één aangemaakt worden (een generator expression)."
+
+[[C419.messages]]
+original = "Unnecessary set comprehension"
+en = "No need to build a set here. Leave out the curly brackets, so the values are produced one by one (a generator expression)."
+nl = "Je hoeft hier geen verzameling te maken. Laat de accolades weg, zodat de waarden één voor één aangemaakt worden (een generator expression)."
+
+[E401]  # multiple-imports-on-one-line
+type = "info"
+
+[[E401.messages]]
+original = "Multiple imports on one line"
+en = "Put each import on its own line."
+nl = "Zet elke import op een aparte regel."
+
+[E402]  # module-import-not-at-top-of-file
+type = "info"
+
+[[E402.messages]]
+original = "Module level import not at top of cell"
+en = "Put your imports at the top of the cell."
+nl = "Zet je imports bovenaan de cel."
+
+[[E402.messages]]
+original = "Module level import not at top of file"
+en = "Put your imports at the top of the file."
+nl = "Zet je imports bovenaan het bestand."
+
+[E701]  # multiple-statements-on-one-line-colon
+type = "info"
+
+[[E701.messages]]
+original = "Multiple statements on one line (colon)"
+en = "Put the code after the colon on a new, indented line."
+nl = "Zet de code na de dubbelepunt op een nieuwe regel en laat die inspringen."
+
+[E702]  # multiple-statements-on-one-line-semicolon
+type = "info"
+
+[[E702.messages]]
+original = "Multiple statements on one line (semicolon)"
+en = "Put each statement on its own line instead of separating them with a semicolon."
+nl = "Zet elke opdracht op een aparte regel in plaats van ze te scheiden met een puntkomma."
+
+[E703]  # useless-semicolon
+type = "info"
+
+[[E703.messages]]
+original = "Statement ends with an unnecessary semicolon"
+en = "Remove the semicolon at the end of this line; Python doesn't need it."
+nl = "Verwijder de puntkomma op het einde van deze regel; Python heeft die niet nodig."
+
+[E711]  # none-comparison
+type = "info"
+
+[[E711.messages]]
+original = "Comparison to `None` should be `cond is None`"
+en = "Compare with `None` using `is None`, not `==`."
+nl = "Gebruik `is None` om met `None` te vergelijken, niet `==`."
+
+[[E711.messages]]
+original = "Comparison to `None` should be `cond is not None`"
+en = "Compare with `None` using `is not None`, not `!=`."
+nl = "Gebruik `is not None` om met `None` te vergelijken, niet `!=`."
+
+[E712]  # true-false-comparison
+type = "info"
+
+[[E712.messages]]
+original = "Avoid equality comparisons to `True`; use `{cond}:` for truth checks"
+en = "No need to compare with `True`. Write just `{cond}` instead of the comparison."
+nl = "Je hoeft niet te vergelijken met `True`. Schrijf gewoon `{cond}` in plaats van de vergelijking."
+
+[[E712.messages]]
+original = "Avoid inequality comparisons to `True`; use `not {cond}:` for false checks"
+en = "No need to compare with `True`. Write `not {cond}` instead of the comparison."
+nl = "Je hoeft niet te vergelijken met `True`. Schrijf `not {cond}` in plaats van de vergelijking."
+
+[[E712.messages]]
+original = "Avoid equality comparisons to `False`; use `not {cond}:` for false checks"
+en = "No need to compare with `False`. Write `not {cond}` instead of the comparison."
+nl = "Je hoeft niet te vergelijken met `False`. Schrijf `not {cond}` in plaats van de vergelijking."
+
+[[E712.messages]]
+original = "Avoid inequality comparisons to `False`; use `{cond}:` for truth checks"
+en = "No need to compare with `False`. Write just `{cond}` instead of the comparison."
+nl = "Je hoeft niet te vergelijken met `False`. Schrijf gewoon `{cond}` in plaats van de vergelijking."
+
+[E713]  # not-in-test
+type = "info"
+
+[[E713.messages]]
+original = "Test for membership should be `not in`"
+en = "Write `x not in y` instead of `not x in y`."
+nl = "Schrijf `x not in y` in plaats van `not x in y`."
+
+[E721]  # type-comparison
+type = "info"
+
+[[E721.messages]]
+original = "Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks"
+en = "To check the type of a value, use `isinstance()`, or compare types with `is` instead of `==`."
+nl = "Gebruik `isinstance()` om het type van een waarde te controleren, of vergelijk types met `is` in plaats van `==`."
+
+[E722]  # bare-except
+type = "warning"
+
+[[E722.messages]]
+original = "Do not use bare `except`"
+en = "An `except:` without an exception type also catches errors you don't expect. Say which exception you want to catch, for example `except ValueError:`."
+nl = "Een `except:` zonder exception erachter vangt ook fouten op die je niet verwacht. Vermeld welke exception je wil opvangen, bijvoorbeeld `except ValueError:`."
+
+[E731]  # lambda-assignment
+type = "info"
+
+[[E731.messages]]
+original = "Do not assign a `lambda` expression, use a `def`"
+en = "Don't store a `lambda` in a variable. Define a function with `def` instead."
+nl = "Bewaar geen `lambda` in een variabele. Definieer een functie met `def`."
+
+[F401]  # unused-import
+type = "warning"
+
+[[F401.messages]]
+original = "`{name}` imported but unused; consider using `importlib.util.find_spec` to test for availability"
+en = "`{name}` is imported but never used. If you only want to check whether it is available, use `importlib.util.find_spec`; otherwise remove the import."
+nl = "`{name}` wordt geïmporteerd maar nergens gebruikt. Wil je enkel nagaan of het beschikbaar is, gebruik dan `importlib.util.find_spec`; verwijder anders de import."
+
+[[F401.messages]]
+original = "`{name}` imported but unused; consider removing, adding to `__all__`, or using a redundant alias"
+en = "`{name}` is imported but never used. Remove the import."
+nl = "`{name}` wordt geïmporteerd maar nergens gebruikt. Verwijder de import."
+
+[[F401.messages]]
+original = "`{name}` imported but unused"
+en = "`{name}` is imported but never used. Remove the import."
+nl = "`{name}` wordt geïmporteerd maar nergens gebruikt. Verwijder de import."
+
+[F402]  # import-shadowed-by-loop-var
+type = "warning"
+
+[[F402.messages]]
+original = "Import `{name}` from line {line} shadowed by loop variable"
+en = "The loop variable overwrites `{name}`, which you imported on line {line}. Use another name for the loop variable."
+nl = "De lusvariabele overschrijft de import `{name}` van regel {line}. Kies een andere naam voor de lusvariabele."
+
+[[F402.messages]]
+original = "Import `{name}` from {row} shadowed by loop variable"
+en = "The loop variable overwrites `{name}`, which you imported on {row}. Use another name for the loop variable."
+nl = "De lusvariabele overschrijft de import `{name}` van {row}. Kies een andere naam voor de lusvariabele."
+
+[F403]  # undefined-local-with-import-star
+type = "warning"
+
+[[F403.messages]]
+original = "`from {name} import *` used; unable to detect undefined names"
+en = "Avoid `from {name} import *`: it hides which names you import, so mistakes in names can't be detected. Import only the names you need, like `from {name} import ...`."
+nl = "Vermijd `from {name} import *`: zo zie je niet welke namen je importeert, en fouten in namen worden niet opgemerkt. Importeer enkel de namen die je nodig hebt, zoals `from {name} import ...`."
+
+[F404]  # late-future-import
+type = "error"
+
+[[F404.messages]]
+original = "`from __future__` imports must occur at the beginning of the file"
+en = "`from __future__` imports must be the first statements of the file."
+nl = "`from __future__`-imports moeten de eerste opdrachten van het bestand zijn."
+
+[F405]  # undefined-local-with-import-star-usage
+type = "warning"
+
+[[F405.messages]]
+original = "`{name}` may be undefined, or defined from star imports"
+en = "`{name}` may not be defined, or it comes from an `import *`. Import it by name, like `from ... import {name}`, or define it."
+nl = "`{name}` is misschien niet gedefinieerd, of komt uit een `import *`. Importeer het met naam, zoals `from ... import {name}`, of definieer het."
+
+[F406]  # undefined-local-with-nested-import-star-usage
+type = "error"
+
+[[F406.messages]]
+original = "`from {name} import *` only allowed at module level"
+en = "`from {name} import *` is only allowed outside functions and classes."
+nl = "`from {name} import *` mag enkel buiten functies en klassen staan."
+
+[F407]  # future-feature-not-defined
+type = "error"
+
+[[F407.messages]]
+original = "Future feature `{name}` is not defined"
+en = "`{name}` doesn't exist in `__future__`. Check the spelling."
+nl = "`{name}` bestaat niet in `__future__`. Controleer de spelling."
+
+[F501]  # percent-format-invalid-format
+type = "error"
+
+[[F501.messages]]
+original = "`%`-format string has invalid format string: {message}"
+en = "This string with `%` formatting is invalid: {message}"
+nl = "Deze string met `%`-opmaak is ongeldig: {message}"
+
+[F502]  # percent-format-expected-mapping
+type = "error"
+
+[[F502.messages]]
+original = "`%`-format string expected mapping but got sequence"
+en = "This string uses placeholders with a name, like `%(name)s`, so the values after `%` must be in a dictionary, not in a tuple."
+nl = "Deze string gebruikt plaatshouders met een naam, zoals `%(naam)s`, dus de waarden na `%` moeten in een dictionary staan en niet in een tuple."
+
+[F503]  # percent-format-expected-sequence
+type = "error"
+
+[[F503.messages]]
+original = "`%`-format string expected sequence but got mapping"
+en = "This string uses placeholders without a name, like `%s`, so the values after `%` must be in a tuple, not in a dictionary."
+nl = "Deze string gebruikt plaatshouders zonder naam, zoals `%s`, dus de waarden na `%` moeten in een tuple staan en niet in een dictionary."
+
+[F504]  # percent-format-extra-named-arguments
+type = "warning"
+
+[[F504.messages]]
+original = "`%`-format string has unused named argument(s): {message}"
+en = "The dictionary after `%` contains names that the string never uses: `{message}`"
+nl = "De dictionary na `%` bevat namen die de string nergens gebruikt: `{message}`"
+
+[F505]  # percent-format-missing-argument
+type = "error"
+
+[[F505.messages]]
+original = "`%`-format string is missing argument(s) for placeholder(s): {message}"
+en = "The dictionary after `%` has no value for these placeholders: `{message}`"
+nl = "De dictionary na `%` heeft geen waarde voor deze plaatshouders: `{message}`"
+
+[F506]  # percent-format-mixed-positional-and-named
+type = "error"
+
+[[F506.messages]]
+original = "`%`-format string has mixed positional and named placeholders"
+en = "Don't mix placeholders with and without a name, like `%s` and `%(name)s`, in the same string. Choose one style."
+nl = "Gebruik in dezelfde string niet zowel plaatshouders met als zonder naam, zoals `%s` en `%(naam)s`. Kies één stijl."
+
+[F507]  # percent-format-positional-count-mismatch
+type = "error"
+
+[[F507.messages]]
+original = "`%`-format string has {wanted} placeholder(s) but {got} substitution(s)"
+en = "This string has {wanted} placeholder(s), but you give {got} value(s) after `%`. These numbers must be equal."
+nl = "Deze string heeft {wanted} plaatshouder(s), maar je geeft {got} waarde(n) mee na `%`. Die aantallen moeten gelijk zijn."
+
+[F508]  # percent-format-star-requires-sequence
+type = "error"
+
+[[F508.messages]]
+original = "`%`-format string `*` specifier requires sequence"
+en = "A `*` in a `%` placeholder needs the values in a tuple."
+nl = "Een `*` in een `%`-plaatshouder vraagt om de waarden in een tuple."
+
+[F509]  # percent-format-unsupported-format-character
+type = "error"
+
+[[F509.messages]]
+original = "`%`-format string has unsupported format character `{char}`"
+en = "`{char}` is not a valid format character after a `%`. Use for example `%s`, `%d` or `%f`."
+nl = "`{char}` is geen geldig opmaakteken na een `%`. Gebruik bijvoorbeeld `%s`, `%d` of `%f`."
+
+[F521]  # string-dot-format-invalid-format
+type = "error"
+
+[[F521.messages]]
+original = "`.format` call has invalid format string: {message}"
+en = "The string used with `.format` is invalid: {message}"
+nl = "De string bij `.format` is ongeldig: {message}"
+
+[F522]  # string-dot-format-extra-named-arguments
+type = "warning"
+
+[[F522.messages]]
+original = "`.format` call has unused named argument(s): {message}"
+en = "`.format` gets named values that the string never uses: `{message}`"
+nl = "`.format` krijgt waarden met een naam mee die de string nergens gebruikt: `{message}`"
+
+[F523]  # string-dot-format-extra-positional-arguments
+type = "warning"
+
+[[F523.messages]]
+original = "`.format` call has unused arguments at position(s): {message}"
+en = "`.format` gets values that the string never uses, at position(s) (counting from 0): {message}"
+nl = "`.format` krijgt waarden mee die de string nergens gebruikt, op positie(s) (vanaf 0 geteld): {message}"
+
+[F524]  # string-dot-format-missing-arguments
+type = "error"
+
+[[F524.messages]]
+original = "`.format` call is missing argument(s) for placeholder(s): {message}"
+en = "The string used with `.format` has placeholders without a value: `{message}`"
+nl = "De string bij `.format` heeft plaatshouders zonder waarde: `{message}`"
+
+[F525]  # string-dot-format-mixing-automatic
+type = "error"
+
+[[F525.messages]]
+original = "`.format` string mixes automatic and manual numbering"
+en = "Don't mix empty placeholders and numbered ones in the same string for `.format`. Number all of them, or none."
+nl = "Gebruik in dezelfde string voor `.format` niet zowel lege als genummerde plaatshouders. Nummer ze allemaal, of geen enkele."
+
+[F541]  # f-string-missing-placeholders
+type = "warning"
+
+[[F541.messages]]
+original = "f-string without any placeholders"
+en = "This f-string has nothing between curly brackets, so the `f` is not needed. Remove the `f`, or add the value you wanted to fill in."
+nl = "Deze f-string bevat niets tussen accolades, dus de `f` is overbodig. Verwijder de `f`, of voeg de waarde toe die je wou invullen."
+
+[F601]  # multi-value-repeated-key-literal
+type = "warning"
+
+[[F601.messages]]
+original = "Dictionary key literal `{name}` repeated"
+en = "The key `{name}` appears more than once in this dictionary. Only the last value is kept."
+nl = "De sleutel `{name}` komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
+
+[[F601.messages]]
+original = "Dictionary key literal `{name}` repeated (`{name}` hashes to the same value as `{existing}`)"
+en = "The keys `{existing}` and `{name}` are equal, so this dictionary contains the same key twice. Only the last value is kept."
+nl = "De sleutels `{existing}` en `{name}` zijn gelijk, dus deze dictionary bevat twee keer dezelfde sleutel. Enkel de laatste waarde blijft over."
+
+[[F601.messages]]
+original = "Dictionary key literal repeated"
+en = "A key appears more than once in this dictionary. Only the last value is kept."
+nl = "Een sleutel komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
+
+[F602]  # multi-value-repeated-key-variable
+type = "warning"
+
+[[F602.messages]]
+original = "Dictionary key `{name}` repeated"
+en = "The key `{name}` appears more than once in this dictionary. Only the last value is kept."
+nl = "De sleutel `{name}` komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
+
+[[F602.messages]]
+original = "Dictionary key repeated"
+en = "A key appears more than once in this dictionary. Only the last value is kept."
+nl = "Een sleutel komt meer dan één keer voor in deze dictionary. Enkel de laatste waarde blijft over."
+
+[F621]  # expressions-in-star-assignment
+type = "error"
+
+[[F621.messages]]
+original = "Too many expressions in star-unpacking assignment"
+en = "Too many values on the left side of this assignment with `*`."
+nl = "Te veel waarden links van deze toekenning met `*`."
+
+[F622]  # multiple-starred-expressions
+type = "error"
+
+[[F622.messages]]
+original = "Two starred expressions in assignment"
+en = "You can use only one `*` on the left side of an assignment."
+nl = "Je mag links van een toekenning maar één `*` gebruiken."
+
+[F631]  # assert-tuple
+type = "warning"
+
+[[F631.messages]]
+original = "Assert test is a non-empty tuple, which is always `True`"
+en = "This `assert` checks a tuple, which is always true. Remove the parentheses around the condition and the message."
+nl = "Deze `assert` controleert een tuple, en een tuple is altijd waar. Verwijder de haakjes rond de voorwaarde en de boodschap."
+
+[F632]  # is-literal
+type = "warning"
+
+[[F632.messages]]
+original = "Use `==` to compare constant literals"
+en = "Use `==` to compare with a fixed value such as a number or string: `is` checks whether two things are the very same object."
+nl = "Gebruik `==` om te vergelijken met een vaste waarde zoals een getal of string: `is` controleert of twee dingen exact hetzelfde object zijn."
+
+[[F632.messages]]
+original = "Use `!=` to compare constant literals"
+en = "Use `!=` to compare with a fixed value such as a number or string: `is not` checks whether two things are different objects."
+nl = "Gebruik `!=` om te vergelijken met een vaste waarde zoals een getal of string: `is not` controleert of twee dingen verschillende objecten zijn."
+
+[F633]  # invalid-print-syntax
+type = "error"
+
+[[F633.messages]]
+original = "Use of `>>` is invalid with `print` function"
+en = "You can't use `>>` with `print()`. To print to a file, use `print(..., file=...)`."
+nl = "Je kan `>>` niet gebruiken met `print()`. Om naar een bestand te schrijven, gebruik je `print(..., file=...)`."
+
+[F634]  # if-tuple
+type = "warning"
+
+[[F634.messages]]
+original = "If test is a tuple, which is always `True`"
+en = "This `if` checks a tuple, which is always true. Check for a comma that doesn't belong there."
+nl = "Deze `if` controleert een tuple, en een tuple is altijd waar. Kijk of er een komma staat die er niet hoort."
+
+[F701]  # break-outside-loop
+type = "error"
+
+[[F701.messages]]
+original = "`break` outside loop"
+en = "`break` only works inside a loop."
+nl = "`break` werkt enkel binnen een lus."
+
+[F702]  # continue-outside-loop
+type = "error"
+
+[[F702.messages]]
+original = "`continue` not properly in loop"
+en = "`continue` only works inside a loop."
+nl = "`continue` werkt enkel binnen een lus."
+
+[F704]  # yield-outside-function
+type = "error"
+
+[[F704.messages]]
+original = "`{keyword}` statement outside of a function"
+en = "`{keyword}` can only be used inside a function."
+nl = "`{keyword}` kan enkel binnen een functie gebruikt worden."
+
+[F706]  # return-outside-function
+type = "error"
+
+[[F706.messages]]
+original = "`return` statement outside of a function/method"
+en = "`return` can only be used inside a function or method."
+nl = "`return` kan enkel binnen een functie of methode gebruikt worden."
+
+[F707]  # default-except-not-last
+type = "error"
+
+[[F707.messages]]
+original = "An `except` block as not the last exception handler"
+en = "An `except:` without an exception type must be the last `except` block, because it catches everything."
+nl = "Een `except:` zonder exception erachter moet het laatste `except`-blok zijn, want het vangt alles op."
+
+[F722]  # forward-annotation-syntax-error
+type = "error"
+
+[[F722.messages]]
+original = "Syntax error in forward annotation: {parse_error}"
+en = "This type annotation, written as a string, is not valid Python code: {parse_error}"
+nl = "Deze typeannotatie, geschreven als string, is geen geldige Python-code: {parse_error}"
+
+[F811]  # redefined-while-unused
+type = "warning"
+
+[[F811.messages]]
+original = "Redefinition of unused `{name}` from line {line}: `{name}` redefined here"
+en = "`{name}` is defined again here, but the `{name}` from line {line} was never used. Remove one of them or use another name."
+nl = "`{name}` wordt hier opnieuw gedefinieerd, maar de `{name}` van regel {line} werd nooit gebruikt. Verwijder er één of kies een andere naam."
+
+[[F811.messages]]
+original = "Redefinition of unused `{name}` from line {line}"
+en = "`{name}` is defined again here, but the `{name}` from line {line} was never used. Remove one of them or use another name."
+nl = "`{name}` wordt hier opnieuw gedefinieerd, maar de `{name}` van regel {line} werd nooit gebruikt. Verwijder er één of kies een andere naam."
+
+[[F811.messages]]
+original = "Redefinition of unused `{name}` from {row}"
+en = "`{name}` from {row} is defined again here without ever being used. Remove one of them or use another name."
+nl = "`{name}` van {row} wordt hier opnieuw gedefinieerd zonder dat het gebruikt werd. Verwijder er één of kies een andere naam."
+
+[F821]  # undefined-name
+type = "error"
+
+[[F821.messages]]
+original = "Undefined name `{name}`. {tip}"
+en = "`{name}` is not defined. Check the spelling, or define it before you use it."
+nl = "`{name}` is niet gedefinieerd. Controleer de spelling, of definieer het voor je het gebruikt."
+
+[[F821.messages]]
+original = "Undefined name `{name}`"
+en = "`{name}` is not defined. Check the spelling, or define it before you use it."
+nl = "`{name}` is niet gedefinieerd. Controleer de spelling, of definieer het voor je het gebruikt."
+
+[F822]  # undefined-export
+type = "error"
+
+[[F822.messages]]
+original = "Undefined name `{name}` in `__all__`"
+en = "`{name}` is listed in `__all__` but doesn't exist in this file."
+nl = "`{name}` staat in `__all__` maar bestaat niet in dit bestand."
+
+[F823]  # undefined-local
+type = "error"
+
+[[F823.messages]]
+original = "Local variable `{name}` referenced before assignment"
+en = "The variable `{name}` is used before it gets a value. Because this function assigns to `{name}`, it is a local variable, separate from any `{name}` outside the function."
+nl = "De variabele `{name}` wordt gebruikt voor ze een waarde krijgt. Omdat deze functie een waarde toekent aan `{name}`, is het een lokale variabele, los van een `{name}` buiten de functie."
+
+[F841]  # unused-variable
+type = "warning"
+
+[[F841.messages]]
+original = "Local variable `{name}` is assigned to but never used"
+en = "The variable `{name}` gets a value but is never used. Use it or remove it."
+nl = "De variabele `{name}` krijgt een waarde maar wordt nergens gebruikt. Gebruik ze of verwijder ze."
+
+[F842]  # unused-annotation
+type = "warning"
+
+[[F842.messages]]
+original = "Local variable `{name}` is annotated but never used"
+en = "The variable `{name}` has a type annotation but is never used. Use it or remove it."
+nl = "De variabele `{name}` heeft een typeannotatie maar wordt nergens gebruikt. Gebruik ze of verwijder ze."
+
+[F901]  # raise-not-implemented
+type = "error"
+
+[[F901.messages]]
+original = "`raise NotImplemented` should be `raise NotImplementedError`"
+en = "Write `raise NotImplementedError`: `NotImplemented` is not an exception, so you can't raise it."
+nl = "Schrijf `raise NotImplementedError`: `NotImplemented` is geen exception, dus je kan het niet opgooien."
+
+[PLC0105]  # type-name-incorrect-variance
+type = "info"
+
+[[PLC0105.messages]]
+original = "`{kind}` name \"{param_name}\" does not reflect its {variance}; consider renaming it to \"{replacement_name}\""
+en = "The name `{param_name}` of this `{kind}` does not match its {variance}. Rename it to `{replacement_name}`."
+nl = "De naam `{param_name}` van deze `{kind}` past niet bij zijn variantie. Hernoem hem naar `{replacement_name}`."
+
+[PLC0131]  # type-bivariance
+type = "error"
+
+[[PLC0131.messages]]
+original = "`{kind}` cannot be both covariant and contravariant"
+en = "This `{kind}` can't be both covariant and contravariant."
+nl = "Deze `{kind}` kan niet tegelijk covariant en contravariant zijn."
+
+[[PLC0131.messages]]
+original = "`{kind}` \"{param_name}\" cannot be both covariant and contravariant"
+en = "The `{kind}` `{param_name}` can't be both covariant and contravariant."
+nl = "De `{kind}` `{param_name}` kan niet tegelijk covariant en contravariant zijn."
+
+[PLC0132]  # type-param-name-mismatch
+type = "info"
+
+[[PLC0132.messages]]
+original = "`{kind}` name `{param_name}` does not match assigned variable name `{var_name}`"
+en = "The name `{param_name}` of this `{kind}` must be the same as the variable `{var_name}` it is stored in."
+nl = "De naam `{param_name}` van deze `{kind}` moet gelijk zijn aan de variabele `{var_name}` waarin hij bewaard wordt."
+
+[PLC0205]  # single-string-slots
+type = "info"
+
+[[PLC0205.messages]]
+original = "Class `__slots__` should be a non-string iterable"
+en = "`__slots__` should be a tuple or list of names, not a single string."
+nl = "`__slots__` moet een tuple of lijst met namen zijn, geen losse string."
+
+[PLC0206]  # dict-index-missing-items
+type = "info"
+
+[[PLC0206.messages]]
+original = "Extracting value from dictionary without calling `.items()`"
+en = "Loop over `.items()` to get each key and its value together, instead of looking up the value with the key."
+nl = "Doorloop de dictionary met `.items()` om elke sleutel samen met zijn waarde te krijgen, in plaats van de waarde op te zoeken met de sleutel."
+
+[PLC0208]  # iteration-over-set
+type = "info"
+
+[[PLC0208.messages]]
+original = "Use a sequence type instead of a `set` when iterating over values"
+en = "Loop over a list or tuple instead of a set: a set has no fixed order. Use square brackets or parentheses instead of curly brackets."
+nl = "Doorloop een lijst of tuple in plaats van een verzameling: een verzameling heeft geen vaste volgorde. Gebruik rechte haken of ronde haakjes in plaats van accolades."
+
+[PLC0414]  # useless-import-alias
+type = "info"
+
+[[PLC0414.messages]]
+original = "Import alias does not rename original package"
+en = "This `as` gives the import the same name it already has. Remove the `as`."
+nl = "Deze `as` geeft de import dezelfde naam die hij al had. Verwijder de `as`."
+
+[[PLC0414.messages]]
+original = "Required import does not rename original package."
+en = "This `as` gives the import the same name it already has. Remove the `as`."
+nl = "Deze `as` geeft de import dezelfde naam die hij al had. Verwijder de `as`."
+
+[PLC0415]  # import-outside-top-level
+type = "info"
+
+[[PLC0415.messages]]
+original = "`import` should be at the top-level of a file"
+en = "Put this `import` at the top of the file, not inside a function or other block."
+nl = "Zet deze `import` bovenaan het bestand en niet in een functie of ander blok."
+
+[PLC1802]  # len-test
+type = "info"
+
+[[PLC1802.messages]]
+original = "`len(SEQUENCE)` used as condition without comparison"
+en = "No need for `len()` in a condition: use the list or string itself. An empty one counts as false."
+nl = "Je hebt `len()` niet nodig in een voorwaarde: gebruik de lijst of string zelf. Een lege telt als onwaar."
+
+[[PLC1802.messages]]
+original = "`len({expression})` used as condition without comparison"
+en = "No need for `len()` in a condition: write just `{expression}`. An empty list or string counts as false."
+nl = "Je hebt `len()` niet nodig in een voorwaarde: schrijf gewoon `{expression}`. Een lege lijst of string telt als onwaar."
+
+[PLC2401]  # non-ascii-name
+type = "info"
+
+[[PLC2401.messages]]
+original = "{kind} name `{name}` contains a non-ASCII character"
+en = "The name `{name}` contains a special character (like an accent). Use only plain letters, digits and underscores."
+nl = "De naam `{name}` bevat een speciaal teken (zoals een accent). Gebruik enkel gewone letters, cijfers en underscores."
+
+[PLC2403]  # non-ascii-import-name
+type = "info"
+
+[[PLC2403.messages]]
+original = "Module alias `{name}` contains a non-ASCII character"
+en = "The alias `{name}` contains a special character (like an accent). Use only plain letters, digits and underscores."
+nl = "De alias `{name}` bevat een speciaal teken (zoals een accent). Gebruik enkel gewone letters, cijfers en underscores."
+
+[[PLC2403.messages]]
+original = "Module name `{name}` contains a non-ASCII character"
+en = "The module name `{name}` contains a special character (like an accent). Use only plain letters, digits and underscores."
+nl = "De modulenaam `{name}` bevat een speciaal teken (zoals een accent). Gebruik enkel gewone letters, cijfers en underscores."
+
+[PLC3002]  # unnecessary-direct-lambda-call
+type = "info"
+
+[[PLC3002.messages]]
+original = "Lambda expression called directly. Execute the expression inline instead."
+en = "This `lambda` is called immediately. Just write the expression itself."
+nl = "Deze `lambda` wordt meteen opgeroepen. Schrijf gewoon de uitdrukking zelf."
+
+[PLE0100]  # yield-in-init
+type = "error"
+
+[[PLE0100.messages]]
+original = "`__init__` method is a generator"
+en = "`__init__` must not contain `yield`: that turns it into a generator, and then creating the object fails."
+nl = "`__init__` mag geen `yield` bevatten: dan wordt het een generator, en mislukt het maken van het object."
+
+[PLE0101]  # return-in-init
+type = "error"
+
+[[PLE0101.messages]]
+original = "Explicit return in `__init__`"
+en = "`__init__` must not return a value. Remove the `return`."
+nl = "`__init__` mag geen waarde teruggeven. Verwijder de `return`."
+
+[PLE0115]  # nonlocal-and-global
+type = "error"
+
+[[PLE0115.messages]]
+original = "Name `{name}` is both `nonlocal` and `global`"
+en = "`{name}` is declared as both `nonlocal` and `global`. Choose one."
+nl = "`{name}` is zowel `nonlocal` als `global` gedeclareerd. Kies er één."
+
+[PLE0117]  # nonlocal-without-binding
+type = "error"
+
+[[PLE0117.messages]]
+original = "Nonlocal name `{name}` found without binding"
+en = "`nonlocal {name}` refers to a variable that doesn't exist in an enclosing function."
+nl = "`nonlocal {name}` verwijst naar een variabele die niet bestaat in een omringende functie."
+
+[PLE0118]  # load-before-global-declaration
+type = "error"
+
+[[PLE0118.messages]]
+original = "Name `{name}` is used prior to global declaration on line {line}"
+en = "`{name}` is used before the `global` declaration on line {line}. Put `global {name}` at the start of the function."
+nl = "`{name}` wordt gebruikt voor de `global`-declaratie op regel {line}. Zet `global {name}` bovenaan de functie."
+
+[[PLE0118.messages]]
+original = "Name `{name}` is used prior to global declaration on {row}"
+en = "`{name}` is used before the `global` declaration on {row}. Put `global {name}` at the start of the function."
+nl = "`{name}` wordt gebruikt voor de `global`-declaratie op {row}. Zet `global {name}` bovenaan de functie."
+
+[PLE0237]  # non-slot-assignment
+type = "error"
+
+[[PLE0237.messages]]
+original = "Attribute `{name}` is not defined in class's `__slots__`"
+en = "The attribute `{name}` is not listed in the `__slots__` of this class. Add it there, or don't give it a value."
+nl = "Het attribuut `{name}` staat niet in de `__slots__` van deze klasse. Voeg het daar toe, of geef het geen waarde."
+
+[PLE0241]  # duplicate-bases
+type = "error"
+
+[[PLE0241.messages]]
+original = "Duplicate base `{base}` for class `{class}`"
+en = "The class `{class}` lists the base class `{base}` more than once. Remove the duplicate."
+nl = "De klasse `{class}` vermeldt de basisklasse `{base}` meer dan één keer. Verwijder de dubbele vermelding."
+
+[PLE0302]  # unexpected-special-method-signature
+type = "error"
+
+[[PLE0302.messages]]
+original = "The special method `{}` expects {}, {} were given"
+en = "The special method `{}` should have {} (counting `self`), but it has {}."
+nl = "De speciale methode `{}` moet {} hebben (`self` meegeteld), maar heeft er {}."
+
+[[PLE0302.messages]]
+original = "The special method `{}` expects {}, {} was given"
+en = "The special method `{}` should have {} (counting `self`), but it has {}."
+nl = "De speciale methode `{}` moet {} hebben (`self` meegeteld), maar heeft er {}."
+
+[[PLE0302.messages]]
+original = "The special method `{}` expects {}, {} {} given"
+en = "The special method `{}` should have {} (counting `self`), but {} {} given."
+nl = "Deze speciale methode heeft niet het juiste aantal parameters (`self` meegeteld)."
+
+[PLE0303]  # invalid-length-return-type
+type = "error"
+
+[[PLE0303.messages]]
+original = "`__len__` does not return a non-negative integer"
+en = "`__len__` must return an integer of 0 or more."
+nl = "`__len__` moet een geheel getal van 0 of meer teruggeven."
+
+[PLE0304]  # invalid-bool-return-type
+type = "error"
+
+[[PLE0304.messages]]
+original = "`__bool__` does not return `bool`"
+en = "`__bool__` must return `True` or `False`."
+nl = "`__bool__` moet `True` of `False` teruggeven."
+
+[PLE0305]  # invalid-index-return-type
+type = "error"
+
+[[PLE0305.messages]]
+original = "`__index__` does not return an integer"
+en = "`__index__` must return an integer."
+nl = "`__index__` moet een geheel getal teruggeven."
+
+[PLE0307]  # invalid-str-return-type
+type = "error"
+
+[[PLE0307.messages]]
+original = "`__str__` does not return `str`"
+en = "`__str__` must return a string."
+nl = "`__str__` moet een string teruggeven."
+
+[PLE0308]  # invalid-bytes-return-type
+type = "error"
+
+[[PLE0308.messages]]
+original = "`__bytes__` does not return `bytes`"
+en = "`__bytes__` must return a `bytes` value."
+nl = "`__bytes__` moet een `bytes`-waarde teruggeven."
+
+[PLE0309]  # invalid-hash-return-type
+type = "error"
+
+[[PLE0309.messages]]
+original = "`__hash__` does not return an integer"
+en = "`__hash__` must return an integer."
+nl = "`__hash__` moet een geheel getal teruggeven."
+
+[PLE0604]  # invalid-all-object
+type = "error"
+
+[[PLE0604.messages]]
+original = "Invalid object in `__all__`, must contain only strings"
+en = "`__all__` may only contain strings."
+nl = "`__all__` mag enkel strings bevatten."
+
+[PLE0605]  # invalid-all-format
+type = "error"
+
+[[PLE0605.messages]]
+original = "Invalid format for `__all__`, must be `tuple` or `list`"
+en = "`__all__` must be a tuple or a list."
+nl = "`__all__` moet een tuple of een lijst zijn."
+
+[PLE0643]  # potential-index-error
+type = "error"
+
+[[PLE0643.messages]]
+original = "Expression is likely to raise `IndexError`"
+en = "This gives an `IndexError` when it runs, because the index is out of range."
+nl = "Dit geeft een `IndexError` als het uitgevoerd wordt, want de index valt buiten het bereik."
+
+[PLE0704]  # misplaced-bare-raise
+type = "error"
+
+[[PLE0704.messages]]
+original = "Bare `raise` statement is not inside an exception handler"
+en = "A `raise` without an exception only works inside an `except` block. Say which exception to raise."
+nl = "Een `raise` zonder exception werkt enkel in een `except`-blok. Vermeld welke exception je wil opgooien."
+
+[PLE1132]  # repeated-keyword-argument
+type = "error"
+
+[[PLE1132.messages]]
+original = "Repeated keyword argument: `{duplicate_keyword}`"
+en = "The argument `{duplicate_keyword}` is given more than once in this call."
+nl = "Het argument `{duplicate_keyword}` wordt meer dan één keer meegegeven in deze oproep."
+
+[PLE1142]  # await-outside-async
+type = "error"
+
+[[PLE1142.messages]]
+original = "`await` should be used within an async function"
+en = "`await` can only be used inside an `async` function."
+nl = "`await` kan enkel binnen een `async`-functie gebruikt worden."
+
+[PLE1205]  # logging-too-many-args
+type = "error"
+
+[[PLE1205.messages]]
+original = "Too many arguments for `logging` format string"
+en = "You give more values to `logging` than the message has placeholders for."
+nl = "Je geeft aan `logging` meer waarden mee dan er plaatshouders in de boodschap zijn."
+
+[PLE1206]  # logging-too-few-args
+type = "error"
+
+[[PLE1206.messages]]
+original = "Not enough arguments for `logging` format string"
+en = "You give fewer values to `logging` than the message has placeholders for."
+nl = "Je geeft aan `logging` minder waarden mee dan er plaatshouders in de boodschap zijn."
+
+[PLE1300]  # bad-string-format-character
+type = "error"
+
+[[PLE1300.messages]]
+original = "Unsupported format character '{format_char}'"
+en = "`{format_char}` is not a valid format character."
+nl = "`{format_char}` is geen geldig opmaakteken."
+
+[PLE1307]  # bad-string-format-type
+type = "error"
+
+[[PLE1307.messages]]
+original = "Format type does not match argument type"
+en = "The type of the value doesn't match the format character, for example `%d` with a string."
+nl = "Het type van de waarde past niet bij het opmaakteken, bijvoorbeeld `%d` met een string."
+
+[PLE1310]  # bad-str-strip-call
+type = "warning"
+
+[[PLE1310.messages]]
+original = "String `{strip}` call contains duplicate characters (did you mean `{removal}`?)"
+en = "`{strip}` removes each of the given characters separately, not the text as a whole, so giving a character twice is useless. Did you mean `{removal}`?"
+nl = "`{strip}` verwijdert elk van de opgegeven tekens afzonderlijk, niet de tekst als geheel, dus een teken twee keer opgeven heeft geen zin. Bedoelde je `{removal}`?"
+
+[[PLE1310.messages]]
+original = "String `{strip}` call contains duplicate characters"
+en = "`{strip}` removes each of the given characters separately, not the text as a whole, so giving a character twice is useless."
+nl = "`{strip}` verwijdert elk van de opgegeven tekens afzonderlijk, niet de tekst als geheel, dus een teken twee keer opgeven heeft geen zin."
+
+[PLE1507]  # invalid-envvar-value
+type = "error"
+
+[[PLE1507.messages]]
+original = "Invalid type for initial `os.getenv` argument; expected `str`"
+en = "The first argument of `os.getenv` must be a string."
+nl = "Het eerste argument van `os.getenv` moet een string zijn."
+
+[PLE1519]  # singledispatch-method
+type = "error"
+
+[[PLE1519.messages]]
+original = "`@singledispatch` decorator should not be used on methods"
+en = "Don't use `@singledispatch` on a method. Use `@singledispatchmethod` instead."
+nl = "Gebruik `@singledispatch` niet op een methode. Gebruik `@singledispatchmethod`."
+
+[PLE1520]  # singledispatchmethod-function
+type = "error"
+
+[[PLE1520.messages]]
+original = "`@singledispatchmethod` decorator should not be used on non-method functions"
+en = "Don't use `@singledispatchmethod` on a function that isn't a method. Use `@singledispatch` instead."
+nl = "Gebruik `@singledispatchmethod` niet op een functie die geen methode is. Gebruik `@singledispatch`."
+
+[PLE1700]  # yield-from-in-async-function
+type = "error"
+
+[[PLE1700.messages]]
+original = "`yield from` statement in async function; use `async for` instead"
+en = "`yield from` doesn't work in an `async` function. Use `async for` instead."
+nl = "`yield from` werkt niet in een `async`-functie. Gebruik `async for`."
+
+[PLE2502]  # bidirectional-unicode
+type = "warning"
+
+[[PLE2502.messages]]
+original = "Contains control characters that can permit obfuscated code"
+en = "This contains invisible control characters that can hide what the code really does. Remove them."
+nl = "Dit bevat onzichtbare stuurtekens die kunnen verbergen wat de code echt doet. Verwijder ze."
+
+[PLE2510]  # invalid-character-backspace
+type = "warning"
+
+[[PLE2510.messages]]
+original = "Invalid unescaped character backspace, use \"\\b\" instead"
+en = "This string contains an invisible backspace character. Write it as `\\b`, so it can be seen."
+nl = "Deze string bevat een onzichtbaar backspace-teken. Schrijf het als `\\b`, zodat je het ziet."
+
+[PLE2512]  # invalid-character-sub
+type = "warning"
+
+[[PLE2512.messages]]
+original = "Invalid unescaped character SUB, use \"\\x1a\" instead"
+en = "This string contains an invisible SUB control character. Write it as `\\x1a`, so it can be seen."
+nl = "Deze string bevat een onzichtbaar SUB-stuurteken. Schrijf het als `\\x1a`, zodat je het ziet."
+
+[PLE2513]  # invalid-character-esc
+type = "warning"
+
+[[PLE2513.messages]]
+original = "Invalid unescaped character ESC, use \"\\x1b\" instead"
+en = "This string contains an invisible ESC control character. Write it as `\\x1b`, so it can be seen."
+nl = "Deze string bevat een onzichtbaar ESC-stuurteken. Schrijf het als `\\x1b`, zodat je het ziet."
+
+[PLE2514]  # invalid-character-nul
+type = "error"
+
+[[PLE2514.messages]]
+original = "Invalid unescaped character NUL, use \"\\0\" instead"
+en = "This string contains an invisible NUL character, which Python doesn't allow in code. Write it as `\\0`."
+nl = "Deze string bevat een onzichtbaar NUL-teken, en dat laat Python niet toe in code. Schrijf het als `\\0`."
+
+[PLE2515]  # invalid-character-zero-width-space
+type = "warning"
+
+[[PLE2515.messages]]
+original = "Invalid unescaped character zero-width-space, use \"\\u200B\" instead"
+en = "This string contains an invisible zero-width space. Remove it, or write it as `\\u200B` if you really need it."
+nl = "Deze string bevat een onzichtbare spatie zonder breedte (zero-width space). Verwijder ze, of schrijf ze als `\\u200B` als je ze echt nodig hebt."
+
+[PLR0124]  # comparison-with-itself
+type = "warning"
+
+[[PLR0124.messages]]
+original = "Name compared with itself, consider replacing `{actual}`"
+en = "`{actual}` compares a name with itself, so the result is always the same. Did you mean to use another variable?"
+nl = "`{actual}` vergelijkt een naam met zichzelf, dus de uitkomst is altijd dezelfde. Wou je een andere variabele gebruiken?"
+
+[[PLR0124.messages]]
+original = "Name compared with itself"
+en = "A name is compared with itself, so the result is always the same. Did you mean to use another variable?"
+nl = "Een naam wordt met zichzelf vergeleken, dus de uitkomst is altijd dezelfde. Wou je een andere variabele gebruiken?"
+
+[PLR0133]  # comparison-of-constant
+type = "info"
+
+[[PLR0133.messages]]
+original = "Two constants compared in a comparison, consider replacing `{left_constant} {op} {right_constant}`"
+en = "You compare two fixed values, so the result is always the same. Replace `{left_constant} {op} {right_constant}` with its result."
+nl = "Je vergelijkt twee vaste waarden, dus de uitkomst is altijd dezelfde. Vervang `{left_constant} {op} {right_constant}` door het resultaat."
+
+[PLR0206]  # property-with-parameters
+type = "warning"
+
+[[PLR0206.messages]]
+original = "Cannot have defined parameters for properties"
+en = "A `@property` can't have parameters besides `self`. Use a normal method if you need them."
+nl = "Een `@property` kan geen parameters hebben naast `self`. Gebruik een gewone methode als je ze nodig hebt."
+
+[PLR0402]  # manual-from-import
+type = "info"
+
+[[PLR0402.messages]]
+original = "Use `from {module} import {name}` in lieu of alias"
+en = "Write `from {module} import {name}` instead of `import ... as ...`."
+nl = "Schrijf `from {module} import {name}` in plaats van `import ... as ...`."
+
+[PLR0912]  # too-many-branches
+type = "info"
+
+[[PLR0912.messages]]
+original = "Too many branches ({branches} > {max_branches})"
+en = "This function has too many branches (`if`, `elif`, `else`, ...): {branches} instead of at most {max_branches}. Split it into smaller functions."
+nl = "Deze functie heeft te veel takken (`if`, `elif`, `else`, ...): {branches} in plaats van hooguit {max_branches}. Splits ze op in kleinere functies."
+
+[PLR0913]  # too-many-arguments
+type = "info"
+
+[[PLR0913.messages]]
+original = "Too many arguments in function definition ({c_args} > {max_args})"
+en = "This function has too many parameters: {c_args} instead of at most {max_args}."
+nl = "Deze functie heeft te veel parameters: {c_args} in plaats van hooguit {max_args}."
+
+[PLR0915]  # too-many-statements
+type = "info"
+
+[[PLR0915.messages]]
+original = "Too many statements ({statements} > {max_statements})"
+en = "This function has too many statements: {statements} instead of at most {max_statements}. Split it into smaller functions."
+nl = "Deze functie heeft te veel opdrachten: {statements} in plaats van hooguit {max_statements}. Splits ze op in kleinere functies."
+
+[PLR1704]  # redefined-argument-from-local
+type = "info"
+
+[[PLR1704.messages]]
+original = "Redefining argument with the local name `{name}`"
+en = "The parameter `{name}` is overwritten by a variable with the same name in a `for`, `with` or `except`. Use another name."
+nl = "De parameter `{name}` wordt overschreven door een variabele met dezelfde naam in een `for`, `with` of `except`. Kies een andere naam."
+
+[PLR1708]  # stop-iteration-return
+type = "error"
+
+[[PLR1708.messages]]
+original = "Explicit `raise StopIteration` in generator"
+en = "`raise StopIteration` in a generator causes a `RuntimeError`. Use `return` to stop the generator."
+nl = "`raise StopIteration` in een generator geeft een `RuntimeError`. Gebruik `return` om de generator te stoppen."
+
+[PLR1711]  # useless-return
+type = "info"
+
+[[PLR1711.messages]]
+original = "Useless `return` statement at end of function"
+en = "This `return` at the end of the function does nothing. Remove it."
+nl = "Deze `return` op het einde van de functie doet niets. Verwijder hem."
+
+[PLR1714]  # repeated-equality-comparison
+type = "info"
+
+[[PLR1714.messages]]
+original = "Consider merging multiple comparisons: `{expression}`. Use a `set` if the elements are hashable."
+en = "Merge these comparisons into one: `{expression}`."
+nl = "Voeg deze vergelijkingen samen tot één: `{expression}`."
+
+[[PLR1714.messages]]
+original = "Consider merging multiple comparisons: `{expression}`."
+en = "Merge these comparisons into one: `{expression}`."
+nl = "Voeg deze vergelijkingen samen tot één: `{expression}`."
+
+[[PLR1714.messages]]
+original = "Consider merging multiple comparisons. Use a `set` if the elements are hashable."
+en = "Merge these comparisons into one with `in`, like `x in (1, 2, 3)`."
+nl = "Voeg deze vergelijkingen samen tot één met `in`, zoals `x in (1, 2, 3)`."
+
+[[PLR1714.messages]]
+original = "Consider merging multiple comparisons."
+en = "Merge these comparisons into one with `in`, like `x in (1, 2, 3)`."
+nl = "Voeg deze vergelijkingen samen tot één met `in`, zoals `x in (1, 2, 3)`."
+
+[PLR1716]  # boolean-chained-comparison
+type = "info"
+
+[[PLR1716.messages]]
+original = "Contains chained boolean comparison that can be simplified"
+en = "These comparisons can be written shorter as one chain, like `a < b < c`."
+nl = "Je kan deze vergelijkingen korter schrijven als één vergelijking, zoals `a < b < c`."
+
+[PLR1722]  # sys-exit-alias
+type = "info"
+
+[[PLR1722.messages]]
+original = "Use `sys.exit()` instead of `{name}`"
+en = "Use `sys.exit()` (after `import sys`) instead of `{name}`."
+nl = "Gebruik `sys.exit()` (na `import sys`) in plaats van `{name}`."
+
+[PLR1730]  # if-stmt-min-max
+type = "info"
+
+[[PLR1730.messages]]
+original = "Replace `if` statement with `{replacement}`"
+en = "This `if` can be replaced by `{replacement}`."
+nl = "Deze `if` kan vervangen worden door `{replacement}`."
+
+[[PLR1730.messages]]
+original = "Replace `if` statement with `{min_max}` call"
+en = "This `if` can be replaced by a call to `{min_max}`."
+nl = "Deze `if` kan vervangen worden door een oproep van `{min_max}`."
+
+[PLR1733]  # unnecessary-dict-index-lookup
+type = "info"
+
+[[PLR1733.messages]]
+original = "Unnecessary lookup of dictionary value by key"
+en = "You already have this value from the loop. No need to look it up in the dictionary again."
+nl = "Je hebt deze waarde al uit de lus. Je hoeft ze niet opnieuw op te zoeken in de dictionary."
+
+[PLR1736]  # unnecessary-list-index-lookup
+type = "info"
+
+[[PLR1736.messages]]
+original = "List index lookup in `enumerate()` loop"
+en = "You already have this item from `enumerate()`. No need to look it up in the list by index again."
+nl = "Je hebt dit element al uit `enumerate()`. Je hoeft het niet opnieuw op te zoeken in de lijst met de index."
+
+[PLW0108]  # unnecessary-lambda
+type = "info"
+
+[[PLW0108.messages]]
+original = "Lambda may be unnecessary; consider inlining inner function"
+en = "This `lambda` only calls another function. Use that function directly."
+nl = "Deze `lambda` roept enkel een andere functie op. Gebruik die functie rechtstreeks."
+
+[PLW0120]  # useless-else-on-loop
+type = "warning"
+
+[[PLW0120.messages]]
+original = "`else` clause on loop without a `break` statement; remove the `else` and dedent its contents"
+en = "This `else` on a loop is useless because the loop has no `break`: its code always runs. Remove the `else` and indent its code one level less."
+nl = "Deze `else` bij een lus is nutteloos omdat de lus geen `break` heeft: de code erin wordt altijd uitgevoerd. Verwijder de `else` en laat de code een niveau minder inspringen."
+
+[PLW0127]  # self-assigning-variable
+type = "warning"
+
+[[PLW0127.messages]]
+original = "Self-assignment of variable `{name}`"
+en = "The variable `{name}` is assigned to itself. Remove this line."
+nl = "De variabele `{name}` wordt aan zichzelf toegekend. Verwijder deze regel."
+
+[PLW0128]  # redeclared-assigned-name
+type = "warning"
+
+[[PLW0128.messages]]
+original = "Redeclared variable `{name}` in assignment"
+en = "The variable `{name}` is assigned twice in the same statement. Only the last value is kept."
+nl = "De variabele `{name}` krijgt twee keer een waarde in dezelfde opdracht. Enkel de laatste waarde blijft over."
+
+[PLW0129]  # assert-on-string-literal
+type = "warning"
+
+[[PLW0129.messages]]
+original = "Asserting on an empty string literal will never pass"
+en = "An `assert` on an empty string always fails. Write a real condition."
+nl = "Een `assert` op een lege string faalt altijd. Schrijf een echte voorwaarde."
+
+[[PLW0129.messages]]
+original = "Asserting on a non-empty string literal will always pass"
+en = "An `assert` on a non-empty string always passes. Write a real condition."
+nl = "Een `assert` op een niet-lege string slaagt altijd. Schrijf een echte voorwaarde."
+
+[[PLW0129.messages]]
+original = "Asserting on a string literal may have unintended results"
+en = "An `assert` on a string doesn't check anything useful. Write a real condition."
+nl = "Een `assert` op een string controleert niets nuttigs. Schrijf een echte voorwaarde."
+
+[PLW0131]  # named-expr-without-context
+type = "info"
+
+[[PLW0131.messages]]
+original = "Named expression used without context"
+en = "This `:=` stands on its own. Use a normal assignment with `=` instead."
+nl = "Deze `:=` staat er alleen. Gebruik een gewone toekenning met `=`."
+
+[PLW0133]  # useless-exception-statement
+type = "warning"
+
+[[PLW0133.messages]]
+original = "Missing `raise` statement on exception"
+en = "This creates an exception but doesn't do anything with it. Add `raise` in front of it."
+nl = "Hier wordt een exception gemaakt, maar er gebeurt niets mee. Zet er `raise` voor."
+
+[PLW0177]  # nan-comparison
+type = "warning"
+
+[[PLW0177.messages]]
+original = "Comparing against a NaN value; use `math.isnan` instead"
+en = "Comparing with NaN doesn't work: NaN is not even equal to itself. Use `math.isnan` instead."
+nl = "Vergelijken met NaN werkt niet: NaN is zelfs niet gelijk aan zichzelf. Gebruik `math.isnan`."
+
+[[PLW0177.messages]]
+original = "Comparing against a NaN value; use `np.isnan` instead"
+en = "Comparing with NaN doesn't work: NaN is not even equal to itself. Use `np.isnan` instead."
+nl = "Vergelijken met NaN werkt niet: NaN is zelfs niet gelijk aan zichzelf. Gebruik `np.isnan`."
+
+[PLW0211]  # bad-staticmethod-argument
+type = "warning"
+
+[[PLW0211.messages]]
+original = "First argument of a static method should not be named `{argument_name}`"
+en = "A static method doesn't get `{argument_name}`, so don't use that name for its first parameter."
+nl = "Een statische methode krijgt geen `{argument_name}` mee, dus gebruik die naam niet voor de eerste parameter."
+
+[PLW0245]  # super-without-brackets
+type = "error"
+
+[[PLW0245.messages]]
+original = "`super` call is missing parentheses"
+en = "Write `super()` with parentheses."
+nl = "Schrijf `super()` met haakjes."
+
+[PLW0406]  # import-self
+type = "warning"
+
+[[PLW0406.messages]]
+original = "Module `{name}` imports itself"
+en = "The module `{name}` imports itself. Remove this import."
+nl = "De module `{name}` importeert zichzelf. Verwijder deze import."
+
+[PLW0602]  # global-variable-not-assigned
+type = "warning"
+
+[[PLW0602.messages]]
+original = "Using global for `{name}` but no assignment is done"
+en = "`{name}` never gets a new value in this function, so `global` is not needed. Remove `global {name}`."
+nl = "`{name}` krijgt in deze functie nooit een nieuwe waarde, dus `global` is niet nodig. Verwijder `global {name}`."
+
+[PLW0603]  # global-statement
+type = "warning"
+
+[[PLW0603.messages]]
+original = "Using the global statement to update `{name}` is discouraged"
+en = "Avoid using `global` to change `{name}`. Pass values as arguments and use `return` instead."
+nl = "Vermijd `global` om `{name}` te wijzigen. Geef waarden mee als argument en gebruik `return`."
+
+[PLW0604]  # global-at-module-level
+type = "warning"
+
+[[PLW0604.messages]]
+original = "`global` at module level is redundant"
+en = "`global` outside a function does nothing. Remove it."
+nl = "`global` buiten een functie doet niets. Verwijder de `global`."
+
+[PLW0642]  # self-or-cls-assignment
+type = "warning"
+
+[[PLW0642.messages]]
+original = "Reassigned `{}` variable in class method"
+en = "`{}` gets a new value inside this class method. Use another variable name."
+nl = "`{}` krijgt een nieuwe waarde in deze klassemethode. Gebruik een andere naam voor de variabele."
+
+[[PLW0642.messages]]
+original = "Reassigned `{}` variable in instance method"
+en = "`{}` gets a new value inside this method. Use another variable name."
+nl = "`{}` krijgt een nieuwe waarde in deze methode. Gebruik een andere naam voor de variabele."
+
+[[PLW0642.messages]]
+original = "Reassigned `{}` variable in {method_type} method"
+en = "`{}` gets a new value inside this {method_type} method. Use another variable name."
+nl = "`{}` krijgt een nieuwe waarde in deze {method_type}-methode. Gebruik een andere naam voor de variabele."
+
+[PLW0711]  # binary-op-exception
+type = "warning"
+
+[[PLW0711.messages]]
+original = "Exception to catch is the result of a binary `and` operation"
+en = "`except A and B` only catches `B`. To catch both, use a tuple: `except (A, B)`."
+nl = "`except A and B` vangt enkel `B` op. Gebruik een tuple om beide op te vangen: `except (A, B)`."
+
+[[PLW0711.messages]]
+original = "Exception to catch is the result of a binary `or` operation"
+en = "`except A or B` only catches `A`. To catch both, use a tuple: `except (A, B)`."
+nl = "`except A or B` vangt enkel `A` op. Gebruik een tuple om beide op te vangen: `except (A, B)`."
+
+[PLW1501]  # bad-open-mode
+type = "error"
+
+[[PLW1501.messages]]
+original = "`{mode}` is not a valid mode for `open`"
+en = "`{mode}` is not a valid mode for `open`. Use for example `\"r\"`, `\"w\"` or `\"a\"`."
+nl = "`{mode}` is geen geldige modus voor `open`. Gebruik bijvoorbeeld `\"r\"`, `\"w\"` of `\"a\"`."
+
+[PLW1507]  # shallow-copy-environ
+type = "warning"
+
+[[PLW1507.messages]]
+original = "Shallow copy of `os.environ` via `copy.copy(os.environ)`"
+en = "`copy.copy(os.environ)` doesn't make a separate copy: changing it also changes `os.environ`. Use `os.environ.copy()` instead."
+nl = "`copy.copy(os.environ)` maakt geen aparte kopie: als je die wijzigt, wijzig je ook `os.environ`. Gebruik `os.environ.copy()`."
+
+[PLW1508]  # invalid-envvar-default
+type = "warning"
+
+[[PLW1508.messages]]
+original = "Invalid type for environment variable default; expected `str` or `None`"
+en = "The default value for an environment variable must be a string or `None`."
+nl = "De standaardwaarde voor een omgevingsvariabele moet een string of `None` zijn."
+
+[PLW1509]  # subprocess-popen-preexec-fn
+type = "warning"
+
+[[PLW1509.messages]]
+original = "`preexec_fn` argument is unsafe when using threads"
+en = "`preexec_fn` is unsafe when your program uses threads. Avoid it."
+nl = "`preexec_fn` is onveilig als je programma threads gebruikt. Vermijd het."
+
+[PLW1510]  # subprocess-run-without-check
+type = "warning"
+
+[[PLW1510.messages]]
+original = "`subprocess.run` without explicit `check` argument"
+en = "Add `check=True` or `check=False` to `subprocess.run`, so it is clear what happens when the command fails."
+nl = "Voeg `check=True` of `check=False` toe aan `subprocess.run`, zodat duidelijk is wat er gebeurt als het commando faalt."
+
+[PLW2101]  # useless-with-lock
+type = "warning"
+
+[[PLW2101.messages]]
+original = "Threading lock directly created in `with` statement has no effect"
+en = "A new lock is created in this `with`, so it never blocks anything. Create the lock once, outside the `with`, and share it."
+nl = "In deze `with` wordt een nieuwe lock gemaakt, dus die blokkeert nooit iets. Maak de lock één keer aan, buiten de `with`, en deel hem."
+
+[PLW3301]  # nested-min-max
+type = "info"
+
+[[PLW3301.messages]]
+original = "Nested `{func}` calls can be flattened"
+en = "Nested calls of `{func}` can be merged into one call."
+nl = "Geneste oproepen van `{func}` kunnen samengevoegd worden tot één oproep."
+
+[RET506]  # superfluous-else-raise
+type = "info"
+
+[[RET506.messages]]
+original = "Unnecessary `elif` after `raise` statement"
+en = "This `elif` is not needed: the block before it ends with `raise`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `raise`. Maak er een `if` van."
+
+[[RET506.messages]]
+original = "Unnecessary `else` after `raise` statement"
+en = "This `else` is not needed: the block before it ends with `raise`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `raise`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
+
+[RET507]  # superfluous-else-continue
+type = "info"
+
+[[RET507.messages]]
+original = "Unnecessary `elif` after `continue` statement"
+en = "This `elif` is not needed: the block before it ends with `continue`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `continue`. Maak er een `if` van."
+
+[[RET507.messages]]
+original = "Unnecessary `else` after `continue` statement"
+en = "This `else` is not needed: the block before it ends with `continue`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `continue`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
+
+[RET508]  # superfluous-else-break
+type = "info"
+
+[[RET508.messages]]
+original = "Unnecessary `elif` after `break` statement"
+en = "This `elif` is not needed: the block before it ends with `break`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `break`. Maak er een `if` van."
+
+[[RET508.messages]]
+original = "Unnecessary `else` after `break` statement"
+en = "This `else` is not needed: the block before it ends with `break`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `break`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
+
+[S307]  # suspicious-eval-usage
+type = "warning"
+
+[[S307.messages]]
+original = "Use of possibly insecure function; consider using `ast.literal_eval`"
+en = "`eval` runs any code it is given, which is risky. To turn text into a number, use `int()` or `float()`; for a list or other value, use `ast.literal_eval`."
+nl = "`eval` voert eender welke code uit die je meegeeft, en dat is riskant. Gebruik `int()` of `float()` om tekst om te zetten naar een getal, of `ast.literal_eval` voor een lijst of een andere waarde."
+
+[SIM101]  # duplicate-isinstance-call
+type = "info"
+
+[[SIM101.messages]]
+original = "Multiple `isinstance` calls for `{name}`, merge into a single call"
+en = "Merge these `isinstance` calls for `{name}` into one, with a tuple of types, like `isinstance({name}, (int, float))`."
+nl = "Voeg deze `isinstance`-oproepen voor `{name}` samen tot één, met een tuple van types, zoals `isinstance({name}, (int, float))`."
+
+[[SIM101.messages]]
+original = "Multiple `isinstance` calls for expression, merge into a single call"
+en = "Merge these `isinstance` calls into one, with a tuple of types, like `isinstance(x, (int, float))`."
+nl = "Voeg deze `isinstance`-oproepen samen tot één, met een tuple van types, zoals `isinstance(x, (int, float))`."
+
+[SIM103]  # needless-bool
+type = "info"
+
+[[SIM103.messages]]
+original = "Return the condition `{condition}` directly"
+en = "Instead of `if ...: return True else: return False`, write `return {condition}`."
+nl = "In plaats van `if ...: return True else: return False` kan je `return {condition}` schrijven."
+
+[[SIM103.messages]]
+original = "Return the negated condition directly"
+en = "Instead of `if ...: return False else: return True`, return the negated condition directly, with `not`."
+nl = "In plaats van `if ...: return False else: return True` kan je rechtstreeks de omgekeerde voorwaarde teruggeven, met `not`."
+
+[[SIM103.messages]]
+original = "Return the condition directly"
+en = "Instead of `if ...: return True else: return False`, return the condition directly."
+nl = "In plaats van `if ...: return True else: return False` kan je de voorwaarde rechtstreeks teruggeven."
+
+[SIM115]  # open-file-with-context-handler
+type = "info"
+
+[[SIM115.messages]]
+original = "Use a context manager for opening files"
+en = "Open files with `with open(...) as f:`, so they are closed automatically."
+nl = "Open bestanden met `with open(...) as f:`, dan worden ze automatisch gesloten."
+
+[SIM118]  # in-dict-keys
+type = "info"
+
+[[SIM118.messages]]
+original = "Use `key {operator} dict` instead of `key {operator} dict.keys()`"
+en = "Write `key {operator} dict` instead of `key {operator} dict.keys()`."
+nl = "Schrijf `key {operator} dict` in plaats van `key {operator} dict.keys()`."
+
+[SIM210]  # if-expr-with-true-false
+type = "info"
+
+[[SIM210.messages]]
+original = "Remove unnecessary `True if ... else False`"
+en = "No need for `True if ... else False`. Use the condition itself."
+nl = "Je hebt `True if ... else False` niet nodig. Gebruik de voorwaarde zelf."
+
+[[SIM210.messages]]
+original = "Use `bool(...)` instead of `True if ... else False`"
+en = "Use `bool(...)` instead of `True if ... else False`."
+nl = "Gebruik `bool(...)` in plaats van `True if ... else False`."
+
+[UP004]  # useless-object-inheritance
+type = "info"
+
+[[UP004.messages]]
+original = "Class `{name}` inherits from `object`"
+en = "The class `{name}` doesn't need `(object)`: every class inherits from `object` automatically. Remove it."
+nl = "De klasse `{name}` heeft `(object)` niet nodig: elke klasse erft automatisch van `object`. Verwijder het."
+
+[UP008]  # super-call-with-parameters
+type = "info"
+
+[[UP008.messages]]
+original = "Use `super()` instead of `super(__class__, self)`"
+en = "Write `super()` without arguments."
+nl = "Schrijf `super()` zonder argumenten."
+
+[UP028]  # yield-in-for-loop
+type = "info"
+
+[[UP028.messages]]
+original = "Replace `yield` over `for` loop with `yield from`"
+en = "Replace this `for` loop around `yield` with a single `yield from`."
+nl = "Vervang deze `for`-lus met `yield` door één `yield from`."
+
+[UP032]  # f-string
+type = "info"
+
+[[UP032.messages]]
+original = "Use f-string instead of `format` call"
+en = "Use an f-string instead of `.format`; it is shorter and easier to read."
+nl = "Gebruik een f-string in plaats van `.format`; dat is korter en leesbaarder."
+
+[UP034]  # extraneous-parentheses
+type = "info"
+
+[[UP034.messages]]
+original = "Avoid extraneous parentheses"
+en = "Remove these extra parentheses."
+nl = "Verwijder deze overbodige haakjes."
+
+[W605]  # invalid-escape-sequence
+type = "warning"
+
+[[W605.messages]]
+original = "Invalid escape sequence: `\\{ch}`"
+en = "`\\{ch}` is not a valid escape sequence in a string. To write a backslash, type two (`\\\\`), or use a raw string (`r\"...\"`)."
+nl = "`\\{ch}` is geen geldige escapereeks in een string. Typ twee backslashes (`\\\\`) voor één backslash, of gebruik een raw string (`r\"...\"`)."
+
+["syntax-error"]
+type = "error"
+
+[["syntax-error".messages]]
+original = "{message}"
+en = "Syntax error: {message}"
+nl = "Syntaxfout: {message}"

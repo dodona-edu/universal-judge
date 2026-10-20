@@ -94,8 +94,10 @@ nl:
       not-found: "%{linter} niet gevonden!"
     python:
       linter:
-        crashed: "Pylint gecrasht"
-        output: "Pylint produceerde slechte uitvoer."
+        timeout: "Ruff overschreed de tijdslimiet"
+        memory: "Ruff overschreed de geheugenlimiet"
+        crashed: "Ruff gecrasht"
+        output: "Ruff produceerde slechte uitvoer."
     typescript:
       runtime:
         invalid:
