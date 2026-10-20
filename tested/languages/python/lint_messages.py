@@ -25,6 +25,8 @@ from pathlib import Path
 
 MESSAGES_FILE = Path(__file__).with_name("rules") / "messages.toml"
 _PLACEHOLDER = re.compile(r"\{(\w*)\}")
+# A placeholder that is a code span on its own (`{name}`), or any other placeholder.
+_TEXT_PLACEHOLDER = re.compile(r"`\{(\w*)\}`|\{(\w*)\}")
 DEFAULT_TYPE = "warning"
 
 
@@ -97,19 +99,31 @@ def template_pattern(template: str) -> re.Pattern[str]:
     return re.compile("".join(parts), re.DOTALL)
 
 
+def code_span(value: str) -> str:
+    """A markdown code span of the value, with a fence longer than any backticks in it."""
+    fence = "`" * (max(map(len, re.findall(r"`+", value)), default=0) + 1)
+    pad = " " if value.startswith("`") or value.endswith("`") else ""
+    return f"{fence}{pad}{value}{pad}{fence}"
+
+
 def fill(text: str, match: re.Match[str]) -> str:
-    """The text with its placeholders replaced by what they matched in the linter's message."""
+    """The text with its placeholders replaced by what they matched in the linter's message.
+
+    A value from the student's code can contain backticks, so a placeholder that is a code
+    span on its own gets a fence that keeps the value inside it.
+    """
     position = 0
 
     def value(placeholder: re.Match[str]) -> str:
         nonlocal position
-        name = placeholder[1]
+        in_code_span = placeholder[1] is not None
+        name = placeholder[1] if in_code_span else placeholder[2]
         if not name:
             position += 1
             name = f"_{position}"
-        return match[name]
+        return code_span(match[name]) if in_code_span else match[name]
 
-    return _PLACEHOLDER.sub(value, text)
+    return _TEXT_PLACEHOLDER.sub(value, text)
 
 
 @cache

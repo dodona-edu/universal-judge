@@ -176,6 +176,14 @@ def test_a_language_without_a_text_gets_the_english_text():
     assert MESSAGES.text("X1", "Swap `a` and `b`", "nl") == "Swap `a` with `b`"
 
 
+def test_a_value_with_backticks_stays_inside_its_code_span():
+    # The value comes from the student's code; a single backtick would end the span.
+    assert (
+        MESSAGES.text("X1", "Name `a`b` from line 3", "en") == "``a`b`` is from line 3"
+    )
+    assert MESSAGES.text("X1", "Swap ``` and `b`", "en") == "Swap `` ` `` with `b`"
+
+
 def test_a_message_without_a_matching_template_stays_as_the_linter_wrote_it():
     assert MESSAGES.text("X1", "Something else", "nl") == "Something else"
     assert MESSAGES.text("X2", "Unknown rule", "nl") == "Unknown rule"
