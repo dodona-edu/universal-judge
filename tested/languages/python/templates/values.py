@@ -1,12 +1,10 @@
 """Minimal RPC language in JSON to send data from the tests to the judge."""
 
-import dataclasses
 import decimal
 import io
 import json
 import math
 import sys
-import traceback
 
 # If the users make data too large, it should crash on memory issues, or other
 # resource limitations, not a crash in the encoding of values.
@@ -75,6 +73,10 @@ def send_value(stream, value):
 def send_exception(stream, exception):
     if exception is None:
         return
+    # Imported here, like dataclasses below: every execution imports this module,
+    # and most never need them, while importing them takes milliseconds.
+    import traceback
+
     tracer = io.StringIO()
     traceback.print_tb(exception.__traceback__, file=tracer)
     data = {
@@ -88,6 +90,8 @@ def send_exception(stream, exception):
 
 class _EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
+        import dataclasses
+
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         return super().default(o)
