@@ -124,9 +124,9 @@ def test_ruff_refactor(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     annotations = updates.find_all("annotate-code")
-    # Too many arguments (PLR0913) and too many positional arguments (PLR0917).
-    assert len(annotations) == 2
-    [annotation] = [a for a in annotations if "too-many-arguments" in a["externalUrl"]]
+    # Too many arguments (PLR0913), and not also too many positional arguments.
+    [annotation] = annotations
+    assert "too-many-arguments" in annotation["externalUrl"]
 
     assert annotation["type"] == Severity.INFO
     assert annotation["row"] == 0

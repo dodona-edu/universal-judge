@@ -1129,14 +1129,6 @@ original = "Too many statements ({statements} > {max_statements})"
 en = "This function has too many statements: {statements} instead of at most {max_statements}. Split it into smaller functions."
 nl = "Deze functie heeft te veel opdrachten: {statements} in plaats van hooguit {max_statements}. Splits ze op in kleinere functies."
 
-[PLR0917]  # too-many-positional-arguments
-type = "info"
-
-[[PLR0917.messages]]
-original = "Too many positional arguments ({c_pos} > {max_pos})"
-en = "This function has too many positional parameters: {c_pos} instead of at most {max_pos}."
-nl = "Deze functie heeft te veel positionele parameters: {c_pos} in plaats van hooguit {max_pos}."
-
 [PLR1704]  # redefined-argument-from-local
 type = "info"
 

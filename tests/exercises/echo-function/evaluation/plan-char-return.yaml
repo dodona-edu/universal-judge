@@ -1,0 +1,4 @@
+- tab: "Test char return"
+  testcases:
+    - expression: "get_high_byte()"
+      return: "'a'"

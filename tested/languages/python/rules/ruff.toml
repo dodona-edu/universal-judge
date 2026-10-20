@@ -5,9 +5,11 @@
 # configuration: every check pylint ran by default that ruff implements as a
 # stable rule, except the ones that configuration switched off (names,
 # docstrings, line length, whitespace, too many attributes, methods or returns)
-# and three left out on purpose: no-else-return (RET505),
-# missing-maxsplit-arg (PLC0207) and implicit-return (RET503). Every rule here
-# needs an entry in messages.toml.
+# and four left out on purpose: no-else-return (RET505),
+# missing-maxsplit-arg (PLC0207), implicit-return (RET503) and
+# too-many-positional-arguments (PLR0917), which only fires on functions that
+# too-many-arguments (PLR0913) already flags. Every rule here needs an entry in
+# messages.toml.
 #
 # target-version can differ between the judges: it must be the Python version that runs the
 # submissions, or ruff reports syntax that version accepts as an error.
@@ -114,7 +116,6 @@ select = [
     "PLR0912",  # too-many-branches
     "PLR0913",  # too-many-arguments
     "PLR0915",  # too-many-statements
-    "PLR0917",  # too-many-positional-arguments
     "PLR1704",  # redefined-argument-from-local
     "PLR1708",  # stop-iteration-return
     "PLR1711",  # useless-return
