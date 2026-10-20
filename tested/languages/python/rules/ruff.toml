@@ -8,6 +8,9 @@
 # and three left out on purpose: no-else-return (RET505),
 # missing-maxsplit-arg (PLC0207) and implicit-return (RET503). Every rule here
 # needs an entry in messages.toml.
+#
+# target-version can differ between the judges: it must be the Python version that runs the
+# submissions, or ruff reports syntax that version accepts as an error.
 target-version = "py312"
 
 [lint]

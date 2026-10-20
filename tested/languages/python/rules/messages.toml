@@ -51,8 +51,8 @@ type = "warning"
 
 [[B018.messages]]
 original = "Found useless expression. Either assign it to a variable or remove it."
-en = "This expression has no effect, because its result is not used. Store it in a variable or remove it. To call a method, add parentheses, like `numbers.sort()`."
-nl = "Deze uitdrukking heeft geen effect, want het resultaat wordt niet gebruikt. Bewaar het in een variabele of verwijder de uitdrukking. Wil je een methode oproepen, zet er dan haakjes achter, zoals `getallen.sort()`."
+en = "This expression has no effect, because its result is not used. Store it in a variable or remove it. To call a function or method, add parentheses, like `print()` or `numbers.sort()`."
+nl = "Deze uitdrukking heeft geen effect, want het resultaat wordt niet gebruikt. Bewaar het in een variabele of verwijder de uitdrukking. Wil je een functie of methode oproepen, zet er dan haakjes achter, zoals `print()` of `getallen.sort()`."
 
 [[B018.messages]]
 original = "Found useless attribute access. Either assign it to a variable or remove it."
@@ -85,13 +85,13 @@ type = "info"
 
 [[B904.messages]]
 original = "Within an `except*` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling"
-en = "When you raise a new exception in an `except*` block, link it to the caught one with `raise ... from err` (with `err` the name after `as`), or use `raise ... from None` to leave it out. Then the error message shows clearly where the problem started."
-nl = "Als je in een `except*`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception met `raise ... from err` (met `err` de naam na `as`), of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
+en = "When you raise a new exception in an `except*` block, link it to the caught one: write `except* ... as err:` and `raise ... from err`, or use `raise ... from None` to leave the caught one out. Then the error message shows clearly where the problem started."
+nl = "Als je in een `except*`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception: schrijf `except* ... as err:` en `raise ... from err`, of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
 
 [[B904.messages]]
 original = "Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling"
-en = "When you raise a new exception in an `except` block, link it to the caught one with `raise ... from err` (with `err` the name after `as`), or use `raise ... from None` to leave it out. Then the error message shows clearly where the problem started."
-nl = "Als je in een `except`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception met `raise ... from err` (met `err` de naam na `as`), of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
+en = "When you raise a new exception in an `except` block, link it to the caught one: write `except ... as err:` and `raise ... from err`, or use `raise ... from None` to leave the caught one out. Then the error message shows clearly where the problem started."
+nl = "Als je in een `except`-blok een nieuwe exception opgooit, koppel ze dan aan de opgevangen exception: schrijf `except ... as err:` en `raise ... from err`, of gebruik `raise ... from None` om die weg te laten. Dan toont de foutmelding duidelijk waar het probleem begon."
 
 [C403]  # unnecessary-list-comprehension-set
 type = "info"
@@ -105,9 +105,24 @@ nl = "Je hoeft niet eerst een lijst te maken. Schrijf meteen een set comprehensi
 type = "info"
 
 [[C408.messages]]
+original = "Unnecessary `list()` call (rewrite as a literal)"
+en = "No need to call `list()`. Write `[]` for an empty list."
+nl = "Je hoeft `list()` niet op te roepen. Schrijf `[]` voor een lege lijst."
+
+[[C408.messages]]
+original = "Unnecessary `dict()` call (rewrite as a literal)"
+en = "No need to call `dict()`. Write the dictionary directly with curly brackets, like `{\"a\": 1}` instead of `dict(a=1)`."
+nl = "Je hoeft `dict()` niet op te roepen. Schrijf de dictionary rechtstreeks met accolades, zoals `{\"a\": 1}` in plaats van `dict(a=1)`."
+
+[[C408.messages]]
+original = "Unnecessary `tuple()` call (rewrite as a literal)"
+en = "No need to call `tuple()`. Write `()` for an empty tuple."
+nl = "Je hoeft `tuple()` niet op te roepen. Schrijf `()` voor een lege tuple."
+
+[[C408.messages]]
 original = "Unnecessary `{kind}()` call (rewrite as a literal)"
-en = "No need to call `{kind}()`. Write the value directly with brackets, for example `[]` instead of `list()`."
-nl = "Je hoeft `{kind}()` niet op te roepen. Schrijf de waarde rechtstreeks met haakjes, bijvoorbeeld `[]` in plaats van `list()`."
+en = "No need to call `{kind}()`. Write the value directly with brackets."
+nl = "Je hoeft `{kind}()` niet op te roepen. Schrijf de waarde rechtstreeks met haakjes."
 
 [C416]  # unnecessary-comprehension
 type = "info"
@@ -687,8 +702,8 @@ type = "info"
 
 [[PLC0208.messages]]
 original = "Use a sequence type instead of a `set` when iterating over values"
-en = "Loop over a list or tuple instead of a set: a set has no fixed order. Use square or round brackets instead of curly ones."
-nl = "Doorloop een lijst of tuple in plaats van een verzameling: een verzameling heeft geen vaste volgorde. Gebruik rechte of ronde haakjes in plaats van accolades."
+en = "Loop over a list or tuple instead of a set: a set has no fixed order. Use square brackets or parentheses instead of curly brackets."
+nl = "Doorloop een lijst of tuple in plaats van een verzameling: een verzameling heeft geen vaste volgorde. Gebruik rechte haken of ronde haakjes in plaats van accolades."
 
 [PLC0414]  # useless-import-alias
 type = "info"
@@ -812,7 +827,7 @@ type = "error"
 [[PLE0241.messages]]
 original = "Duplicate base `{base}` for class `{class}`"
 en = "The class `{class}` lists the base class `{base}` more than once. Remove the duplicate."
-nl = "De klasse `{class}` vermeldt de basisklasse `{base}` meer dan één keer. Verwijder de dubbele."
+nl = "De klasse `{class}` vermeldt de basisklasse `{base}` meer dan één keer. Verwijder de dubbele vermelding."
 
 [PLE0302]  # unexpected-special-method-signature
 type = "error"
@@ -1175,7 +1190,7 @@ type = "info"
 [[PLR1716.messages]]
 original = "Contains chained boolean comparison that can be simplified"
 en = "These comparisons can be written shorter as one chain, like `a < b < c`."
-nl = "Je kan deze vergelijkingen korter schrijven, zoals `a < b < c`."
+nl = "Je kan deze vergelijkingen korter schrijven als één vergelijking, zoals `a < b < c`."
 
 [PLR1722]  # sys-exit-alias
 type = "info"
@@ -1330,7 +1345,7 @@ type = "warning"
 
 [[PLW0603.messages]]
 original = "Using the global statement to update `{name}` is discouraged"
-en = "Avoid `global` to change `{name}`. Pass values as arguments and use `return` instead."
+en = "Avoid using `global` to change `{name}`. Pass values as arguments and use `return` instead."
 nl = "Vermijd `global` om `{name}` te wijzigen. Geef waarden mee als argument en gebruik `return`."
 
 [PLW0604]  # global-at-module-level
@@ -1432,25 +1447,40 @@ nl = "Geneste oproepen van `{func}` kunnen samengevoegd worden tot één oproep.
 type = "info"
 
 [[RET506.messages]]
-original = "Unnecessary `{branch}` after `raise` statement"
-en = "This `{branch}` is not needed: the block before it ends with `raise`. Turn `elif` into `if`, or remove `else` and indent its code one level less."
-nl = "Deze `{branch}` is overbodig: het blok ervoor eindigt met `raise`. Maak van `elif` een `if`, of verwijder `else` en laat de code eronder een niveau minder inspringen."
+original = "Unnecessary `elif` after `raise` statement"
+en = "This `elif` is not needed: the block before it ends with `raise`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `raise`. Maak er een `if` van."
+
+[[RET506.messages]]
+original = "Unnecessary `else` after `raise` statement"
+en = "This `else` is not needed: the block before it ends with `raise`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `raise`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
 
 [RET507]  # superfluous-else-continue
 type = "info"
 
 [[RET507.messages]]
-original = "Unnecessary `{branch}` after `continue` statement"
-en = "This `{branch}` is not needed: the block before it ends with `continue`. Turn `elif` into `if`, or remove `else` and indent its code one level less."
-nl = "Deze `{branch}` is overbodig: het blok ervoor eindigt met `continue`. Maak van `elif` een `if`, of verwijder `else` en laat de code eronder een niveau minder inspringen."
+original = "Unnecessary `elif` after `continue` statement"
+en = "This `elif` is not needed: the block before it ends with `continue`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `continue`. Maak er een `if` van."
+
+[[RET507.messages]]
+original = "Unnecessary `else` after `continue` statement"
+en = "This `else` is not needed: the block before it ends with `continue`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `continue`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
 
 [RET508]  # superfluous-else-break
 type = "info"
 
 [[RET508.messages]]
-original = "Unnecessary `{branch}` after `break` statement"
-en = "This `{branch}` is not needed: the block before it ends with `break`. Turn `elif` into `if`, or remove `else` and indent its code one level less."
-nl = "Deze `{branch}` is overbodig: het blok ervoor eindigt met `break`. Maak van `elif` een `if`, of verwijder `else` en laat de code eronder een niveau minder inspringen."
+original = "Unnecessary `elif` after `break` statement"
+en = "This `elif` is not needed: the block before it ends with `break`. Turn it into an `if`."
+nl = "Deze `elif` is overbodig: het blok ervoor eindigt met `break`. Maak er een `if` van."
+
+[[RET508.messages]]
+original = "Unnecessary `else` after `break` statement"
+en = "This `else` is not needed: the block before it ends with `break`. Remove the `else` and indent its code one level less."
+nl = "Deze `else` is overbodig: het blok ervoor eindigt met `break`. Verwijder de `else` en laat de code eronder een niveau minder inspringen."
 
 [S307]  # suspicious-eval-usage
 type = "warning"
@@ -1541,7 +1571,7 @@ type = "info"
 
 [[UP028.messages]]
 original = "Replace `yield` over `for` loop with `yield from`"
-en = "Replace this `for` loop with `yield` by a single `yield from`."
+en = "Replace this `for` loop around `yield` with a single `yield from`."
 nl = "Vervang deze `for`-lus met `yield` door één `yield from`."
 
 [UP032]  # f-string
@@ -1566,7 +1596,7 @@ type = "warning"
 [[W605.messages]]
 original = "Invalid escape sequence: `\\{ch}`"
 en = "`\\{ch}` is not a valid escape sequence in a string. To write a backslash, type two (`\\\\`), or use a raw string (`r\"...\"`)."
-nl = "`\\{ch}` is geen geldige escapereeks in een string. Voor een backslash typ je er twee (`\\\\`), of gebruik een raw string (`r\"...\"`)."
+nl = "`\\{ch}` is geen geldige escapereeks in een string. Typ twee backslashes (`\\\\`) voor één backslash, of gebruik een raw string (`r\"...\"`)."
 
 ["syntax-error"]
 type = "error"
