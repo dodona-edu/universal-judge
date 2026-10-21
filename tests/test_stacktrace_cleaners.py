@@ -511,6 +511,80 @@ def test_cpp_modify_solution_offsets(tmp_path: Path):
     assert solution.read_text().startswith("#pragma once\n\n")
 
 
+def test_haskell_modify_solution_inserts_one_line(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("add a b = a + b\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text() == "module Submission where\nadd a b = a + b\n"
+    assert language_config.config.dodona.source_offset == -1
+
+
+def test_haskell_modify_solution_after_pragmas(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("{-# LANGUAGE Safe #-}\nadd a b = a + b\n")
+    language_config.modify_solution(solution)
+    lines = solution.read_text().splitlines()
+    assert lines[:3] == [
+        "{-# LANGUAGE Safe #-}",
+        "module Submission where",
+        "add a b = a + b",
+    ]
+    assert language_config.config.dodona.source_offset == -1
+
+
+def test_haskell_compile_line_offset_end_to_end(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("greet name = nme\nmfzej àryhg çyh aiogharuio ghqgh\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text().splitlines()[1].startswith("greet")
+    original = """Submission.hs:2:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 2)
+  |
+2 | greet name = nme
+  |              ^^^
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    expected = """<code>:1:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 1)
+  |
+1 | greet name = nme
+  |              ^^^
+"""
+    assert final == expected
+
+
+def test_haskell_runtime_line_offset_end_to_end(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("add a b = a + b\ngreet name = error name\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text().splitlines()[2].startswith("greet")
+    original = """undefined
+    CallStack (from HasCallStack):
+      error, called at ./Submission.hs:3:14 in main:Submission
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    expected = """    CallStack (from HasCallStack):
+      error, called at <code>:2:14 in main:Submission
+"""
+    assert final == expected
+
+
 def test_csharp_runtime_line_offset_end_to_end():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")

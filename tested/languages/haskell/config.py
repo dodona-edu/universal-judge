@@ -120,6 +120,7 @@ class Haskell(Language):
         filename = submission_file(self)
         context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
         compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
+        hint_line_regex = re.compile(r"\(line (\d+)\)")
         type_conflict_regex = re.compile(
             r"Couldn't match expected type (.*) with actual type (.*)"
         )
@@ -161,6 +162,10 @@ class Haskell(Language):
                 match = compile_line_regex.match(line)
                 if match:
                     line = f"{int(match.group(1)) - 1}{match.group(2)}"
+                else:
+                    line = hint_line_regex.sub(
+                        lambda hint: f"(line {int(hint.group(1)) - 1})", line
+                    )
 
             lines.append(line + "\n")
         return "".join(lines)

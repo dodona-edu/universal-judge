@@ -97,9 +97,10 @@ def haskell_solution(lang_config: "Language", solution: Path):
             i = next(
                 i for i, line in enumerate(original_lines) if not line.startswith("{-#")
             )
-            result = f"module {name} where\n"
+            result = f"module {name} where"
             resulting_lines = original_lines[:i] + [result] + original_lines[i:]
             file.write("\n".join(resulting_lines))
+        lang_config.config.dodona.source_offset -= 1
 
 
 def executable_name(basename: str) -> str:
