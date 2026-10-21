@@ -84,6 +84,46 @@ def test_cpp_function_try_block_main_without_return(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize(
+    "submission",
+    [
+        "main-in-comment",
+        "main-const-argc",
+        "main-comment-before-brace",
+        "main-prototype",
+        "main-prototype-args",
+        "main-ifdef",
+        "main-end-macro",
+        "void-main",
+    ],
+)
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_c_cpp_main_forms(
+    language: str, submission: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", submission
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.cpp
+def test_cpp_main_trailing_return_type(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "cpp",
+        tmp_path,
+        "one-exit-code.yaml",
+        "main-trailing-return",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.cpp
 def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test: string = foo()"
