@@ -156,7 +156,8 @@ class CPP(Language):
             if in_student_file:
                 line = line.replace(submission_file(self), "<code>")
                 result += line
-        return result
+        # Errors outside the submission (e.g. a missing main) never mention it.
+        return result or stacktrace
 
     def is_source_file(self, file: Path) -> bool:
         return file.suffix in (".cpp", ".h", ".tpp")
