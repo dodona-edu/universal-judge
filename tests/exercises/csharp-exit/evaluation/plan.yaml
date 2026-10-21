@@ -1,0 +1,8 @@
+- tab: "Program"
+  contexts:
+    - testcases:
+        - arguments: ["Hello"]
+          stdout: |
+            Hello
+    - testcases:
+        - exit_code: 1
