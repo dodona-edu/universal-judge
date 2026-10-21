@@ -1,0 +1,6 @@
+- tab: "Return values"
+  testcases:
+    - expression: "add(2, 3)"
+      return: 5
+    - expression: 'greet("World")'
+      return: "Hello, World!"

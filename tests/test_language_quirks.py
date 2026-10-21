@@ -155,6 +155,25 @@ def test_cpp_unknown_return_type_without_streamable_is_null(
     assert received_data == "None"
 
 
+@pytest.mark.cpp
+@pytest.mark.parametrize("solution", ["crash", "hang"])
+def test_cpp_results_survive_crash_and_timeout(
+    solution: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "crash-after-result",
+        "cpp",
+        tmp_path,
+        "suite.yaml",
+        solution,
+        {"time_limit": 40} if solution == "hang" else None,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum()[0] == "correct"
+
+
 @pytest.mark.typescript
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
