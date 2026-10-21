@@ -1,0 +1,4 @@
+- tab: "lens"
+  testcases:
+    - expression: "lens([[1], ['a']])"
+      return: [1, 1]

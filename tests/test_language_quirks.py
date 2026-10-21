@@ -538,3 +538,27 @@ def test_haskell_empty_list_to_polymorphic_function(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct", "correct"]
+
+
+@pytest.mark.parametrize(
+    "lang",
+    [
+        pytest.param("haskell", marks=pytest.mark.haskell),
+        pytest.param("runhaskell", marks=pytest.mark.haskell),
+    ],
+)
+def test_haskell_nested_heterogeneous_list_is_detected(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "haskell-nested-heterogeneous-list",
+        lang,
+        tmp_path,
+        "lens.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 0
+    assert updates.find_status_enum() == ["internal error"]
