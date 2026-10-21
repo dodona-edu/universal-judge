@@ -130,6 +130,16 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
+def _sorted_features(features: Iterable) -> list:
+    """Sort a feature collection for use in a message.
+
+    Sets of features are formatted into the "not solvable" message; their
+    iteration order follows the (per-process randomised) string hash, so the
+    same suite could produce a different message on every run (#753).
+    """
+    return sorted(features, key=str)
+
+
 def is_supported(language: "Language") -> list[Message] | None:
     """
     Check if the given configuration bundle is supported. This will check if the
@@ -156,13 +166,13 @@ def is_supported(language: "Language") -> list[Message] | None:
         This test suite is not solvable in {language.__class__.__name__}.
         
         The required language constructs are:
-        {required.constructs}
+        {_sorted_features(required.constructs)}
         
         The programming language has support for:
-        {available_constructs}
+        {_sorted_features(available_constructs)}
         
         This means support is lacking for these:
-        {missing}
+        {_sorted_features(missing)}
         
         Note that support for certain types means real support, not reduced support.
         For example, if tuples are required, the language must have a dedicated tuple
@@ -253,13 +263,13 @@ def is_supported(language: "Language") -> list[Message] | None:
             This test suite is not solvable in {language.__class__.__name__}.
             
             The required {key} types are:
-            {value_types}
+            {_sorted_features(value_types)}
             
             The programming language has support for:
-            {restrictions}
+            {_sorted_features(restrictions)}
             
             This means support is lacking for these:
-            {missing}
+            {_sorted_features(missing)}
             
             Note that support for certain types means real support, not reduced support.
             For example, if tuples are required, the language must have a dedicated tuple
