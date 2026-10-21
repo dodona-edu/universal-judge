@@ -113,22 +113,23 @@ def convert_function_call(
     result += function.name
 
     if function.type != FunctionType.PROPERTY:
-        result += " "
         for i, argument in enumerate(function.arguments):
             if isinstance(argument, Identifier):
                 # If the expression is an identifier, just echo it.
-                result += f'"${argument}" '
+                result += f' "${argument}"'
             elif isinstance(argument, FunctionCall):
                 # Delegate to the function template for function calls.
                 if argument.type == FunctionType.PROPERTY:
                     result += (
-                        convert_function_call(argument, index_fun, index_map) + "\n"
+                        " "
+                        + convert_function_call(argument, index_fun, index_map)
+                        + "\n"
                     )
                 else:
-                    result += f'"$ARG{index_map[-1][i]}" '
+                    result += f' "$ARG{index_map[-1][i]}"'
             elif isinstance(argument, Value):
                 # We have a value, delegate to the value template.
-                result += convert_value(argument) + " "
+                result += " " + convert_value(argument)
     else:
         result += '"'
     index_map.pop()
