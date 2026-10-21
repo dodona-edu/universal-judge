@@ -241,6 +241,15 @@ Arguments pass through to pytest, and each test is marked with its programming l
 ./devel/run-tests.sh tests/test_functionality.py
 ```
 
+The golden suite in `tests/golden/` judges every submission under `tests/golden/<exercise>/submissions/<language>/` and compares TESTed's complete output with `tests/golden/<exercise>/expected/<language>/<case>.json` (see `tests/test_golden.py` for the layout and which compiler or runtime text only warns when it differs).
+After an intended change in TESTed's output, rewrite the expected files with `UPDATE_EXPECTED=1` and review the diff before committing it:
+
+```bash
+./devel/run-tests.sh tests/test_golden.py
+./devel/run-tests.sh tests/test_golden.py -m kotlin
+UPDATE_EXPECTED=1 ./devel/run-tests.sh tests/test_golden.py
+```
+
 We use `black` and `isort` for code formatting. `pyright` is used for type checking.
 You can check them with:
 

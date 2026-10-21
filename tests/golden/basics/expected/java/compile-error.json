@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.add(2, 3)",
+   "format": "java"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>: error: cannot find symbol<br>        return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>                           ^<br>  symbol:   variable nme<br>  location: class Submission<br>1 error</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.greet(\"World\")",
+   "format": "java"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>: error: cannot find symbol<br>        return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>                           ^<br>  symbol:   variable nme<br>  location: class Submission<br>1 error</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.printGreeting(\"Dodona\")",
+   "format": "java"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>: error: cannot find symbol<br>        return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>                           ^<br>  symbol:   variable nme<br>  location: class Submission<br>2 errors</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

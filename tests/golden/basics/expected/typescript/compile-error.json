@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "typescript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "typescript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "printGreeting(\"Dodona\")",
+   "format": "typescript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

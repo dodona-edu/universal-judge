@@ -1,0 +1,4 @@
+# <exercise>/<language>/<case> <issue URL> [<issue URL> ...]: judged as a strict xfail
+basics/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746
+timeouts/c/timeout https://github.com/dodona-edu/universal-judge/issues/739
+bash-basics/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746

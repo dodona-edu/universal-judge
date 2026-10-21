@@ -1,0 +1,131 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "typescript"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "typescript"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>Error: cannot greet World<br>    at Object.greet (<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>:11)</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "Error: cannot greet World",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"Hello, World!\""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong",
+   "human": "Missing return value."
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "printGreeting(\"Dodona\")",
+   "format": "typescript"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, Dodona!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

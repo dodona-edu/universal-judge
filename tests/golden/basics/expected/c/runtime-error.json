@@ -1,0 +1,129 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "c"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "c"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "-11",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"Hello, World!\""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong",
+   "human": "Missing return value."
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "print_greeting(\"Dodona\")",
+   "format": "c"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "accepted": false,
+  "command": "close-context"
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

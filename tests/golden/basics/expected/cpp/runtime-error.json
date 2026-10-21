@@ -1,0 +1,123 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(std::intmax_t(2), std::intmax_t(3))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(std::string(\"World\"))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "St13runtime_error: cannot greet World",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"Hello, World!\""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong",
+   "human": "Missing return value."
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "print_greeting(std::string(\"Dodona\"))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, Dodona!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

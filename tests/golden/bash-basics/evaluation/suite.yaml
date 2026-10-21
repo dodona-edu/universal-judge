@@ -1,0 +1,6 @@
+- tab: "Output"
+  testcases:
+    - statement: 'greet("World")'
+      stdout: "Hello, World!"
+    - statement: 'greet("Dodona")'
+      stdout: "Hello, Dodona!"

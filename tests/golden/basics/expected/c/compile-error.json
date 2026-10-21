@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "c"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   13 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "c"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   13 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "print_greeting(\"Dodona\")",
+   "format": "c"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>selector.c:6:14: fatal error: execution_0.c: No such file or directory<br>    6 |     #include &quot;execution_0.c&quot;<br>      |              ^~~~~~~~~~~~~~~<br>compilation terminated.</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
