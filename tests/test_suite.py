@@ -1,5 +1,7 @@
 import pytest
 
+from tested.dsl import parse_string
+from tested.features import Construct
 from tested.parsing import get_converter
 from tested.serialisation import FunctionCall, FunctionType
 from tested.testsuite import (
@@ -269,3 +271,17 @@ def test_output_files_same_path_different_content_raises():
                 ),
             ]
         )
+
+
+def test_empty_list_is_not_heterogeneous():
+    assert not parse_string("[]").get_used_features().constructs
+
+
+def test_nested_empty_list_is_not_heterogeneous():
+    features = parse_string("[[], [1]]").get_used_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS not in features.constructs
+
+
+def test_mixed_list_is_heterogeneous():
+    features = parse_string('[1, "a"]').get_used_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS in features.constructs

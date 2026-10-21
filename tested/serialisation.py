@@ -224,7 +224,8 @@ class SequenceType(WithFeatures, WithFunctions):
         base_features = FeatureSet(set(), {self.type}, combined_nested_types)
         combined = combine_features([base_features] + nested_features)
         content_type = self.get_content_type()
-        if content_type == BasicStringTypes.ANY:
+        # An empty collection has no element types that could disagree.
+        if self.data and content_type == BasicStringTypes.ANY:
             combined = combine_features(
                 [
                     FeatureSet(
