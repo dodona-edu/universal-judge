@@ -128,6 +128,14 @@ class TypeScript(Language):
                     "--noEmit",
                     "--typeRoots",
                     f"{path_to_modules}/@types",
+                    # Don't type check the declaration files of the libraries.
+                    "--skipLibCheck",
+                    # TypeScript 7 no longer includes every package in typeRoots
+                    # and is strict by default; keep the behaviour of 5.x.
+                    "--types",
+                    "node",
+                    "--strict",
+                    "false",
                     str(main_file.name),
                 ],
                 files,
