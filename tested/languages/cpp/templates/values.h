@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <cstdio>
+#include <cstdint>
 #include <typeinfo>
 #include <type_traits>
 #include <exception>
