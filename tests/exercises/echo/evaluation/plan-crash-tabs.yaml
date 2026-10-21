@@ -1,0 +1,19 @@
+- tab: "First"
+  contexts:
+    - testcases:
+        - arguments: ["Hello"]
+          stdout: "Hello"
+- tab: "Second"
+  contexts:
+    - testcases:
+        - arguments: ["World"]
+          stdout: "World"
+    - testcases:
+        - stdin: "Dodona"
+          arguments: ["Hi"]
+          stdout: "Hi"
+- tab: "Third"
+  contexts:
+    - testcases:
+        - arguments: ["Again"]
+          stdout: "Again"

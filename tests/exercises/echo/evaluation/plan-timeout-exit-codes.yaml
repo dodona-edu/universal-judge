@@ -1,0 +1,8 @@
+- tab: "Exit codes"
+  contexts:
+    - testcases:
+        - arguments: ["slow"]
+          exit_code: 1
+    - testcases:
+        - arguments: ["fast"]
+          exit_code: 1

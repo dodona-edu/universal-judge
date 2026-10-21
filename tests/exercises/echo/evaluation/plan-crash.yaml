@@ -1,0 +1,12 @@
+- tab: "Program"
+  contexts:
+    - testcases:
+        - arguments: ["Hello"]
+          stdout: "Hello"
+    - testcases:
+        - arguments: ["World"]
+          stdout: "World"
+    - testcases:
+        - stdin: "Dodona"
+          arguments: ["Hi"]
+          stdout: "Hi"
