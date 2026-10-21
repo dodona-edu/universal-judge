@@ -21,3 +21,7 @@ program-io/typescript/stderr https://github.com/dodona-edu/universal-judge/issue
 program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
 program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746 https://github.com/dodona-edu/universal-judge/issues/759
 program-io/csharp/runtime-error https://github.com/dodona-edu/universal-judge/issues/758
+haskell-polymorphic-empty-list/haskell/correct https://github.com/dodona-edu/universal-judge/issues/735
+haskell-polymorphic-empty-list/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/735
+haskell-nested-mixed-lists/haskell/correct https://github.com/dodona-edu/universal-judge/issues/736 https://github.com/dodona-edu/universal-judge/issues/753
+haskell-nested-mixed-lists/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/736 https://github.com/dodona-edu/universal-judge/issues/753
