@@ -18,7 +18,7 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import executable_name
+from tested.languages.utils import add_main_return, executable_name
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -114,6 +114,7 @@ class C(Language):
             with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
             replacement = r"int\2solution_main\3(\4int"
             contents = re.sub(with_args, replacement, contents, count=1)
+        contents = add_main_return(contents)
         assert self.config
         with open(solution, "w") as file:
             header = "#pragma once\n\n"

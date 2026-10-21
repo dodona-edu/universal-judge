@@ -17,6 +17,7 @@ from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
 from tested.languages.preparation import prepare_assignment, prepare_expression
 from tested.languages.python.generators import convert_statement
+from tested.languages.utils import add_main_return
 from tested.serialisation import (
     Assignment,
     BooleanType,
@@ -57,6 +58,62 @@ def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_c_cpp_main_without_return(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", "no-return"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.c
+@pytest.mark.cpp
+@pytest.mark.parametrize(
+    "source,expected",
+    [
+        (
+            "int solution_main(int argc, char** argv) {\n"
+            '    if (argc) { puts("}\\"{"); }\n'
+            "    // }\n"
+            "    /* } { */\n"
+            "    char c = '}';\n"
+            "}\n"
+            "void f() {}\n",
+            "int solution_main(int argc, char** argv) {\n"
+            '    if (argc) { puts("}\\"{"); }\n'
+            "    // }\n"
+            "    /* } { */\n"
+            "    char c = '}';\n"
+            "return 0;}\n"
+            "void f() {}\n",
+        ),
+        (
+            "int f() { return 2; }\n"
+            "int solution_main(int argc, char* argv[]) {\n"
+            '    auto s = R"x(})")x";\n'
+            "    int n = 1'000;\n"
+            "    char c = u8'}';\n"
+            "    return 1;\n"
+            "}\n",
+            "int f() { return 2; }\n"
+            "int solution_main(int argc, char* argv[]) {\n"
+            '    auto s = R"x(})")x";\n'
+            "    int n = 1'000;\n"
+            "    char c = u8'}';\n"
+            "    return 1;\n"
+            "return 0;}\n",
+        ),
+        ("int main() {}\n", "int main() {}\n"),
+    ],
+)
+def test_c_cpp_add_main_return(source: str, expected: str):
+    assert add_main_return(source) == expected
 
 
 @pytest.mark.cpp

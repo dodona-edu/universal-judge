@@ -102,6 +102,44 @@ def haskell_solution(lang_config: "Language", solution: Path):
             file.write("\n".join(resulting_lines))
 
 
+# Braces inside comments and literals must not count; numbers can hold ' separators.
+_C_MAIN_TOKENS = re.compile(
+    "|".join(
+        [
+            r"//(?:\\\n|[^\n])*",
+            r"/\*[\s\S]*?\*/",
+            r'(?<!\w)(?:u8|[uUL])?R"([^()\\\s]{0,16})\([\s\S]*?\)\1"',
+            r'"(?:\\[\s\S]|[^"\\\n])*"',
+            r"'(?:\\[\s\S]|[^'\\\n])*'",
+            r"(?<![\w.])\d[\w'.]*",
+            r"\bsolution_main\b",
+            r"[{}]",
+        ]
+    )
+)
+
+
+def add_main_return(contents: str) -> str:
+    """
+    Insert ``return 0;`` before the closing brace of ``solution_main`` in C or C++
+    source: only ``main`` returns 0 implicitly, and the renamed function would
+    otherwise flow off its end (undefined behaviour).
+    """
+    tokens = _C_MAIN_TOKENS.finditer(contents)
+    if not any(token[0] == "solution_main" for token in tokens):
+        return contents
+    depth = 0
+    for token in tokens:
+        if token[0] == "{":
+            depth += 1
+        elif token[0] == "}":
+            depth -= 1
+            if depth == 0:
+                end = token.start()
+                return f"{contents[:end]}return 0;{contents[end:]}"
+    return contents
+
+
 def executable_name(basename: str) -> str:
     """
     Utility function that will
