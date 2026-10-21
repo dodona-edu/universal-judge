@@ -134,7 +134,15 @@ class Java(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
-        return ["javac", "-cp", ".", *others], file_filter
+        # javac runs once in a fresh JVM, so the time C2 spends optimising the
+        # compiler never pays off. Stopping at C1 saves CPU.
+        return [
+            "javac",
+            "-J-XX:TieredStopAtLevel=1",
+            "-cp",
+            ".",
+            *others,
+        ], file_filter
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         assert self.config
