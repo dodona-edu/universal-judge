@@ -227,7 +227,11 @@ touch {pu.value_file} {pu.exception_file}
 
     for i, ctx in enumerate(pu.contexts):
         result += "write_context_separator\n"
-        result += f"context_{i} || (exit $?)\n"
+        # A function's non-zero status is a return value, unless the context checks the exit code.
+        if ctx.context.has_main_testcase() or ctx.context.has_exit_testcase():
+            result += f"context_{i} || (exit $?)\n"
+        else:
+            result += f"context_{i} || true\n"
         result += f""
 
     result += "exit $?\n"

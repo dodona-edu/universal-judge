@@ -255,6 +255,13 @@ def evaluate_context_results(
                 )
             )
 
+    # The process stopped in the last testcase that printed its separator.
+    crashed = (
+        exec_results.exit != 0 and not exec_results.timeout and not exec_results.memory
+    )
+    reached = max(len(stdout_), len(stderr_), len(exceptions), len(values))
+    crashed_index = min(max(reached, 1), len(context.testcases)) - 1
+
     # All files that will be used in this context.
     all_files = context.get_input_files()
 
@@ -316,6 +323,25 @@ def evaluate_context_results(
             timeout=exec_results.timeout and len(stdout_) == i + 1,
             memory=exec_results.memory and len(stdout_) == i + 1,
         )
+        if (
+            crashed
+            and i == crashed_index
+            and not actual_exception
+            and not isinstance(output.exception, ExceptionOutputChannel)
+            and not testcase.is_main_testcase()
+            and testcase.output.exit_code == IgnoredChannel.IGNORED
+        ):
+            t_col.add(StartTest(expected="0", channel=Channel.EXIT))
+            t_col.add(
+                CloseTest(
+                    generated=str(exec_results.exit),
+                    status=StatusMessage(
+                        enum=Status.RUNTIME_ERROR,
+                        human=get_i18n_string("oracles.nothing.runtime"),
+                    ),
+                )
+            )
+
         missing_return = _evaluate_channel(
             bundle,
             context_dir,

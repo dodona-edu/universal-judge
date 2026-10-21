@@ -161,6 +161,26 @@ def test_specific_oracle_exception_runtime_exception(
     assert len(updates.find_all("append-message")) >= 1
 
 
+@pytest.mark.parametrize("lang", ["python"])
+def test_specific_oracle_exception_runtime_exception_in_function(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "division",
+        lang,
+        tmp_path,
+        "plan-runtime-exception-function.json",
+        "function",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong", "wrong"]
+    assert not [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+
+
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
 def test_specific_oracle_return_specific_argument(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
