@@ -38,7 +38,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v8
         with:
-          name: coverage
+          pattern: coverage-*
       - name: Code Coverage
         uses: codecov/codecov-action@v7
         with:

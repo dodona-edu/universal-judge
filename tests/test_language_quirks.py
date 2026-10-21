@@ -29,6 +29,7 @@ from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
+@pytest.mark.c
 def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -43,6 +44,7 @@ def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.cpp
 def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -57,6 +59,7 @@ def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.cpp
 def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test: string = foo()"
     cpp = LANGUAGES["cpp"](pytestconfig)
@@ -65,6 +68,7 @@ def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     assert result == "std::string test = foo()"
 
 
+@pytest.mark.cpp
 def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = 'test = { "a": foo() }'
     cpp = LANGUAGES["cpp"](pytestconfig)
@@ -73,6 +77,7 @@ def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Co
     assert result == 'std::map<std::string, std::any> test = {{"a", foo()}}'
 
 
+@pytest.mark.cpp
 def test_cpp_types_get_cast_within_functions(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -91,6 +96,7 @@ def test_cpp_types_get_cast_within_functions(
     )
 
 
+@pytest.mark.cpp
 def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'1': [2 , (3, {4, 5})]}"
     cpp = LANGUAGES["cpp"](pytestconfig)
@@ -111,6 +117,7 @@ def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config
     assert result in valid_results
 
 
+@pytest.mark.cpp
 def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
     cpp = LANGUAGES["cpp"](pytestconfig)
     object_function = "foo.bar()"
@@ -129,6 +136,7 @@ def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
     assert result == "(foo()).bar()"
 
 
+@pytest.mark.cpp
 def test_cpp_unknown_return_type_without_streamable_is_null(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -147,6 +155,7 @@ def test_cpp_unknown_return_type_without_streamable_is_null(
     assert received_data == "None"
 
 
+@pytest.mark.typescript
 def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
     ts = LANGUAGES["typescript"](pytestconfig)
@@ -161,6 +170,7 @@ def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
     assert result in valid_results
 
 
+@pytest.mark.typescript
 def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'test', True, 10, 10.1, None, {'wow': 10}}"
     ts = LANGUAGES["typescript"](pytestconfig)
@@ -175,6 +185,7 @@ def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
     assert result in valid_results
 
 
+@pytest.mark.typescript
 def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test = {'test', True, testing(10)}"
     ts = LANGUAGES["typescript"](pytestconfig)
@@ -187,6 +198,7 @@ def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Co
     assert result == 'let test : Array<any> = ["test", true, testing(10)]'
 
 
+@pytest.mark.javascript
 def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -201,6 +213,7 @@ def test_javascript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.typescript
 def test_typescript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -215,6 +228,7 @@ def test_typescript_vanilla_object(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.python
 def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
@@ -230,6 +244,7 @@ def test_python_input_prompt_is_ignored(tmp_path: Path, pytestconfig: pytest.Con
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.haskell
 def test_haskell_function_arguments_without_brackets(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
