@@ -15,7 +15,15 @@ class RunHaskell(Haskell):
             return [], files
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
-        return ["runhaskell", file, *arguments]
+        # A larger allocation area makes the interpreter collect garbage less often.
+        return [
+            "runhaskell",
+            "--ghc-arg=+RTS",
+            "--ghc-arg=-A64m",
+            "--ghc-arg=-RTS",
+            file,
+            *arguments,
+        ]
 
     def filter_dependencies(self, files: list[Path], context_name: str) -> list[Path]:
         return files
