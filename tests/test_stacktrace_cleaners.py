@@ -10,6 +10,7 @@ from tested.languages import get_language as upstream_get_language
 from tested.languages.utils import (
     _convert_stacktrace_to_html,
     _replace_code_line_number,
+    convert_stacktrace_to_clickable_feedback,
 )
 from tested.testsuite import Suite, SupportedLanguage
 from tests.language_markers import ALL_LANGUAGES
@@ -39,12 +40,12 @@ def test_javascript_assertion_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
-    at bigram2letter ({workdir}/execution00/submission.js:86:13)
-    at {workdir}/execution00/submission.js:98:32
+    at bigram2letter ({workdir}/.tested/execution00/submission.js:86:13)
+    at {workdir}/.tested/execution00/submission.js:98:32
     at Array.map (<anonymous>)
-    at Codeersleutel.decodeer ({workdir}/execution00/submission.js:98:18)
-    at context0 ({workdir}/execution00/execution00.js:78:31)
-    at async {workdir}/execution00/execution00.js:1515:13
+    at Codeersleutel.decodeer ({workdir}/.tested/execution00/submission.js:98:18)
+    at context0 ({workdir}/.tested/execution00/execution00.js:78:31)
+    at async {workdir}/.tested/execution00/execution00.js:1515:13
 """
     expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
@@ -60,12 +61,12 @@ def test_typescript_assertion_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "typescript")
     original = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
-    at bigram2letter ({workdir}/execution00/submission.ts:86:13)
-    at {workdir}/execution00/submission.ts:98:32
+    at bigram2letter ({workdir}/.tested/execution00/submission.ts:86:13)
+    at {workdir}/.tested/execution00/submission.ts:98:32
     at Array.map (<anonymous>)
-    at Codeersleutel.decodeer ({workdir}/execution00/submission.ts:98:18)
-    at context0 ({workdir}/execution00/execution00.ts:78:31)
-    at async {workdir}/execution00/execution00.ts:1515:13
+    at Codeersleutel.decodeer ({workdir}/.tested/execution00/submission.ts:98:18)
+    at context0 ({workdir}/.tested/execution00/execution00.ts:78:31)
+    at async {workdir}/.tested/execution00/execution00.ts:1515:13
 """
     expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
@@ -81,9 +82,9 @@ def test_javascript_type_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""TypeError: submission.Codeersleutel is not a constructor
-    at context0 ({workdir}/execution00/execution00.js:46:17)
-    at {workdir}/execution00.js:1515:19
-    at Object.<anonymous> ({workdir}/execution00/execution00.js:1573:7)
+    at context0 ({workdir}/.tested/execution00/execution00.js:46:17)
+    at {workdir}/.tested/execution00.js:1515:19
+    at Object.<anonymous> ({workdir}/.tested/execution00/execution00.js:1573:7)
     at Module._compile (node:internal/modules/cjs/loader:1254:14)
     at Module._extensions..js (node:internal/modules/cjs/loader:1308:10)
     at Module.load (node:internal/modules/cjs/loader:1117:32)
@@ -100,9 +101,9 @@ def test_typescript_type_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "typescript")
     original = f"""TypeError: submission.Codeersleutel is not a constructor
-    at context0 ({workdir}/execution00/execution00.ts:46:17)
-    at {workdir}/execution00.ts:1515:19
-    at Object.<anonymous> ({workdir}/execution00/execution00.ts:1573:7)
+    at context0 ({workdir}/.tested/execution00/execution00.ts:46:17)
+    at {workdir}/.tested/execution00.ts:1515:19
+    at Object.<anonymous> ({workdir}/.tested/execution00/execution00.ts:1573:7)
     at Module._compile (node:internal/modules/cjs/loader:1254:14)
     at Module._extensions..ts (node:internal/modules/cjs/loader:1308:10)
     at Module.load (node:internal/modules/cjs/loader:1117:32)
@@ -129,7 +130,7 @@ def test_javascript_compilation_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""
-    {workdir}/common/submission.js:4
+    {workdir}/.tested/common/submission.js:4
     const deepcopy = cellen => cellen.map(([x, y]) => [x, y]));
                                                              ^
     
@@ -184,8 +185,8 @@ def test_python_exception():
 def test_csharp_exception():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
-    original = f"""at Submission.Main(String[] args) in {workdir}/common/Submission.cs:line 7
-    at Tested.Execution00.Context0() in {workdir}/common/Execution00.cs:line 67'
+    original = f"""at Submission.Main(String[] args) in {workdir}/.tested/common/Submission.cs:line 7
+    at Tested.Execution00.Context0() in {workdir}/.tested/common/Execution00.cs:line 67'
     """
     expected = "at Submission.Main(String[] args) in <code>:7\n"
     actual = language_config.cleanup_stacktrace(original)
@@ -195,11 +196,11 @@ def test_csharp_exception():
 def test_csharp_compilation():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
-    original = f"""    {workdir}/common/Submission.cs(13,20): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,26): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,30): error CS1001: Identifier expected
-    {workdir}/common/Submission.cs(13,30): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,34): error CS1002: ; expected
+    original = f"""    {workdir}/.tested/common/Submission.cs(13,20): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,26): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,30): error CS1001: Identifier expected
+    {workdir}/.tested/common/Submission.cs(13,30): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,34): error CS1002: ; expected
     """
     expected = f"""    <code>:13:20: error CS1002: ; expected
     <code>:13:26: error CS1002: ; expected
@@ -650,7 +651,7 @@ def test_csharp_runtime_line_offset_end_to_end():
     language_config.config.dodona.source_offset = -12
     original = (
         f"at Submission.Main(String[] args) in "
-        f"{workdir}/common/Submission.cs:line 15\n"
+        f"{workdir}/.tested/common/Submission.cs:line 15\n"
     )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
@@ -687,7 +688,7 @@ def test_csharp_cleanup_stacktrace_execution_dir_compile():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
     original = (
-        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
         "The name 'foo' does not exist\n"
     )
     expected = "<code>:14:19: error CS0103: The name 'foo' does not exist\n"
@@ -699,9 +700,43 @@ def test_csharp_compile_line_offset_end_to_end():
     language_config = get_language(workdir, "csharp")
     assert language_config.config
     language_config.config.dodona.source_offset = -12
-    original = f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
+    original = (
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
+    )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
         language_config.config.dodona.source_offset, cleaned
     )
     assert final == "<code>:2:19: error CS0103: undefined\n"
+
+
+def test_csharp_compilation_hides_tested_directory():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = (
+        f"{workdir}/.tested/Execution0/Values.cs(100,30): warning CS8602: "
+        "Dereference of a possibly null reference.\n"
+    )
+    expected = (
+        "<div class='code'>Values.cs(100,30): warning CS8602: "
+        "Dereference of a possibly null reference.</div>"
+    )
+    actual = convert_stacktrace_to_clickable_feedback(language_config, original)
+    assert actual.description == expected
+
+
+def test_javascript_exception_hides_tested_directory():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "javascript")
+    original = f"""Error: boom
+    at inner ({workdir}/.tested/execution_0/helper.js:3:9)
+    at check ({workdir}/.tested/execution_0/submission.js:4:14)
+    at context0 ({workdir}/.tested/execution_0/execution_0.js:78:31)
+"""
+    expected = (
+        "<div class='code'>Error: boom<br>"
+        "    at inner (helper.js:3:9)<br>"
+        '    at check (<a href="#" class="tab-link" data-tab="code" data-line="4">&lt;code&gt;:4</a>:14)</div>'
+    )
+    actual = convert_stacktrace_to_clickable_feedback(language_config, original)
+    assert actual.description == expected

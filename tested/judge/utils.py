@@ -9,8 +9,7 @@ from pathlib import Path
 
 from attrs import define
 
-from tested.configs import Bundle
-from tested.languages.conventionalize import EXECUTION_PREFIX
+from tested.configs import TESTED_DIRECTORY, Bundle
 from tested.languages.language import FileFilter
 
 _logger = logging.getLogger(__name__)
@@ -118,18 +117,13 @@ def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> li
     def recursive_copy(src: Path, dst: Path):
         for origin in src.iterdir():
             file = origin.name
-            normalized_file = file.lower()
             if origin.is_file() and (
                 all_files or bundle.language.is_source_file(origin)
             ):
                 source_files.append(str(dst / origin.name))
                 _logger.debug("Copying %s to %s", origin, dst)
                 shutil.copy2(origin, dst)
-            elif (
-                origin.is_dir()
-                and not normalized_file.startswith(EXECUTION_PREFIX)
-                and normalized_file != "common"
-            ):
+            elif origin.is_dir() and file != TESTED_DIRECTORY:
                 _logger.debug("Iterate subdir %s", dst / file)
                 shutil.copytree(origin, dst / file)
 
