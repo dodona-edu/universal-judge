@@ -40,6 +40,11 @@ def get_executable(name):
     return name
 
 
+# Both the compiler and the submission run once in a fresh JVM, so the time C2
+# spends optimising hot code never pays off. Stopping at C1 saves CPU.
+JIT_FLAGS = ["-XX:TieredStopAtLevel=1"]
+
+
 class Kotlin(Language):
     def initial_dependencies(self) -> list[str]:
         return ["Values.kt", "EvaluationResult.kt"]
@@ -147,6 +152,7 @@ class Kotlin(Language):
         return [
             get_executable("kotlinc"),
             f"-J-Xmx192M",
+            *(f"-J{flag}" for flag in JIT_FLAGS),
             "-nowarn",
             "-jvm-target",
             "11",
@@ -161,6 +167,7 @@ class Kotlin(Language):
         return [
             get_executable("kotlin"),
             f"-J-Xmx{limit}",
+            *(f"-J{flag}" for flag in JIT_FLAGS),
             "-cp",
             ".",
             Path(file).stem,
