@@ -1,0 +1,131 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add (2 :: Int) (3 :: Int)",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "5 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet \"World\"",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>cannot greet World<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:14 in main:Submission</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: cannot greet World\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:7:14 in main:Submission",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"Hello, World!\""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong",
+   "human": "Missing return value."
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "printGreeting \"Dodona\"",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, Dodona!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

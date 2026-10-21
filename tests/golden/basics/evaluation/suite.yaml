@@ -1,0 +1,10 @@
+- tab: "Return values"
+  testcases:
+    - expression: "add(2, 3)"
+      return: 5
+    - expression: 'greet("World")'
+      return: "Hello, World!"
+- tab: "Output"
+  testcases:
+    - statement: 'print_greeting("Dodona")'
+      stdout: "Hello, Dodona!"

@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.Add(2, 3)",
+   "format": "csharp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br><workdir>/Execution0/Values.cs(100,30): warning CS8602: Dereference of a possibly null reference.</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.Greet(\"World\")",
+   "format": "csharp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br><workdir>/Execution0/Values.cs(100,30): warning CS8602: Dereference of a possibly null reference.</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.PrintGreeting(\"Dodona\")",
+   "format": "csharp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><workdir>/Execution1/Selector.cs(12,21): error CS0103: The name &#x27;Execution0&#x27; does not exist in the current context<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br><workdir>/Execution1/Values.cs(100,30): warning CS8602: Dereference of a possibly null reference.</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

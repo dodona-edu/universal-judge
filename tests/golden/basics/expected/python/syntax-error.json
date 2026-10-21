@@ -1,0 +1,124 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "python"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>*** Error compiling &#x27;&lt;code&gt;&#x27;...<br>  File &quot;<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>&quot;<br>    def greet(name)<br>                   ^<br>SyntaxError: expected &#x27;:&#x27;</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "add(2, 3)"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet('World')",
+   "format": "python"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>*** Error compiling &#x27;&lt;code&gt;&#x27;...<br>  File &quot;<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>&quot;<br>    def greet(name)<br>                   ^<br>SyntaxError: expected &#x27;:&#x27;</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "greet('World')"
+  }
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "print_greeting('Dodona')",
+   "format": "python"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>*** Error compiling &#x27;&lt;code&gt;&#x27;...<br>  File &quot;<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>&quot;<br>    def greet(name)<br>                   ^<br>SyntaxError: expected &#x27;:&#x27;</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "print_greeting('Dodona')"
+  }
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

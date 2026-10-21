@@ -1,0 +1,73 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet World ",
+   "format": "bash"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, World!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, World!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet Dodona ",
+   "format": "bash"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, Dodona!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

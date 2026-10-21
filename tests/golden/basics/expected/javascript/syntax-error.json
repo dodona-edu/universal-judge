@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "javascript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a><br>    return (`Hello, ${name}!`;<br>                             ^<br><br>SyntaxError: Unexpected token &#x27;;&#x27;<br>    at wrapSafe (node:internal/modules/cjs/loader:1713:18)<br>    at checkSyntax (node:internal/main/check_syntax:78:3)<br><br>Node.js v22.23.3</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "javascript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a><br>    return (`Hello, ${name}!`;<br>                             ^<br><br>SyntaxError: Unexpected token &#x27;;&#x27;<br>    at wrapSafe (node:internal/modules/cjs/loader:1713:18)<br>    at checkSyntax (node:internal/main/check_syntax:78:3)<br><br>Node.js v22.23.3</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "printGreeting(\"Dodona\")",
+   "format": "javascript"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a><br>    return (`Hello, ${name}!`;<br>                             ^<br><br>SyntaxError: Unexpected token &#x27;;&#x27;<br>    at wrapSafe (node:internal/modules/cjs/loader:1713:18)<br>    at checkSyntax (node:internal/main/check_syntax:78:3)<br><br>Node.js v22.23.3</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

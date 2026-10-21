@@ -1,0 +1,105 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet World ",
+   "format": "bash"
+  }
+ },
+ {
+  "channel": "stderr",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "cannot greet World\n",
+  "status": {
+   "enum": "wrong",
+   "human": "Unexpected output"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, World!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet Dodona ",
+   "format": "bash"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "accepted": false,
+  "command": "close-context"
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

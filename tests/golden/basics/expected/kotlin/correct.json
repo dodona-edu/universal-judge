@@ -1,0 +1,109 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "kotlin"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(\"World\")",
+   "format": "kotlin"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"Hello, World!\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"Hello, World!\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "printGreeting(\"Dodona\")",
+   "format": "kotlin"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello, Dodona!\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

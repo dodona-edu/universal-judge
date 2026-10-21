@@ -1,0 +1,118 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Return values"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(std::intmax_t(2), std::intmax_t(3))",
+   "format": "cpp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   12 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet(std::string(\"World\"))",
+   "format": "cpp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   12 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "print_greeting(std::string(\"Dodona\"))",
+   "format": "cpp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'></div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

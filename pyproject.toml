@@ -1,10 +1,10 @@
 [tool.isort]
 profile = "black"
-skip_glob = ["tests/exercises/*"]
+skip_glob = ["tests/exercises/*", "tests/golden/*"]
 
 [tool.black]
 line-length = 88
-extend-exclude="tests/exercises/*"
+extend-exclude="tests/(exercises|golden)/*"
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers --ignore=tests/test_integration_javascript.py"
@@ -24,7 +24,7 @@ markers = [
 ]
 
 [tool.pyright]
-exclude = ["tests/exercises/", "tests/snapshots/", "tests/descriptions/"]
+exclude = ["tests/exercises/", "tests/golden/", "tests/snapshots/", "tests/descriptions/"]
 
 [tool.poetry]
 name = "tested"

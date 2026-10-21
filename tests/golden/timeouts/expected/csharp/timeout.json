@@ -1,0 +1,90 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Output"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.PrintGreeting(\"World\")",
+   "format": "csharp"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, World!\n"
+ },
+ {
+  "command": "append-message",
+  "message": "Time limit exceeded"
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "time limit exceeded",
+   "human": "Time limit exceeded"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "time limit exceeded"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "Submission.PrintGreeting(\"Dodona\")",
+   "format": "csharp"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello, Dodona!\n"
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "accepted": false,
+  "command": "close-context"
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
