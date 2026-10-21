@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tested.configs import DodonaConfig, _get_language
 from tested.languages.language import STRING_QUOTES
 from tested.testsuite import SupportedLanguage
 from tests.language_markers import ALL_LANGUAGES
@@ -113,6 +114,48 @@ def test_io_exercise_strict_workdir_isolates_workdir_files(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def _shebang_config(
+    pytestconfig: pytest.Config, tmp_path: Path, first_line: str
+) -> tuple[DodonaConfig, Path]:
+    source = tmp_path / "submission.py"
+    source.write_text(f"{first_line}\nprint(input())\n")
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        options={"source": source},
+    )
+    return conf, source
+
+
+def test_io_exercise_unknown_shebang_language_is_ignored(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf, source = _shebang_config(pytestconfig, tmp_path, "#!tested foo")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+    assert "#!tested" not in source.read_text()
+
+
+@pytest.mark.parametrize(
+    "first_line, expected_offset",
+    [("#!tested foo", 1), ("#!tested a b", 1), ("#!tested python", 1), ("# note", 0)],
+)
+def test_unknown_shebang_language_counts_as_consumed_line(
+    first_line: str,
+    expected_offset: int,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf, _ = _shebang_config(pytestconfig, tmp_path, first_line)
+    language, offset = _get_language(conf)
+    assert language == SupportedLanguage.PYTHON
+    assert offset == expected_offset
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
