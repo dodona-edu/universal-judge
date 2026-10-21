@@ -5,10 +5,10 @@ Module containing the definitions of the features we can support.
 import logging
 import operator
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Set
 from enum import StrEnum, auto, unique
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from attrs import define
 
@@ -130,6 +130,16 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
+def _sorted_repr(items: Set[Any]) -> str:
+    """
+    Format a set like its repr, but with the elements in a fixed order.
+    """
+    body = ", ".join(repr(item) for item in sorted(items))
+    if isinstance(items, frozenset):
+        return f"frozenset({{{body}}})" if items else "frozenset()"
+    return f"{{{body}}}" if items else "set()"
+
+
 def is_supported(language: "Language") -> list[Message] | None:
     """
     Check if the given configuration bundle is supported. This will check if the
@@ -156,13 +166,13 @@ def is_supported(language: "Language") -> list[Message] | None:
         This test suite is not solvable in {language.__class__.__name__}.
         
         The required language constructs are:
-        {required.constructs}
+        {_sorted_repr(required.constructs)}
         
         The programming language has support for:
-        {available_constructs}
+        {_sorted_repr(available_constructs)}
         
         This means support is lacking for these:
-        {missing}
+        {_sorted_repr(missing)}
         
         Note that support for certain types means real support, not reduced support.
         For example, if tuples are required, the language must have a dedicated tuple
@@ -253,13 +263,13 @@ def is_supported(language: "Language") -> list[Message] | None:
             This test suite is not solvable in {language.__class__.__name__}.
             
             The required {key} types are:
-            {value_types}
+            {_sorted_repr(value_types)}
             
             The programming language has support for:
-            {restrictions}
+            {_sorted_repr(restrictions)}
             
             This means support is lacking for these:
-            {missing}
+            {_sorted_repr(missing)}
             
             Note that support for certain types means real support, not reduced support.
             For example, if tuples are required, the language must have a dedicated tuple
