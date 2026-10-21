@@ -17,7 +17,7 @@ from tested.languages.language import (
     TypeDeclarationMetadata,
 )
 from tested.languages.preparation import PreparedExecutionUnit
-from tested.languages.utils import executable_name
+from tested.languages.utils import executable_name, shift_gcc_gutter_line_number
 from tested.serialisation import Statement, Value
 
 
@@ -145,6 +145,7 @@ class CPP(Language):
         return linter.run_cppcheck(self.config.dodona, remaining, "c++")
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
+        assert self.config
         result = ""
         in_student_file = False
         for line in stacktrace.splitlines(keepends=True):
@@ -155,6 +156,9 @@ class CPP(Language):
 
             if in_student_file:
                 line = line.replace(submission_file(self), "<code>")
+                line = shift_gcc_gutter_line_number(
+                    self.config.dodona.source_offset, line
+                )
                 result += line
         return result
 
