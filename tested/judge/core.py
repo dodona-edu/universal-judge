@@ -23,7 +23,11 @@ from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
 from tested.judge.compilation import precompile
-from tested.judge.evaluation import evaluate_context_results, terminate
+from tested.judge.evaluation import (
+    add_not_executed_context,
+    evaluate_context_results,
+    terminate,
+)
 from tested.judge.execution import (
     ExecutionResult,
     compile_unit,
@@ -317,8 +321,7 @@ def _process_results(
     else:
         context_results = [None] * len(unit.contexts)
 
-    for planned, context_result in zip(unit.contexts, context_results):
-        planned: PlannedContext
+    for index, planned in enumerate(unit.contexts):
         if currently_open_tab < planned.tab_index:
             # Close the previous tab if necessary.
             if collector.open_stack[-1] == "tab":
@@ -327,13 +330,20 @@ def _process_results(
             tab = bundle.suite.tabs[currently_open_tab]
             collector.add(StartTab(title=tab.name, hidden=tab.hidden))
 
+        # A crash or early exit leaves fewer results than planned contexts.
+        if index >= len(context_results):
+            add_not_executed_context(
+                bundle, collector, planned.context, planned.context_index
+            )
+            continue
+
         # Handle the contexts.
         collector.add(StartContext(description=planned.context.description))
 
         continue_ = evaluate_context_results(
             bundle,
             context=planned.context,
-            exec_results=context_result,
+            exec_results=context_results[index],
             context_dir=execution_dir,
             collector=collector,
             compilation_results=compilation_results,

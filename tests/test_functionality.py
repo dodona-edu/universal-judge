@@ -15,6 +15,7 @@ from pytest_mock import MockerFixture
 
 from tested.configs import create_bundle
 from tested.features import Construct
+from tested.internationalization import get_i18n_string
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
@@ -435,6 +436,70 @@ def test_batch_compilation_no_fallback_runtime(
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
+
+
+@pytest.mark.parametrize("language", ["python"])
+@pytest.mark.parametrize(
+    "suite, tabs, contexts, not_executed",
+    [
+        # Contexts 1 and 2 share an execution, context 3 has stdin and starts a new one.
+        ("plan-crash.yaml", 1, 3, [1]),
+        # Each execution crashes after its first context, across tabs.
+        ("plan-crash-tabs.yaml", 3, 4, [1, 3]),
+    ],
+)
+def test_crash_keeps_remaining_contexts_of_execution(
+    language: str,
+    suite: str,
+    tabs: int,
+    contexts: int,
+    not_executed: list[int],
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(pytestconfig, "echo", language, tmp_path, suite, "crash")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-tab")) == tabs
+    assert len(updates.find_all("close-tab")) == tabs
+    assert len(updates.find_all("start-context")) == contexts
+    close_contexts = updates.find_all("close-context")
+    assert len(close_contexts) == contexts
+    # Only the skipped contexts are reported as not executed.
+    assert [i for i, c in enumerate(close_contexts) if c.get("accepted") is False] == (
+        not_executed
+    )
+    assert [u["message"] for u in updates.find_all("append-message")] == [
+        get_i18n_string("judge.evaluation.not-executed")
+    ] * len(not_executed)
+
+
+@pytest.mark.parametrize("language", ["python"])
+def test_not_executed_context_keeps_its_exit_code(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        language,
+        tmp_path,
+        "plan-timeout-exit-codes.yaml",
+        "slow-exit",
+        {"time_limit": 3},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The first context times out, whether during startup or during the sleep.
+    start_contexts = [
+        i for i, u in enumerate(updates) if u["command"] == "start-context"
+    ]
+    assert len(start_contexts) == 2
+    second = updates[start_contexts[1] :]
+    close = next(i for i, u in enumerate(second) if u["command"] == "close-context")
+    second = second[: close + 1]
+    assert second[-1]["accepted"] is False
+    tests = [u for u in second if u["command"] == "start-test"]
+    assert [(t["channel"], t["expected"]) for t in tests] == [("exit code", "1")]
 
 
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
