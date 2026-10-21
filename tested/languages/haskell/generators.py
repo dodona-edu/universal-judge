@@ -230,7 +230,7 @@ handleException :: Exception e => (Either e a) -> Maybe e
 handleException (Left e) = Just e
 handleException (Right _) = Nothing
 
--- Leaves ExitCode uncaught, so exitWith in main sets the process exit code.
+-- Leaves ExitCode uncaught, so exitWith sets the process exit code.
 nonExit :: SomeException -> Maybe SomeException
 nonExit e = case fromException e :: Maybe ExitCode of
     Just _ -> Nothing
@@ -272,7 +272,7 @@ nonExit e = case fromException e :: Maybe ExitCode of
                         + "\n"
                     )
                 else:
-                    result += indent + f"result{i1} <- catch\n"
+                    result += indent + f"result{i1} <- catchJust nonExit\n"
                     result += indent * 2 + f"(do\n"  # Start a `do` block
                     id_result = tc.input.input_statement("r")
                     result += (
