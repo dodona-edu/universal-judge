@@ -256,13 +256,15 @@ class {class_name}
         assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
-            rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"
+            rf"{self.config.dodona.tested_directory}/common/{execution}[0-9]+.cs"
         )
-        workdir = re.escape(str(self.config.dodona.workdir.resolve()))
+        tested_directory = re.escape(str(self.config.dodona.tested_directory.resolve()))
         subdir = rf"(?:common|{execution}[_0-9]+)"
         sub = re.escape(submission_file(self))
-        submission_location_regex = rf"{workdir}/{subdir}/{sub}:line ([0-9]+)"
-        compilation_location_regex = rf"{workdir}/{subdir}/{sub}\((\d+),(\d+)\)"
+        submission_location_regex = rf"{tested_directory}/{subdir}/{sub}:line ([0-9]+)"
+        compilation_location_regex = (
+            rf"{tested_directory}/{subdir}/{sub}\((\d+),(\d+)\)"
+        )
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):

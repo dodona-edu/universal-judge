@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
+TESTED_DIRECTORY = ".tested"
+
 
 @define(frozen=True)
 class Options:
@@ -93,6 +95,11 @@ class DodonaConfig:
 
     # Sometimes, we need to offset the source code.
     source_offset: int = 0
+
+    @property
+    def tested_directory(self) -> Path:
+        """Where TESTed puts its own files, apart from the exercise's workdir files."""
+        return self.workdir / TESTED_DIRECTORY
 
     def config_for(self) -> dict[str, Any]:
         return self.options.language.get(self.programming_language, dict())

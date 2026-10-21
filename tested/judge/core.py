@@ -257,7 +257,8 @@ def _generate_files(
     directory, copies all dependencies to that folder and runs the generation.
     """
     dependencies = bundle.language.initial_dependencies()
-    common_dir = Path(bundle.config.workdir, f"common")
+    bundle.config.tested_directory.mkdir()
+    common_dir = bundle.config.tested_directory / "common"
     common_dir.mkdir()
 
     _logger.debug("Generating files in common directory %s", common_dir)
