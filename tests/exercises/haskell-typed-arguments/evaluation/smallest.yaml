@@ -1,0 +1,7 @@
+- tab: "Smallest"
+  contexts:
+    - testcases:
+        - expression: "smallest(5, 6)"
+          return: 5
+        - expression: "smallest(-5, -6)"
+          return: -6

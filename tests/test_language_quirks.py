@@ -265,8 +265,24 @@ def test_haskell_function_arguments_without_brackets(
 
     result = generate_statement(bundle, statement)
     assert (
-        result == f'{submission_name(bundle.language)}.test 5.5 :: Double "hallo" True'
+        result
+        == f'{submission_name(bundle.language)}.test (5.5 :: Double) "hallo" True'
     )
+
+
+@pytest.mark.haskell
+def test_haskell_typed_literal_arguments(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "haskell-typed-arguments",
+        "haskell",
+        tmp_path,
+        "smallest.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
