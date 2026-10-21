@@ -2,6 +2,8 @@ name: Integration test
 
 on:
   push:
+    branches: [master]
+  pull_request:
 
 permissions:
   contents: read
@@ -26,6 +28,8 @@ jobs:
         run: ./devel/install_dev_deps.sh
       - name: Run the linters
         run: ./devel/check.sh
+      - name: Check the translation files
+        run: python -m tested.internationalization.validation
 
   # codecov-action needs curl and gpg. They happen to be in this image, but we'd
   # rather not depend on the environment the test is meant to exercise shipping them.

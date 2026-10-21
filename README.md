@@ -224,16 +224,21 @@ The repository of TESTed is organized as follows:
 
 ## Useful commands
 
-You can run the basic unit tests with:
+CI runs the whole test suite in the judge image, through `.github/workflows/e2e.yml`, on every pull request and on master; docker-images runs the same workflow on each candidate `dodona-tested` image.
+Run it the same way locally with Docker:
 
 ```bash
-pytest tests/test_functionality.py
+./devel/run-tests-in-image.sh
+IMAGE=ghcr.io/dodona-edu/dodona-tested:pr-123 ./devel/run-tests-in-image.sh  # a candidate image
 ```
 
-You can run the full test suite with:
+Without Docker, run it directly; that needs the toolchains of the languages it judges (see the [dockerfile](./.devcontainer/dodona-tested.dockerfile)).
+Arguments pass through to pytest, and each test is marked with its programming language, so you can limit a run to the languages you have installed:
 
 ```bash
 ./devel/run-tests.sh
+./devel/run-tests.sh -m "python or javascript"
+./devel/run-tests.sh tests/test_functionality.py
 ```
 
 We use `black` and `isort` for code formatting. `pyright` is used for type checking.
