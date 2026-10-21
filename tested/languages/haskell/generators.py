@@ -95,7 +95,11 @@ def convert_function_call(function: FunctionCall) -> str:
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
         if isinstance(argument, Value):
-            result += convert_statement(argument)
+            converted = convert_statement(argument)
+            # GHC can't parse a type annotation as a bare function argument.
+            if " :: " in converted:
+                converted = "(" + converted + ")"
+            result += converted
         else:
             assert not isinstance(argument, NamedArgument)
             result += "(" + convert_statement(argument) + ")"
