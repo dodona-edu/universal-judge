@@ -503,3 +503,38 @@ def test_haskell_function_with_mixed_argument_types_second_to_last(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 18
+
+
+@pytest.mark.haskell
+def test_haskell_empty_list_is_compatible(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "haskell-empty-list",
+        "haskell",
+        tmp_path,
+        "lists.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 4
+
+
+@pytest.mark.haskell
+@pytest.mark.xfail(
+    strict=True, reason="https://github.com/dodona-edu/universal-judge/issues/735"
+)
+def test_haskell_empty_list_to_polymorphic_function(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "haskell-empty-list-polymorphic",
+        "haskell",
+        tmp_path,
+        "rev.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]

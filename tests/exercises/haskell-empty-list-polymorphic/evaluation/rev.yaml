@@ -1,0 +1,6 @@
+- tab: "rev"
+  testcases:
+    - expression: "rev([1, 2])"
+      return: [2, 1]
+    - expression: "rev([])"
+      return: []

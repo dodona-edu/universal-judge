@@ -1,0 +1,10 @@
+- tab: "lists"
+  testcases:
+    - expression: "total([1, 2])"
+      return: 3
+    - expression: "total([])"
+      return: 0
+    - expression: "positives([1, -2])"
+      return: [1]
+    - expression: "positives([-1])"
+      return: []
