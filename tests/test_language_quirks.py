@@ -369,6 +369,23 @@ def test_js_ts_exception_missing_message(
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.parametrize("lang", ["javascript", "typescript"])
+def test_js_ts_module_state_is_fresh_per_context(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "counter",
+        lang,
+        tmp_path,
+        "module-state.yaml",
+        "module-state",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+
+
 @pytest.mark.parametrize("exercise", ["echo-function-file-input", "echo-function"])
 def test_javascript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
