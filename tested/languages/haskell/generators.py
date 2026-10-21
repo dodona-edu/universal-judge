@@ -233,9 +233,9 @@ handleException (Right _) = Nothing
 -- Shared by all testcases: inlining this makes compilation a lot slower.
 runTestcase :: IO a -> (a -> IO ()) -> (Maybe SomeException -> IO ()) -> IO ()
 runTestcase action onValue onException =
-    catch (action >>= onValue) (\\e -> onException (Just e))
+    catchJust nonExit (action >>= onValue) (\\e -> onException (Just e))
 
--- Leaves ExitCode uncaught, so exitWith in main sets the process exit code.
+-- Leaves ExitCode uncaught, so exitWith sets the process exit code.
 nonExit :: SomeException -> Maybe SomeException
 nonExit e = case fromException e :: Maybe ExitCode of
     Just _ -> Nothing
