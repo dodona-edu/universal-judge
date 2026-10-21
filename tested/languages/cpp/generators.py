@@ -303,7 +303,7 @@ class CPPGenerator:
             result += "};\n"
             result += (
                 indent
-                + f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
+                + f"exit_code = __real_main({len(tc.input.arguments) + 1}, args);\n"
             )
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
@@ -392,6 +392,8 @@ static void {pu.unit.name}_write_context_separator() {{
         result = f"""
 #include "values.h"
 #include "{pu.submission_name}.{self.extension}"
+
+extern "C" int __real_main(int argc, char* argv[]);
 """
 
         # Import functions
@@ -427,7 +429,7 @@ int {pu.unit.name}() {{
 }}
 
 #ifndef INCLUDED
-int main() {{
+extern "C" int __wrap_main() {{
     return {pu.unit.name}();
 }}
 #endif
@@ -447,7 +449,7 @@ int main() {{
 """
 
         result += """
-int main(int argc, char* argv[]) {
+extern "C" int __wrap_main(int argc, char* argv[]) {
 
     if (argc < 1) {
         std::cerr << "No context selected.";
@@ -476,7 +478,7 @@ int main(int argc, char* argv[]) {
         result = """
 #include "values.h"
 
-int main() {
+extern "C" int __wrap_main() {
 """
         for value in values:
             result += (
@@ -484,5 +486,5 @@ int main() {
                 + f"write_value(std::cout, {self.convert_value(value, True)});\n"
             )
             result += self.spacing(1) + 'std::cout << "␞";\n'
-        result += "}\n"
+        result += self.spacing(1) + "return 0;\n}\n"
         return result
