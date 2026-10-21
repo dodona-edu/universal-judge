@@ -1,0 +1,145 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Program"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hello Alice Bob",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello: Alice\nHello: Bob\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello: Alice\nHello: Bob\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Welcome Dodona",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Welcome: Dodona\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Welcome: Dodona\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hi << 'STDIN'\nTESTed\nJudge\nSTDIN",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hi: TESTed\nHi: Judge\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "TESTed\nJudge\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "stdin": "TESTed\nJudge\n"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

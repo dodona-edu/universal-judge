@@ -2,3 +2,22 @@
 basics/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746
 timeouts/c/timeout https://github.com/dodona-edu/universal-judge/issues/739
 bash-basics/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
+program-io/haskell/correct https://github.com/dodona-edu/universal-judge/issues/713
+program-io/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/713
+program-io/typescript/correct https://github.com/dodona-edu/universal-judge/issues/714
+program-io/csharp/top-level-statements https://github.com/dodona-edu/universal-judge/issues/750
+program-io/haskell/wrong-answer https://github.com/dodona-edu/universal-judge/issues/713
+program-io/haskell/runtime-error https://github.com/dodona-edu/universal-judge/issues/713
+program-io/haskell/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/713
+program-io/haskell/stderr https://github.com/dodona-edu/universal-judge/issues/713
+program-io/runhaskell/wrong-answer https://github.com/dodona-edu/universal-judge/issues/713
+program-io/runhaskell/runtime-error https://github.com/dodona-edu/universal-judge/issues/713
+program-io/runhaskell/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/713
+program-io/runhaskell/stderr https://github.com/dodona-edu/universal-judge/issues/713
+program-io/typescript/wrong-answer https://github.com/dodona-edu/universal-judge/issues/714
+program-io/typescript/runtime-error https://github.com/dodona-edu/universal-judge/issues/714
+program-io/typescript/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/714
+program-io/typescript/stderr https://github.com/dodona-edu/universal-judge/issues/714
+program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
+program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746 https://github.com/dodona-edu/universal-judge/issues/759
+program-io/csharp/runtime-error https://github.com/dodona-edu/universal-judge/issues/758

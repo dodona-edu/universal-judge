@@ -1,0 +1,221 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Program"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hello Alice Bob",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stderr",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "submission: line 11: cannot_continue: command not found\n",
+  "status": {
+   "enum": "wrong",
+   "human": "Unexpected output"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello: Alice\nHello: Bob\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello: Alice\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "127",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Welcome Dodona",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stderr",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "submission: line 11: cannot_continue: command not found\n",
+  "status": {
+   "enum": "wrong",
+   "human": "Unexpected output"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Welcome: Dodona\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Welcome: Dodona\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "127",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hi << 'STDIN'\nTESTed\nJudge\nSTDIN",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stderr",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "submission: line 15: cannot_continue: command not found\n",
+  "status": {
+   "enum": "wrong",
+   "human": "Unexpected output"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hi: TESTed\nHi: Judge\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hi: TESTed\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "127",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
