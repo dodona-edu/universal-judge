@@ -769,3 +769,25 @@ def test_javascript_exception_hides_tested_directory():
     )
     actual = convert_stacktrace_to_clickable_feedback(language_config, original)
     assert actual.description == expected
+
+
+def test_typescript_modify_solution_offsets(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "typescript")
+    assert language_config.config
+    solution = tmp_path / "submission.ts"
+    solution.write_text("function foo() {\n    throw new Error('x');\n}\n")
+    language_config.modify_solution(solution)
+    assert language_config.config.dodona.source_offset == -1
+    assert solution.read_text().startswith('"use strict";\nfunction foo() {\n')
+
+
+def test_typescript_compile_line_offset_end_to_end():
+    language_config = get_language("test", "typescript")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -1
+    original = "submission.ts(7,22): error TS2552: Cannot find name 'mfzej'.\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>:6:22: error TS2552: Cannot find name 'mfzej'.\n"
