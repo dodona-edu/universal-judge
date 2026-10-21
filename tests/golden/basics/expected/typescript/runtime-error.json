@@ -53,7 +53,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>Error: cannot greet World<br>    at Object.greet (<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>:11)</div>",
+   "description": "<div class='code'>Error: cannot greet World<br>    at Object.greet (<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a>:11)</div>",
    "format": "html",
    "permission": "student"
   }

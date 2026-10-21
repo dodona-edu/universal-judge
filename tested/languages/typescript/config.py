@@ -163,7 +163,7 @@ class TypeScript(Language):
         # TODO: This may be deleted in the future.
         with open(solution, "w") as file:
             file.write('"use strict";\n' + non_strict)
-        self.config.dodona.source_offset -= 2
+        self.config.dodona.source_offset -= 1
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
@@ -185,6 +185,8 @@ class TypeScript(Language):
         compilation_submission_location = str(submission_location.resolve())
         execution_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.ts"
         submission_namespace = f"{submission_name(self)}."
+        # tsc reports compile errors as "submission.ts(LINE,COL)".
+        tsc_location_regex = rf"{re.escape(submission_file(self))}\((\d+),(\d+)\)"
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
@@ -195,6 +197,7 @@ class TypeScript(Language):
             # Replace any reference to the submission.
             line = re.sub(execution_submission_location_regex, "<code>", line)
             line = line.replace(compilation_submission_location, "<code>")
+            line = re.sub(tsc_location_regex, r"<code>:\1:\2", line)
             # Remove any references of the form "submission.SOMETHING"
             line = line.replace(submission_namespace, "")
 
