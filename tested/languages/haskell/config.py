@@ -117,16 +117,20 @@ class Haskell(Language):
         return cleanup_description(self, statement)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
+        assert self.config
+        offset = self.config.dodona.source_offset
         filename = submission_file(self)
+        diagnostic_regex = re.compile(r"^<code>:\d+:\d+: (error|warning)")
         context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
         compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
+        hint_line_regex = re.compile(r"\(line (\d+)\)")
         type_conflict_regex = re.compile(
             r"Couldn't match expected type (.*) with actual type (.*)"
         )
         parse_module = r"error: parse error on input ‘module’"
         replace_module = r"error: unexpected ‘module’"
         traceback = stacktrace.splitlines()
-        skip_line, lines = False, []
+        skip_line, in_diagnostic, lines = False, False, []
         for line in traceback:
             if not line or line == "undefined":
                 continue
@@ -155,12 +159,21 @@ class Haskell(Language):
                 continue
             skip_line = False
 
+            if diagnostic_regex.match(line):
+                in_diagnostic = True
+            elif not (in_diagnostic and (line[0].isspace() or line[0].isdigit())):
+                in_diagnostic = False
+
             if parse_module in line:
                 line = line.replace(parse_module, replace_module)
-            else:
+            elif in_diagnostic:
                 match = compile_line_regex.match(line)
                 if match:
-                    line = f"{int(match.group(1)) - 1}{match.group(2)}"
+                    line = f"{int(match.group(1)) + offset}{match.group(2)}"
+                else:
+                    line = hint_line_regex.sub(
+                        lambda hint: f"(line {int(hint.group(1)) + offset})", line
+                    )
 
             lines.append(line + "\n")
         return "".join(lines)
