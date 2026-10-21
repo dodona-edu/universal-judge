@@ -338,6 +338,8 @@ class {pu.unit.name}
         stdout = new StreamWriter(Console.OpenStandardOutput());
         stderr = new StreamWriter(Console.OpenStandardError());
 
+        valueFile.AutoFlush = true;
+        exceptionFile.AutoFlush = true;
         stdout.AutoFlush = true;
         stderr.AutoFlush = true;
         Console.SetOut(stdout);
