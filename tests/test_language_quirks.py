@@ -469,3 +469,37 @@ def test_python_nested_values_keep_submission_namespace(
         statement = prepare_expression(bundle, statement)
 
     assert convert_statement(statement, True) == expected
+
+
+@pytest.mark.haskell
+def test_haskell_function_with_mixed_argument_types_nth_element(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "haskell-mixed-argument-types",
+        "haskell",
+        tmp_path,
+        "nthElement.yaml",
+        "nthElement",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 20
+
+
+@pytest.mark.haskell
+def test_haskell_function_with_mixed_argument_types_second_to_last(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "haskell-mixed-argument-types",
+        "haskell",
+        tmp_path,
+        "secondToLast.yaml",
+        "secondToLast",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 18
