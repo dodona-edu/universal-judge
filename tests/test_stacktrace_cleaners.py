@@ -303,6 +303,20 @@ def test_c_compilation_error():
     assert actual == expected
 
 
+def test_c_compilation_error_dots_in_message():
+    original = """submission.c:3:19: error: expected declaration specifiers or ‘...’ before ‘)’ token
+    3 | int helper(int a, ) {
+      |                   ^
+"""
+    language_config = get_language("test", "c")
+    expected = """<code>:3:19: error: expected declaration specifiers or ‘...’ before ‘)’ token
+    3 | int helper(int a, ) {
+      |                   ^
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_cpp_compilation_error():
     original = """In file included from execution_0.cpp:3,
                  from selector.cpp:5:
