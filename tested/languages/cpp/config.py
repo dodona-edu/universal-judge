@@ -122,7 +122,7 @@ class CPP(Language):
         # We use regex to find the main function.
         # First, check if we have a no-arg main function.
         # If so, replace it with a renamed main function that does have args.
-        no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
+        no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)(?:void\s*)?\)(\s*{)")
         replacement = r"int\2solution_main\3(\4int argc, char* argv[])\5"
         contents, nr = re.subn(no_args, replacement, contents, count=1)
         if nr == 0:

@@ -60,12 +60,13 @@ def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.parametrize("submission", ["no-return", "no-return-void"])
 @pytest.mark.parametrize("language", ["c", "cpp"])
 def test_c_cpp_main_without_return(
-    language: str, tmp_path: Path, pytestconfig: pytest.Config
+    language: str, submission: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
-        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", "no-return"
+        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", submission
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
