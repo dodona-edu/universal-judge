@@ -94,9 +94,15 @@ class Haskell(Language):
             "-fno-cse",
             "-fno-full-laziness",
             "-O3" if self.config.options.compiler_optimizations else "-O0",
+            # Linking against the shared libraries is cheaper than a static link,
+            # and a larger allocation area makes ghc collect garbage less often.
+            "-dynamic",
             main_,
             "-main-is",
             exec_,
+            "+RTS",
+            "-A64m",
+            "-RTS",
         ], [executable_name(exec_)]
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
