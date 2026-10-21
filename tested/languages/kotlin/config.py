@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -38,6 +39,21 @@ def get_executable(name):
     if os.name == "nt":
         return f"{name}.bat"
     return name
+
+
+def kotlin_classpath() -> str:
+    """
+    The classpath to run compiled code with plain java. The kotlin launcher
+    starts an extra JVM to probe the java version and loads the class through
+    kotlin-runner, which costs three times the CPU of running java directly.
+    Like the launcher, include kotlin-reflect.
+    """
+    kotlinc = shutil.which(get_executable("kotlinc"))
+    assert kotlinc, "kotlinc not found on the PATH"
+    lib = Path(kotlinc).resolve().parent.parent / "lib"
+    return os.pathsep.join(
+        [".", str(lib / "kotlin-stdlib.jar"), str(lib / "kotlin-reflect.jar")]
+    )
 
 
 class Kotlin(Language):
@@ -159,10 +175,10 @@ class Kotlin(Language):
         assert self.config
         limit = jvm_memory_limit(self.config)
         return [
-            get_executable("kotlin"),
-            f"-J-Xmx{limit}",
+            "java",
+            f"-Xmx{limit}",
             "-cp",
-            ".",
+            kotlin_classpath(),
             Path(file).stem,
             *arguments,
         ]
