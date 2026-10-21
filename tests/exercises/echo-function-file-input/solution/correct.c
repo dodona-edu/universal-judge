@@ -1,4 +1,7 @@
 #include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 void trim(char *s) {
     char * p = s;
