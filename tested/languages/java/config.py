@@ -233,7 +233,7 @@ class Java(Language):
         }
 
     def is_void_method(self, name: str) -> bool:
-        regex = rf"void\s+{name}"
+        regex = rf"void\s+{re.escape(name)}(?!\w)"
         assert self.config
         the_source = self.config.dodona.source.read_text()
         return re.search(regex, the_source) is not None
