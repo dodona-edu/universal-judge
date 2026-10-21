@@ -131,6 +131,11 @@ def convert_function_call(
                 result += convert_value(argument) + " "
     else:
         result += '"'
+    # Every argument in the description path is emitted with a trailing
+    # space; drop the one left at the end, so the testcase description the
+    # student sees does not end in a space (#744).
+    if result.endswith(" "):
+        result = result[:-1]
     index_map.pop()
     return result
 
