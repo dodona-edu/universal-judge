@@ -1,0 +1,22 @@
+- tab: "Program"
+  contexts:
+    - testcases:
+        - arguments: ["Hello", "Alice", "Bob"]
+          stdout: |
+            Hello: Alice
+            Hello: Bob
+    - testcases:
+        - arguments: ["Welcome", "Dodona"]
+          stdout: |
+            Welcome: Dodona
+    - testcases:
+        - stdin: |
+            TESTed
+            Judge
+          arguments: ["Hi"]
+          stdout: |
+            Hi: TESTed
+            Hi: Judge
+    - testcases:
+        - stdout: ""
+          exit_code: 1

@@ -1,0 +1,206 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Program"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Hello Alice Bob",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>java.lang.IllegalStateException: cannot continue<br>\tat Submission.main(<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>)</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "IllegalStateException: cannot continue",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello: Alice\nHello: Bob\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello: Alice\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Welcome Dodona",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>java.lang.IllegalStateException: cannot continue<br>\tat Submission.main(<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>)</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "IllegalStateException: cannot continue",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Welcome: Dodona\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Welcome: Dodona\n",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Hi << 'STDIN'\nTESTed\nJudge\nSTDIN",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>java.lang.IllegalStateException: cannot continue<br>\tat Submission.main(<a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"18\">&lt;code&gt;:18</a>)</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "IllegalStateException: cannot continue",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hi: TESTed\nHi: Judge\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hi: TESTed\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

@@ -1,0 +1,169 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Program"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hello Alice Bob",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello: Alice\nHello: Bob\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hello: Alice\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "-11",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Welcome Dodona",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Welcome: Dodona\n"
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "accepted": false,
+  "command": "close-context"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission Hi << 'STDIN'\nTESTed\nJudge\nSTDIN",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hi: TESTed\nHi: Judge\n"
+ },
+ {
+  "command": "close-test",
+  "generated": "Hi: TESTed\n",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "-11",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ submission",
+   "format": "console"
+  }
+ },
+ {
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "accepted": false,
+  "command": "close-context"
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
