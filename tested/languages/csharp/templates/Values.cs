@@ -97,7 +97,7 @@ namespace Tested
                 data = entries;
             } else {
                 type = "unknown";
-                diagnostic = data.GetType().ToString();
+                diagnostic = value.GetType().ToString();
                 data = JsonSerializer.Serialize(data);
             }
             var result = new Dictionary<string, object?>();
