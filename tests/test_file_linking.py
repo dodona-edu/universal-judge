@@ -406,3 +406,33 @@ def test_get_meta_files_empty_returns_none(tmp_path: Path, pytestconfig: pytest.
     bundle, planned = _make_planned(tmp_path, pytestconfig, [])
 
     assert _get_meta_files(bundle, planned) is None
+
+
+@pytest.mark.parametrize(
+    ("stdin", "expected"),
+    [
+        ("hi", "$ submission x <<< hi\n"),
+        ("a\nb", "$ submission x << 'STDIN'\na\nb\nSTDIN"),
+    ],
+)
+def test_readable_input_stdin_and_arguments(
+    stdin: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "correct",
+    )
+
+    the_input = Testcase(
+        input=MainInput(arguments=["x"], stdin=TextData(content=stdin)),
+    )
+
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[the_input])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+    readable, _ = get_readable_input(bundle, the_input)
+
+    assert readable.description == expected
