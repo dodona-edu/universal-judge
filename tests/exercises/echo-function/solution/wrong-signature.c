@@ -1,3 +1,3 @@
 char echo(char* content) {
-    return content;
+    return -100;
 }
