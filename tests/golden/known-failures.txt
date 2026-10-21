@@ -5,7 +5,6 @@ bash-basics/bash/runtime-error https://github.com/dodona-edu/universal-judge/iss
 program-io/haskell/correct https://github.com/dodona-edu/universal-judge/issues/713
 program-io/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/713
 program-io/typescript/correct https://github.com/dodona-edu/universal-judge/issues/714
-program-io/csharp/top-level-statements https://github.com/dodona-edu/universal-judge/issues/750
 program-io/haskell/wrong-answer https://github.com/dodona-edu/universal-judge/issues/713
 program-io/haskell/runtime-error https://github.com/dodona-edu/universal-judge/issues/713
 program-io/haskell/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/713

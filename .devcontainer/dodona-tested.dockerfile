@@ -86,7 +86,11 @@ CFG
         pyyaml==6.0.1 \
         Pygments==2.18.0 \
         python-i18n==0.3.9 \
-        ruff==0.17.0
+        ruff==0.17.0 \
+        tree-sitter==0.26.0 \
+        tree-sitter-c-sharp==0.23.5 \
+        tree-sitter-haskell==0.24.1 \
+        tree-sitter-kotlin==1.1.0
 
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \
