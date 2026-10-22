@@ -140,8 +140,15 @@ function sendException(stream, exception) {
 }
 
 // Send an evaluation result to the given stream.
+// The readable and DSL values must be text, but an evaluator may pass a student's value.
 function sendEvaluated(stream, result) {
-    fs.writeSync(stream, JSON.stringify(result));
+    const text = {...result};
+    for (const key of ["readable_expected", "readable_actual", "dsl_expected", "dsl_actual"]) {
+        if (text[key] != null) {
+            text[key] = String(text[key]);
+        }
+    }
+    fs.writeSync(stream, JSON.stringify(text));
 }
 
 exports.sendValue = sendValue;

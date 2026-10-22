@@ -88,12 +88,20 @@ def send_exception(stream, exception):
     json.dump(data, stream)
 
 
+_TEXT_FIELDS = ("readable_expected", "readable_actual", "dsl_expected", "dsl_actual")
+
+
 class _EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
         import dataclasses
 
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            data = dataclasses.asdict(o)
+            # TESTed only accepts text here, but an evaluator may pass a student's value.
+            for key in _TEXT_FIELDS:
+                if data.get(key) is not None:
+                    data[key] = str(data[key])
+            return data
         return super().default(o)
 
 
