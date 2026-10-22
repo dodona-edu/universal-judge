@@ -128,8 +128,15 @@ function sendException(stream: number, exception: Error | Object | {constructor:
 }
 
 // Send an evaluation result to the given stream.
+// The readable and DSL values must be text, but an evaluator may pass a student's number or boolean.
 function sendEvaluated(stream: number, result: Object) {
-    fs.writeSync(stream, JSON.stringify(result));
+    const text: Record<string, unknown> = {...result};
+    for (const key of ["readable_expected", "readable_actual", "dsl_expected", "dsl_actual"]) {
+        if (typeof text[key] === "number" || typeof text[key] === "boolean") {
+            text[key] = String(text[key]);
+        }
+    }
+    fs.writeSync(stream, JSON.stringify(text));
 }
 
 export { sendValue, sendException, sendEvaluated };

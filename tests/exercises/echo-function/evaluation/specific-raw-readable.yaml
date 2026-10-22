@@ -1,0 +1,15 @@
+- tab: "Tab"
+  testcases:
+    - expression: echo('correct')
+      return: !oracle
+        oracle: specific_check
+        functions:
+          python:
+            file: evaluator.py
+            name: evaluate
+          javascript:
+            file: rawEvaluator.js
+            name: evaluate
+          typescript:
+            file: rawEvaluator.ts
+            name: evaluate
