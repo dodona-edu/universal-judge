@@ -1,0 +1,5 @@
+- tab: "Tests"
+  testcases:
+    - stdin: "input-1\n"
+      stdout: "input-1\n"
+      exit_code: 0

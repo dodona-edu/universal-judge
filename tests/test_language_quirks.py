@@ -59,6 +59,31 @@ def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.parametrize("submission", ["no-return", "no-return-void"])
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_c_cpp_main_without_return(
+    language: str, submission: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", submission
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.cpp
+def test_cpp_function_try_block_main_without_return(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", "cpp", tmp_path, "one-exit-code.yaml", "no-return-try"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.cpp
 def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
     statement_string = "test: string = foo()"

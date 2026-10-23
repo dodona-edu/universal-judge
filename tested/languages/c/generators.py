@@ -179,9 +179,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             result += f'char* args[] = {{"{pu.submission_name}", '
             result += ", ".join(wrapped)
             result += "};\n"
-            result += (
-                f"exit_code = solution_main({len(tc.input.arguments) + 1}, args);\n"
-            )
+            result += f"exit_code = __real_main({len(tc.input.arguments) + 1}, args);\n"
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
             result += "exit_code = 0;\n"
@@ -208,6 +206,8 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     
     #include "values.h"
     #include "{pu.submission_name}.c"
+
+    int __real_main(int argc, char** argv);
     """
 
     # Import functions
@@ -266,7 +266,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
     }}
     
     #ifndef INCLUDED
-    int main() {{
+    int __wrap_main() {{
         return {pu.unit.name}();
     }}
     #endif
@@ -286,7 +286,7 @@ def convert_selector(contexts: list[str]) -> str:
         result += f'#include "{ctx}.c"\n'
 
     result += """
-    int main(int argc, const char* argv[]) {
+    int __wrap_main(int argc, const char* argv[]) {
 
         if (argc < 1) {
             fprintf(stderr, "No context selected.");
@@ -318,10 +318,10 @@ def convert_encoder(values: list[Value]) -> str:
 
 #include "values.h"
 
-int main() {
+int __wrap_main() {
 """
     for value in values:
         result += " " * 4 + f"write_value(stdout, {convert_value(value)});\n"
         result += " " * 4 + 'printf("␞");\n'
-    result += "}\n"
+    result += "    return 0;\n}\n"
     return result
