@@ -19,7 +19,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   12 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
+   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   10 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
    "format": "html",
    "permission": "student"
   }
@@ -51,7 +51,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   12 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
+   "description": "<div class='code'>&lt;code&gt;: In function ‘std::string greet(std::string)’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"10\">&lt;code&gt;:10</a>:24: error: ‘nme’ was not declared in this scope; did you mean ‘name’?<br>   10 |     return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>      |                        ^~~<br>      |                        name</div>",
    "format": "html",
    "permission": "student"
   }

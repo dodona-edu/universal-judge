@@ -19,7 +19,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   13 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
+   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   11 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
    "format": "html",
    "permission": "student"
   }
@@ -51,7 +51,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   13 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
+   "description": "<div class='code'>&lt;code&gt;: In function ‘greet’:<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: error: ‘nme’ undeclared (first use in this function); did you mean ‘name’?<br>   11 |     sprintf(greeting, &quot;Hello, %s!&quot;, nme);<br>      |                                     ^~~<br>      |                                     name<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"11\">&lt;code&gt;:11</a>:37: note: each undeclared identifier is reported only once for each function it appears in</div>",
    "format": "html",
    "permission": "student"
   }

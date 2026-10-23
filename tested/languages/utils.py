@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 code_regex = re.compile(r"<code>:(\d+)")
+gcc_gutter_regex = re.compile(r"^( *)(\d+)( \|)")
 
 
 def cleanup_description(lang_config: "Language", description: str) -> str:
@@ -114,6 +115,19 @@ def executable_name(basename: str) -> str:
         return f"{basename}.exe"
     else:
         return basename
+
+
+def shift_gcc_gutter_line_number(offset: int, line: str) -> str:
+    """
+    Shift the line number in the gutter of a GCC source snippet line, keeping the
+    gutter's width.
+    """
+    match = gcc_gutter_regex.match(line)
+    if not match:
+        return line
+    spaces, number, bar = match.groups()
+    width = len(spaces) + len(number)
+    return f"{int(number) + offset:>{width}}{bar}{line[match.end():]}"
 
 
 def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
