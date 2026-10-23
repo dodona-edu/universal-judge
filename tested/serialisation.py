@@ -115,6 +115,53 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
         return BasicStringTypes.ANY
 
 
+def _get_checked_type(expression: "Expression") -> tuple | AllTypes | None:
+    """
+    Like `_get_type_for`, but for the heterogeneity check: collections become
+    `(type, *content types)` and `None` means there are no elements to disagree.
+    """
+    if isinstance(expression, SequenceType):
+        return expression.type, _merge_checked_types(
+            _get_checked_type(x) for x in expression.data
+        )
+    elif isinstance(expression, ObjectType):
+        return (
+            expression.type,
+            _merge_checked_types(_get_checked_type(x.key) for x in expression.data),
+            _merge_checked_types(_get_checked_type(x.value) for x in expression.data),
+        )
+    elif isinstance(expression, Value):
+        return expression.type
+    else:
+        return BasicStringTypes.ANY
+
+
+def _merge_checked_types(types: Iterable[tuple | AllTypes | None]):
+    """Merge types per nesting level: `ANY` marks where they disagree."""
+
+    def merge(left, right):
+        if left is None:
+            return right
+        if right is None or left == right:
+            return left
+        if (
+            isinstance(left, tuple)
+            and isinstance(right, tuple)
+            and left[0] == right[0]
+            and len(left) == len(right)
+        ):
+            return (left[0], *(merge(x, y) for x, y in zip(left[1:], right[1:])))
+        return BasicStringTypes.ANY
+
+    return reduce(merge, types, None)
+
+
+def _contains_any(checked_type: tuple | AllTypes | None) -> bool:
+    if isinstance(checked_type, tuple):
+        return any(_contains_any(x) for x in checked_type[1:])
+    return checked_type == BasicStringTypes.ANY
+
+
 def _combine_nested_types(
     data_type: AllTypes, features: Iterable[FeatureSet]
 ) -> NestedTypes:
@@ -221,22 +268,13 @@ class SequenceType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         nested_features = [x.get_used_features() for x in self.data]
         combined_nested_types = _combine_nested_types(self.type, nested_features)
-        base_features = FeatureSet(set(), {self.type}, combined_nested_types)
-        combined = combine_features([base_features] + nested_features)
-        content_type = self.get_content_type()
-        # An empty collection has no element types that could disagree.
-        if self.data and content_type == BasicStringTypes.ANY:
-            combined = combine_features(
-                [
-                    FeatureSet(
-                        {Construct.HETEROGENEOUS_COLLECTIONS},
-                        {self.type},
-                        combined_nested_types,
-                    )
-                ]
-                + nested_features
-            )
-        return combined
+        constructs = (
+            {Construct.HETEROGENEOUS_COLLECTIONS}
+            if _contains_any(_get_checked_type(self))
+            else set()
+        )
+        base_features = FeatureSet(constructs, {self.type}, combined_nested_types)
+        return combine_features([base_features] + nested_features)
 
     def get_content_type(self) -> WrappedAllTypes:
         """
