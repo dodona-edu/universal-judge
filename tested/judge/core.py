@@ -175,7 +175,8 @@ def judge(bundle: Bundle):
     _logger.debug("Executing with %s workers", max_workers)
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        remaining_time = plan.remaining_time()
+        # Outlast the processes' deadline, so a process that timed out is collected first.
+        remaining_time = plan.remaining_time() + float(bundle.config.time_limit) * 0.05
         results = executor.map(
             _process_one_unit, range(len(plan.units)), timeout=remaining_time
         )

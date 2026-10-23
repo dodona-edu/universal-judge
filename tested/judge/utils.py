@@ -51,7 +51,6 @@ def run_command(
         return None
 
     try:
-        timeout = int(timeout) if timeout is not None else None
         process = subprocess.run(
             command,
             cwd=directory,
