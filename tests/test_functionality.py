@@ -447,6 +447,31 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("start-test")) == 4
 
 
+@pytest.mark.parametrize(
+    "lang",
+    [
+        *all_languages_except("haskell", "runhaskell", "c"),
+        pytest.param(
+            "c",
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="exit(0) ends the execution: https://github.com/dodona-edu/universal-judge/issues/431",
+            ),
+        ),
+    ],
+)
+def test_program_params_in_one_execution(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Without exit code checks, the planner puts all main calls in one execution.
+    conf = configuration(
+        pytestconfig, "sum", lang, tmp_path, "same-unit.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct", "correct"]
+
+
 @pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_objects(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
