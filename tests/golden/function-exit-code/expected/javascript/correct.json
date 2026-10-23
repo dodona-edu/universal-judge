@@ -1,0 +1,44 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Exit"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "check(1)",
+   "format": "javascript"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

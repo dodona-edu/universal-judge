@@ -178,6 +178,7 @@ module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
+import System.Exit (ExitCode)
 import qualified Values
 import Control.Monad.Trans.Class
 import Control.Exception
@@ -228,6 +229,12 @@ sendSpecificException = Values.sendEvaluated exception_file
 handleException :: Exception e => (Either e a) -> Maybe e
 handleException (Left e) = Just e
 handleException (Right _) = Nothing
+
+-- Leaves ExitCode uncaught, so exitWith sets the process exit code.
+nonExit :: SomeException -> Maybe SomeException
+nonExit e = case fromException e :: Maybe ExitCode of
+    Just _ -> Nothing
+    Nothing -> Just e
 """
 
     # Generate code for each context.
@@ -248,7 +255,7 @@ handleException (Right _) = Nothing
                 result += indent + f"let mainArgs = [{' ,'.join(wrapped)}]\n"
                 result += (
                     indent
-                    + f"result <- try (withArgs mainArgs {pu.submission_name}.main) :: IO (Either SomeException ())\n"
+                    + f"result <- tryJust nonExit (withArgs mainArgs {pu.submission_name}.main)\n"
                 )
                 result += (
                     indent
@@ -265,7 +272,7 @@ handleException (Right _) = Nothing
                         + "\n"
                     )
                 else:
-                    result += indent + f"result{i1} <- catch\n"
+                    result += indent + f"result{i1} <- catchJust nonExit\n"
                     result += indent * 2 + f"(do\n"  # Start a `do` block
                     id_result = tc.input.input_statement("r")
                     result += (

@@ -1,0 +1,4 @@
+- tab: "Exit"
+  testcases:
+    - statement: "check(1)"
+      exit_code: 1
