@@ -2,6 +2,7 @@ import logging
 import re
 import subprocess
 from collections.abc import Iterable
+from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -30,24 +31,65 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
-# The symbols MSBuild defines for a Debug build of net8.0.
-DEFINES = [
-    "TRACE",
-    "DEBUG",
-    "NET",
-    "NET8_0",
-    "NETCOREAPP",
-    "NET5_0_OR_GREATER",
-    "NET6_0_OR_GREATER",
-    "NET7_0_OR_GREATER",
-    "NET8_0_OR_GREATER",
-    "NETCOREAPP1_0_OR_GREATER",
-    "NETCOREAPP1_1_OR_GREATER",
-    "NETCOREAPP2_0_OR_GREATER",
-    "NETCOREAPP2_1_OR_GREATER",
-    "NETCOREAPP2_2_OR_GREATER",
-    "NETCOREAPP3_0_OR_GREATER",
-    "NETCOREAPP3_1_OR_GREATER",
+
+@dataclass(frozen=True)
+class TargetFramework:
+    # The folder in packs/Microsoft.NETCore.App.Ref/<version>/ref/.
+    reference_dir: str
+    # The template in templates/ that is passed to `dotnet exec --runtimeconfig`.
+    runtimeconfig: str
+    # The symbols MSBuild defines for a Debug build.
+    defines: list[str]
+
+
+# In order of preference.
+TARGET_FRAMEWORKS = [
+    TargetFramework(
+        reference_dir="net10.0",
+        runtimeconfig="tested.net10.0.runtimeconfig.json",
+        defines=[
+            "TRACE",
+            "DEBUG",
+            "NET",
+            "NET10_0",
+            "NETCOREAPP",
+            "NET5_0_OR_GREATER",
+            "NET6_0_OR_GREATER",
+            "NET7_0_OR_GREATER",
+            "NET8_0_OR_GREATER",
+            "NET9_0_OR_GREATER",
+            "NET10_0_OR_GREATER",
+            "NETCOREAPP1_0_OR_GREATER",
+            "NETCOREAPP1_1_OR_GREATER",
+            "NETCOREAPP2_0_OR_GREATER",
+            "NETCOREAPP2_1_OR_GREATER",
+            "NETCOREAPP2_2_OR_GREATER",
+            "NETCOREAPP3_0_OR_GREATER",
+            "NETCOREAPP3_1_OR_GREATER",
+        ],
+    ),
+    TargetFramework(
+        reference_dir="net8.0",
+        runtimeconfig="tested.net8.0.runtimeconfig.json",
+        defines=[
+            "TRACE",
+            "DEBUG",
+            "NET",
+            "NET8_0",
+            "NETCOREAPP",
+            "NET5_0_OR_GREATER",
+            "NET6_0_OR_GREATER",
+            "NET7_0_OR_GREATER",
+            "NET8_0_OR_GREATER",
+            "NETCOREAPP1_0_OR_GREATER",
+            "NETCOREAPP1_1_OR_GREATER",
+            "NETCOREAPP2_0_OR_GREATER",
+            "NETCOREAPP2_1_OR_GREATER",
+            "NETCOREAPP2_2_OR_GREATER",
+            "NETCOREAPP3_0_OR_GREATER",
+            "NETCOREAPP3_1_OR_GREATER",
+        ],
+    ),
 ]
 
 
@@ -61,10 +103,33 @@ def _newest(paths: Iterable[Path], version_part: int, what: str) -> Path:
     return max(paths, key=version)
 
 
-@cache
-def _compiler_and_references() -> tuple[Path, list[Path]]:
+def _pick_target_framework(roots: Iterable[Path]) -> tuple[TargetFramework, Path]:
     """
-    Find the C# compiler and the .NET 8 reference assemblies in the SDK.
+    Pick the first supported target framework with reference assemblies in one of
+    the dotnet roots, and return it with the newest of those reference folders.
+    """
+    roots = list(roots)
+    for framework in TARGET_FRAMEWORKS:
+        packs = [
+            reference
+            for root in roots
+            for reference in root.glob(
+                f"packs/Microsoft.NETCore.App.Ref/*/ref/{framework.reference_dir}"
+            )
+        ]
+        if packs:
+            return framework, _newest(packs, -3, "reference assemblies")
+    supported = ", ".join(x.reference_dir for x in TARGET_FRAMEWORKS)
+    raise FileNotFoundError(
+        f"No reference assemblies found for any supported framework ({supported})"
+    )
+
+
+@cache
+def _compiler_and_references() -> tuple[Path, TargetFramework, list[Path]]:
+    """
+    Find the C# compiler and the reference assemblies of a supported target
+    framework in the SDK.
 
     TESTed calls the compiler directly: `dotnet build` spends seconds on MSBuild
     for a project that never changes, and leaves a compiler server running that
@@ -80,14 +145,12 @@ def _compiler_and_references() -> tuple[Path, list[Path]]:
         for version, directory in re.findall(r"^(\S+) \[(.+)\]$", listing, re.M)
     ]
     sdk = _newest(sdks, -1, ".NET SDK")
-    roots = {x.parent.parent for x in sdks}
-    packs = [
-        reference
-        for root in roots
-        for reference in root.glob("packs/Microsoft.NETCore.App.Ref/*/ref/net8.0")
-    ]
-    references = _newest(packs, -3, "net8.0 reference assemblies")
-    return sdk / "Roslyn" / "bincore" / "csc.dll", sorted(references.glob("*.dll"))
+    framework, references = _pick_target_framework({x.parent.parent for x in sdks})
+    return (
+        sdk / "Roslyn" / "bincore" / "csc.dll",
+        framework,
+        sorted(references.glob("*.dll")),
+    )
 
 
 class CSharp(Language):
@@ -167,7 +230,7 @@ class CSharp(Language):
         def file_filter(file: Path) -> bool:
             return file.name in (f"{name}.dll", f"{name}.pdb")
 
-        compiler, references = _compiler_and_references()
+        compiler, framework, references = _compiler_and_references()
         args = [
             "dotnet",
             str(compiler),
@@ -185,7 +248,7 @@ class CSharp(Language):
             "-langversion:12.0",
             "-warn:8",
             "-nowarn:1701,1702",
-            f"-define:{';'.join(DEFINES)}",
+            f"-define:{';'.join(framework.defines)}",
             *(f"-r:{x}" for x in references),
             # Like `dotnet build`, compile every source file in the directory,
             # including those in subdirectories copied from the workdir.
@@ -196,7 +259,8 @@ class CSharp(Language):
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # csc does not write the runtimeconfig.json that `dotnet build` does.
-        runtime_config = self.path_to_dependencies()[0] / "tested.runtimeconfig.json"
+        _, framework, _ = _compiler_and_references()
+        runtime_config = self.path_to_dependencies()[0] / framework.runtimeconfig
         return [
             "dotnet",
             "exec",
