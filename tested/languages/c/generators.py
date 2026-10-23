@@ -223,6 +223,9 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         fprintf({pu.unit.name}_exception_file, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.testcase_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.testcase_separator_secret}-- SEP");
+        fflush({pu.unit.name}_value_file);
+        fflush({pu.unit.name}_exception_file);
+        fflush(stdout);
     }}
     
     static void {pu.unit.name}_write_context_separator() {{
@@ -230,6 +233,9 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         fprintf({pu.unit.name}_exception_file, "--{pu.context_separator_secret}-- SEP");
         fprintf(stdout, "--{pu.context_separator_secret}-- SEP");
         fprintf(stderr, "--{pu.context_separator_secret}-- SEP");
+        fflush({pu.unit.name}_value_file);
+        fflush({pu.unit.name}_exception_file);
+        fflush(stdout);
     }}
     
     #undef send_value
