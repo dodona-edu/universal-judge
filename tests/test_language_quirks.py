@@ -11,6 +11,7 @@ import pytest
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
+from tested.descriptions.renderer import render_one_statement
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
@@ -563,3 +564,19 @@ def test_haskell_empty_list_to_polymorphic_function(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct", "correct"]
+
+
+@pytest.mark.parametrize(
+    "language",
+    [
+        pytest.param("javascript", marks=pytest.mark.javascript),
+        pytest.param("typescript", marks=pytest.mark.typescript),
+    ],
+)
+def test_javascript_description_keeps_await_in_strings(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    statement = 'echo("await you")'
+    assert render_one_statement(bundle, statement) == statement
