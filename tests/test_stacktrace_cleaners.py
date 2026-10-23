@@ -491,6 +491,89 @@ def test_csharp_modify_solution_explicit_class_keeps_offset(tmp_path: Path):
     assert language_config.config.dodona.source_offset == 0
 
 
+def test_csharp_modify_solution_keeps_usings_above_the_class(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    solution = tmp_path / "Submission.cs"
+    solution.write_text("using System;\nusing System.Linq;\nvar x = 1;\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text() == (
+        "using System.IO;\n"
+        "using System.Collections.Generic;\n"
+        "using System.Net.Http;\n"
+        "using System.Threading;\n"
+        "using System.Threading.Tasks;\n"
+        "\n"
+        "using System;\n"
+        "using System.Linq; class Submission { public static void Main(string[] args) {\n"
+        "var x = 1;\n"
+        "\n"
+        "    }\n"
+        "}\n"
+    )
+    assert language_config.config.dodona.source_offset == -6
+
+
+@pytest.mark.parametrize(
+    "source",
+    ["// A classic greeting\nConsole.WriteLine(1);\n", "var classes = 1;\n"],
+)
+def test_csharp_modify_solution_wraps_despite_class_text(tmp_path: Path, source: str):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    solution = tmp_path / "Submission.cs"
+    solution.write_text(source)
+    language_config.modify_solution(solution)
+    assert "public static void Main" in solution.read_text()
+    assert language_config.config.dodona.source_offset == -12
+
+
+def test_csharp_modify_solution_keeps_record_outside_main(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    solution = tmp_path / "Submission.cs"
+    solution.write_text("Console.WriteLine(new P(1));\n\nrecord P(int X);\n")
+    language_config.modify_solution(solution)
+    lines = solution.read_text().splitlines()
+    assert lines[12:] == ["Console.WriteLine(new P(1)); } }", "", "record P(int X);"]
+    assert language_config.config.dodona.source_offset == -12
+
+
+def test_csharp_modify_solution_syntax_error_unchanged(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "csharp")
+    assert language_config.config
+    original = "Console.WriteLine(1\n"
+    solution = tmp_path / "Submission.cs"
+    solution.write_text(original)
+    language_config.modify_solution(solution)
+    assert solution.read_text() == original
+    assert language_config.config.dodona.source_offset == 0
+
+
+def test_haskell_modify_solution_header_after_pragmas(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("-- Greeting\n{-# LANGUAGE LambdaCase #-}\nmain = pure ()\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text() == (
+        "-- Greeting\n{-# LANGUAGE LambdaCase #-}\n"
+        "module Submission where\nmain = pure ()\n"
+    )
+    assert language_config.config.dodona.source_offset == -1
+
+
+def test_haskell_modify_solution_keeps_existing_header(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    original = "module Submission where\nmain = pure ()\n"
+    solution = tmp_path / "Submission.hs"
+    solution.write_text(original)
+    language_config.modify_solution(solution)
+    assert solution.read_text() == original
+    assert language_config.config.dodona.source_offset == 0
+
+
 def test_c_modify_solution_offsets(tmp_path: Path):
     language_config = get_language(str(tmp_path), "c")
     assert language_config.config

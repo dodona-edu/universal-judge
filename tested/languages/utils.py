@@ -85,21 +85,24 @@ def jvm_cleanup_stacktrace(stacktrace_str: str, submission_filename: str) -> str
 
 def haskell_solution(lang_config: "Language", solution: Path):
     """Support implicit modules if needed."""
+    from tested.languages.treesitter import haskell_header_line
+
     assert lang_config.config
     if lang_config.config.dodona.config_for().get("implicitModule", True):
         name = submission_name(lang_config)
         # noinspection PyTypeChecker
         with open(solution, "r") as file:
             contents = file.read()
+        i = haskell_header_line(contents)
+        if i is None:
+            return
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
             original_lines = contents.split("\n")
-            i = next(
-                i for i, line in enumerate(original_lines) if not line.startswith("{-#")
-            )
-            result = f"module {name} where\n"
+            result = f"module {name} where"
             resulting_lines = original_lines[:i] + [result] + original_lines[i:]
             file.write("\n".join(resulting_lines))
+        lang_config.config.dodona.source_offset -= 1
 
 
 def executable_name(basename: str) -> str:

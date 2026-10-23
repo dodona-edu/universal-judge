@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -175,25 +174,12 @@ class Kotlin(Language):
         ]
 
     def modify_solution(self, solution: Path):
+        from tested.languages.treesitter import rewrite_kotlin_main
+
         with open(solution, "r") as file:
             contents = file.read()
-        # We use regex to find the main function.
-        # First, check if we have a no-arg main function.
-        # If so, replace it with a renamed main function that does have args.
-        # Needed for main outside class
-        no_args = re.compile(r"fun(\s+)main(\s*)\((\s*)\)")
-        replacement = r"fun\1solutionMain\2(args: Array<String> = emptyArray()\3)"
-        contents, nr = re.subn(no_args, replacement, contents, count=1)
-        if nr == 0:
-            # There was no main function without arguments. Now we try a main
-            # function with arguments.
-            with_args = re.compile(
-                r"fun(\s+)main(\s*)\((\s*[^\s]*\s*:\s*" r"Array\s*<\s*String\s*>)"
-            )
-            replacement = r"fun\1solutionMain\2(\3"
-            contents = re.sub(with_args, replacement, contents, count=1)
         with open(solution, "w") as file:
-            file.write(contents)
+            file.write(rewrite_kotlin_main(contents))
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.

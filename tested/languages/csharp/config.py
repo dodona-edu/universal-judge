@@ -30,6 +30,16 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
+USINGS = [
+    "using System;",
+    "using System.IO;",
+    "using System.Collections.Generic;",
+    "using System.Linq;",
+    "using System.Net.Http;",
+    "using System.Threading;",
+    "using System.Threading.Tasks;",
+]
+
 # The symbols MSBuild defines for a Debug build of net8.0.
 DEFINES = [
     "TRACE",
@@ -59,6 +69,10 @@ def _newest(paths: Iterable[Path], version_part: int, what: str) -> Path:
     if not paths:
         raise FileNotFoundError(f"No {what} found in the .NET installation")
     return max(paths, key=version)
+
+
+def _squash(using: bytes) -> bytes:
+    return b"".join(using.split())
 
 
 @cache
@@ -219,36 +233,50 @@ class CSharp(Language):
             return Status.COMPILATION_ERROR
 
     def modify_solution(self, solution: Path):
+        from tested.languages.treesitter import Edit, apply_edits, csharp_top_level
+
         assert self.config
         with open(solution, "r") as file:
             contents = file.read()
 
-        if "class" in contents:
+        source = contents.encode()
+        top_level = csharp_top_level(source)
+        if top_level is None:
+            return  # Leave syntax errors to the compiler.
+        usings, statements, declarations = top_level
+        if declarations and not statements:
             return  # No top-level statements; we are happy...
 
         class_name = submission_name(self)
-        header = f"""\
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-
+        edits = []
+        if usings:
+            # The class opens on the line of the last using, so no line moves.
+            declared = {_squash(source[u.start_byte : u.end_byte]) for u in usings}
+            missing = [u for u in USINGS if _squash(u.encode()) not in declared]
+            header = "".join(f"{u}\n" for u in missing) + "\n"
+            opener = f" class {class_name} {{ public static void Main(string[] args) {{"
+            edits.append(Edit(usings[-1].end_byte, usings[-1].end_byte, opener))
+        else:
+            opener = f"""\
 class {class_name}
 {{
     public static void Main(string[] args)
     {{
 """
-        footer = """
+            header = "".join(f"{u}\n" for u in USINGS) + "\n" + opener
+        if declarations:
+            # Types declared after the statements stay outside the class.
+            edits.append(Edit(statements[-1].end_byte, statements[-1].end_byte, " } }"))
+            footer = ""
+        else:
+            footer = """
     }
 }
 """
 
         # noinspection PyTypeChecker
         with open(solution, "w") as file:
-            file.write(header + contents + footer)
+            file.write(header + apply_edits(source, edits) + footer)
 
         self.config.dodona.source_offset -= header.count("\n")
 
