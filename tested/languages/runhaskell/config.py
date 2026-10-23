@@ -1,11 +1,15 @@
 from pathlib import Path
 
 from tested.languages.conventionalize import submission_file
-from tested.languages.haskell.config import Haskell
+from tested.languages.haskell.config import Haskell, precompiled_helpers
 from tested.languages.language import CallbackResult, Command
 
 
 class RunHaskell(Haskell):
+    def _precompiled_helpers(self) -> Path | None:
+        # GHCi loads them instead of interpreting them, as long as they are dynamic.
+        return precompiled_helpers("dynamic")
+
     def compilation(self, files: list[str]) -> CallbackResult:
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
@@ -19,15 +23,3 @@ class RunHaskell(Haskell):
 
     def filter_dependencies(self, files: list[Path], context_name: str) -> list[Path]:
         return files
-
-    def path_to_dependencies(self) -> list[Path]:
-        """
-        Construct the paths to the folder containing the additional dependencies
-        needed for a programming language.
-
-        :return: A list of template folders.
-        """
-        assert self.config
-        return [
-            self.config.dodona.judge / "tested" / "languages" / "haskell" / "templates"
-        ]
