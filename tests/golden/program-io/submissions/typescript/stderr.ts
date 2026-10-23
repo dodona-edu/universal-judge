@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 
-console.error(`debug: ${process.argv.length - 1} arguments`);
+console.error(`debug: ${process.argv.length - 2} arguments`);
 
-const [prefix, ...names] = process.argv.slice(1);
+const [prefix, ...names] = process.argv.slice(2);
 if (prefix === undefined) {
     process.exit(1);
 }
