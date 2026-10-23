@@ -47,6 +47,49 @@ def test_specific_oracle_shows_a_list_answer_as_wrong(
     assert generated == ["['input-1']", "['correct']"]
 
 
+@pytest.mark.parametrize(
+    ("solution", "shown"),
+    [("wrong-int", "5"), ("wrong-float", "2.5"), ("wrong-bool", "True")],
+)
+def test_specific_oracle_shows_a_scalar_answer_as_wrong(
+    solution: str, shown: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "two-specific.tson",
+        solution,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The evaluator passes the student's number or boolean as its readable actual value.
+    assert updates.find_status_enum() == ["wrong", "wrong"]
+    generated = [t["generated"] for t in updates.find_all("close-test")]
+    assert generated == [shown, shown]
+
+
+@pytest.mark.parametrize("language", ["javascript", "typescript"])
+def test_specific_oracle_shows_a_number_from_an_untyped_evaluator_as_wrong(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "specific-raw-readable.yaml",
+        "wrong-int",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The evaluator passes the student's number as its readable actual value.
+    assert updates.find_status_enum() == ["wrong"]
+    generated = [t["generated"] for t in updates.find_all("close-test")]
+    assert generated == ["5"]
+
+
 def test_specific_oracle_messages_keep_their_permission(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
