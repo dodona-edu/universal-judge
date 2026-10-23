@@ -521,6 +521,59 @@ def _add_channel(
             )
 
 
+def add_not_executed_context(
+    bundle: Bundle,
+    collector: OutputManager,
+    context: Context,
+    context_index: int | None = None,
+    testcase_start: int = 0,
+):
+    """
+    Report a context, or the part of it from testcase_start, as not executed.
+
+    :param context_index: The index of the context in its tab, to keep track of
+                          which contexts have been reported.
+    """
+    updates: list[Update] = [
+        AppendMessage(message=get_i18n_string("judge.evaluation.not-executed"))
+    ]
+    if testcase_start == 0:
+        collector.add(StartContext(description=context.description))
+    # All files that will be used in this context.
+    all_files = context.get_input_files()
+
+    # Begin normal testcases.
+    for j, testcase in enumerate(
+        context.testcases[testcase_start:], start=testcase_start
+    ):
+        readable_input, seen = get_readable_input(bundle, testcase)
+        all_files = all_files - seen
+        updates.append(StartTestcase(description=readable_input))
+
+        # Do the normal output channels.
+        output = testcase.output
+        _add_channel(bundle, output.stdout, Channel.STDOUT, updates)
+        _add_channel(bundle, output.stderr, Channel.STDERR, updates)
+        _add_channel(bundle, output.file, Channel.FILE, updates)
+        _add_channel(bundle, output.exception, Channel.EXCEPTION, updates)
+        _add_channel(bundle, output.result, Channel.RETURN, updates)
+
+        # If last testcase, do exit code.
+        if j == len(context.testcases) - 1:
+            _add_channel(bundle, output.exit_code, Channel.EXIT, updates)
+
+        updates.append(CloseTestcase(accepted=False))
+
+    # Add links to files we haven't seen yet.
+    if all_files:
+        link_files = link_files_message(all_files)
+        if link_files:
+            updates.insert(0, link_files)
+
+    collector.add_all(updates)
+    collector.add(CloseContext(accepted=False), context_index)
+
+
 def complete_evaluation(bundle: Bundle, collector: OutputManager):
     # We assume we have at least an open judgement.
     if collector.finalized:
@@ -537,45 +590,10 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             collector.add(StartTab(title=tab.name, hidden=tab.hidden))
         assert tab.contexts
         for context in tab.contexts[context_start:]:
-            updates: list[Update] = [
-                AppendMessage(message=get_i18n_string("judge.evaluation.not-executed"))
-            ]
-            if testcase_start == 0:
-                collector.add(StartContext(description=context.description))
-            # All files that will be used in this context.
-            all_files = context.get_input_files()
-
-            # Begin normal testcases.
-            for j, testcase in enumerate(
-                context.testcases[testcase_start:], start=testcase_start
-            ):
-                readable_input, seen = get_readable_input(bundle, testcase)
-                all_files = all_files - seen
-                updates.append(StartTestcase(description=readable_input))
-
-                # Do the normal output channels.
-                output = testcase.output
-                _add_channel(bundle, output.stdout, Channel.STDOUT, updates)
-                _add_channel(bundle, output.stderr, Channel.STDERR, updates)
-                _add_channel(bundle, output.file, Channel.FILE, updates)
-                _add_channel(bundle, output.exception, Channel.EXCEPTION, updates)
-                _add_channel(bundle, output.result, Channel.RETURN, updates)
-
-                # If last testcase, do exit code.
-                if j == len(tab.contexts) - 1:
-                    _add_channel(bundle, output.exit_code, Channel.EXIT, updates)
-
-                updates.append(CloseTestcase(accepted=False))
+            add_not_executed_context(
+                bundle, collector, context, testcase_start=testcase_start
+            )
             testcase_start = 0  # For the next context, start at the beginning
-
-            # Add links to files we haven't seen yet.
-            if all_files:
-                link_files = link_files_message(all_files)
-                if link_files:
-                    updates.insert(0, link_files)
-
-            collector.add_all(updates)
-            collector.add(CloseContext(accepted=False))
         collector.add(CloseTab())
         context_start = 0  # For the next tab, start from the beginning.
     collector.add(CloseJudgement())

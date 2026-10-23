@@ -19,5 +19,5 @@ program-io/typescript/runtime-error https://github.com/dodona-edu/universal-judg
 program-io/typescript/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/714
 program-io/typescript/stderr https://github.com/dodona-edu/universal-judge/issues/714
 program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
-program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746 https://github.com/dodona-edu/universal-judge/issues/759
+program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746
 program-io/csharp/runtime-error https://github.com/dodona-edu/universal-judge/issues/758
