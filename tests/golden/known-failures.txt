@@ -1,7 +1,6 @@
 # <exercise>/<language>/<case> <issue URL> [<issue URL> ...]: judged as a strict xfail
-basics/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746
+basics/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739
 timeouts/c/timeout https://github.com/dodona-edu/universal-judge/issues/739
-bash-basics/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
 program-io/haskell/correct https://github.com/dodona-edu/universal-judge/issues/713
 program-io/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/713
 program-io/typescript/correct https://github.com/dodona-edu/universal-judge/issues/714
@@ -18,6 +17,6 @@ program-io/typescript/wrong-answer https://github.com/dodona-edu/universal-judge
 program-io/typescript/runtime-error https://github.com/dodona-edu/universal-judge/issues/714
 program-io/typescript/wrong-exit-code https://github.com/dodona-edu/universal-judge/issues/714
 program-io/typescript/stderr https://github.com/dodona-edu/universal-judge/issues/714
-program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/746
-program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/746 https://github.com/dodona-edu/universal-judge/issues/759
+program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/804
+program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/739 https://github.com/dodona-edu/universal-judge/issues/759 https://github.com/dodona-edu/universal-judge/issues/804
 program-io/csharp/runtime-error https://github.com/dodona-edu/universal-judge/issues/758
