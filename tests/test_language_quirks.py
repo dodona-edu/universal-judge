@@ -563,3 +563,66 @@ def test_haskell_empty_list_to_polymorphic_function(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct", "correct"]
+
+
+@pytest.mark.parametrize(
+    "language, source, name, void_name",
+    [
+        pytest.param(
+            "c",
+            "int total(int a, int b) {\n    return a + b;\n}\n\n"
+            "void total_all(int* values, int length) {\n}\n",
+            "total",
+            "total_all",
+            marks=pytest.mark.c,
+            id="c",
+        ),
+        pytest.param(
+            "cpp",
+            "int total(int a, int b) {\n    return a + b;\n}\n\n"
+            "void total_all(std::vector<int> values) {\n}\n",
+            "total",
+            "total_all",
+            marks=pytest.mark.cpp,
+            id="cpp",
+        ),
+        pytest.param(
+            "csharp",
+            "class Submission\n{\n"
+            "    public static int Total(int a, int b)\n    {\n"
+            "        return a + b;\n    }\n\n"
+            "    public static void TotalAll(int[] values)\n    {\n    }\n}\n",
+            "Total",
+            "TotalAll",
+            marks=pytest.mark.csharp,
+            id="csharp",
+        ),
+        pytest.param(
+            "java",
+            "class Submission {\n"
+            "    public static int total(int a, int b) {\n        return a + b;\n    }\n\n"
+            "    public static void totalAll(int[] values) {\n    }\n}\n",
+            "total",
+            "totalAll",
+            marks=pytest.mark.java,
+            id="java",
+        ),
+    ],
+)
+def test_is_void_method_matches_whole_names(
+    language: str,
+    source: str,
+    name: str,
+    void_name: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    submission = tmp_path / "submission.txt"
+    submission.write_text(source)
+    conf = configuration(
+        pytestconfig, "", language, tmp_path, options={"source": submission}
+    )
+    bundle = create_bundle(conf, sys.stdout, Suite())
+
+    assert not bundle.language.is_void_method(name)
+    assert bundle.language.is_void_method(void_name)
