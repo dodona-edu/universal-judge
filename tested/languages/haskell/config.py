@@ -1,4 +1,7 @@
+import functools
 import re
+import shutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -27,9 +30,66 @@ if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
 
+HELPER_MODULES = ["Values", "EvaluationUtils"]
+TEMPLATES_DIRECTORY = Path(__file__).parent / "templates"
+
+# The dodona-tested image compiles the helper modules ahead of time: a "static" set
+# for ghc and a "dynamic" set for runhaskell, as GHCi only loads dynamic objects.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
+
+
+@functools.cache
+def precompiled_helpers(way: str) -> Path | None:
+    """
+    Find the precompiled helper modules of the image, if it has them.
+
+    They are only used if they were built from the same sources as the templates of
+    this judge: otherwise GHC would recompile them, and units that compile in
+    parallel share the hard-linked files.
+    """
+    directory = PRECOMPILED_DIRECTORY / way
+    for module in HELPER_MODULES:
+        if not all((directory / f"{module}.{ext}").is_file() for ext in ("hi", "o")):
+            return None
+        source = directory / f"{module}.hs"
+        template = TEMPLATES_DIRECTORY / f"{module}.hs"
+        if not source.is_file() or source.read_bytes() != template.read_bytes():
+            return None
+    return directory
+
+
+@functools.cache
+def linker_flags() -> list[str]:
+    # lld links a lot faster than GNU ld, the default of GHC.
+    if sys.platform.startswith("linux") and shutil.which("ld.lld"):
+        return ["-optl-fuse-ld=lld"]
+    return []
+
+
 class Haskell(Language):
+    def _precompiled_helpers(self) -> Path | None:
+        assert self.config
+        # The image compiles them with -O0.
+        if self.config.options.compiler_optimizations:
+            return None
+        return precompiled_helpers("static")
+
     def initial_dependencies(self) -> list[str]:
-        return ["Values.hs", "EvaluationUtils.hs"]
+        dependencies = [f"{module}.hs" for module in HELPER_MODULES]
+        if self._precompiled_helpers():
+            dependencies += [
+                f"{module}.{ext}" for module in HELPER_MODULES for ext in ("hi", "o")
+            ]
+        return dependencies
+
+    def path_to_dependencies(self) -> list[Path]:
+        assert self.config
+        paths = [
+            self.config.dodona.judge / "tested" / "languages" / "haskell" / "templates"
+        ]
+        if directory := self._precompiled_helpers():
+            paths.insert(0, directory)
+        return paths
 
     def needs_selector(self):
         return True
@@ -94,9 +154,14 @@ class Haskell(Language):
             "-fno-cse",
             "-fno-full-laziness",
             "-O3" if self.config.options.compiler_optimizations else "-O0",
+            *linker_flags(),
             main_,
             "-main-is",
             exec_,
+            # A larger allocation area makes ghc collect garbage less often.
+            "+RTS",
+            "-A32m",
+            "-RTS",
         ], [executable_name(exec_)]
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
