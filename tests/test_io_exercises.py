@@ -212,6 +212,20 @@ def test_csharp_compiles_source_files_in_workdir_subdirectories(
     assert updates.find_status_enum() == ["correct"]
 
 
+def test_csharp_compile_error_has_no_warnings_from_support_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "csharp", tmp_path, "one.tson", "comp-error"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = updates.find_all("append-message")
+    assert "CS0103" in messages[0]["message"]["description"]
+    assert not any("Values.cs" in m["message"]["description"] for m in messages)
+
+
 def test_csharp_ignores_dll_files_in_workdir_subdirectories(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
