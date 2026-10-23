@@ -365,6 +365,8 @@ static void {pu.unit.name}_write_separator() {{
     {pu.unit.name}_exception_file << "--{pu.testcase_separator_secret}-- SEP";
     std::cout << "--{pu.testcase_separator_secret}-- SEP";
     std::cerr << "--{pu.testcase_separator_secret}-- SEP";
+    {pu.unit.name}_value_file.flush();
+    {pu.unit.name}_exception_file.flush();
 }}
 
 static void {pu.unit.name}_write_context_separator() {{
@@ -372,6 +374,8 @@ static void {pu.unit.name}_write_context_separator() {{
     {pu.unit.name}_exception_file << "--{pu.context_separator_secret}-- SEP";
     std::cout << "--{pu.context_separator_secret}-- SEP";
     std::cerr << "--{pu.context_separator_secret}-- SEP";
+    {pu.unit.name}_value_file.flush();
+    {pu.unit.name}_exception_file.flush();
 }}
 
 #undef send_value
