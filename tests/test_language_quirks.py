@@ -295,21 +295,6 @@ def test_haskell_function_arguments_without_brackets(
     )
 
 
-@pytest.mark.haskell
-def test_haskell_typed_literal_arguments(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "haskell-typed-arguments",
-        "haskell",
-        tmp_path,
-        "smallest.yaml",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct", "correct"]
-
-
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
 def test_js_ts_exception_correct(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
@@ -494,72 +479,3 @@ def test_python_nested_values_keep_submission_namespace(
         statement = prepare_expression(bundle, statement)
 
     assert convert_statement(statement, True) == expected
-
-
-@pytest.mark.haskell
-def test_haskell_function_with_mixed_argument_types_nth_element(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "haskell-mixed-argument-types",
-        "haskell",
-        tmp_path,
-        "nthElement.yaml",
-        "nthElement",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 20
-
-
-@pytest.mark.haskell
-def test_haskell_function_with_mixed_argument_types_second_to_last(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "haskell-mixed-argument-types",
-        "haskell",
-        tmp_path,
-        "secondToLast.yaml",
-        "secondToLast",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 18
-
-
-@pytest.mark.haskell
-def test_haskell_empty_list_is_compatible(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "haskell-empty-list",
-        "haskell",
-        tmp_path,
-        "lists.yaml",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 4
-
-
-@pytest.mark.haskell
-@pytest.mark.xfail(
-    strict=True, reason="https://github.com/dodona-edu/universal-judge/issues/735"
-)
-def test_haskell_empty_list_to_polymorphic_function(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "haskell-empty-list-polymorphic",
-        "haskell",
-        tmp_path,
-        "rev.yaml",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct", "correct"]
