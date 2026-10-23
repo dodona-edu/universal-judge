@@ -772,7 +772,10 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     else:
         raise ValueError("Tab must have either contexts or testcases")
 
-    return Tab(name=name, contexts=contexts)
+    hidden = tab.get("hidden")
+    assert hidden is None or isinstance(hidden, bool)
+
+    return Tab(name=name, contexts=contexts, hidden=hidden)
 
 
 T = TypeVar("T")
