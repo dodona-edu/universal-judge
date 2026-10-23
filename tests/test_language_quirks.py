@@ -44,6 +44,28 @@ def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["wrong"]
 
 
+@pytest.mark.c
+def test_c_compilation_error_message_with_dots(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "c",
+        tmp_path,
+        "one.tson",
+        "compile-error-dots",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = [
+        m if isinstance(m, str) else m["description"]
+        for m in (x["message"] for x in updates.find_all("append-message"))
+    ]
+    assert any("expected declaration specifiers" in m for m in messages)
+
+
 @pytest.mark.cpp
 def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
