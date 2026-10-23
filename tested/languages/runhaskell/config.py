@@ -10,7 +10,7 @@ class RunHaskell(Haskell):
         submission = submission_file(self)
         main_file = list(filter(lambda x: x == submission, files))
         if main_file:
-            return ["ghc", "-fno-code", main_file[0]], files
+            return ["ghc", "-v0", "-fno-code", main_file[0]], files
         else:
             return [], files
 
