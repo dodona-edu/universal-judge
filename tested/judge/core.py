@@ -4,6 +4,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from attrs import evolve
+
 from tested.configs import Bundle
 from tested.dodona import (
     AppendMessage,
@@ -230,7 +232,7 @@ def _execute_one_unit(
             bundle, plan, index, execution_dir, dependencies
         )
     else:
-        local_compilation_results = compilation_results
+        local_compilation_results = evolve(compilation_results)
 
     # Execute the unit.
     if local_compilation_results.status == Status.CORRECT:

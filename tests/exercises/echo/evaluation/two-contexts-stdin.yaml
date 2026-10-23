@@ -1,0 +1,8 @@
+- tab: "Echo"
+  contexts:
+    - testcases:
+        - stdin: "one\n"
+          stdout: "one\n"
+    - testcases:
+        - stdin: "two\n"
+          stdout: "two\n"
