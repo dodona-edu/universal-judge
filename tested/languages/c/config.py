@@ -100,20 +100,10 @@ class C(Language):
         return [str(local_file.absolute()), *arguments]
 
     def modify_solution(self, solution: Path):
+        from tested.languages.treesitter import rewrite_c_main
+
         with open(solution, "r") as file:
-            contents = file.read()
-        # We use regex to find the main function.
-        # First, check if we have a no-arg main function.
-        # If so, replace it with a renamed main function that does have args.
-        no_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)\)(\s*{)")
-        replacement = r"int\2solution_main\3(\4int argc, char** argv)\5"
-        contents, nr = re.subn(no_args, replacement, contents, count=1)
-        if nr == 0:
-            # There was no main function without arguments. Now we try a main
-            # function with arguments.
-            with_args = re.compile(r"(int|void)(\s+)main(\s*)\((\s*)int")
-            replacement = r"int\2solution_main\3(\4int"
-            contents = re.sub(with_args, replacement, contents, count=1)
+            contents = rewrite_c_main("c", file.read())
         assert self.config
         with open(solution, "w") as file:
             header = "#pragma once\n\n"

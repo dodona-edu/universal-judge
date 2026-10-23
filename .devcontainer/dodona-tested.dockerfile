@@ -88,7 +88,9 @@ CFG
         python-i18n==0.3.9 \
         ruff==0.17.0 \
         tree-sitter==0.26.0 \
+        tree-sitter-c==0.24.2 \
         tree-sitter-c-sharp==0.23.5 \
+        tree-sitter-cpp==0.23.4 \
         tree-sitter-haskell==0.24.1 \
         tree-sitter-kotlin==1.1.0
 

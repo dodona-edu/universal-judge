@@ -13,6 +13,8 @@ from typing import NamedTuple
 from tree_sitter import Language, Node, Parser, Tree
 
 _GRAMMARS = {
+    "c": "tree_sitter_c",
+    "cpp": "tree_sitter_cpp",
     "csharp": "tree_sitter_c_sharp",
     "haskell": "tree_sitter_haskell",
     "kotlin": "tree_sitter_kotlin",
@@ -27,6 +29,21 @@ _CSHARP_TYPE_DECLARATIONS = {
     "namespace_declaration",
     "record_declaration",
     "struct_declaration",
+}
+
+_C_MAIN_PARAMETERS = {
+    "c": "int argc, char** argv",
+    "cpp": "int argc, char* argv[]",
+}
+
+# Unbalanced braces in preprocessor branches wrap the code after them in an ERROR.
+_C_TOP_LEVEL_GROUPS = {
+    "ERROR",
+    "preproc_elif",
+    "preproc_elifdef",
+    "preproc_else",
+    "preproc_if",
+    "preproc_ifdef",
 }
 
 
@@ -69,6 +86,60 @@ def _replace_parameters(parameters: Node, declared: str) -> Edit:
     assert parameters.text is not None
     newlines = "\n" * parameters.text.count(b"\n")
     return _replace(parameters, f"({declared}{newlines})")
+
+
+def rewrite_c_main(language: str, source: str) -> str:
+    """
+    Rename main in a C or C++ submission to solution_main, which TESTed calls with
+    argc and argv, and end its body with a return 0, which only main has implicitly.
+    Prototypes of main are renamed too. No line moves.
+    """
+    data = source.encode()
+    edits = []
+    for node in _c_top_level(parse(language, data).root_node):
+        if node.type not in ("declaration", "function_definition"):
+            continue
+        declarator = node.child_by_field_name("declarator")
+        if declarator is None or declarator.type != "function_declarator":
+            continue
+        name = declarator.child_by_field_name("declarator")
+        if name is None or name.text != b"main" or declarator.has_error:
+            continue
+
+        edits.append(_replace(name, "solution_main"))
+        parameters = declarator.child_by_field_name("parameters")
+        assert parameters is not None
+        declared = [p.text for p in parameters.named_children if p.type != "comment"]
+        if declared in ([], [b"void"]):
+            edits.append(_replace_parameters(parameters, _C_MAIN_PARAMETERS[language]))
+        return_type = node.child_by_field_name("type")
+        if return_type is not None and return_type.text == b"void":
+            edits.append(_replace(return_type, "int"))
+        body = node.child_by_field_name("body")
+        if body is not None and not body.has_error:
+            for block in _c_function_blocks(body):
+                closing = block.end_byte - 1
+                edits.append(Edit(closing, closing, "return 0;"))
+    return apply_edits(data, edits)
+
+
+def _c_top_level(node: Node) -> list[Node]:
+    nodes = []
+    for child in node.children:
+        if child.type in _C_TOP_LEVEL_GROUPS:
+            nodes.extend(_c_top_level(child))
+        else:
+            nodes.append(child)
+    return nodes
+
+
+def _c_function_blocks(body: Node) -> list[Node]:
+    """The blocks a function ends in: a function-try-block also ends in its handlers."""
+    if body.type != "try_statement":
+        return [body]
+    clauses = [body, *(c for c in body.children if c.type == "catch_clause")]
+    blocks = [c.child_by_field_name("body") for c in clauses]
+    return [b for b in blocks if b is not None]
 
 
 def csharp_top_level(source: bytes) -> CSharpTopLevel | None:
