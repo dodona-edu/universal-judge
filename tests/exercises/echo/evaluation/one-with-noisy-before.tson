@@ -1,0 +1,33 @@
+{
+  "tabs": [
+    {
+      "name": "Tab",
+      "contexts": [
+        {
+          "before": {
+            "python": {
+              "data": "import sys; print(\"noise\"); print(\"error\", file=sys.stderr)"
+            }
+          },
+          "testcases": [
+            {
+              "input": {
+                "main_call": true,
+                "stdin": {
+                  "type": "text",
+                  "data": "input-1\n"
+                }
+              },
+              "output": {
+                "stdout": {
+                  "type": "text",
+                  "data": "input-1\n"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
