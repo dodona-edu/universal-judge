@@ -153,16 +153,16 @@ class Bundle:
         return self.global_config.context_separator_secret
 
 
-def _consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
+def _consume_shebang(submission: Path) -> tuple[bool, Optional[str]]:
     """
     Find the shebang in the submission, and if it is present, consume it.
 
     :param submission: The path to the file containing the code.
 
-    :return: The programming language if found.
+    :return: Whether a shebang line was removed, and its language name if it has
+             one, which may not exist.
     """
-    from tested.testsuite import SupportedLanguage
-
+    removed = False
     language = None
     try:
         with open(submission, "r+") as file:
@@ -174,6 +174,7 @@ def _consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
             for line in lines:
                 stripped = line.strip()
                 if has_potential and stripped.startswith("#!tested"):
+                    removed = True
                     try:
                         _, language = stripped.split(" ")
                     except ValueError:
@@ -187,27 +188,28 @@ def _consume_shebang(submission: Path) -> Optional["SupportedLanguage"]:
         # Nothing we can do if there is no submission.
         pass
 
-    return SupportedLanguage(language) if language else None
+    return removed, language
 
 
 def _get_language(config: DodonaConfig) -> tuple[SupportedLanguage, int]:
     import tested.languages as langs
 
-    bang = _consume_shebang(config.source)
+    removed, bang = _consume_shebang(config.source)
+    offset = 1 if removed else 0
     if bang and langs.language_exists(bang):
         _logger.debug(
             "Found shebang language and it exists, using %s instead of config language %s.",
             bang,
             config.programming_language,
         )
-        return bang, 1
+        return SupportedLanguage(bang), offset
     else:
         _logger.debug(
             "No shebang found or it doesn't exist: %s. Using configuration language %s.",
             bang,
             config.programming_language,
         )
-        return config.programming_language, 0
+        return config.programming_language, offset
 
 
 def create_bundle(
