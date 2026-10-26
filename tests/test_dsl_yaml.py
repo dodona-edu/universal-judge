@@ -1,5 +1,6 @@
 # type: ignore[reportAttributeAccessIssue]
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -1632,6 +1633,237 @@ tabs:
         return False
 
     assert check_error(excinfo.value)
+
+
+def test_input_files_on_first_and_output_files_on_last_testcase():
+    yaml_str = """
+tabs:
+  - tab: "Files"
+    contexts:
+      - testcases:
+          - statement: "x = 1"
+            input_files:
+              - path: "data.txt"
+                content: "hello"
+          - expression: "x"
+            return: 1
+          - expression: "y"
+            output_files:
+              - path: "out.txt"
+                content: "bye"
+"""
+    suite = parse_dsl(yaml_str)
+    testcases = suite.tabs[0].contexts[0].testcases
+    assert [t.input_files for t in testcases][1:] == [[], []]
+    assert testcases[0].input_files[0].path == "data.txt"
+    assert isinstance(testcases[2].output.file, FileOutputChannel)
+
+
+def test_input_and_output_files_on_single_testcase_context():
+    yaml_str = """
+tabs:
+  - tab: "Files"
+    contexts:
+      - testcases:
+          - expression: "test()"
+            input_files:
+              - path: "data.txt"
+                content: "hello"
+            output_files:
+              - path: "out.txt"
+                content: "bye"
+"""
+    testcase = parse_dsl(yaml_str).tabs[0].contexts[0].testcases[0]
+    assert testcase.input_files[0].path == "data.txt"
+    assert isinstance(testcase.output.file, FileOutputChannel)
+
+
+def test_files_on_any_testcase_of_tab_testcases():
+    yaml_str = """
+tabs:
+  - tab: "Files"
+    testcases:
+      - expression: "one()"
+        input_files:
+          - path: "a.txt"
+            content: "a"
+        output_files:
+          - path: "out_a.txt"
+            content: "a"
+      - expression: "two()"
+        input_files:
+          - path: "b.txt"
+            content: "b"
+        output_files:
+          - path: "out_b.txt"
+            content: "b"
+"""
+    contexts = parse_dsl(yaml_str).tabs[0].contexts
+    assert len(contexts) == 2
+    for context, name in zip(contexts, ["a.txt", "b.txt"]):
+        assert context.testcases[0].input_files[0].path == name
+        assert isinstance(context.testcases[0].output.file, FileOutputChannel)
+
+
+def test_legacy_files_on_context_with_multiple_testcases():
+    yaml_str = """
+tabs:
+  - tab: "Files"
+    contexts:
+      - files:
+          - name: "data.txt"
+            url: "media/data.txt"
+        testcases:
+          - statement: "x = 1"
+          - expression: "x"
+            return: 1
+"""
+    testcases = parse_dsl(yaml_str).tabs[0].contexts[0].testcases
+    assert len(testcases) == 2
+    for testcase in testcases:
+        assert [f.path for f in testcase.input_files] == ["data.txt"]
+
+
+@pytest.mark.parametrize(
+    "key, position, verb",
+    [("input_files", "first", "uses"), ("output_files", "last", "checks")],
+)
+def test_files_on_root_fails(key, position, verb):
+    yaml_str = f"""
+{key}:
+  - path: "data.txt"
+    content: "hello"
+tabs:
+  - tab: "Files"
+    testcases:
+      - expression: "test()"
+"""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"{key} can't be set on the root of the test suite: "
+            f"move them to the {position} test case of each context that {verb} them."
+        ),
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize(
+    "key, position, verb",
+    [("input_files", "first", "uses"), ("output_files", "last", "checks")],
+)
+def test_files_on_tab_fails(key, position, verb):
+    yaml_str = f"""
+tabs:
+  - tab: "Files"
+    {key}:
+      - path: "data.txt"
+        content: "hello"
+    testcases:
+      - expression: "test()"
+"""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Tab 'Files': {key} can't be set on a tab: "
+            f"move them to the {position} test case of each context that {verb} them."
+        ),
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize(
+    "key, position",
+    [("input_files", "first"), ("output_files", "last")],
+)
+def test_files_on_context_fails(key, position):
+    yaml_str = f"""
+tabs:
+  - tab: "Files"
+    contexts:
+      - testcases:
+          - expression: "one()"
+      - {key}:
+          - path: "data.txt"
+            content: "hello"
+        testcases:
+          - expression: "two()"
+"""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Tab 'Files', context 2: {key} can't be set on a context: "
+            f"move them to the {position} test case of the context."
+        ),
+    ):
+        parse_dsl(yaml_str)
+
+
+def test_files_on_context_fails_in_legacy_structure():
+    yaml_str = """
+units:
+  - unit: "Files"
+    cases:
+      - input_files:
+          - path: "data.txt"
+            content: "hello"
+        script:
+          - expression: "test()"
+"""
+    with pytest.raises(
+        ValueError, match=re.escape("Tab 'Files', context 1: input_files")
+    ):
+        parse_dsl(yaml_str)
+
+
+def test_input_files_on_later_testcase_fails():
+    yaml_str = """
+tabs:
+  - tab: "Files"
+    contexts:
+      - testcases:
+          - expression: "one()"
+      - testcases:
+          - statement: "x = 1"
+          - expression: "x"
+          - expression: "test()"
+            input_files:
+              - path: "data.txt"
+                content: "hello"
+"""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Tab 'Files', context 2: input_files can only be set on the first test "
+            "case of a context (found on test case 3). "
+            "Move them to the first test case."
+        ),
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize("key", ["output_files", "file"])
+def test_output_files_on_non_last_testcase_fails(key):
+    yaml_str = f"""
+tabs:
+  - tab: "Files"
+    contexts:
+      - testcases:
+          - expression: "one()"
+            {key}:
+              - path: "out.txt"
+                content: "bye"
+          - expression: "two()"
+"""
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            f"Tab 'Files', context 1: {key} can only be set on the last test case "
+            f"of a context (found on test case 1). "
+            f"Move them to the last test case."
+        ),
+    ):
+        parse_dsl(yaml_str)
 
 
 _LANGUAGE_MAPPING_SUITES = [

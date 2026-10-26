@@ -256,13 +256,14 @@ def evaluate_context_results(
             )
 
     # All files that will be used in this context.
-    all_files = context.get_input_files()
+    input_files = context.get_input_files()
+    all_files = input_files
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         _logger.debug("Evaluating testcase %s", i)
 
-        readable_input, seen = get_readable_input(bundle, testcase)
+        readable_input, seen = get_readable_input(bundle, testcase, input_files)
         all_files = all_files - seen
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
@@ -543,13 +544,14 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
             # All files that will be used in this context.
-            all_files = context.get_input_files()
+            input_files = context.get_input_files()
+            all_files = input_files
 
             # Begin normal testcases.
             for j, testcase in enumerate(
                 context.testcases[testcase_start:], start=testcase_start
             ):
-                readable_input, seen = get_readable_input(bundle, testcase)
+                readable_input, seen = get_readable_input(bundle, testcase, input_files)
                 all_files = all_files - seen
                 updates.append(StartTestcase(description=readable_input))
 

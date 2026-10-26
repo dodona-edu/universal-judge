@@ -12,8 +12,10 @@ from tested.languages.generation import get_readable_input
 from tested.testsuite import (
     ContentPath,
     Context,
+    LanguageLiterals,
     MainInput,
     Suite,
+    SupportedLanguage,
     Tab,
     Testcase,
     TextData,
@@ -332,6 +334,67 @@ def test_readable_input_no_path_in_input_files(
 
     assert "some-arg" in readable.description
     assert len(seen) == 0
+
+
+def test_readable_input_matches_files_of_whole_context(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "correct",
+    )
+
+    # Input files only sit on the first testcase of a context.
+    data_file = TextData(path="data.txt", content=ContentPath(path="path/to/data.txt"))
+    first = Testcase(
+        input=MainInput(arguments=[]),
+        input_files=[data_file],
+    )
+    second = Testcase(
+        input=LanguageLiterals(literals={SupportedLanguage.PYTHON: "read(1)"}),
+        description="Read data.txt",
+    )
+    context = Context(testcases=[first, second])
+
+    suite = Suite(tabs=[Tab(contexts=[context], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+
+    _, seen_by_case = get_readable_input(bundle, second)
+    _, seen_by_context = get_readable_input(bundle, second, context.get_input_files())
+
+    assert seen_by_case == set()
+    assert seen_by_context == {data_file}
+
+
+def test_readable_input_prefers_longest_file_name(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        "correct",
+    )
+
+    short_file = TextData(path="a.txt", content=ContentPath(path="url1"))
+    long_file = TextData(path="a.txt.bak", content=ContentPath(path="url2"))
+    case = Testcase(
+        input=LanguageLiterals(literals={SupportedLanguage.PYTHON: "read(1)"}),
+        description="Read a.txt.bak",
+    )
+
+    suite = Suite(tabs=[Tab(contexts=[Context(testcases=[case])], name="test")])
+    bundle = create_bundle(conf, sys.stdout, suite)
+
+    _, seen = get_readable_input(bundle, case, {short_file, long_file})
+
+    assert seen == {long_file}
 
 
 def _make_planned(
