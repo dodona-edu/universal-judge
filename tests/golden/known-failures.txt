@@ -1,7 +1,7 @@
 # <exercise>/<language>/<case> <issue URL> [<issue URL> ...]: judged as a strict xfail
 program-io/csharp/top-level-statements https://github.com/dodona-edu/universal-judge/issues/750
-program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/804
-program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/759 https://github.com/dodona-edu/universal-judge/issues/804
+program-io/bash/runtime-error https://github.com/dodona-edu/universal-judge/issues/759
+program-io/c/runtime-error https://github.com/dodona-edu/universal-judge/issues/759
 program-io/csharp/runtime-error https://github.com/dodona-edu/universal-judge/issues/758
 haskell-polymorphic-empty-list/haskell/correct https://github.com/dodona-edu/universal-judge/issues/735
 haskell-polymorphic-empty-list/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/735

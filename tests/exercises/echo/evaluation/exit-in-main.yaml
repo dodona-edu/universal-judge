@@ -1,0 +1,8 @@
+- tab: "Tests"
+  contexts:
+    - testcases:
+        - arguments: ["exit"]
+          stdout: "exit"
+    - testcases:
+        - arguments: ["hello"]
+          stdout: "hello"

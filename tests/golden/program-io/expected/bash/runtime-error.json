@@ -65,23 +65,14 @@
   "command": "start-context"
  },
  {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
   "command": "start-testcase",
   "description": {
    "description": "$ submission Welcome Dodona",
    "format": "console"
-  }
- },
- {
-  "channel": "stderr",
-  "command": "start-test",
-  "expected": ""
- },
- {
-  "command": "close-test",
-  "generated": "submission: line 11: cannot_continue: command not found\n",
-  "status": {
-   "enum": "wrong",
-   "human": "Unexpected output"
   }
  },
  {
@@ -90,31 +81,20 @@
   "expected": "Welcome: Dodona\n"
  },
  {
+  "accepted": false,
   "command": "close-test",
-  "generated": "Welcome: Dodona\n",
+  "generated": "",
   "status": {
-   "enum": "correct"
+   "enum": "wrong"
   }
  },
  {
-  "channel": "exit code",
-  "command": "start-test",
-  "expected": "0"
- },
- {
-  "command": "close-test",
-  "generated": "127",
-  "status": {
-   "enum": "runtime error",
-   "human": "Runtime error"
-  }
- },
- {
+  "accepted": false,
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "start-context"
@@ -175,6 +155,10 @@
   "command": "start-context"
  },
  {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
+ },
+ {
   "command": "start-testcase",
   "description": {
    "description": "$ submission",
@@ -187,10 +171,11 @@
   "expected": ""
  },
  {
+  "accepted": false,
   "command": "close-test",
   "generated": "",
   "status": {
-   "enum": "correct"
+   "enum": "wrong"
   }
  },
  {
@@ -199,18 +184,20 @@
   "expected": "1"
  },
  {
+  "accepted": false,
   "command": "close-test",
-  "generated": "1",
+  "generated": "",
   "status": {
-   "enum": "correct"
+   "enum": "wrong"
   }
  },
  {
+  "accepted": false,
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "close-tab"

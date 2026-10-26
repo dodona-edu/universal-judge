@@ -970,6 +970,36 @@ def test_nonzero_status_in_bash_function_testcase_is_no_crash(
     ]
 
 
+@pytest.mark.parametrize("language", ["python", "bash"])
+def test_exit_in_main_call_is_runtime_error(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        language,
+        tmp_path,
+        "exit-in-main.yaml",
+        "exit-in-main",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    tests = updates.find_all("start-test")
+    assert tests[0] == {
+        "command": "start-test",
+        "expected": "exit\n",
+        "channel": "stdout",
+    }
+    assert updates[updates.index(tests[0]) + 1]["status"]["enum"] == "correct"
+    exit_tests = [x for x in tests if x["channel"] == "exit code"]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "0", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "3"
+    assert exit_result["status"]["enum"] == "runtime error"
+
+
 @pytest.mark.parametrize("language", ["bash"])
 def test_nonzero_status_in_bash_function_testcase_checks_exit_code(
     language: str, tmp_path: Path, pytestconfig: pytest.Config
