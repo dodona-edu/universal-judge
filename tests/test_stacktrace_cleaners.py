@@ -355,6 +355,21 @@ execution_0.cpp:52:5: error: ‘execution_0_value_file’ was not declared in th
     assert actual == expected
 
 
+def test_cpp_compilation_error_outside_submission():
+    original = """In file included from selector.cpp:5:
+execution_0.cpp: In function ‘int execution_0_context_0()’:
+execution_0.cpp:39:25: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+   39 |         char* args[] = {"submission", };
+      |                         ^~~~~~~~~~~~
+execution_0.cpp:40:21: error: ‘solution_main’ was not declared in this scope
+   40 |         exit_code = solution_main(1, args);
+      |                     ^~~~~~~~~~~~~
+"""
+    language_config = get_language("test", "cpp")
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == original
+
+
 def test_haskell_compilation_error():
     original = """Submission.hs:3:1: error:
         Parse error: module header, import declaration

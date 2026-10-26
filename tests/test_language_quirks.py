@@ -71,6 +71,20 @@ def test_c_compilation_error_message_with_dots(
 
 
 @pytest.mark.cpp
+def test_cpp_error_outside_submission_has_message(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "echo", "cpp", tmp_path, "one.tson", "no-main")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = updates.find_all("append-message")
+    descriptions = [m["message"]["description"] for m in messages]
+    assert any("error:" in d for d in descriptions)
+    assert "<div class='code'></div>" not in descriptions
+
+
+@pytest.mark.cpp
 def test_cpp_negative_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
