@@ -211,14 +211,12 @@ class TypeScript(Language):
         return resulting_lines
 
     def cleanup_description(self, statement: str) -> str:
-        statement = cleanup_description(self, statement)
-        await_regex = re.compile(r"await\s+")
-        return await_regex.sub("", statement)
+        return cleanup_description(self, statement)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.typescript import generators
 
-        return generators.convert_statement(statement, full=True)
+        return generators.convert_statement(statement, internal=True, full=True)
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         from tested.languages.typescript import generators
