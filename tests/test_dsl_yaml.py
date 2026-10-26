@@ -585,6 +585,100 @@ def test_tab_config_trickles_down_stderr():
     assert config["caseInsensitive"]
 
 
+def test_tab_config_trickles_down_output_files():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "OutputFiles"
+    config:
+      file:
+        ignoreWhitespace: true
+        caseInsensitive: true
+        mode: "line"
+    testcases:
+      - expression: "test()"
+        output_files:
+          - path: "output.txt"
+            content: "expected"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    file = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file, FileOutputChannel)
+    assert isinstance(file.oracle, GenericTextOracle)
+    config = file.oracle.options
+    assert config["ignoreWhitespace"]
+    assert config["caseInsensitive"]
+    assert config["mode"] == "line"
+
+
+def test_tab_config_output_files_overrides_file():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "OutputFiles"
+    config:
+      file:
+        ignoreWhitespace: true
+        caseInsensitive: true
+      output_files:
+        caseInsensitive: false
+        roundTo: 3
+    testcases:
+      - expression: "test()"
+        output_files:
+          - path: "output.txt"
+            content: "expected"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    file = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file, FileOutputChannel)
+    assert isinstance(file.oracle, GenericTextOracle)
+    config = file.oracle.options
+    # Only set in the "file" config, so inherited from there.
+    assert config["ignoreWhitespace"]
+    # Set in both, so "output_files" wins.
+    assert not config["caseInsensitive"]
+    # Only set in the "output_files" config, which is still supported.
+    assert config["roundTo"] == 3
+
+
+def test_output_files_inline_config_overrides_tab_config():
+    yaml_str = """
+namespace: "Files"
+tabs:
+  - tab: "OutputFiles"
+    config:
+      file:
+        ignoreWhitespace: true
+        caseInsensitive: true
+        roundTo: 1
+      output_files:
+        roundTo: 2
+    testcases:
+      - expression: "test()"
+        output_files:
+          config:
+            ignoreWhitespace: false
+            roundTo: 3
+          data:
+            - path: "output.txt"
+              content: "expected"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    file = suite.tabs[0].contexts[0].testcases[0].output.file
+    assert isinstance(file, FileOutputChannel)
+    assert isinstance(file.oracle, GenericTextOracle)
+    config = file.oracle.options
+    # Inline config wins over both inherited configs.
+    assert not config["ignoreWhitespace"]
+    assert config["roundTo"] == 3
+    # Not set inline, so still inherited.
+    assert config["caseInsensitive"]
+
+
 def test_expression_raw_return():
     yaml_str = """
 - tab: 'Test'
