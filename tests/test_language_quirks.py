@@ -232,7 +232,8 @@ def test_cpp_results_survive_crash_and_timeout(
         tmp_path,
         "suite.yaml",
         solution,
-        {"time_limit": 40} if solution == "hang" else None,
+        # The linter is off in tests: the limit covers g++ and the run.
+        {"time_limit": 10} if solution == "hang" else None,
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
