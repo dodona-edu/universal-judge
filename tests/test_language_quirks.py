@@ -436,7 +436,7 @@ def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.C
     assert precompiled
     for module in haskell_config.HELPER_MODULES:
         for ext in ("hi", "o"):
-            used = tmp_path / "common" / f"{module}.{ext}"
+            used = conf.tested_directory / "common" / f"{module}.{ext}"
             shipped = precompiled / f"{module}.{ext}"
             assert used.stat().st_mtime_ns == shipped.stat().st_mtime_ns
 
@@ -458,12 +458,12 @@ def test_runhaskell_with_precompiled_helpers(
 
     # Run the unit again as the judge does, listing where GHCi got each module from.
     command = LANGUAGES["runhaskell"](None).execution(
-        tmp_path, "Selector.hs", ["Execution0"]
+        conf.tested_directory, "Selector.hs", ["Execution0"]
     )
     command[1:1] = ["--ghc-arg=-e", "--ghc-arg=:show modules"]
     modules = subprocess.run(
         command,
-        cwd=tmp_path / "Execution0",
+        cwd=conf.tested_directory / "Execution0",
         capture_output=True,
         text=True,
         check=True,
