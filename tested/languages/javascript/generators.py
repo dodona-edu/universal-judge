@@ -170,12 +170,14 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         # Prepare command arguments if needed.
         if tc.testcase.is_main_testcase():
             assert isinstance(tc.input, MainInput)
-            wrapped = [json.dumps(a) for a in tc.input.arguments]
+            argv = [
+                "process.argv[0]",
+                f'require.resolve("./{submission_file(pu.language)}")',
+                *(json.dumps(a) for a in tc.input.arguments),
+            ]
             result += f"""
             writeSeparator();
-            let new_args = [process.argv[0]];
-            new_args = new_args.concat([{", ".join(wrapped)}]);
-            process.argv = new_args;
+            process.argv = [{", ".join(argv)}];
             """
         elif i != 0:
             result += "writeSeparator();\n"
