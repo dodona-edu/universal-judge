@@ -19,11 +19,8 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import (
-    cleanup_description,
-    executable_name,
-    haskell_solution,
-)
+from tested.languages.utils import cleanup_description as strip_submission_prefix
+from tested.languages.utils import executable_name, haskell_solution
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -179,7 +176,7 @@ class Haskell(Language):
         return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+        return strip_submission_prefix(self, statement)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         filename = submission_file(self)
