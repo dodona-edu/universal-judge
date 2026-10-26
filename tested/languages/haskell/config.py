@@ -151,6 +151,7 @@ class Haskell(Language):
         assert self.config
         return [
             "ghc",
+            "-v0",
             "-fno-cse",
             "-fno-full-laziness",
             "-O3" if self.config.options.compiler_optimizations else "-O0",
