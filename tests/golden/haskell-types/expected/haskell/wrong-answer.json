@@ -1,0 +1,1687 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "smallest"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "smallest (5 :: Int) (6 :: Int)",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "5 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "smallest (-5 :: Int) (-6 :: Int)",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "-6 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "-5 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "total"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "total ([1 :: Int, 2 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "4 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "total []",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "0 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "positives"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "positives ([1 :: Int, -2 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[1 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "[1 :: Int]",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "positives ([-1 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[]"
+ },
+ {
+  "command": "close-test",
+  "generated": "[-1 :: Int]",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "nthElement (Int)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (0 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "1 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "1 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (1 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (2 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "3 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (3 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "4 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "4 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (4 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "4 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "nthElement (Double)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (0 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "1.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "1 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (1 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (2 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "3 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (3 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "4.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "4 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (4 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "4 :: Double",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "nthElement (String)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (0 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"a\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"a\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (1 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"b\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (2 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"c\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"c\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (3 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"d\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"d\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (4 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"e\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"d\"",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "nthElement (Tuple)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (0 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[1 :: Int, 5 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "(1 :: Int, 5 :: Int)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (1 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[2 :: Int, 4 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "(2 :: Int, 4 :: Int)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (2 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[3 :: Int, 3 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "(3 :: Int, 3 :: Int)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (3 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[4 :: Int, 2 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "(4 :: Int, 2 :: Int)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (4 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[5 :: Int, 1 :: Int]"
+ },
+ {
+  "command": "close-test",
+  "generated": "(4 :: Int, 2 :: Int)",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "secondToLast (Int)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1 :: Int, 2 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "1 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "4 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1 :: Int, 0 :: Int, 1 :: Int, 0 :: Int, 1 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "0 :: Int",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([9 :: Int, 81 :: Int, 1 :: Int, 2 :: Int, 4 :: Int, 1 :: Int, 42 :: Int, 1 :: Int])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "42 :: Int"
+ },
+ {
+  "command": "close-test",
+  "generated": "81 :: Int",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "secondToLast (Double)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "1.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Double",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Double",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "4.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "2 :: Double",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([1.0 :: Double, 0.0 :: Double, 1.0 :: Double, 0.0 :: Double, 1.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "0 :: Double",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ([9.0 :: Double, 81.0 :: Double, 1.0 :: Double, 2.0 :: Double, 4.0 :: Double, 1.0 :: Double, 42.0 :: Double, 1.0 :: Double])",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "42.0 :: Double"
+ },
+ {
+  "command": "close-test",
+  "generated": "81 :: Double",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "secondToLast (String)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"a\", \"b\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"a\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"a\", \"b\", \"c\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"b\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"a\", \"b\", \"c\", \"d\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"c\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"d\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"a\", \"b\", \"a\", \"b\", \"a\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"b\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"b\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast [\"c\", \"d\", \"a\", \"b\", \"g\"]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"b\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"d\"",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "nthElement (Char)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (0 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'a'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'a'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (1 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'b'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (2 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'c'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'c'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (3 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'d'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'d'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "nthElement (4 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'e'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'d'",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "secondToLast (Char)"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['a', 'b']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'a'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['a', 'b', 'c']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'b'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['a', 'b', 'c', 'd']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'c'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['a', 'b', 'c', 'd', 'e']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'d'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['a', 'b', 'a', 'b', 'a']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'b'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'b'",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "secondToLast ['c', 'd', 'a', 'b', 'g']",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "'b'"
+ },
+ {
+  "command": "close-test",
+  "generated": "'d'",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
