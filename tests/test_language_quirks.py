@@ -3,7 +3,9 @@ Tests for specific aspects of certain language implementations.
 """
 
 import itertools
+import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -346,12 +348,15 @@ def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.C
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
 
-    # GHC rewrites the object files if it had to recompile the helpers.
+    # The copies keep the modification time of the image, unless GHC recompiled the
+    # helpers. Their contents don't tell: GHC would write the same bytes again.
     precompiled = haskell_config.precompiled_helpers("static")
     assert precompiled
     for module in haskell_config.HELPER_MODULES:
-        used = tmp_path / "common" / f"{module}.o"
-        assert used.read_bytes() == (precompiled / f"{module}.o").read_bytes()
+        for ext in ("hi", "o"):
+            used = tmp_path / "common" / f"{module}.{ext}"
+            shipped = precompiled / f"{module}.{ext}"
+            assert used.stat().st_mtime_ns == shipped.stat().st_mtime_ns
 
 
 @pytest.mark.runhaskell
@@ -368,7 +373,21 @@ def test_runhaskell_with_precompiled_helpers(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
-    assert (tmp_path / "common" / "Values.o").is_file()
+
+    # Run the unit again as the judge does, listing where GHCi got each module from.
+    command = LANGUAGES["runhaskell"](None).execution(
+        tmp_path, "Selector.hs", ["Execution0"]
+    )
+    command[1:1] = ["--ghc-arg=-e", "--ghc-arg=:show modules"]
+    modules = subprocess.run(
+        command,
+        cwd=tmp_path / "Execution0",
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    for module in haskell_config.HELPER_MODULES:
+        assert re.search(rf"^{module} +\( {module}\.hs, {module}\.o \)$", modules, re.M)
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
