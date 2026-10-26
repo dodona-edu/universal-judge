@@ -129,7 +129,7 @@ class C(Language):
                 continue
 
             # Once we hit the three dots, skip.
-            if "..." in line:
+            if line.strip() == "...":
                 break
 
             line = line.replace(submission_file(self), "<code>")
