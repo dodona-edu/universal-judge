@@ -155,12 +155,12 @@ class JavaScript(Language):
         # 1a. While inside the submission code, replace all references to the location with <code>
         # 1b. Remove any "submission.SOMETHING" -> "SOMETHING"
         # 2. Once we encounter a line with the execution location, skip all lines.
-        execution_submission_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
+        execution_submission_location_regex = f"{self.config.dodona.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
         submission_location = (
-            self.config.dodona.workdir / "common" / submission_file(self)
+            self.config.dodona.tested_directory / "common" / submission_file(self)
         )
         compilation_submission_location = str(submission_location.resolve())
-        execution_location_regex = f"{self.config.dodona.workdir}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.js"
+        execution_location_regex = f"{self.config.dodona.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.js"
         submission_namespace = f"{submission_name(self)}."
 
         resulting_lines = ""

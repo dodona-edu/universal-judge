@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tested.configs import create_bundle
+from tested.configs import TESTED_DIRECTORY, create_bundle
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedSequenceTypes,
@@ -329,16 +329,11 @@ def test_copy_workdir_files_keeps_the_case_of_directories(
     assert source_files == [str(destination / "Helper.py")]
 
 
-def test_copy_workdir_files_ignores_the_directories_of_the_judge(
+def test_copy_workdir_files_ignores_only_the_directory_of_the_judge(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
-    """
-    The judge creates its own directories in the workdir, which must not be copied.
-    Their name is conventionalized, so the check is case-insensitive: the execution
-    directory is called "execution_0" in Python, but "Execution0" in Java.
-    """
     workdir = tmp_path / "workdir"
-    for name in ("common", "execution_0", "Execution0", "MyExecutionHelpers"):
+    for name in (TESTED_DIRECTORY, "common", "execution_0", "Execution0"):
         (workdir / name).mkdir(parents=True)
         (workdir / name / "module.py").touch()
     destination = tmp_path / "destination"
@@ -348,7 +343,11 @@ def test_copy_workdir_files_ignores_the_directories_of_the_judge(
     bundle = create_bundle(conf, sys.stdout, Suite())
     copy_workdir_files(bundle, destination, True)
 
-    assert [x.name for x in destination.iterdir()] == ["MyExecutionHelpers"]
+    assert sorted(x.name for x in destination.iterdir()) == [
+        "Execution0",
+        "common",
+        "execution_0",
+    ]
 
 
 def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig: pytest.Config):

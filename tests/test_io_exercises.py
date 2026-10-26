@@ -158,6 +158,34 @@ def test_unknown_shebang_language_counts_as_consumed_line(
     assert offset == expected_offset
 
 
+@pytest.mark.parametrize(
+    "files",
+    [
+        ["common/data.txt"],
+        ["execution_0/c.txt"],
+        ["execution_logs/a.txt", "data/b.txt"],
+    ],
+)
+def test_io_exercise_workdir_folders_reach_submission(
+    files: list[str], tmp_path: Path, pytestconfig: pytest.Config
+):
+    for file in files:
+        (tmp_path / file).parent.mkdir()
+        (tmp_path / file).write_text("workdir content\n")
+    (tmp_path / "expected-files.txt").write_text("\n".join(files))
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-workdir-folders.yaml",
+        "correct-workdir-folders",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
