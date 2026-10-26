@@ -88,16 +88,17 @@ class ExecutionResult(BaseExecutionResult):
         for index, (r, e, err, out) in enumerate(
             itertools.zip_longest(results, exceptions, stderr, stdout)
         ):
+            last = index == size - 1
             context_execution_results.append(
                 ContextResult(
                     separator=self.testcase_separator,
-                    exit=self.exit,
+                    exit=self.exit if last else 0,
                     results=r or "",
                     exceptions=e or "",
                     stdout=out or "",
                     stderr=err or "",
-                    timeout=self.timeout and index == size - 1,
-                    memory=self.memory and index == size - 1,
+                    timeout=self.timeout and last,
+                    memory=self.memory and last,
                 )
             )
 

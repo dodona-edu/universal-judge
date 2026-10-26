@@ -920,3 +920,76 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
     assert (
         actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
+
+
+@pytest.mark.parametrize("language", ["python"])
+def test_exit_in_function_testcase_is_runtime_error(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "exit-in-function.yaml",
+        "exit-in-function",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == [
+        "correct",
+        "runtime error",
+        "wrong",
+        "wrong",
+    ]
+    exit_tests = [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "0", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "3"
+
+
+@pytest.mark.parametrize("language", ["bash"])
+@pytest.mark.parametrize(
+    "suite", ["nonzero-status-last.yaml", "nonzero-status-first.yaml"]
+)
+def test_nonzero_status_in_bash_function_testcase_is_no_crash(
+    language: str, suite: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", language, tmp_path, suite, "nonzero-status"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+    assert not [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+
+
+@pytest.mark.parametrize("language", ["bash"])
+def test_nonzero_status_in_bash_function_testcase_checks_exit_code(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "nonzero-status-exit-code.yaml",
+        "nonzero-status",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+    exit_tests = [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "1", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "1"

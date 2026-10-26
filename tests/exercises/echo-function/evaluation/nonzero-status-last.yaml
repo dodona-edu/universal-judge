@@ -1,0 +1,8 @@
+- tab: "My tab"
+  contexts:
+    - testcases:
+        - statement: 'is_even("4")'
+          stdout: ""
+    - testcases:
+        - statement: 'is_even("3")'
+          stdout: ""
