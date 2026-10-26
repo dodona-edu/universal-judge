@@ -178,6 +178,7 @@ module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
+import System.Exit (ExitCode)
 import qualified Values
 import Control.Monad.Trans.Class
 import Control.Exception
@@ -232,7 +233,13 @@ handleException (Right _) = Nothing
 -- Shared by all testcases: inlining this makes compilation a lot slower.
 runTestcase :: IO a -> (a -> IO ()) -> (Maybe SomeException -> IO ()) -> IO ()
 runTestcase action onValue onException =
-    catch (action >>= onValue) (\\e -> onException (Just e))
+    catchJust nonExit (action >>= onValue) (\\e -> onException (Just e))
+
+-- Leaves ExitCode uncaught, so exitWith sets the process exit code.
+nonExit :: SomeException -> Maybe SomeException
+nonExit e = case fromException e :: Maybe ExitCode of
+    Just _ -> Nothing
+    Nothing -> Just e
 """
 
     # Generate code for each context.
@@ -253,7 +260,7 @@ runTestcase action onValue onException =
                 result += indent + f"let mainArgs = [{' ,'.join(wrapped)}]\n"
                 result += (
                     indent
-                    + f"result <- try (withArgs mainArgs {pu.submission_name}.main) :: IO (Either SomeException ())\n"
+                    + f"result <- tryJust nonExit (withArgs mainArgs {pu.submission_name}.main)\n"
                 )
                 result += (
                     indent
