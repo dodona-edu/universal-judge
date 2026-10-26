@@ -26,7 +26,7 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import cleanup_description
+from tested.languages.utils import cleanup_description as strip_submission_prefix
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
@@ -211,7 +211,7 @@ class TypeScript(Language):
         return resulting_lines
 
     def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+        return strip_submission_prefix(self, statement)
 
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.typescript import generators
