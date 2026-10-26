@@ -14,6 +14,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from tested.configs import create_bundle
+from tested.dodona import Status
 from tested.features import Construct
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
@@ -435,6 +436,32 @@ def test_batch_compilation_no_fallback_runtime(
     assert len(updates.find_status_enum()) >= 4
     # There could be more wrongs: some languages might modify the exit code
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
+
+
+@pytest.mark.python
+def test_unit_without_main_file_does_not_fail_later_units(
+    tmp_path: Path, pytestconfig: pytest.Config, monkeypatch: pytest.MonkeyPatch
+):
+    python = LANGUAGES["python"]
+    original = python.find_main_file
+
+    def find_main_file(self, files, name):
+        if name.endswith("_0"):
+            return Status.COMPILATION_ERROR
+        return original(self, files, name)
+
+    monkeypatch.setattr(python, "find_main_file", find_main_file)
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "two-contexts-stdin.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error", "correct"]
 
 
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
