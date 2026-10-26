@@ -1,0 +1,10 @@
+namespace: "counter"
+tabs:
+- tab: "Counter"
+  contexts:
+    - testcases:
+        - expression: "increment()"
+          return: 1
+    - testcases:
+        - expression: "increment()"
+          return: 1

@@ -235,7 +235,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
         result += f"""
             writeSeparator();
             delete require.cache[require.resolve("./{submission_file(pu.language)}")];
-            let {pu.submission_name} = await import('./{submission_file(pu.language)}');
+            let {pu.submission_name} = require('./{submission_file(pu.language)}');
             """
 
     # Generate code for each testcase
@@ -269,7 +269,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             assert isinstance(tc.input, MainInput)
             result += f"""
                 delete require.cache[require.resolve("./{pu.submission_name}.ts")];
-                let {pu.submission_name} = await import('./{pu.submission_name}.ts');
+                let {pu.submission_name} = require('./{pu.submission_name}.ts');
             """
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
