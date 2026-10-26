@@ -3,7 +3,9 @@ Tests for specific aspects of certain language implementations.
 """
 
 import itertools
+import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -15,6 +17,7 @@ from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
+from tested.languages.haskell import config as haskell_config
 from tested.languages.preparation import prepare_assignment, prepare_expression
 from tested.languages.python.generators import convert_statement
 from tested.serialisation import (
@@ -308,6 +311,83 @@ def test_haskell_typed_literal_arguments(tmp_path: Path, pytestconfig: pytest.Co
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct", "correct"]
+
+
+def test_haskell_precompiled_helpers_must_match_templates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    (tmp_path / "static").mkdir()
+    for module in haskell_config.HELPER_MODULES:
+        template = haskell_config.TEMPLATES_DIRECTORY / f"{module}.hs"
+        shutil.copy(template, tmp_path / "static")
+        for ext in ("hi", "o"):
+            (tmp_path / "static" / f"{module}.{ext}").write_bytes(b"")
+    shutil.copytree(tmp_path / "static", tmp_path / "dynamic")
+    with (tmp_path / "dynamic" / "Values.hs").open("a") as source:
+        source.write("-- outdated\n")
+
+    monkeypatch.setattr(haskell_config, "PRECOMPILED_DIRECTORY", tmp_path)
+    haskell_config.precompiled_helpers.cache_clear()
+    try:
+        assert haskell_config.precompiled_helpers("static") == tmp_path / "static"
+        assert haskell_config.precompiled_helpers("dynamic") is None
+    finally:
+        haskell_config.precompiled_helpers.cache_clear()
+
+
+@pytest.mark.haskell
+@pytest.mark.skipif(
+    haskell_config.precompiled_helpers("static") is None,
+    reason="The image has no precompiled Haskell helpers",
+)
+def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+    # The copies keep the modification time of the image, unless GHC recompiled the
+    # helpers. Their contents don't tell: GHC would write the same bytes again.
+    precompiled = haskell_config.precompiled_helpers("static")
+    assert precompiled
+    for module in haskell_config.HELPER_MODULES:
+        for ext in ("hi", "o"):
+            used = tmp_path / "common" / f"{module}.{ext}"
+            shipped = precompiled / f"{module}.{ext}"
+            assert used.stat().st_mtime_ns == shipped.stat().st_mtime_ns
+
+
+@pytest.mark.runhaskell
+@pytest.mark.skipif(
+    haskell_config.precompiled_helpers("dynamic") is None,
+    reason="The image has no precompiled Haskell helpers",
+)
+def test_runhaskell_with_precompiled_helpers(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "runhaskell", tmp_path, "one.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+    # Run the unit again as the judge does, listing where GHCi got each module from.
+    command = LANGUAGES["runhaskell"](None).execution(
+        tmp_path, "Selector.hs", ["Execution0"]
+    )
+    command[1:1] = ["--ghc-arg=-e", "--ghc-arg=:show modules"]
+    modules = subprocess.run(
+        command,
+        cwd=tmp_path / "Execution0",
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    for module in haskell_config.HELPER_MODULES:
+        assert re.search(rf"^{module} +\( {module}\.hs, {module}\.o \)$", modules, re.M)
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
