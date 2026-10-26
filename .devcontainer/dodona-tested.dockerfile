@@ -5,7 +5,7 @@
 # It should not contain any development tools or dependencies.
 # Add those to dev-dependencies.sh instead.
 
-FROM python:3.12.4-slim-bullseye
+FROM python:3.12.15-slim-trixie
 
 # Set up the environment
 
@@ -30,29 +30,6 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 # hadolint ignore=DL3013,DL3016
 RUN <<EOF
     set -eux
-
-    # TEMPORARY: Debian 11 (bullseye) reached end-of-life on 2026-08-31 and its
-    # security pocket has been withdrawn in two stages: the Release file expired
-    # on 2026-09-07, so apt drops the whole suite, and the .deb files are being
-    # deleted from the pool (404 on both deb.debian.org and security.debian.org).
-    # The NodeSource setup script swallows the resulting apt failure and exits 0,
-    # so the build silently ends up with Debian's nodejs 12 and no npm at all.
-    #
-    # Serve the base distro from archive.debian.org, frozen at the final 11.11
-    # point release, and take bullseye-security from a pinned snapshot.debian.org
-    # timestamp. archive.debian.org has no debian-security for bullseye yet
-    # (buster is still the newest suite there) and, going by how long buster took
-    # to land, is not expected to before mid-2027. Dropping the security pocket
-    # instead would move 55 packages back to their pre-security-pocket builds,
-    # among them ca-certificates (2021 vs 2025), openjdk-11-jre-headless (11.0.24
-    # vs 11.0.32), libc6 (u11 vs u14) and the whole GnuPG suite.
-    #
-    # Remove this whole workaround once the base image is bumped to bookworm.
-    cat > /etc/apt/sources.list <<'SOURCES'
-deb [check-valid-until=no] http://archive.debian.org/debian bullseye main
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260831T000000Z bullseye-security main
-SOURCES
-    rm -f /etc/apt/sources.list.d/*.list
 
     # Update apt-get
     apt-get update
@@ -137,7 +114,7 @@ CFG
     find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 
     # C# dependencies
-    curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
+    curl https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     rm packages-microsoft-prod.deb
     apt-get update
