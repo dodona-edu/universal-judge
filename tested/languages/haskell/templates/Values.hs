@@ -312,9 +312,15 @@ sendEvaluatedH file r =
     ]))
 
 sendException :: FilePath -> Maybe SomeException -> IO ()
-sendException file (Just (SomeException ex)) = LBS.appendFile file (encode (object [
-        "message" .= toJSON (show ex),
+sendException file (Just e@(SomeException ex)) = LBS.appendFile file (encode (object [
+        "message" .= toJSON (exceptionMessage e),
         "stacktrace" .= toJSON (show ex),
         "type" .= show (typeOf ex)
     ]))
 sendException _ Nothing = return ()
+
+-- show of an ErrorCall appends its CallStack, which belongs in the stack trace only.
+exceptionMessage :: SomeException -> String
+exceptionMessage e@(SomeException ex) = case fromException e of
+    Just (ErrorCall msg) -> msg
+    Nothing -> show ex

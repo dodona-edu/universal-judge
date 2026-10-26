@@ -31,7 +31,7 @@
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:26:21 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"
@@ -81,7 +81,7 @@
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:26:21 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"
@@ -131,7 +131,7 @@
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:14:13 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"

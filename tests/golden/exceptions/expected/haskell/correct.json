@@ -1,0 +1,44 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Exceptions"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "greet \"World\"",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": "ErrorCall: cannot greet World"
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: cannot greet World",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
