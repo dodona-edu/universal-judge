@@ -56,8 +56,8 @@ CFG
     # Python dependencies
     pip install --no-cache-dir --upgrade \
         psutil==5.9.8 \
-        attrs==23.2.0 \
-        cattrs==23.2.3 \
+        attrs==26.1.0 \
+        cattrs==26.2.1 \
         jsonschema==4.22.0 \
         typing_inspect==0.9.0 \
         pyyaml==6.0.1 \
