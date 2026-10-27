@@ -34,7 +34,8 @@ from tested.datatypes import (
     resolve_to_basic,
 )
 from tested.datatypes.advanced import AdvancedObjectTypes
-from tested.features import TypeSupport, fallback_type_support_map
+from tested.dsl import parse_string
+from tested.features import Construct, TypeSupport, fallback_type_support_map
 from tested.judge.compilation import run_compilation
 from tested.judge.execution import execute_file, filter_files
 from tested.judge.utils import BaseExecutionResult, copy_from_paths_to_path
@@ -340,3 +341,44 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig: pytest.Conf
             basic_type = resolve_to_basic(advanced_type)
             basic_value = type_map[basic_type]
             assert basic_value == TypeSupport.SUPPORTED
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "[1, 'a']",
+        "[[1], ['a']]",
+        "[[1], 1]",
+        "[[[1]], [['a']]]",
+        "[[], [1], ['a']]",
+        "[(1, 2), (1, 'a')]",
+        "{(1,), ('a',)}",
+        "[{'a': 1}, {'a': 'b'}]",
+        "[{'a': 1}, {1: 1}]",
+    ],
+)
+def test_heterogeneous_collections_are_detected(expression: str):
+    features = parse_string(expression).get_used_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS in features.constructs
+
+
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "[1, 2]",
+        "[[1], [2, 3]]",
+        "[[1], []]",
+        "[[], [1]]",
+        "[[], []]",
+        "[[[]], [[1]]]",
+        "[[[1]], [[]], [[2], []]]",
+        "[(1, 2), (3, 4)]",
+        "{(1,), (2,)}",
+        "[{'a': 1}, {'b': 2}]",
+        "[{'a': []}, {'b': [1]}]",
+        "[[1.5], [2.5]]",
+    ],
+)
+def test_homogeneous_collections_are_not_flagged(expression: str):
+    features = parse_string(expression).get_used_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS not in features.constructs
