@@ -10,6 +10,7 @@ from typing import Any, Generator, cast
 from attrs import define
 
 from tested.configs import Bundle, create_bundle
+from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
 from tested.judge.utils import BaseExecutionResult
@@ -242,6 +243,14 @@ def evaluate(
             result=StatusMessage(enum=Status.WRONG),
             readable_expected=readable_expected,
             readable_actual=readable_actual,
+        )
+
+    if BasicStringTypes.UNKNOWN in actual.get_used_features().types:
+        return OracleResult(
+            result=StatusMessage(enum=Status.WRONG),
+            readable_expected=readable_expected,
+            readable_actual=readable_actual,
+            messages=[get_i18n_string("oracles.programmed.unknown-value")],
         )
 
     _logger.debug(

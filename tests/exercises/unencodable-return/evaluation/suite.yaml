@@ -1,0 +1,20 @@
+- tab: "My tab"
+  testcases:
+    - expression: 'make_item(3)'
+      return: !oracle
+        oracle: "custom_check"
+        file: "evaluator.py"
+        name: "evaluate_never"
+        value: "Item(4)"
+    - expression: 'make_items(3)'
+      return: !oracle
+        oracle: "custom_check"
+        file: "evaluator.py"
+        name: "evaluate_never"
+        value: ["Item(4)"]
+    - expression: 'make_item_dict(3)'
+      return: !oracle
+        oracle: "custom_check"
+        file: "evaluator.py"
+        name: "evaluate_never"
+        value: {"item": "Item(4)"}
