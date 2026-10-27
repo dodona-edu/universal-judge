@@ -19,7 +19,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a>:22: error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
    "format": "html",
    "permission": "student"
   }
@@ -51,7 +51,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a>:22: error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
    "format": "html",
    "permission": "student"
   }
@@ -90,7 +90,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>ts(7,22): error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"6\">&lt;code&gt;:6</a>:22: error TS2552: Cannot find name &#x27;nme&#x27;. Did you mean &#x27;name&#x27;?</div>",
    "format": "html",
    "permission": "student"
   }
