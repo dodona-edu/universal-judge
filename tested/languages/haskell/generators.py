@@ -178,6 +178,7 @@ module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
 import System.Environment
+import System.Exit (ExitCode)
 import qualified Values
 import Control.Monad.Trans.Class
 import Control.Exception
@@ -228,6 +229,17 @@ sendSpecificException = Values.sendEvaluated exception_file
 handleException :: Exception e => (Either e a) -> Maybe e
 handleException (Left e) = Just e
 handleException (Right _) = Nothing
+
+-- Shared by all testcases: inlining this makes compilation a lot slower.
+runTestcase :: IO a -> (a -> IO ()) -> (Maybe SomeException -> IO ()) -> IO ()
+runTestcase action onValue onException =
+    catchJust nonExit (action >>= onValue) (\\e -> onException (Just e))
+
+-- Leaves ExitCode uncaught, so exitWith sets the process exit code.
+nonExit :: SomeException -> Maybe SomeException
+nonExit e = case fromException e :: Maybe ExitCode of
+    Just _ -> Nothing
+    Nothing -> Just e
 """
 
     # Generate code for each context.
@@ -239,7 +251,7 @@ handleException (Right _) = Nothing
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for i1, tc in enumerate(ctx.testcases):
+        for tc in ctx.testcases:
             result += indent + "writeSeparator\n"
 
             if tc.testcase.is_main_testcase():
@@ -248,7 +260,7 @@ handleException (Right _) = Nothing
                 result += indent + f"let mainArgs = [{' ,'.join(wrapped)}]\n"
                 result += (
                     indent
-                    + f"result <- try (withArgs mainArgs {pu.submission_name}.main) :: IO (Either SomeException ())\n"
+                    + f"result <- tryJust nonExit (withArgs mainArgs {pu.submission_name}.main)\n"
                 )
                 result += (
                     indent
@@ -265,31 +277,19 @@ handleException (Right _) = Nothing
                         + "\n"
                     )
                 else:
-                    result += indent + f"result{i1} <- catch\n"
-                    result += indent * 2 + f"(do\n"  # Start a `do` block
-                    id_result = tc.input.input_statement("r")
-                    result += (
-                        indent * 3
-                        + f"r <- {convert_statement(tc.input.unwrapped_input_statement(), True)}\n"
-                    )  # Bind the result to 'r'
-                    if isinstance(id_result, Identifier):
-                        result += (
-                            indent * 3 + f"sendValue {convert_statement(id_result)}\n"
-                        )  # Send the value if it's an identifier
-                    else:
-                        result += (
-                            indent * 3 + convert_statement(id_result) + "\n"
-                        )  # Otherwise, execute the statement
-                    result += indent * 3 + "return ()\n"  # Explicitly return unit
-                    result += indent * 2 + ") (\\e -> do\n"  # Handle exceptions
-                    result += (
-                        indent * 3
-                        + f"let ee = (Just (e :: SomeException)) in {convert_statement(tc.exception_statement('ee'))}\n"
+                    action = convert_statement(
+                        tc.input.unwrapped_input_statement(), True
                     )
+                    id_result = tc.input.input_statement("r")
+                    if isinstance(id_result, Identifier):
+                        on_value = f"sendValue {convert_statement(id_result)}"
+                    else:
+                        on_value = convert_statement(id_result)
+                    on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        indent * 3 + "return ()\n"
-                    )  # Explicitly return unit in the exception case
-                    result += indent * 2 + ")\n"  # End the `catch` block
+                        indent
+                        + f"runTestcase ({action}) (\\r -> {on_value}) (\\ee -> {on_exception})\n"
+                    )
         result += indent + ctx.after + "\n"
         result += indent + 'putStr ""\n'
 

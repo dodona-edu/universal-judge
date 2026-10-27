@@ -24,14 +24,14 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"27\">&lt;code&gt;:27</a>:21 in main:Submission</div>",
+   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"25\">&lt;code&gt;:25</a>:21 in main:Submission</div>",
    "format": "html",
    "permission": "student"
   }
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:27:21 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"
@@ -74,14 +74,14 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"27\">&lt;code&gt;:27</a>:21 in main:Submission</div>",
+   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"25\">&lt;code&gt;:25</a>:21 in main:Submission</div>",
    "format": "html",
    "permission": "student"
   }
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:27:21 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"
@@ -124,14 +124,14 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"15\">&lt;code&gt;:15</a>:13 in main:Submission</div>",
+   "description": "<div class='code'>cannot continue<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"13\">&lt;code&gt;:13</a>:13 in main:Submission</div>",
    "format": "html",
    "permission": "student"
   }
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot continue\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:15:13 in main:Submission",
+  "generated": "ErrorCall: cannot continue",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"

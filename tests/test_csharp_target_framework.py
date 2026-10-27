@@ -17,15 +17,6 @@ def install_pack(root: Path, version: str, framework: str) -> Path:
     return reference
 
 
-def test_only_net8_picks_net8(tmp_path: Path):
-    reference = install_pack(tmp_path, "8.0.11", "net8.0")
-    framework, folder = _pick_target_framework([tmp_path])
-    assert framework.reference_dir == "net8.0"
-    assert framework.runtimeconfig == "tested.net8.0.runtimeconfig.json"
-    assert "NET8_0" in framework.defines
-    assert folder == reference
-
-
 def test_only_net10_picks_net10(tmp_path: Path):
     reference = install_pack(tmp_path, "10.0.8", "net10.0")
     framework, folder = _pick_target_framework([tmp_path])
@@ -35,35 +26,27 @@ def test_only_net10_picks_net10(tmp_path: Path):
     assert folder == reference
 
 
-def test_both_prefers_net10(tmp_path: Path):
-    install_pack(tmp_path, "8.0.11", "net8.0")
-    reference = install_pack(tmp_path, "10.0.8", "net10.0")
-    framework, folder = _pick_target_framework([tmp_path])
-    assert framework.reference_dir == "net10.0"
-    assert folder == reference
-
-
 def test_roots_are_combined(tmp_path: Path):
     reference = install_pack(tmp_path / "a", "10.0.8", "net10.0")
-    install_pack(tmp_path / "b", "8.0.11", "net8.0")
+    install_pack(tmp_path / "b", "10.0.4", "net10.0")
     framework, folder = _pick_target_framework([tmp_path / "b", tmp_path / "a"])
     assert framework.reference_dir == "net10.0"
     assert folder == reference
 
 
 def test_newest_reference_pack_is_used(tmp_path: Path):
-    install_pack(tmp_path, "8.0.9", "net8.0")
-    reference = install_pack(tmp_path, "8.0.11", "net8.0")
+    install_pack(tmp_path, "10.0.7", "net10.0")
+    reference = install_pack(tmp_path, "10.0.8", "net10.0")
     _, folder = _pick_target_framework([tmp_path])
     assert folder == reference
 
 
 def test_unsupported_framework_is_ignored(tmp_path: Path):
-    install_pack(tmp_path, "9.0.0", "net9.0")
-    with pytest.raises(FileNotFoundError, match=r"net10\.0, net8\.0"):
+    install_pack(tmp_path, "8.0.11", "net8.0")
+    with pytest.raises(FileNotFoundError, match=r"net10\.0"):
         _pick_target_framework([tmp_path])
 
 
 def test_nothing_installed_names_supported_frameworks(tmp_path: Path):
-    with pytest.raises(FileNotFoundError, match=r"net10\.0, net8\.0"):
+    with pytest.raises(FileNotFoundError, match=r"net10\.0"):
         _pick_target_framework([tmp_path])

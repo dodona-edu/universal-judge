@@ -5,6 +5,7 @@ Translates items from the test suite into the actual programming language.
 import logging
 import re
 import shlex
+from collections.abc import Collection
 from pathlib import Path
 from typing import TYPE_CHECKING, TypeAlias
 
@@ -72,7 +73,7 @@ def _get_heredoc_token(stdin: str) -> str:
 
 
 def get_readable_input(
-    bundle: Bundle, case: Testcase
+    bundle: Bundle, case: Testcase, input_files: Collection[TextData] | None = None
 ) -> tuple[ExtendedMessage, set[TextData]]:
     """
     Get human-readable input for a testcase. This function will use, in
@@ -83,6 +84,9 @@ def get_readable_input(
         a. A function expression or generate_statement.
     3. If it is a context testcase:
         a. The stdin and the arguments.
+
+    The second element holds the files from `input_files` (by default the
+    testcase's own) whose path occurs in the readable input.
     """
     format_ = "text"  # By default, we use text as input.
     if case.description:
@@ -111,7 +115,9 @@ def get_readable_input(
         if stdin and isinstance(stdin, Path):
             text = f"{args} < {stdin}"
         elif case.input.arguments and stdin:
-            assert stdin[-1] == "\n", "stdin must end with a newline"
+            # A here-string or heredoc always ends stdin with a newline.
+            if not stdin.endswith("\n"):
+                stdin += "\n"
             if stdin.count("\n") == 1:
                 text = f"{args} <<< {stdin}"
             else:
@@ -140,12 +146,15 @@ def get_readable_input(
     # We have potential files.
     # Check if the file names are present in the string.
     # We construct a regex, since that can be faster than checking everything.
-    file_paths = [re.escape(x.path) for x in case.input_files if x.path is not None]
+    if input_files is None:
+        input_files = case.input_files
+    path_map = {x.path: x for x in input_files if x.path is not None}
 
-    if not file_paths:
+    if not path_map:
         return ExtendedMessage(description=text, format=format_), set()
 
-    path_map = {x.path: x for x in case.input_files if x.path is not None}
+    # Longest first, so a name that is a prefix of another does not win.
+    file_paths = [re.escape(x) for x in sorted(path_map, key=len, reverse=True)]
     seen = {path_map[m.group()] for m in re.finditer("|".join(file_paths), text)}
     return ExtendedMessage(description=text, format=format_), seen
 

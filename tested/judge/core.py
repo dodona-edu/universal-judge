@@ -4,6 +4,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from attrs import evolve
+
 from tested.configs import Bundle
 from tested.dodona import (
     AppendMessage,
@@ -231,7 +233,7 @@ def _execute_one_unit(
             bundle, plan, index, execution_dir, dependencies
         )
     else:
-        local_compilation_results = compilation_results
+        local_compilation_results = evolve(compilation_results)
 
     # Execute the unit.
     if local_compilation_results.status == Status.CORRECT:
@@ -258,7 +260,8 @@ def _generate_files(
     directory, copies all dependencies to that folder and runs the generation.
     """
     dependencies = bundle.language.initial_dependencies()
-    common_dir = Path(bundle.config.workdir, f"common")
+    bundle.config.tested_directory.mkdir()
+    common_dir = bundle.config.tested_directory / "common"
     common_dir.mkdir()
 
     _logger.debug("Generating files in common directory %s", common_dir)

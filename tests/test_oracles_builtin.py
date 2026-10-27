@@ -140,6 +140,17 @@ def test_text_oracle_round_to(tmp_path: Path, pytestconfig: pytest.Config):
     assert result.readable_actual == "1.5"
 
 
+def test_text_oracle_try_floating_point_text_expected(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig, {"tryFloatingPoint": True})
+    channel = TextOutputChannel(content="Invalid input")
+    result = evaluate_text(config, channel, "0")
+    assert result.result.enum == Status.WRONG
+    assert result.readable_expected == "Invalid input"
+    assert result.readable_actual == "0"
+
+
 def test_file_oracle_full_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):

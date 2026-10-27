@@ -23,6 +23,7 @@ en:
       result: "This result of the programmed evaluation is invalid:"
       stdout: "This is produced on stdout:"
       stderr: "This is produced on stderr:"
+      unknown-value: "The return value has a type that can't be compared with the expected value."
     specific:
       student:
         default: >-
@@ -70,6 +71,9 @@ en:
         many: "Files: %{files}"
       dynamic: "Dynamic"
       hidden_expected: "\U0001f937 You must find the correct solution on your own."
+      recovered:
+        stdout: "Standard output was:"
+        stderr: "Standard error was:"
     programmed:
       student: >-
         Something went wrong while evaluating the solution.

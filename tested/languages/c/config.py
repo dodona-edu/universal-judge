@@ -18,7 +18,7 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import executable_name
+from tested.languages.utils import executable_name, shift_gcc_gutter_line_number
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -122,17 +122,26 @@ class C(Language):
         return linter.run_cppcheck(self.config.dodona, remaining)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
+        assert self.config
         included_regex = rf"from ({EXECUTION_PREFIX}|selector)"
         result = ""
+        in_student_file = False
         for line in stacktrace.splitlines(keepends=True):
             if re.search(included_regex, line):
                 continue
 
             # Once we hit the three dots, skip.
-            if "..." in line:
+            if line.strip() == "...":
                 break
 
             line = line.replace(submission_file(self), "<code>")
+            if re.match(r" *(\d+ )?\|", line):
+                if in_student_file:
+                    line = shift_gcc_gutter_line_number(
+                        self.config.dodona.source_offset, line
+                    )
+            else:
+                in_student_file = "<code>" in line
             result += line
         return result
 
@@ -187,6 +196,6 @@ class C(Language):
 
     def is_void_method(self, name: str) -> bool:
         assert self.config
-        regex = rf"void\s+{name}"
+        regex = rf"void\s+{re.escape(name)}(?!\w)"
         the_source = self.config.dodona.source.read_text()
         return re.search(regex, the_source) is not None

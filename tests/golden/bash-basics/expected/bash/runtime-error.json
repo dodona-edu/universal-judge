@@ -12,7 +12,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "greet World ",
+   "description": "greet World",
    "format": "bash"
   }
  },
@@ -71,7 +71,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "greet Dodona ",
+   "description": "greet Dodona",
    "format": "bash"
   }
  },

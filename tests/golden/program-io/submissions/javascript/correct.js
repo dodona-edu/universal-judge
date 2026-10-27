@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const [prefix, ...names] = process.argv.slice(1);
+const [prefix, ...names] = process.argv.slice(2);
 if (prefix === undefined) {
     process.exit(1);
 }

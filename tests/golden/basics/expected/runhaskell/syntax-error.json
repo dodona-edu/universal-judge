@@ -19,15 +19,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"9\">&lt;code&gt;:9</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>8 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
-   "format": "html",
-   "permission": "student"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>[1 of 1] Compiling Submission       ( &lt;code&gt;, nothing )</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>7 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
    "format": "html",
    "permission": "student"
   }
@@ -59,15 +51,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"9\">&lt;code&gt;:9</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>8 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
-   "format": "html",
-   "permission": "student"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>[1 of 1] Compiling Submission       ( &lt;code&gt;, nothing )</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>7 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
    "format": "html",
    "permission": "student"
   }
@@ -106,15 +90,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"9\">&lt;code&gt;:9</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>8 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
-   "format": "html",
-   "permission": "student"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>[1 of 1] Compiling Submission       ( &lt;code&gt;, nothing )</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:1: error: [GHC-58481]<br>    parse error (possibly incorrect indentation or mismatched brackets)<br>  |<br>7 | printGreeting :: String -&gt; IO ()<br>  | ^</div>",
    "format": "html",
    "permission": "student"
   }

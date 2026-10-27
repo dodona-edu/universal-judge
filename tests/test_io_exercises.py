@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tested.configs import DodonaConfig, _get_language
 from tested.languages.language import STRING_QUOTES
 from tested.testsuite import SupportedLanguage
 from tests.language_markers import ALL_LANGUAGES
@@ -115,6 +116,76 @@ def test_io_exercise_strict_workdir_isolates_workdir_files(
     assert updates.find_status_enum() == ["correct"]
 
 
+def _shebang_config(
+    pytestconfig: pytest.Config, tmp_path: Path, first_line: str
+) -> tuple[DodonaConfig, Path]:
+    source = tmp_path / "submission.py"
+    source.write_text(f"{first_line}\nprint(input())\n")
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        options={"source": source},
+    )
+    return conf, source
+
+
+def test_io_exercise_unknown_shebang_language_is_ignored(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf, source = _shebang_config(pytestconfig, tmp_path, "#!tested foo")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+    assert "#!tested" not in source.read_text()
+
+
+@pytest.mark.parametrize(
+    "first_line, expected_offset",
+    [("#!tested foo", 1), ("#!tested a b", 1), ("#!tested python", 1), ("# note", 0)],
+)
+def test_unknown_shebang_language_counts_as_consumed_line(
+    first_line: str,
+    expected_offset: int,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf, _ = _shebang_config(pytestconfig, tmp_path, first_line)
+    language, offset = _get_language(conf)
+    assert language == SupportedLanguage.PYTHON
+    assert offset == expected_offset
+
+
+@pytest.mark.parametrize(
+    "files",
+    [
+        ["common/data.txt"],
+        ["execution_0/c.txt"],
+        ["execution_logs/a.txt", "data/b.txt"],
+    ],
+)
+def test_io_exercise_workdir_folders_reach_submission(
+    files: list[str], tmp_path: Path, pytestconfig: pytest.Config
+):
+    for file in files:
+        (tmp_path / file).parent.mkdir()
+        (tmp_path / file).write_text("workdir content\n")
+    (tmp_path / "expected-files.txt").write_text("\n".join(files))
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "plan-workdir-folders.yaml",
+        "correct-workdir-folders",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_io_exercise_wrong(language: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "echo", language, tmp_path, "one.tson", "wrong")
@@ -210,6 +281,20 @@ def test_csharp_compiles_source_files_in_workdir_subdirectories(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+def test_csharp_compile_error_has_no_warnings_from_support_files(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "csharp", tmp_path, "one.tson", "comp-error"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = updates.find_all("append-message")
+    assert "CS0103" in messages[0]["message"]["description"]
+    assert not any("Values.cs" in m["message"]["description"] for m in messages)
 
 
 def test_csharp_ignores_dll_files_in_workdir_subdirectories(

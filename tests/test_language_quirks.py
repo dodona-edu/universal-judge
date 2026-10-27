@@ -3,7 +3,9 @@ Tests for specific aspects of certain language implementations.
 """
 
 import itertools
+import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -11,10 +13,12 @@ import pytest
 
 from tested.configs import create_bundle
 from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
+from tested.descriptions.renderer import render_one_statement
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.conventionalize import submission_name
 from tested.languages.generation import generate_statement
+from tested.languages.haskell import config as haskell_config
 from tested.languages.preparation import prepare_assignment, prepare_expression
 from tested.languages.python.generators import convert_statement
 from tested.serialisation import (
@@ -27,6 +31,16 @@ from tested.serialisation import (
 )
 from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
+
+
+@pytest.mark.csharp
+def test_csharp_14_field_keyword(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo-function", "csharp", tmp_path, "one.tson", "csharp-14"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
 
 
 @pytest.mark.c
@@ -42,6 +56,42 @@ def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.c
+def test_c_compilation_error_message_with_dots(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "c",
+        tmp_path,
+        "one.tson",
+        "compile-error-dots",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = [
+        m if isinstance(m, str) else m["description"]
+        for m in (x["message"] for x in updates.find_all("append-message"))
+    ]
+    assert any("expected declaration specifiers" in m for m in messages)
+
+
+@pytest.mark.cpp
+def test_cpp_error_outside_submission_has_message(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "echo", "cpp", tmp_path, "one.tson", "no-main")
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    messages = updates.find_all("append-message")
+    descriptions = [m["message"]["description"] for m in messages]
+    assert any("error:" in d for d in descriptions)
+    assert "<div class='code'></div>" not in descriptions
 
 
 @pytest.mark.cpp
@@ -78,6 +128,46 @@ def test_cpp_function_try_block_main_without_return(
 ):
     conf = configuration(
         pytestconfig, "echo", "cpp", tmp_path, "one-exit-code.yaml", "no-return-try"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize(
+    "submission",
+    [
+        "main-in-comment",
+        "main-const-argc",
+        "main-comment-before-brace",
+        "main-prototype",
+        "main-prototype-args",
+        "main-ifdef",
+        "main-end-macro",
+        "void-main",
+    ],
+)
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_c_cpp_main_forms(
+    language: str, submission: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one-exit-code.yaml", submission
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.cpp
+def test_cpp_main_trailing_return_type(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "cpp",
+        tmp_path,
+        "one-exit-code.yaml",
+        "main-trailing-return",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
@@ -178,6 +268,26 @@ def test_cpp_unknown_return_type_without_streamable_is_null(
     assert updates.find_status_enum() == ["wrong"]
     received_data = updates.find_next("close-test")["generated"]
     assert received_data == "None"
+
+
+@pytest.mark.cpp
+@pytest.mark.parametrize("solution", ["crash", "hang"])
+def test_cpp_results_survive_crash_and_timeout(
+    solution: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "crash-after-result",
+        "cpp",
+        tmp_path,
+        "suite.yaml",
+        solution,
+        # The linter is off in tests: the limit covers g++ and the run.
+        {"time_limit": 10} if solution == "hang" else None,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum()[0] == "correct"
 
 
 @pytest.mark.typescript
@@ -295,19 +405,81 @@ def test_haskell_function_arguments_without_brackets(
     )
 
 
+def test_haskell_precompiled_helpers_must_match_templates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    (tmp_path / "static").mkdir()
+    for module in haskell_config.HELPER_MODULES:
+        template = haskell_config.TEMPLATES_DIRECTORY / f"{module}.hs"
+        shutil.copy(template, tmp_path / "static")
+        for ext in ("hi", "o"):
+            (tmp_path / "static" / f"{module}.{ext}").write_bytes(b"")
+    shutil.copytree(tmp_path / "static", tmp_path / "dynamic")
+    with (tmp_path / "dynamic" / "Values.hs").open("a") as source:
+        source.write("-- outdated\n")
+
+    monkeypatch.setattr(haskell_config, "PRECOMPILED_DIRECTORY", tmp_path)
+    haskell_config.precompiled_helpers.cache_clear()
+    try:
+        assert haskell_config.precompiled_helpers("static") == tmp_path / "static"
+        assert haskell_config.precompiled_helpers("dynamic") is None
+    finally:
+        haskell_config.precompiled_helpers.cache_clear()
+
+
 @pytest.mark.haskell
-def test_haskell_typed_literal_arguments(tmp_path: Path, pytestconfig: pytest.Config):
+@pytest.mark.skipif(
+    haskell_config.precompiled_helpers("static") is None,
+    reason="The image has no precompiled Haskell helpers",
+)
+def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
-        pytestconfig,
-        "haskell-typed-arguments",
-        "haskell",
-        tmp_path,
-        "smallest.yaml",
-        "correct",
+        pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "correct"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct", "correct"]
+    assert updates.find_status_enum() == ["correct"]
+
+    # The copies keep the modification time of the image, unless GHC recompiled the
+    # helpers. Their contents don't tell: GHC would write the same bytes again.
+    precompiled = haskell_config.precompiled_helpers("static")
+    assert precompiled
+    for module in haskell_config.HELPER_MODULES:
+        for ext in ("hi", "o"):
+            used = conf.tested_directory / "common" / f"{module}.{ext}"
+            shipped = precompiled / f"{module}.{ext}"
+            assert used.stat().st_mtime_ns == shipped.stat().st_mtime_ns
+
+
+@pytest.mark.runhaskell
+@pytest.mark.skipif(
+    haskell_config.precompiled_helpers("dynamic") is None,
+    reason="The image has no precompiled Haskell helpers",
+)
+def test_runhaskell_with_precompiled_helpers(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "runhaskell", tmp_path, "one.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+    # Run the unit again as the judge does, listing where GHCi got each module from.
+    command = LANGUAGES["runhaskell"](None).execution(
+        conf.tested_directory, "Selector.hs", ["Execution0"]
+    )
+    command[1:1] = ["--ghc-arg=-e", "--ghc-arg=:show modules"]
+    modules = subprocess.run(
+        command,
+        cwd=conf.tested_directory / "Execution0",
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    for module in haskell_config.HELPER_MODULES:
+        assert re.search(rf"^{module} +\( {module}\.hs, {module}\.o \)$", modules, re.M)
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
@@ -392,6 +564,23 @@ def test_js_ts_exception_missing_message(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+@pytest.mark.parametrize("lang", ["javascript", "typescript"])
+def test_js_ts_module_state_is_fresh_per_context(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "counter",
+        lang,
+        tmp_path,
+        "module-state.yaml",
+        "module-state",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
 
 
 @pytest.mark.parametrize("exercise", ["echo-function-file-input", "echo-function"])
@@ -496,70 +685,127 @@ def test_python_nested_values_keep_submission_namespace(
     assert convert_statement(statement, True) == expected
 
 
-@pytest.mark.haskell
-def test_haskell_function_with_mixed_argument_types_nth_element(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "haskell-mixed-argument-types",
-        "haskell",
-        tmp_path,
-        "nthElement.yaml",
-        "nthElement",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 20
-
-
-@pytest.mark.haskell
-def test_haskell_function_with_mixed_argument_types_second_to_last(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
-    conf = configuration(
-        pytestconfig,
-        "haskell-mixed-argument-types",
-        "haskell",
-        tmp_path,
-        "secondToLast.yaml",
-        "secondToLast",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 18
-
-
-@pytest.mark.haskell
-def test_haskell_empty_list_is_compatible(tmp_path: Path, pytestconfig: pytest.Config):
-    conf = configuration(
-        pytestconfig,
-        "haskell-empty-list",
-        "haskell",
-        tmp_path,
-        "lists.yaml",
-        "correct",
-    )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 4
-
-
-@pytest.mark.haskell
-@pytest.mark.xfail(
-    strict=True, reason="https://github.com/dodona-edu/universal-judge/issues/735"
+@pytest.mark.parametrize(
+    "language",
+    [
+        pytest.param("javascript", marks=pytest.mark.javascript),
+        pytest.param("typescript", marks=pytest.mark.typescript),
+    ],
 )
-def test_haskell_empty_list_to_polymorphic_function(
-    tmp_path: Path, pytestconfig: pytest.Config
+def test_javascript_description_keeps_await_in_strings(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    statement = 'echo("await you")'
+    assert render_one_statement(bundle, statement) == statement
+
+
+@pytest.mark.parametrize(
+    "language, source, name, void_name",
+    [
+        pytest.param(
+            "c",
+            "int total(int a, int b) {\n    return a + b;\n}\n\n"
+            "void total_all(int* values, int length) {\n}\n",
+            "total",
+            "total_all",
+            marks=pytest.mark.c,
+            id="c",
+        ),
+        pytest.param(
+            "cpp",
+            "int total(int a, int b) {\n    return a + b;\n}\n\n"
+            "void total_all(std::vector<int> values) {\n}\n",
+            "total",
+            "total_all",
+            marks=pytest.mark.cpp,
+            id="cpp",
+        ),
+        pytest.param(
+            "csharp",
+            "class Submission\n{\n"
+            "    public static int Total(int a, int b)\n    {\n"
+            "        return a + b;\n    }\n\n"
+            "    public static void TotalAll(int[] values)\n    {\n    }\n}\n",
+            "Total",
+            "TotalAll",
+            marks=pytest.mark.csharp,
+            id="csharp",
+        ),
+        pytest.param(
+            "java",
+            "class Submission {\n"
+            "    public static int total(int a, int b) {\n        return a + b;\n    }\n\n"
+            "    public static void totalAll(int[] values) {\n    }\n}\n",
+            "total",
+            "totalAll",
+            marks=pytest.mark.java,
+            id="java",
+        ),
+    ],
+)
+def test_is_void_method_matches_whole_names(
+    language: str,
+    source: str,
+    name: str,
+    void_name: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    submission = tmp_path / "submission.txt"
+    submission.write_text(source)
     conf = configuration(
-        pytestconfig,
-        "haskell-empty-list-polymorphic",
-        "haskell",
-        tmp_path,
-        "rev.yaml",
-        "correct",
+        pytestconfig, "", language, tmp_path, options={"source": submission}
     )
-    result = execute_config(conf)
-    updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct", "correct"]
+    bundle = create_bundle(conf, sys.stdout, Suite())
+
+    assert not bundle.language.is_void_method(name)
+    assert bundle.language.is_void_method(void_name)
+
+
+@pytest.mark.parametrize(
+    "language, source",
+    [
+        pytest.param(
+            "c",
+            "void test\u0301(int* values, int length) {\n}\n",
+            marks=pytest.mark.c,
+            id="c",
+        ),
+        pytest.param(
+            "cpp",
+            "void test\u0301(std::vector<int> values) {\n}\n",
+            marks=pytest.mark.cpp,
+            id="cpp",
+        ),
+        pytest.param(
+            "csharp",
+            "class Submission\n{\n"
+            "    public static void test\u0301(int[] values)\n    {\n    }\n}\n",
+            marks=pytest.mark.csharp,
+            id="csharp",
+        ),
+        pytest.param(
+            "java",
+            "class Submission {\n"
+            "    public static void test\u0301(int[] values) {\n    }\n}\n",
+            marks=pytest.mark.java,
+            id="java",
+        ),
+    ],
+)
+def test_is_void_method_matches_names_ending_in_combining_mark(
+    language: str,
+    source: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    submission = tmp_path / "submission.txt"
+    submission.write_text(source)
+    conf = configuration(
+        pytestconfig, "", language, tmp_path, options={"source": submission}
+    )
+    bundle = create_bundle(conf, sys.stdout, Suite())
+
+    assert bundle.language.is_void_method("test\u0301")

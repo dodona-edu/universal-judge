@@ -591,6 +591,59 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
+def _validate_no_file_keys(
+    level: YamlDict, location: str, level_name: str, many_contexts: bool
+):
+    """
+    Reject input_files and output_files on a level above the test cases.
+
+    :param location: Prefix naming where we are, empty for the root.
+    :param level_name: The level, as it appears in the message.
+    :param many_contexts: Whether the level contains several contexts.
+    """
+    for key, position, verb in (
+        ("input_files", "first", "uses"),
+        ("output_files", "last", "checks"),
+    ):
+        if key in level:
+            target = (
+                f"each context that {verb} them" if many_contexts else "the context"
+            )
+            raise ValueError(
+                f"{location}{key} can't be set on {level_name}: "
+                f"move them to the {position} test case of {target}."
+            )
+
+
+def _validate_context_file_keys(context: YamlDict, location: str):
+    """
+    Check that input_files are only on the first test case of a context, and
+    output_files (or the deprecated "file") only on the last.
+
+    :param location: Prefix naming the tab and context, e.g. "Tab 'Files', context 2: ".
+    """
+    _validate_no_file_keys(context, location, "a context", many_contexts=False)
+
+    testcases = context["testcases"]
+    assert isinstance(testcases, list)
+    for index, testcase in enumerate(testcases):
+        assert isinstance(testcase, dict)
+        if index > 0 and "input_files" in testcase:
+            raise ValueError(
+                f"{location}input_files can only be set on the first test case "
+                f"of a context (found on test case {index + 1}). "
+                f"Move them to the first test case."
+            )
+        if index < len(testcases) - 1:
+            for key in ("output_files", "file"):
+                if key in testcase:
+                    raise ValueError(
+                        f"{location}{key} can only be set on the last test case "
+                        f"of a context (found on test case {index + 1}). "
+                        f"Move them to the last test case."
+                    )
+
+
 def _convert_text_data(stream: YamlDict) -> TextData:
     raw_content = stream.get("content")
     raw_path = stream.get("path")
@@ -772,9 +825,18 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     name = tab["tab"]
     assert isinstance(name, str)
 
+    _validate_no_file_keys(tab, f"Tab '{name}': ", "a tab", many_contexts=True)
+
     # The tab can have testcases or contexts.
     if "contexts" in tab:
-        contexts = _convert_dsl_list(tab["contexts"], context, _convert_context)
+        raw_contexts = tab["contexts"]
+        assert isinstance(raw_contexts, list)
+        for number, raw_context in enumerate(raw_contexts, start=1):
+            assert isinstance(raw_context, dict)
+            _validate_context_file_keys(
+                raw_context, f"Tab '{name}', context {number}: "
+            )
+        contexts = _convert_dsl_list(raw_contexts, context, _convert_context)
     elif "testcases" in tab:
         testcases = _convert_dsl_list(tab["testcases"], context, _convert_testcase)
         contexts = [Context(testcases=[t]) for t in testcases]
@@ -819,6 +881,9 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         tab_list = dsl_object
     else:
         assert isinstance(dsl_object, dict)
+        _validate_no_file_keys(
+            dsl_object, "", "the root of the test suite", many_contexts=True
+        )
         namespace = dsl_object.get("namespace")
         context = context.deepen_context(dsl_object)
         tab_list = dsl_object["tabs"]

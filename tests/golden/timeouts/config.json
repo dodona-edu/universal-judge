@@ -1,3 +1,8 @@
 {
-  "time_limit": 40
+  "time_limit": 10,
+  "languages": {
+    "csharp": { "time_limit": 20 },
+    "java": { "time_limit": 20 },
+    "kotlin": { "time_limit": 20 }
+  }
 }

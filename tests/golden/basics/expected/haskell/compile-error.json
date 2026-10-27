@@ -19,15 +19,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:27: error: [GHC-88464]<br>    Variable not in scope: nme :: [Char]<br>    Suggested fix: Perhaps use ‘name’ (line 7)<br>  |<br>6 | greet name = &quot;Hello, &quot; ++ nme ++ &quot;!&quot;<br>  |                           ^^^</div>",
-   "format": "html",
-   "permission": "student"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>[1 of 6] Compiling EvaluationUtils  ( EvaluationUtils.hs, EvaluationUtils.o )<br>[2 of 6] Compiling Submission       ( &lt;code&gt;, Submission.o )<br>[3 of 6] Compiling Values           ( Values.hs, Values.o )</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>:27: error: [GHC-88464]<br>    Variable not in scope: nme :: [Char]<br>    Suggested fix: Perhaps use ‘name’ (line 5)<br>  |<br>5 | greet name = &quot;Hello, &quot; ++ nme ++ &quot;!&quot;<br>  |                           ^^^</div>",
    "format": "html",
    "permission": "student"
   }
@@ -59,15 +51,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:27: error: [GHC-88464]<br>    Variable not in scope: nme :: [Char]<br>    Suggested fix: Perhaps use ‘name’ (line 7)<br>  |<br>6 | greet name = &quot;Hello, &quot; ++ nme ++ &quot;!&quot;<br>  |                           ^^^</div>",
-   "format": "html",
-   "permission": "student"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>[1 of 6] Compiling EvaluationUtils  ( EvaluationUtils.hs, EvaluationUtils.o )<br>[2 of 6] Compiling Submission       ( &lt;code&gt;, Submission.o )<br>[3 of 6] Compiling Values           ( Values.hs, Values.o )</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>:27: error: [GHC-88464]<br>    Variable not in scope: nme :: [Char]<br>    Suggested fix: Perhaps use ‘name’ (line 5)<br>  |<br>5 | greet name = &quot;Hello, &quot; ++ nme ++ &quot;!&quot;<br>  |                           ^^^</div>",
    "format": "html",
    "permission": "student"
   }
@@ -101,14 +85,6 @@
   "description": {
    "description": "printGreeting \"Dodona\"",
    "format": "haskell"
-  }
- },
- {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'></div>",
-   "format": "html",
-   "permission": "student"
   }
  },
  {

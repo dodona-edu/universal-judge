@@ -242,7 +242,8 @@ def evaluate_context_results(
             missing_values.append(
                 AppendMessage(
                     message=ExtendedMessage(
-                        description="Standaarduitvoer was:\n" + recovered, format="code"
+                        description=f"{get_i18n_string('judge.evaluation.recovered.stdout')}\n{recovered}",
+                        format="code",
                     )
                 )
             )
@@ -250,19 +251,28 @@ def evaluate_context_results(
             missing_values.append(
                 AppendMessage(
                     message=ExtendedMessage(
-                        description="Standaardfout was:\n" + recovered, format="code"
+                        description=f"{get_i18n_string('judge.evaluation.recovered.stderr')}\n{recovered}",
+                        format="code",
                     )
                 )
             )
 
+    # The process stopped in the last testcase that printed its separator.
+    crashed = (
+        exec_results.exit != 0 and not exec_results.timeout and not exec_results.memory
+    )
+    reached = max(len(stdout_), len(stderr_), len(exceptions), len(values))
+    crashed_index = min(max(reached, 1), len(context.testcases)) - 1
+
     # All files that will be used in this context.
-    all_files = context.get_input_files()
+    input_files = context.get_input_files()
+    all_files = input_files
 
     # Begin processing the normal testcases.
     for i, testcase in enumerate(context.testcases):
         _logger.debug("Evaluating testcase %s", i)
 
-        readable_input, seen = get_readable_input(bundle, testcase)
+        readable_input, seen = get_readable_input(bundle, testcase, input_files)
         all_files = all_files - seen
         t_col = TestcaseCollector(StartTestcase(description=readable_input))
 
@@ -316,6 +326,25 @@ def evaluate_context_results(
             timeout=exec_results.timeout and len(stdout_) == i + 1,
             memory=exec_results.memory and len(stdout_) == i + 1,
         )
+        if (
+            crashed
+            and i == crashed_index
+            and not actual_exception
+            and not isinstance(output.exception, ExceptionOutputChannel)
+            and not testcase.is_main_testcase()
+            and testcase.output.exit_code == IgnoredChannel.IGNORED
+        ):
+            t_col.add(StartTest(expected="0", channel=Channel.EXIT))
+            t_col.add(
+                CloseTest(
+                    generated=str(exec_results.exit),
+                    status=StatusMessage(
+                        enum=Status.RUNTIME_ERROR,
+                        human=get_i18n_string("oracles.nothing.runtime"),
+                    ),
+                )
+            )
+
         missing_return = _evaluate_channel(
             bundle,
             context_dir,
@@ -543,13 +572,14 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             if testcase_start == 0:
                 collector.add(StartContext(description=context.description))
             # All files that will be used in this context.
-            all_files = context.get_input_files()
+            input_files = context.get_input_files()
+            all_files = input_files
 
             # Begin normal testcases.
             for j, testcase in enumerate(
                 context.testcases[testcase_start:], start=testcase_start
             ):
-                readable_input, seen = get_readable_input(bundle, testcase)
+                readable_input, seen = get_readable_input(bundle, testcase, input_files)
                 all_files = all_files - seen
                 updates.append(StartTestcase(description=readable_input))
 

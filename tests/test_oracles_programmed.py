@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from tested.internationalization import get_i18n_string
 from tests.language_markers import ALL_LANGUAGES, OBJECT_LANGUAGES
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -217,3 +218,16 @@ def test_custom_check_function_files_wrong(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"]
+
+
+def test_custom_check_function_unencodable_return(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "unencodable-return", "python", tmp_path, "suite.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"] * 3
+    messages = [m["message"] for m in updates.find_all("append-message")]
+    assert messages == [get_i18n_string("oracles.programmed.unknown-value")] * 3

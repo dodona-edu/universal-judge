@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, overload
 
-from tested.configs import GlobalConfig
+from tested.configs import DodonaConfig, GlobalConfig
 from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 code_regex = re.compile(r"<code>:(\d+)")
+gcc_gutter_regex = re.compile(r"^( *)(\d+)( \|)")
 
 
 def cleanup_description(lang_config: "Language", description: str) -> str:
@@ -97,9 +98,10 @@ def haskell_solution(lang_config: "Language", solution: Path):
             i = next(
                 i for i, line in enumerate(original_lines) if not line.startswith("{-#")
             )
-            result = f"module {name} where\n"
+            result = f"module {name} where"
             resulting_lines = original_lines[:i] + [result] + original_lines[i:]
             file.write("\n".join(resulting_lines))
+        lang_config.config.dodona.source_offset -= 1
 
 
 def executable_name(basename: str) -> str:
@@ -114,6 +116,19 @@ def executable_name(basename: str) -> str:
         return f"{basename}.exe"
     else:
         return basename
+
+
+def shift_gcc_gutter_line_number(offset: int, line: str) -> str:
+    """
+    Shift the line number in the gutter of a GCC source snippet line, keeping the
+    gutter's width.
+    """
+    match = gcc_gutter_regex.match(line)
+    if not match:
+        return line
+    spaces, number, bar = match.groups()
+    width = len(spaces) + len(number)
+    return f"{int(number) + offset:>{width}}{bar}{line[match.end():]}"
 
 
 def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
@@ -132,6 +147,14 @@ def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
         format="html",
         permission=Permission.STUDENT,
     )
+
+
+def _strip_tested_directory(config: DodonaConfig, stacktrace: str) -> str:
+    """Make paths relative to the unit's folder, so TESTed's own folders stay hidden."""
+    tested_directory = config.tested_directory
+    directories = {str(tested_directory), str(tested_directory.resolve())}
+    prefixes = "|".join(re.escape(directory) for directory in directories)
+    return re.sub(rf"(?:{prefixes})/[^/\s]+/", "", stacktrace)
 
 
 def _replace_code_line_number(offset: int, stacktrace: str) -> str:
@@ -172,6 +195,7 @@ def convert_stacktrace_to_clickable_feedback(
         return None
     cleaned_stacktrace = lang.cleanup_stacktrace(stacktrace)
     assert lang.config
+    cleaned_stacktrace = _strip_tested_directory(lang.config.dodona, cleaned_stacktrace)
     updated_stacktrace = _replace_code_line_number(
         lang.config.dodona.source_offset, cleaned_stacktrace
     )

@@ -23,6 +23,7 @@ es:
       result: "El resultado de la evaluación programada no es válido:"
       stdout: "Esto se produjo en stdout:"
       stderr: "Esto se produjo en stderr:"
+      unknown-value: "El valor devuelto tiene un tipo que no se puede comparar con el valor esperado."
     specific:
       student:
         default: >-
@@ -70,6 +71,9 @@ es:
         many: "Archivos: %{files}"
       dynamic: "Dinámico"
       hidden_expected: "\U0001f937 Debes encontrar la solución correcta por tu cuenta."
+      recovered:
+        stdout: "La salida estándar era:"
+        stderr: "El error estándar era:"
     programmed:
       student: >-
         Algo salió mal al evaluar la solución.

@@ -53,14 +53,14 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>cannot greet World<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>:14 in main:Submission</div>",
+   "description": "<div class='code'>cannot greet World<br>CallStack (from HasCallStack):<br>  error, called at <a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"5\">&lt;code&gt;:5</a>:14 in main:Submission</div>",
    "format": "html",
    "permission": "student"
   }
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot greet World\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:7:14 in main:Submission",
+  "generated": "ErrorCall: cannot greet World",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"

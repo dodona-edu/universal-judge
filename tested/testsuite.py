@@ -614,7 +614,9 @@ class Testcase(WithFeatures, WithFunctions):
 
     - The first testcase may be the "main" call of the submission, and thus
       provide command line arguments and stdin.
+    - The first testcase may provide input files.
     - The last testcase may check the exit code.
+    - The last testcase may check output files.
 
     Do note that the first and last testcase may be the same if there is only
     one testcase present.

@@ -94,6 +94,25 @@ def test_cppcheck_style(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.c
+def test_cppcheck_branches(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "c",
+        tmp_path,
+        "plan.tson",
+        "branches",
+        {"options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    # Normal check level stops after 4 always-true conditions and adds a note
+    assert len([a for a in annotations if a["text"].startswith("Condition")]) > 4
+    assert not any("Limiting analysis" in a["text"] for a in annotations)
+
+
+@pytest.mark.c
 def test_cppcheck_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
@@ -116,6 +135,48 @@ def test_cppcheck_bad_output(
     updates = assert_valid_output(result, pytestconfig)
     messages = updates.find_all("append-message")
     assert len(messages) == 2  # Educator and student warning
+
+
+CPPCHECK_FILE_LEVEL_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.17.1"/>
+    <errors>
+        <error id="internalError" severity="error" msg="Bailing out from analysis: Checking file failed" verbose="Bailing out from analysis: Checking file failed" file0="submission.c">
+            <location file="submission.c" line="0" column="0"/>
+        </error>
+    </errors>
+</results>
+"""
+
+
+@pytest.mark.c
+def test_cppcheck_file_level_message(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    mocker.patch(
+        "tested.languages.c.linter.run_command",
+        return_value=BaseExecutionResult(
+            stdout="",
+            stderr=CPPCHECK_FILE_LEVEL_XML,
+            exit=0,
+            timeout=False,
+            memory=False,
+        ),
+    )
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "c",
+        tmp_path,
+        "plan.tson",
+        "correct",
+        {"options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    assert len(annotations) == 1
+    assert annotations[0]["row"] == 0
 
 
 @pytest.mark.cpp

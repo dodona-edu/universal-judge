@@ -23,6 +23,7 @@ nl:
       result: "Het resultaat van de geprogrammeerde evaluatie is ongeldig:"
       stdout: "Het evalueren van de oplossing genereerde deze uitvoer op stderr:"
       stderr: "Het evalueren van de oplossing genereerde deze uitvoer op stdout:"
+      unknown-value: "De teruggegeven waarde heeft een type dat niet met de verwachte waarde vergeleken kan worden."
     specific:
       student:
         default: >-
@@ -70,6 +71,9 @@ nl:
         many: "Bestanden: %{files}"
       dynamic: "Dynamisch"
       hidden_expected: "\U0001f937 Je zult het juiste antwoord zelf moeten vinden."
+      recovered:
+        stdout: "Standaarduitvoer was:"
+        stderr: "Standaardfout was:"
     programmed:
       student: >-
         Er ging iets verkeerds tijdens het evalueren van de oplossing.

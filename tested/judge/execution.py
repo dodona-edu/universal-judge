@@ -88,16 +88,17 @@ class ExecutionResult(BaseExecutionResult):
         for index, (r, e, err, out) in enumerate(
             itertools.zip_longest(results, exceptions, stderr, stdout)
         ):
+            last = index == size - 1
             context_execution_results.append(
                 ContextResult(
                     separator=self.testcase_separator,
-                    exit=self.exit,
+                    exit=self.exit if last else 0,
                     results=r or "",
                     exceptions=e or "",
                     stdout=out or "",
                     stderr=err or "",
-                    timeout=self.timeout and index == size - 1,
-                    memory=self.memory and index == size - 1,
+                    timeout=self.timeout and last,
+                    memory=self.memory and last,
                 )
             )
 
@@ -157,7 +158,7 @@ def set_up_unit(
 ) -> tuple[Path, list[Path]]:
     unit = plan.units[which_unit]
     # Create a working directory for the execution.
-    execution_dir = Path(bundle.config.workdir, unit.name)
+    execution_dir = bundle.config.tested_directory / unit.name
     execution_dir.mkdir()
 
     _logger.info(f"Preparing {unit.name} in {execution_dir}")

@@ -4,7 +4,9 @@ output with the expected file next to it.
 
 Layout of tests/golden/<exercise>/:
     evaluation/suite.yaml                    the test suite (+ files it needs)
-    config.json                              optional judge options, merged in
+    config.json                              optional judge options, merged in; its
+                                             "languages" object overrides them
+                                             per language
     submissions/<language>/<case>.<ext>      one test per submission
     expected/<language>/<case>.json          the golden output
 
@@ -146,7 +148,9 @@ def test_golden(
     expected_file = exercise_dir / "expected" / language / f"{submission.stem}.json"
     options: dict[str, Any] = {"natural_language": "en", "source": submission}
     if (config_file := exercise_dir / "config.json").is_file():
-        options |= json.loads(config_file.read_text())
+        config = json.loads(config_file.read_text())
+        per_language = config.pop("languages", {})
+        options |= config | per_language.get(language, {})
     workdir = tmp_path / "workdir"
     workdir.mkdir()
     conf = exercise_configuration(

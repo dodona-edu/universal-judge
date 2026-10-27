@@ -48,8 +48,8 @@ def compare_text(options: dict[str, Any], expected: str, actual: str) -> OracleR
     if (
         options["tryFloatingPoint"]
         and (actual_float := _is_number(actual_eval.strip())) is not None
+        and (expected_float := _is_number(expected_eval.strip())) is not None
     ):
-        expected_float = float(expected_eval.strip())
         if options["applyRounding"]:
             numbers = int(options["roundTo"])
             # noinspection PyUnboundLocalVariable

@@ -47,6 +47,43 @@ def test_specific_oracle_shows_a_list_answer_as_wrong(
     assert generated == ["['input-1']", "['correct']"]
 
 
+@pytest.mark.parametrize(
+    ("language", "solution", "shown"),
+    [
+        ("python", "wrong-int", "5"),
+        ("python", "wrong-float", "2.5"),
+        ("python", "wrong-bool", "True"),
+        ("javascript", "wrong-int", "5"),
+        ("typescript", "wrong-int", "5"),
+        ("javascript", "wrong-list", "[5]"),
+        ("typescript", "wrong-list", "[5]"),
+        ("javascript", "wrong-bare-object", "{'a': 1}"),
+        ("typescript", "wrong-bare-object", "{'a': 1}"),
+    ],
+)
+def test_specific_oracle_shows_a_scalar_answer_as_wrong(
+    language: str,
+    solution: str,
+    shown: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "specific-raw-readable.yaml",
+        solution,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    # The evaluators pass the student's value as their readable actual value.
+    assert updates.find_status_enum() == ["wrong"]
+    generated = [t["generated"] for t in updates.find_all("close-test")]
+    assert generated == [shown]
+
+
 def test_specific_oracle_messages_keep_their_permission(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
@@ -159,6 +196,26 @@ def test_specific_oracle_exception_runtime_exception(
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong", "wrong"]
     assert len(updates.find_all("append-message")) >= 1
+
+
+@pytest.mark.parametrize("lang", ["python"])
+def test_specific_oracle_exception_runtime_exception_in_function(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "division",
+        lang,
+        tmp_path,
+        "plan-runtime-exception-function.json",
+        "function",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong", "wrong"]
+    assert not [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
 
 
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)

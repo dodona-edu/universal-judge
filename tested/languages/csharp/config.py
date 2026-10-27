@@ -68,28 +68,6 @@ TARGET_FRAMEWORKS = [
             "NETCOREAPP3_1_OR_GREATER",
         ],
     ),
-    TargetFramework(
-        reference_dir="net8.0",
-        runtimeconfig="tested.net8.0.runtimeconfig.json",
-        defines=[
-            "TRACE",
-            "DEBUG",
-            "NET",
-            "NET8_0",
-            "NETCOREAPP",
-            "NET5_0_OR_GREATER",
-            "NET6_0_OR_GREATER",
-            "NET7_0_OR_GREATER",
-            "NET8_0_OR_GREATER",
-            "NETCOREAPP1_0_OR_GREATER",
-            "NETCOREAPP1_1_OR_GREATER",
-            "NETCOREAPP2_0_OR_GREATER",
-            "NETCOREAPP2_1_OR_GREATER",
-            "NETCOREAPP2_2_OR_GREATER",
-            "NETCOREAPP3_0_OR_GREATER",
-            "NETCOREAPP3_1_OR_GREATER",
-        ],
-    ),
 ]
 
 
@@ -245,7 +223,7 @@ class CSharp(Language):
             "-debug:portable",
             "-optimize-",
             "-nullable:enable",
-            "-langversion:12.0",
+            "-langversion:14.0",
             "-warn:8",
             "-nowarn:1701,1702",
             f"-define:{';'.join(framework.defines)}",
@@ -320,13 +298,15 @@ class {class_name}
         assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
-            rf"{self.config.dodona.workdir}/common/{execution}[0-9]+.cs"
+            rf"{self.config.dodona.tested_directory}/common/{execution}[0-9]+.cs"
         )
-        workdir = re.escape(str(self.config.dodona.workdir.resolve()))
+        tested_directory = re.escape(str(self.config.dodona.tested_directory.resolve()))
         subdir = rf"(?:common|{execution}[_0-9]+)"
         sub = re.escape(submission_file(self))
-        submission_location_regex = rf"{workdir}/{subdir}/{sub}:line ([0-9]+)"
-        compilation_location_regex = rf"{workdir}/{subdir}/{sub}\((\d+),(\d+)\)"
+        submission_location_regex = rf"{tested_directory}/{subdir}/{sub}:line ([0-9]+)"
+        compilation_location_regex = (
+            rf"{tested_directory}/{subdir}/{sub}\((\d+),(\d+)\)"
+        )
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
@@ -415,6 +395,6 @@ class {class_name}
 
     def is_void_method(self, name: str) -> bool:
         assert self.config
-        regex = rf"void\s+{name}"
+        regex = rf"void\s+{re.escape(name)}(?!\w)"
         the_source = self.config.dodona.source.read_text()
         return re.search(regex, the_source) is not None

@@ -5,7 +5,7 @@
 # It should not contain any development tools or dependencies.
 # Add those to dev-dependencies.sh instead.
 
-FROM python:3.12.4-slim-bullseye
+FROM python:3.12.15-slim-trixie
 
 # Set up the environment
 
@@ -30,29 +30,6 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 # hadolint ignore=DL3013,DL3016
 RUN <<EOF
     set -eux
-
-    # TEMPORARY: Debian 11 (bullseye) reached end-of-life on 2026-08-31 and its
-    # security pocket has been withdrawn in two stages: the Release file expired
-    # on 2026-09-07, so apt drops the whole suite, and the .deb files are being
-    # deleted from the pool (404 on both deb.debian.org and security.debian.org).
-    # The NodeSource setup script swallows the resulting apt failure and exits 0,
-    # so the build silently ends up with Debian's nodejs 12 and no npm at all.
-    #
-    # Serve the base distro from archive.debian.org, frozen at the final 11.11
-    # point release, and take bullseye-security from a pinned snapshot.debian.org
-    # timestamp. archive.debian.org has no debian-security for bullseye yet
-    # (buster is still the newest suite there) and, going by how long buster took
-    # to land, is not expected to before mid-2027. Dropping the security pocket
-    # instead would move 55 packages back to their pre-security-pocket builds,
-    # among them ca-certificates (2021 vs 2025), openjdk-11-jre-headless (11.0.24
-    # vs 11.0.32), libc6 (u11 vs u14) and the whole GnuPG suite.
-    #
-    # Remove this whole workaround once the base image is bumped to bookworm.
-    cat > /etc/apt/sources.list <<'SOURCES'
-deb [check-valid-until=no] http://archive.debian.org/debian bullseye main
-deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260831T000000Z bullseye-security main
-SOURCES
-    rm -f /etc/apt/sources.list.d/*.list
 
     # Update apt-get
     apt-get update
@@ -114,12 +91,15 @@ CFG
     npm install -g eslint@8.57 abstract-syntax-tree@2.22
 
     # TypeScript dependencies
-    npm install -g typescript@5.6.3 tsx@4.19.2
+    # TypeScript 7 (the Go port) has no JavaScript API: TESTed parses
+    # submissions with TypeScript 6's, installed alongside as tsc6.
+    npm install -g typescript@7.0.2 @typescript/typescript6@6.0.2 tsx@4.19.2
     npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin
 
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
         hlint \
+        lld \
         autoconf \
         build-essential \
         zlib1g-dev \
@@ -137,11 +117,11 @@ CFG
     find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 
     # C# dependencies
-    curl https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
+    curl https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb --output packages-microsoft-prod.deb
     dpkg -i packages-microsoft-prod.deb
     rm packages-microsoft-prod.deb
     apt-get update
-    apt-get install -y --no-install-recommends dotnet-sdk-8.0
+    apt-get install -y --no-install-recommends dotnet-sdk-10.0
 
     # Java and Kotlin dependencies
     bash -c 'set -o pipefail && curl -s "https://get.sdkman.io?rcupdate=false" | bash'
@@ -182,6 +162,27 @@ CFG
     useradd -m runner
     mkdir /home/runner/workdir
     chown -R runner:runner /home/runner/workdir
+EOF
+
+# Precompile TESTed's Haskell helper modules with the flags of Haskell.compilation
+# in tested/languages/haskell/config.py: "static" for ghc, "dynamic" for runhaskell
+# (GHCi only loads dynamic objects). TESTed only uses them if these sources match
+# its templates. ADD keys the build cache on the downloaded content, so the next
+# image build recompiles them after a template change (a RUN curl stays cached).
+# The judge reads them as runner, but a remote ADD writes mode 600, and
+# ADD --chmod=644 would also set the directories it creates to 644.
+# Compile in place: -outputdir changes the flags GHC compares.
+ARG TESTED_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/haskell/templates
+# DL3020: hadolint does not see that ${TESTED_TEMPLATES} is a URL.
+# hadolint ignore=DL3020
+ADD ${TESTED_TEMPLATES}/EvaluationUtils.hs ${TESTED_TEMPLATES}/Values.hs /usr/local/share/tested/haskell/static/
+RUN <<EOF
+    set -eux
+    chmod 644 /usr/local/share/tested/haskell/static/*.hs
+    mkdir /usr/local/share/tested/haskell/dynamic
+    cp /usr/local/share/tested/haskell/static/*.hs /usr/local/share/tested/haskell/dynamic/
+    bash -c "cd /usr/local/share/tested/haskell/static && ghc -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
+    bash -c "cd /usr/local/share/tested/haskell/dynamic && ghc -no-link -dynamic -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
 EOF
 
 USER runner

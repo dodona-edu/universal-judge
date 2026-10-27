@@ -14,6 +14,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from tested.configs import create_bundle
+from tested.dodona import Status
 from tested.features import Construct
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
@@ -437,6 +438,32 @@ def test_batch_compilation_no_fallback_runtime(
     assert all(s in ("runtime error", "wrong") for s in updates.find_status_enum())
 
 
+@pytest.mark.python
+def test_unit_without_main_file_does_not_fail_later_units(
+    tmp_path: Path, pytestconfig: pytest.Config, monkeypatch: pytest.MonkeyPatch
+):
+    python = LANGUAGES["python"]
+    original = python.find_main_file
+
+    def find_main_file(self, files, name):
+        if name.endswith("_0"):
+            return Status.COMPILATION_ERROR
+        return original(self, files, name)
+
+    monkeypatch.setattr(python, "find_main_file", find_main_file)
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "python",
+        tmp_path,
+        "two-contexts-stdin.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error", "correct"]
+
+
 @pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
@@ -445,6 +472,31 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["correct", "correct", "correct", "correct"]
     assert len(updates.find_all("start-testcase")) == 3
     assert len(updates.find_all("start-test")) == 4
+
+
+@pytest.mark.parametrize(
+    "lang",
+    [
+        *all_languages_except("haskell", "runhaskell", "c"),
+        pytest.param(
+            "c",
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="exit(0) ends the execution: https://github.com/dodona-edu/universal-judge/issues/431",
+            ),
+        ),
+    ],
+)
+def test_program_params_in_one_execution(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Without exit code checks, the planner puts all main calls in one execution.
+    conf = configuration(
+        pytestconfig, "sum", lang, tmp_path, "same-unit.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct", "correct"]
 
 
 @pytest.mark.parametrize("language", OBJECT_LANGUAGES)
@@ -868,3 +920,76 @@ def test_stdin_token_is_unique(tmp_path: Path, pytestconfig: pytest.Config):
     assert (
         actual.description == "$ submission hello << 'STDINN'\nOne line\nSTDIN\nSTDINN"
     )
+
+
+@pytest.mark.parametrize("language", ["python"])
+def test_exit_in_function_testcase_is_runtime_error(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "exit-in-function.yaml",
+        "exit-in-function",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == [
+        "correct",
+        "runtime error",
+        "wrong",
+        "wrong",
+    ]
+    exit_tests = [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "0", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "3"
+
+
+@pytest.mark.parametrize("language", ["bash"])
+@pytest.mark.parametrize(
+    "suite", ["nonzero-status-last.yaml", "nonzero-status-first.yaml"]
+)
+def test_nonzero_status_in_bash_function_testcase_is_no_crash(
+    language: str, suite: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", language, tmp_path, suite, "nonzero-status"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+    assert not [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+
+
+@pytest.mark.parametrize("language", ["bash"])
+def test_nonzero_status_in_bash_function_testcase_checks_exit_code(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "nonzero-status-exit-code.yaml",
+        "nonzero-status",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+    exit_tests = [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "1", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "1"

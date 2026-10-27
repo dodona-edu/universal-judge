@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tested.configs import DodonaConfig, GlobalConfig
+from tested.configs import DodonaConfig, GlobalConfig, Options
 from tested.languages import Language
 from tested.languages import get_language as upstream_get_language
 
@@ -10,6 +10,7 @@ from tested.languages import get_language as upstream_get_language
 from tested.languages.utils import (
     _convert_stacktrace_to_html,
     _replace_code_line_number,
+    convert_stacktrace_to_clickable_feedback,
 )
 from tested.testsuite import Suite, SupportedLanguage
 from tests.language_markers import ALL_LANGUAGES
@@ -39,12 +40,12 @@ def test_javascript_assertion_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
-    at bigram2letter ({workdir}/execution00/submission.js:86:13)
-    at {workdir}/execution00/submission.js:98:32
+    at bigram2letter ({workdir}/.tested/execution00/submission.js:86:13)
+    at {workdir}/.tested/execution00/submission.js:98:32
     at Array.map (<anonymous>)
-    at Codeersleutel.decodeer ({workdir}/execution00/submission.js:98:18)
-    at context0 ({workdir}/execution00/execution00.js:78:31)
-    at async {workdir}/execution00/execution00.js:1515:13
+    at Codeersleutel.decodeer ({workdir}/.tested/execution00/submission.js:98:18)
+    at context0 ({workdir}/.tested/execution00/execution00.js:78:31)
+    at async {workdir}/.tested/execution00/execution00.js:1515:13
 """
     expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
@@ -60,12 +61,12 @@ def test_typescript_assertion_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "typescript")
     original = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
-    at bigram2letter ({workdir}/execution00/submission.ts:86:13)
-    at {workdir}/execution00/submission.ts:98:32
+    at bigram2letter ({workdir}/.tested/execution00/submission.ts:86:13)
+    at {workdir}/.tested/execution00/submission.ts:98:32
     at Array.map (<anonymous>)
-    at Codeersleutel.decodeer ({workdir}/execution00/submission.ts:98:18)
-    at context0 ({workdir}/execution00/execution00.ts:78:31)
-    at async {workdir}/execution00/execution00.ts:1515:13
+    at Codeersleutel.decodeer ({workdir}/.tested/execution00/submission.ts:98:18)
+    at context0 ({workdir}/.tested/execution00/execution00.ts:78:31)
+    at async {workdir}/.tested/execution00/execution00.ts:1515:13
 """
     expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
@@ -81,9 +82,9 @@ def test_javascript_type_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""TypeError: submission.Codeersleutel is not a constructor
-    at context0 ({workdir}/execution00/execution00.js:46:17)
-    at {workdir}/execution00.js:1515:19
-    at Object.<anonymous> ({workdir}/execution00/execution00.js:1573:7)
+    at context0 ({workdir}/.tested/execution00/execution00.js:46:17)
+    at {workdir}/.tested/execution00.js:1515:19
+    at Object.<anonymous> ({workdir}/.tested/execution00/execution00.js:1573:7)
     at Module._compile (node:internal/modules/cjs/loader:1254:14)
     at Module._extensions..js (node:internal/modules/cjs/loader:1308:10)
     at Module.load (node:internal/modules/cjs/loader:1117:32)
@@ -100,9 +101,9 @@ def test_typescript_type_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "typescript")
     original = f"""TypeError: submission.Codeersleutel is not a constructor
-    at context0 ({workdir}/execution00/execution00.ts:46:17)
-    at {workdir}/execution00.ts:1515:19
-    at Object.<anonymous> ({workdir}/execution00/execution00.ts:1573:7)
+    at context0 ({workdir}/.tested/execution00/execution00.ts:46:17)
+    at {workdir}/.tested/execution00.ts:1515:19
+    at Object.<anonymous> ({workdir}/.tested/execution00/execution00.ts:1573:7)
     at Module._compile (node:internal/modules/cjs/loader:1254:14)
     at Module._extensions..ts (node:internal/modules/cjs/loader:1308:10)
     at Module.load (node:internal/modules/cjs/loader:1117:32)
@@ -129,7 +130,7 @@ def test_javascript_compilation_error():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "javascript")
     original = f"""
-    {workdir}/common/submission.js:4
+    {workdir}/.tested/common/submission.js:4
     const deepcopy = cellen => cellen.map(([x, y]) => [x, y]));
                                                              ^
     
@@ -184,8 +185,8 @@ def test_python_exception():
 def test_csharp_exception():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
-    original = f"""at Submission.Main(String[] args) in {workdir}/common/Submission.cs:line 7
-    at Tested.Execution00.Context0() in {workdir}/common/Execution00.cs:line 67'
+    original = f"""at Submission.Main(String[] args) in {workdir}/.tested/common/Submission.cs:line 7
+    at Tested.Execution00.Context0() in {workdir}/.tested/common/Execution00.cs:line 67'
     """
     expected = "at Submission.Main(String[] args) in <code>:7\n"
     actual = language_config.cleanup_stacktrace(original)
@@ -195,11 +196,11 @@ def test_csharp_exception():
 def test_csharp_compilation():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
-    original = f"""    {workdir}/common/Submission.cs(13,20): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,26): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,30): error CS1001: Identifier expected
-    {workdir}/common/Submission.cs(13,30): error CS1002: ; expected
-    {workdir}/common/Submission.cs(13,34): error CS1002: ; expected
+    original = f"""    {workdir}/.tested/common/Submission.cs(13,20): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,26): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,30): error CS1001: Identifier expected
+    {workdir}/.tested/common/Submission.cs(13,30): error CS1002: ; expected
+    {workdir}/.tested/common/Submission.cs(13,34): error CS1002: ; expected
     """
     expected = f"""    <code>:13:20: error CS1002: ; expected
     <code>:13:26: error CS1002: ; expected
@@ -303,6 +304,20 @@ def test_c_compilation_error():
     assert actual == expected
 
 
+def test_c_compilation_error_dots_in_message():
+    original = """submission.c:3:19: error: expected declaration specifiers or ‘...’ before ‘)’ token
+    3 | int helper(int a, ) {
+      |                   ^
+"""
+    language_config = get_language("test", "c")
+    expected = """<code>:3:19: error: expected declaration specifiers or ‘...’ before ‘)’ token
+    3 | int helper(int a, ) {
+      |                   ^
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_cpp_compilation_error():
     original = """In file included from execution_0.cpp:3,
                  from selector.cpp:5:
@@ -339,6 +354,21 @@ execution_0.cpp:52:5: error: ‘execution_0_value_file’ was not declared in th
 """
     actual = language_config.cleanup_stacktrace(original)
     assert actual == expected
+
+
+def test_cpp_compilation_error_outside_submission():
+    original = """In file included from selector.cpp:5:
+execution_0.cpp: In function ‘int execution_0_context_0()’:
+execution_0.cpp:39:25: warning: ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+   39 |         char* args[] = {"submission", };
+      |                         ^~~~~~~~~~~~
+execution_0.cpp:40:21: error: ‘solution_main’ was not declared in this scope
+   40 |         exit_code = solution_main(1, args);
+      |                     ^~~~~~~~~~~~~
+"""
+    language_config = get_language("test", "cpp")
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == original
 
 
 def test_haskell_compilation_error():
@@ -511,6 +541,138 @@ def test_cpp_modify_solution_offsets(tmp_path: Path):
     assert solution.read_text().startswith("#pragma once\n\n")
 
 
+def test_haskell_modify_solution_inserts_one_line(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("add a b = a + b\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text() == "module Submission where\nadd a b = a + b\n"
+    assert language_config.config.dodona.source_offset == -1
+
+
+def test_haskell_modify_solution_after_pragmas(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("{-# LANGUAGE Safe #-}\nadd a b = a + b\n")
+    language_config.modify_solution(solution)
+    lines = solution.read_text().splitlines()
+    assert lines[:3] == [
+        "{-# LANGUAGE Safe #-}",
+        "module Submission where",
+        "add a b = a + b",
+    ]
+    assert language_config.config.dodona.source_offset == -1
+
+
+def test_haskell_compile_line_offset_end_to_end(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("greet name = nme\nmfzej àryhg çyh aiogharuio ghqgh\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text().splitlines()[1].startswith("greet")
+    original = """Submission.hs:2:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 2)
+  |
+2 | greet name = nme
+  |              ^^^
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    expected = """<code>:1:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 1)
+  |
+1 | greet name = nme
+  |              ^^^
+"""
+    assert final == expected
+
+
+def test_haskell_runtime_line_offset_end_to_end(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("add a b = a + b\ngreet name = error name\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text().splitlines()[2].startswith("greet")
+    original = """undefined
+    CallStack (from HasCallStack):
+      error, called at ./Submission.hs:3:14 in main:Submission
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    expected = """    CallStack (from HasCallStack):
+      error, called at <code>:2:14 in main:Submission
+"""
+    assert final == expected
+
+
+def test_haskell_explicit_module_keeps_line_numbers(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    language_config.config.dodona.options = Options(
+        language={"haskell": {"implicitModule": False}}
+    )
+    solution = tmp_path / "Submission.hs"
+    solution.write_text("module Submission where\ngreet name = nme\n")
+    language_config.modify_solution(solution)
+    assert solution.read_text() == "module Submission where\ngreet name = nme\n"
+    assert language_config.config.dodona.source_offset == 0
+    original = """Submission.hs:2:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 2)
+  |
+2 | greet name = nme
+  |              ^^^
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == original.replace("Submission.hs", "<code>")
+
+
+def test_haskell_line_hint_outside_diagnostic_is_untouched(tmp_path: Path):
+    language_config = get_language(str(tmp_path), "haskell")
+    assert language_config.config
+    solution = tmp_path / "Submission.hs"
+    solution.write_text('greet name = error "cannot greet"\n')
+    language_config.modify_solution(solution)
+    original = """Submission.hs:2:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 2)
+  |
+2 | greet name = nme
+  |              ^^^
+cannot greet World (line 10)
+    CallStack (from HasCallStack):
+      error, called at ./Submission.hs:3:14 in main:Submission
+"""
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    expected = """<code>:1:14: error: [GHC-88464]
+    Variable not in scope: nme
+    Suggested fix: Perhaps use ‘name’ (line 1)
+  |
+1 | greet name = nme
+  |              ^^^
+cannot greet World (line 10)
+    CallStack (from HasCallStack):
+      error, called at <code>:2:14 in main:Submission
+"""
+    assert final == expected
+
+
 def test_csharp_runtime_line_offset_end_to_end():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
@@ -518,7 +680,7 @@ def test_csharp_runtime_line_offset_end_to_end():
     language_config.config.dodona.source_offset = -12
     original = (
         f"at Submission.Main(String[] args) in "
-        f"{workdir}/common/Submission.cs:line 15\n"
+        f"{workdir}/.tested/common/Submission.cs:line 15\n"
     )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
@@ -551,11 +713,73 @@ def test_cpp_compile_line_offset_end_to_end():
     assert final == "<code>:1:1: error: 'mfzej' does not name a type\n"
 
 
+def test_c_compile_snippet_gutter_offset_end_to_end():
+    language_config = get_language("test", "c")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = (
+        "submission.c: In function 'greet':\n"
+        "submission.c:13:37: error: 'nme' undeclared\n"
+        "   13 |     sprintf(greeting, nme);\n"
+        "      |                       ^~~\n"
+        "selector.c:6:14: fatal error: execution_0.c: No such file\n"
+        '    6 |     #include "execution_0.c"\n'
+        "      |              ^~~~~~~~~~~~~~~\n"
+        "submission.c:11:5: error: expected ';'\n"
+        "   11 |     x = 1\n"
+        "      |          ^\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == (
+        "<code>: In function 'greet':\n"
+        "<code>:11:37: error: 'nme' undeclared\n"
+        "   11 |     sprintf(greeting, nme);\n"
+        "      |                       ^~~\n"
+        "selector.c:6:14: fatal error: execution_0.c: No such file\n"
+        '    6 |     #include "execution_0.c"\n'
+        "      |              ^~~~~~~~~~~~~~~\n"
+        "<code>:9:5: error: expected ';'\n"
+        "    9 |     x = 1\n"
+        "      |          ^\n"
+    )
+
+
+def test_cpp_compile_snippet_gutter_offset_end_to_end():
+    language_config = get_language("test", "cpp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = (
+        "submission.cpp: In function 'int f()':\n"
+        "submission.cpp:12:24: error: 'nme' was not declared\n"
+        "   12 |     return nme;\n"
+        "      |            ^~~\n"
+        "submission.cpp:11:5: error: expected ';'\n"
+        "   11 |     x = 1\n"
+        "      |          ^\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == (
+        "<code>: In function 'int f()':\n"
+        "<code>:10:24: error: 'nme' was not declared\n"
+        "   10 |     return nme;\n"
+        "      |            ^~~\n"
+        "<code>:9:5: error: expected ';'\n"
+        "    9 |     x = 1\n"
+        "      |          ^\n"
+    )
+
+
 def test_csharp_cleanup_stacktrace_execution_dir_compile():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
     original = (
-        f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: "
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
         "The name 'foo' does not exist\n"
     )
     expected = "<code>:14:19: error CS0103: The name 'foo' does not exist\n"
@@ -567,9 +791,43 @@ def test_csharp_compile_line_offset_end_to_end():
     language_config = get_language(workdir, "csharp")
     assert language_config.config
     language_config.config.dodona.source_offset = -12
-    original = f"{workdir}/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
+    original = (
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
+    )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
         language_config.config.dodona.source_offset, cleaned
     )
     assert final == "<code>:2:19: error CS0103: undefined\n"
+
+
+def test_csharp_compilation_hides_tested_directory():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    original = (
+        f"{workdir}/.tested/Execution0/Values.cs(100,30): warning CS8602: "
+        "Dereference of a possibly null reference.\n"
+    )
+    expected = (
+        "<div class='code'>Values.cs(100,30): warning CS8602: "
+        "Dereference of a possibly null reference.</div>"
+    )
+    actual = convert_stacktrace_to_clickable_feedback(language_config, original)
+    assert actual.description == expected
+
+
+def test_javascript_exception_hides_tested_directory():
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "javascript")
+    original = f"""Error: boom
+    at inner ({workdir}/.tested/execution_0/helper.js:3:9)
+    at check ({workdir}/.tested/execution_0/submission.js:4:14)
+    at context0 ({workdir}/.tested/execution_0/execution_0.js:78:31)
+"""
+    expected = (
+        "<div class='code'>Error: boom<br>"
+        "    at inner (helper.js:3:9)<br>"
+        '    at check (<a href="#" class="tab-link" data-tab="code" data-line="4">&lt;code&gt;:4</a>:14)</div>'
+    )
+    actual = convert_stacktrace_to_clickable_feedback(language_config, original)
+    assert actual.description == expected

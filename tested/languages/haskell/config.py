@@ -1,4 +1,7 @@
+import functools
 import re
+import shutil
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -16,20 +19,74 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import (
-    cleanup_description,
-    executable_name,
-    haskell_solution,
-)
+from tested.languages.utils import cleanup_description as strip_submission_prefix
+from tested.languages.utils import executable_name, haskell_solution
 from tested.serialisation import Statement, Value
 
 if TYPE_CHECKING:
     from tested.languages.generation import PreparedExecutionUnit
 
 
+HELPER_MODULES = ["Values", "EvaluationUtils"]
+TEMPLATES_DIRECTORY = Path(__file__).parent / "templates"
+
+# The dodona-tested image compiles the helper modules ahead of time: a "static" set
+# for ghc and a "dynamic" set for runhaskell, as GHCi only loads dynamic objects.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
+
+
+@functools.cache
+def precompiled_helpers(way: str) -> Path | None:
+    """
+    Find the precompiled helper modules of the image, if it has them.
+
+    They are only used if they were built from the same sources as the templates of
+    this judge: otherwise GHC would recompile them, and units that compile in
+    parallel share the hard-linked files.
+    """
+    directory = PRECOMPILED_DIRECTORY / way
+    for module in HELPER_MODULES:
+        if not all((directory / f"{module}.{ext}").is_file() for ext in ("hi", "o")):
+            return None
+        source = directory / f"{module}.hs"
+        template = TEMPLATES_DIRECTORY / f"{module}.hs"
+        if not source.is_file() or source.read_bytes() != template.read_bytes():
+            return None
+    return directory
+
+
+@functools.cache
+def linker_flags() -> list[str]:
+    # lld links a lot faster than GNU ld, the default of GHC.
+    if sys.platform.startswith("linux") and shutil.which("ld.lld"):
+        return ["-optl-fuse-ld=lld"]
+    return []
+
+
 class Haskell(Language):
+    def _precompiled_helpers(self) -> Path | None:
+        assert self.config
+        # The image compiles them with -O0.
+        if self.config.options.compiler_optimizations:
+            return None
+        return precompiled_helpers("static")
+
     def initial_dependencies(self) -> list[str]:
-        return ["Values.hs", "EvaluationUtils.hs"]
+        dependencies = [f"{module}.hs" for module in HELPER_MODULES]
+        if self._precompiled_helpers():
+            dependencies += [
+                f"{module}.{ext}" for module in HELPER_MODULES for ext in ("hi", "o")
+            ]
+        return dependencies
+
+    def path_to_dependencies(self) -> list[Path]:
+        assert self.config
+        paths = [
+            self.config.dodona.judge / "tested" / "languages" / "haskell" / "templates"
+        ]
+        if directory := self._precompiled_helpers():
+            paths.insert(0, directory)
+        return paths
 
     def needs_selector(self):
         return True
@@ -91,12 +148,18 @@ class Haskell(Language):
         assert self.config
         return [
             "ghc",
+            "-v0",
             "-fno-cse",
             "-fno-full-laziness",
             "-O3" if self.config.options.compiler_optimizations else "-O0",
+            *linker_flags(),
             main_,
             "-main-is",
             exec_,
+            # A larger allocation area makes ghc collect garbage less often.
+            "+RTS",
+            "-A32m",
+            "-RTS",
         ], [executable_name(exec_)]
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
@@ -114,19 +177,23 @@ class Haskell(Language):
         return linter.run_hlint(self.config.dodona, remaining)
 
     def cleanup_description(self, statement: str) -> str:
-        return cleanup_description(self, statement)
+        return strip_submission_prefix(self, statement)
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
+        assert self.config
+        offset = self.config.dodona.source_offset
         filename = submission_file(self)
+        diagnostic_regex = re.compile(r"^<code>:\d+:\d+: (error|warning)")
         context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
         compile_line_regex = re.compile(r"^([0-9]+)(\s*\|.*)$")
+        hint_line_regex = re.compile(r"\(line (\d+)\)")
         type_conflict_regex = re.compile(
             r"Couldn't match expected type (.*) with actual type (.*)"
         )
         parse_module = r"error: parse error on input ‘module’"
         replace_module = r"error: unexpected ‘module’"
         traceback = stacktrace.splitlines()
-        skip_line, lines = False, []
+        skip_line, in_diagnostic, lines = False, False, []
         for line in traceback:
             if not line or line == "undefined":
                 continue
@@ -155,12 +222,21 @@ class Haskell(Language):
                 continue
             skip_line = False
 
+            if diagnostic_regex.match(line):
+                in_diagnostic = True
+            elif not (in_diagnostic and (line[0].isspace() or line[0].isdigit())):
+                in_diagnostic = False
+
             if parse_module in line:
                 line = line.replace(parse_module, replace_module)
-            else:
+            elif in_diagnostic:
                 match = compile_line_regex.match(line)
                 if match:
-                    line = f"{int(match.group(1)) - 1}{match.group(2)}"
+                    line = f"{int(match.group(1)) + offset}{match.group(2)}"
+                else:
+                    line = hint_line_regex.sub(
+                        lambda hint: f"(line {int(hint.group(1)) + offset})", line
+                    )
 
             lines.append(line + "\n")
         return "".join(lines)
