@@ -282,6 +282,17 @@ def test_get_linter_position_start_row_base_0_with_offset():
     assert result.row == 5
 
 
+def test_get_linter_position_negative_offset():
+    result = get_linter_position(
+        raw_start_row=1,
+        source_offset=-2,
+        raw_end_row=None,
+        raw_start_column=None,
+        raw_end_column=None,
+    )
+    assert result.row == 0
+
+
 def test_annotation_format_is_reported_only_when_given(pytestconfig: pytest.Config):
     position = AnnotationLocation(row=0, rows=1, column=7, columns=2)
     out = StringIO()

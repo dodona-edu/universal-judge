@@ -34,6 +34,7 @@ def run_cppcheck(
             "cppcheck",
             "--xml",
             "--enable=style,warning",
+            "--check-level=exhaustive",
             f"--language={language}",
             submission.name,
         ],
@@ -74,8 +75,10 @@ def run_cppcheck(
 
             location_element = error.find("location")
             if location_element is not None:
+                line = location_element.attrib.get("line")
                 position = get_linter_position(
-                    raw_start_row=location_element.attrib.get("line"),
+                    # cppcheck reports file-level messages on line 0
+                    raw_start_row=None if line == "0" else line,
                     source_offset=config.source_offset,
                     raw_end_row=None,
                     raw_start_column=location_element.attrib.get("column"),
