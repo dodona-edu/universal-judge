@@ -23,6 +23,7 @@ en:
       result: "This result of the programmed evaluation is invalid:"
       stdout: "This is produced on stdout:"
       stderr: "This is produced on stderr:"
+      unknown-value: "The return value has a type that can't be compared with the expected value."
     specific:
       student:
         default: >-

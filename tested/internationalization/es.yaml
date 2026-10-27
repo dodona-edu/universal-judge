@@ -23,6 +23,7 @@ es:
       result: "El resultado de la evaluación programada no es válido:"
       stdout: "Esto se produjo en stdout:"
       stderr: "Esto se produjo en stderr:"
+      unknown-value: "El valor devuelto tiene un tipo que no se puede comparar con el valor esperado."
     specific:
       student:
         default: >-
