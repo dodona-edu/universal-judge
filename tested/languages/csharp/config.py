@@ -245,7 +245,7 @@ class CSharp(Language):
             "-debug:portable",
             "-optimize-",
             "-nullable:enable",
-            "-langversion:12.0",
+            "-langversion:14.0",
             "-warn:8",
             "-nowarn:1701,1702",
             f"-define:{';'.join(framework.defines)}",
