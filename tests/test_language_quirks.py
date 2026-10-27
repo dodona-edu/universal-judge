@@ -33,6 +33,16 @@ from tested.testsuite import Suite
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
+@pytest.mark.csharp
+def test_csharp_14_field_keyword(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "echo-function", "csharp", tmp_path, "one.tson", "csharp-14"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 @pytest.mark.c
 def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
