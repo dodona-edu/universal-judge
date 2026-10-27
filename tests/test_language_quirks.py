@@ -609,6 +609,25 @@ def test_typescript_async(exercise: str, tmp_path: Path, pytestconfig: pytest.Co
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.csharp
+def test_csharp_exception_survives_later_exit(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "csharp-exit",
+        "csharp",
+        tmp_path,
+        "plan.yaml",
+        "exception-then-exit",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["runtime error", "correct", "correct"]
+    generated = [t["generated"] for t in updates.find_all("close-test")]
+    assert generated[0] == "InvalidOperationException: boom"
+
+
 def test_python_large_int_wrong_answer(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
