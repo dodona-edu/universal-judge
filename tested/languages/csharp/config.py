@@ -68,28 +68,6 @@ TARGET_FRAMEWORKS = [
             "NETCOREAPP3_1_OR_GREATER",
         ],
     ),
-    TargetFramework(
-        reference_dir="net8.0",
-        runtimeconfig="tested.net8.0.runtimeconfig.json",
-        defines=[
-            "TRACE",
-            "DEBUG",
-            "NET",
-            "NET8_0",
-            "NETCOREAPP",
-            "NET5_0_OR_GREATER",
-            "NET6_0_OR_GREATER",
-            "NET7_0_OR_GREATER",
-            "NET8_0_OR_GREATER",
-            "NETCOREAPP1_0_OR_GREATER",
-            "NETCOREAPP1_1_OR_GREATER",
-            "NETCOREAPP2_0_OR_GREATER",
-            "NETCOREAPP2_1_OR_GREATER",
-            "NETCOREAPP2_2_OR_GREATER",
-            "NETCOREAPP3_0_OR_GREATER",
-            "NETCOREAPP3_1_OR_GREATER",
-        ],
-    ),
 ]
 
 
