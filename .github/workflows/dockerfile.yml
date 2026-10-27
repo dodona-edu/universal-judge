@@ -19,5 +19,5 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Check the dockerfile against the image it built
+      - name: Check the mirror against the published image
         run: ./devel/dockerfile_delta.sh
