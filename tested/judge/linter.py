@@ -93,7 +93,7 @@ def get_linter_position(
         int(raw_start_column) if raw_start_column is not None else None
     )
 
-    row = source_start_row - row_base + source_offset
+    row = max(source_start_row - row_base + source_offset, 0)
     column = (
         source_start_column - column_base if source_start_column is not None else None
     )
