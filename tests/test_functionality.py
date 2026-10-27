@@ -1017,6 +1017,43 @@ def test_exit_in_function_testcase_is_runtime_error(
     assert exit_result["generated"] == "3"
 
 
+@pytest.mark.parametrize("language", ["c"])
+def test_signal_in_main_testcase_is_runtime_error(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one.tson", "crash-after-output"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    exit_tests = [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+    assert exit_tests == [
+        {"command": "start-test", "expected": "0", "channel": "exit code"}
+    ]
+    exit_result = updates[updates.index(exit_tests[0]) + 1]
+    assert exit_result["generated"] == "-11"
+    assert exit_result["status"]["enum"] == "runtime error"
+
+
+@pytest.mark.parametrize(
+    "language,submission", [("bash", "grep-no-match"), ("python", "exit-after-output")]
+)
+def test_nonzero_exit_in_main_testcase_is_no_crash(
+    language: str, submission: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo", language, tmp_path, "one.tson", submission
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    assert not [
+        x for x in updates.find_all("start-test") if x["channel"] == "exit code"
+    ]
+
+
 @pytest.mark.parametrize("language", ["bash"])
 @pytest.mark.parametrize(
     "suite", ["nonzero-status-last.yaml", "nonzero-status-first.yaml"]

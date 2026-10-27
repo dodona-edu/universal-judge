@@ -331,7 +331,8 @@ def evaluate_context_results(
             and i == crashed_index
             and not actual_exception
             and not isinstance(output.exception, ExceptionOutputChannel)
-            and not testcase.is_main_testcase()
+            # A main call only crashes on a signal: a script may exit non-zero (Bash).
+            and (not testcase.is_main_testcase() or exec_results.exit < 0)
             and testcase.output.exit_code == IgnoredChannel.IGNORED
         ):
             t_col.add(StartTest(expected="0", channel=Channel.EXIT))
