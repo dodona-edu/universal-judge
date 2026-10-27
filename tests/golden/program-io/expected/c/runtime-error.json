@@ -23,7 +23,7 @@
  },
  {
   "command": "close-test",
-  "generated": "Hello: Alice\n",
+  "generated": "",
   "status": {
    "enum": "wrong"
   }
@@ -100,7 +100,7 @@
  },
  {
   "command": "close-test",
-  "generated": "Hi: TESTed\n",
+  "generated": "",
   "status": {
    "enum": "wrong"
   }
@@ -143,6 +143,19 @@
   "channel": "stdout",
   "command": "start-test",
   "expected": ""
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
  },
  {
   "accepted": false,

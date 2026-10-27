@@ -42,19 +42,6 @@
   }
  },
  {
-  "channel": "exit code",
-  "command": "start-test",
-  "expected": "0"
- },
- {
-  "command": "close-test",
-  "generated": "127",
-  "status": {
-   "enum": "runtime error",
-   "human": "Runtime error"
-  }
- },
- {
   "command": "close-testcase"
  },
  {
@@ -97,19 +84,6 @@
   }
  },
  {
-  "channel": "exit code",
-  "command": "start-test",
-  "expected": "0"
- },
- {
-  "command": "close-test",
-  "generated": "127",
-  "status": {
-   "enum": "runtime error",
-   "human": "Runtime error"
-  }
- },
- {
   "command": "close-testcase"
  },
  {
@@ -149,19 +123,6 @@
   "generated": "Hi: TESTed\n",
   "status": {
    "enum": "wrong"
-  }
- },
- {
-  "channel": "exit code",
-  "command": "start-test",
-  "expected": "0"
- },
- {
-  "command": "close-test",
-  "generated": "127",
-  "status": {
-   "enum": "runtime error",
-   "human": "Runtime error"
   }
  },
  {
