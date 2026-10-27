@@ -713,6 +713,68 @@ def test_cpp_compile_line_offset_end_to_end():
     assert final == "<code>:1:1: error: 'mfzej' does not name a type\n"
 
 
+def test_c_compile_snippet_gutter_offset_end_to_end():
+    language_config = get_language("test", "c")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = (
+        "submission.c: In function 'greet':\n"
+        "submission.c:13:37: error: 'nme' undeclared\n"
+        "   13 |     sprintf(greeting, nme);\n"
+        "      |                       ^~~\n"
+        "selector.c:6:14: fatal error: execution_0.c: No such file\n"
+        '    6 |     #include "execution_0.c"\n'
+        "      |              ^~~~~~~~~~~~~~~\n"
+        "submission.c:11:5: error: expected ';'\n"
+        "   11 |     x = 1\n"
+        "      |          ^\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == (
+        "<code>: In function 'greet':\n"
+        "<code>:11:37: error: 'nme' undeclared\n"
+        "   11 |     sprintf(greeting, nme);\n"
+        "      |                       ^~~\n"
+        "selector.c:6:14: fatal error: execution_0.c: No such file\n"
+        '    6 |     #include "execution_0.c"\n'
+        "      |              ^~~~~~~~~~~~~~~\n"
+        "<code>:9:5: error: expected ';'\n"
+        "    9 |     x = 1\n"
+        "      |          ^\n"
+    )
+
+
+def test_cpp_compile_snippet_gutter_offset_end_to_end():
+    language_config = get_language("test", "cpp")
+    assert language_config.config
+    language_config.config.dodona.source_offset = -2
+    original = (
+        "submission.cpp: In function 'int f()':\n"
+        "submission.cpp:12:24: error: 'nme' was not declared\n"
+        "   12 |     return nme;\n"
+        "      |            ^~~\n"
+        "submission.cpp:11:5: error: expected ';'\n"
+        "   11 |     x = 1\n"
+        "      |          ^\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == (
+        "<code>: In function 'int f()':\n"
+        "<code>:10:24: error: 'nme' was not declared\n"
+        "   10 |     return nme;\n"
+        "      |            ^~~\n"
+        "<code>:9:5: error: expected ';'\n"
+        "    9 |     x = 1\n"
+        "      |          ^\n"
+    )
+
+
 def test_csharp_cleanup_stacktrace_execution_dir_compile():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
