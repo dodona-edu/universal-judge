@@ -193,7 +193,7 @@ def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.
     # SyntaxError. What ruff makes of it depends on the platform: on macOS it
     # overflows its stack.
     source = tmp_path / "deep.py"
-    source.write_text("x = " + "+".join(["1"] * 10000) + "\n")
+    source.write_text("x = " + "+".join(["1"] * 100000) + "\n")
     conf = configuration(
         pytestconfig,
         "linter",
