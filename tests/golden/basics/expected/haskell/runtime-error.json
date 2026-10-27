@@ -60,7 +60,7 @@
  },
  {
   "command": "close-test",
-  "generated": "ErrorCall: cannot greet World\nCallStack (from HasCallStack):\n  error, called at ./Submission.hs:6:14 in main:Submission",
+  "generated": "ErrorCall: cannot greet World",
   "status": {
    "enum": "runtime error",
    "human": "Runtime error"

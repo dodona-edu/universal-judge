@@ -1,0 +1,4 @@
+- tab: "Exceptions"
+  testcases:
+    - expression: 'greet("World")'
+      exception: "cannot greet World"
