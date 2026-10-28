@@ -19,7 +19,6 @@ markers = [
     "javascript",
     "kotlin",
     "python",
-    "runhaskell",
     "typescript",
 ]
 

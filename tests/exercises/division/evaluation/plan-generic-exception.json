@@ -16,7 +16,6 @@
                     "message": null,
                     "types": {
                       "haskell": "ArithException",
-                      "runhaskell": "ArithException",
                       "java": "ArithmeticException",
                       "kotlin": "ArithmeticException",
                       "csharp": "DivideByZeroException",

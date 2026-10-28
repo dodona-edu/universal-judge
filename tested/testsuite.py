@@ -70,7 +70,6 @@ class SupportedLanguage(StrEnum):
     TYPESCRIPT = auto()
     KOTLIN = auto()
     PYTHON = auto()
-    RUNHASKELL = auto()
     CSHARP = auto()
     CPP = auto()
 

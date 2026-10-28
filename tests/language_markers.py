@@ -10,17 +10,13 @@ def all_languages_except(*languages):
     return [l for l in ALL_LANGUAGES if l not in languages]
 
 
-EXCEPTION_LANGUAGES = all_languages_except(
-    "c", "javascript", "typescript", "runhaskell", "bash"
-)
+EXCEPTION_LANGUAGES = all_languages_except("c", "javascript", "typescript", "bash")
 
-OBJECT_LANGUAGES = all_languages_except("c", "haskell", "runhaskell", "bash")
+OBJECT_LANGUAGES = all_languages_except("c", "haskell", "bash")
 
 ALL_SPECIFIC_LANGUAGES = all_languages_except("bash")
 
-COMPILE_LANGUAGES = all_languages_except(
-    "javascript", "typescript", "runhaskell", "bash"
-)
+COMPILE_LANGUAGES = all_languages_except("javascript", "typescript", "bash")
 
 
 SERIALIZABLE_LANGUAGES = all_languages_except("haskell")

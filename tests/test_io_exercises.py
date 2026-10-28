@@ -399,12 +399,10 @@ def test_io_function_nested_call_exercise(
     assert updates.find_status_enum() == ["correct"]
 
 
-@pytest.mark.parametrize("language", ("haskell", "runhaskell"))
-def test_io_function_exercise_haskell_io(
-    language: str, tmp_path: Path, pytestconfig: pytest.Config
-):
+@pytest.mark.haskell
+def test_io_function_exercise_haskell_io(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
-        pytestconfig, "echo-function", language, tmp_path, "one.tson", "correct_io"
+        pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "correct_io"
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)

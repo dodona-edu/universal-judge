@@ -617,7 +617,6 @@
         "typescript",
         "kotlin",
         "python",
-        "runhaskell",
         "csharp",
         "cpp"
       ]

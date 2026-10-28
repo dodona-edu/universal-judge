@@ -30,10 +30,6 @@
                       "file": "Evaluator.hs",
                       "name": "runtime"
                     },
-                    "runhaskell": {
-                      "file": "Evaluator.hs",
-                      "name": "runtime"
-                    },
                     "csharp": {
                       "file": "Evaluator.cs",
                       "name": "runtime"

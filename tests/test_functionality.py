@@ -211,7 +211,6 @@ def test_assignment_and_use_in_expression(
         "typescript",
         "javascript",
         pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_assignment_and_use_in_expression_list(
@@ -266,7 +265,6 @@ def test_crashing_assignment_with_before(
     [
         "c",
         pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_heterogeneous_arguments_are_detected(
@@ -529,7 +527,7 @@ def test_not_executed_context_keeps_its_exit_code(
     assert [(t["channel"], t["expected"]) for t in tests] == [("exit code", "1")]
 
 
-@pytest.mark.parametrize("lang", all_languages_except("haskell", "runhaskell"))
+@pytest.mark.parametrize("lang", all_languages_except("haskell"))
 def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(pytestconfig, "sum", lang, tmp_path, "short.tson", "correct")
     result = execute_config(conf)
@@ -542,7 +540,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
 @pytest.mark.parametrize(
     "lang",
     [
-        *all_languages_except("haskell", "runhaskell", "c"),
+        *all_languages_except("haskell", "c"),
         pytest.param(
             "c",
             marks=pytest.mark.xfail(
@@ -642,7 +640,6 @@ def test_objects_yaml(language: str, tmp_path: Path, pytestconfig: pytest.Config
     [
         "c",
         pytest.param("haskell", marks=pytest.mark.haskell),
-        pytest.param("runhaskell", marks=pytest.mark.haskell),
     ],
 )
 def test_objects_error(language: str, tmp_path: Path, pytestconfig: pytest.Config):
@@ -665,7 +662,6 @@ def test_objects_error(language: str, tmp_path: Path, pytestconfig: pytest.Confi
         ("javascript", ["correct"]),
         ("typescript", ["correct"]),
         ("haskell", ["internal error"]),
-        ("runhaskell", ["internal error"]),
     ],
 )
 def test_named_parameters(

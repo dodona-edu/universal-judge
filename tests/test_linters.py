@@ -122,8 +122,6 @@ def test_eslint_typescript(tmp_path: Path, config: dict, pytestconfig: pytest.Co
     [
         ("haskell", _get_config_options("haskell")[0]),
         ("haskell", _get_config_options("haskell")[1]),
-        ("runhaskell", _get_config_options("runhaskell")[0]),
-        ("runhaskell", _get_config_options("runhaskell")[1]),
     ],
 )
 def test_hlint(

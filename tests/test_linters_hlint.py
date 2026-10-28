@@ -10,12 +10,11 @@ from tests.manual_utils import assert_valid_output, configuration, execute_confi
 pytestmark = pytest.mark.haskell
 
 
-@pytest.mark.parametrize("language", ["haskell", "runhaskell"])
-def test_hlint_correct(tmp_path: Path, pytestconfig: pytest.Config, language: str):
+def test_hlint_correct(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "linter",
-        language,
+        "haskell",
         tmp_path,
         "plan.tson",
         "correct",
@@ -26,12 +25,11 @@ def test_hlint_correct(tmp_path: Path, pytestconfig: pytest.Config, language: st
     assert len(updates.find_all("annotate-code")) == 0
 
 
-@pytest.mark.parametrize("language", ["haskell", "runhaskell"])
-def test_hlint_warning(tmp_path: Path, pytestconfig: pytest.Config, language: str):
+def test_hlint_warning(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "linter",
-        language,
+        "haskell",
         tmp_path,
         "plan.tson",
         "warning",
@@ -48,12 +46,11 @@ def test_hlint_warning(tmp_path: Path, pytestconfig: pytest.Config, language: st
     assert annotations[0]["columns"] == 19
 
 
-@pytest.mark.parametrize("language", ["haskell", "runhaskell"])
-def test_hlint_multiline(tmp_path: Path, pytestconfig: pytest.Config, language: str):
+def test_hlint_multiline(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "linter",
-        language,
+        "haskell",
         tmp_path,
         "plan.tson",
         "multiline",
@@ -69,12 +66,11 @@ def test_hlint_multiline(tmp_path: Path, pytestconfig: pytest.Config, language: 
     assert annotations[0]["columns"] == 14
 
 
-@pytest.mark.parametrize("language", ["haskell", "runhaskell"])
-def test_hlint_suggestion(tmp_path: Path, pytestconfig: pytest.Config, language: str):
+def test_hlint_suggestion(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "linter",
-        language,
+        "haskell",
         tmp_path,
         "plan.tson",
         "warning",
@@ -82,7 +78,6 @@ def test_hlint_suggestion(tmp_path: Path, pytestconfig: pytest.Config, language:
             "options": {
                 "language": {
                     "haskell": {"linter": True, "hlint_config": "suggest_hlint.yml"},
-                    "runhaskell": {"linter": True, "hlint_config": "suggest_hlint.yml"},
                 }
             }
         },
@@ -94,14 +89,11 @@ def test_hlint_suggestion(tmp_path: Path, pytestconfig: pytest.Config, language:
     assert annotations[0]["type"] == Severity.INFO
 
 
-@pytest.mark.parametrize("language", ["haskell", "runhaskell"])
-def test_hlint_custom_config(
-    tmp_path: Path, pytestconfig: pytest.Config, language: str
-):
+def test_hlint_custom_config(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
         pytestconfig,
         "linter",
-        language,
+        "haskell",
         tmp_path,
         "plan.tson",
         "warning",
@@ -109,7 +101,6 @@ def test_hlint_custom_config(
             "options": {
                 "language": {
                     "haskell": {"linter": True, "hlint_config": "custom_hlint.yml"},
-                    "runhaskell": {"linter": True, "hlint_config": "custom_hlint.yml"},
                 }
             }
         },
