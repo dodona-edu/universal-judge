@@ -1,4 +1,3 @@
 # <exercise>/<language>/<case> <issue URL> [<issue URL> ...]: judged as a strict xfail
 program-io/csharp/top-level-statements https://github.com/dodona-edu/universal-judge/issues/750
 haskell-polymorphic-empty-list/haskell/correct https://github.com/dodona-edu/universal-judge/issues/735
-haskell-polymorphic-empty-list/runhaskell/correct https://github.com/dodona-edu/universal-judge/issues/735

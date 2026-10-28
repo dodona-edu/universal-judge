@@ -33,7 +33,6 @@ def test_small_descriptions(language: str):
         ("javascript", "thisIsAFunctionName"),
         ("typescript", "thisIsAFunctionName"),
         ("haskell", "thisIsAFunctionName"),
-        ("runhaskell", "thisIsAFunctionName"),
     ],
 )
 def test_template_function_name(lang: str, expected: str):

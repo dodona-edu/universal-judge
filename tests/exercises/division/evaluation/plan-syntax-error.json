@@ -26,9 +26,6 @@
                     "haskell": {
                       "file": "EvaluatorSyntaxError.hs"
                     },
-                    "runhaskell": {
-                      "file": "EvaluatorSyntaxError.hs"
-                    },
                     "csharp": {
                       "file": "EvaluatorSyntaxError.cs"
                     },

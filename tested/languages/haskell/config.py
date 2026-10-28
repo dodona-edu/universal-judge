@@ -30,13 +30,12 @@ if TYPE_CHECKING:
 HELPER_MODULES = ["Values", "EvaluationUtils"]
 TEMPLATES_DIRECTORY = Path(__file__).parent / "templates"
 
-# The dodona-tested image compiles the helper modules ahead of time: a "static" set
-# for ghc and a "dynamic" set for runhaskell, as GHCi only loads dynamic objects.
-PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell")
+# The dodona-tested image compiles the helper modules ahead of time.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/haskell/static")
 
 
 @functools.cache
-def precompiled_helpers(way: str) -> Path | None:
+def precompiled_helpers() -> Path | None:
     """
     Find the precompiled helper modules of the image, if it has them.
 
@@ -44,7 +43,7 @@ def precompiled_helpers(way: str) -> Path | None:
     this judge: otherwise GHC would recompile them, and units that compile in
     parallel share the hard-linked files.
     """
-    directory = PRECOMPILED_DIRECTORY / way
+    directory = PRECOMPILED_DIRECTORY
     for module in HELPER_MODULES:
         if not all((directory / f"{module}.{ext}").is_file() for ext in ("hi", "o")):
             return None
@@ -69,7 +68,7 @@ class Haskell(Language):
         # The image compiles them with -O0.
         if self.config.options.compiler_optimizations:
             return None
-        return precompiled_helpers("static")
+        return precompiled_helpers()
 
     def initial_dependencies(self) -> list[str]:
         dependencies = [f"{module}.hs" for module in HELPER_MODULES]

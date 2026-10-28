@@ -39,7 +39,7 @@ jobs:
           - shard: kotlin
             marker: kotlin
           - shard: haskell
-            marker: haskell or runhaskell
+            marker: haskell
           - shard: typescript
             marker: typescript
           - shard: java-csharp
@@ -48,7 +48,7 @@ jobs:
             marker: cpp
           - shard: rest
             # not (every marker above)
-            marker: not (kotlin or haskell or runhaskell or typescript or java or csharp or cpp)
+            marker: not (kotlin or haskell or typescript or java or csharp or cpp)
     env:
       MARKER: ${{ matrix.marker }}
 
