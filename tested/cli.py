@@ -101,13 +101,11 @@ class CommandDict(list):
 if __name__ == "__main__":
     parser = ArgumentParser(
         description="Simple CLI for TESTed",
-        epilog=textwrap.dedent(
-            """
+        epilog=textwrap.dedent("""
                  additional information:\n
                      The CLI only looks at a config.json file in the exercise directory.\n
                      It does not look in folders above the exercise directory.
-                 """
-        ),
+                 """),
     )
     parser.add_argument(
         "-e",

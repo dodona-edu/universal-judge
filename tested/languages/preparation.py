@@ -436,7 +436,7 @@ def prepare_testcase(
             statement=command, value_function=value_function_call
         )
 
-    (exception_function_call, exception_evaluator_name) = _create_exception_function(
+    exception_function_call, exception_evaluator_name = _create_exception_function(
         bundle, testcase
     )
 
