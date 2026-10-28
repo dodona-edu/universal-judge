@@ -101,14 +101,12 @@ def _is_type_cast(node: ast.expr) -> bool:
 def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     if not isinstance(node.target, ast.Name):
         actual = ast.dump(node)
-        raise InvalidDslError(
-            f"""
+        raise InvalidDslError(f"""
             You can only assign to simple variables when using type hints.
             You are trying to assign to a target of type {type(node.target)}.
             The full assignment is:
             {actual}
-            """
-        )
+            """)
     assert node.value
     value = _convert_expression(node.value, False)
     if isinstance(node.annotation, ast.Name):
