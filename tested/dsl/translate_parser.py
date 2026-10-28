@@ -83,7 +83,7 @@ from tested.utils import get_args, recursive_dict_merge
 
 
 def _convert_language_dictionary(
-    original: dict[str, str]
+    original: dict[str, str],
 ) -> dict[SupportedLanguage, str]:
     return {SupportedLanguage(k): v for k, v in original.items()}
 
@@ -153,9 +153,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             # There is no additional information, so what can we do?
             raise exc
 
-        sys.stderr.write(
-            textwrap.dedent(
-                f"""
+        sys.stderr.write(textwrap.dedent(f"""
         YAML error while parsing test suite. This means there is a YAML syntax error.
 
         The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
@@ -168,9 +166,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             
         The detailed exception is provided below.
         You might also find help by validating your YAML file with a YAML validator.\n
-        """
-            )
-        )
+        """))
         raise exc
 
 
