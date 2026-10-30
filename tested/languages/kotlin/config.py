@@ -151,7 +151,7 @@ class Kotlin(Language):
         others = [x for x in files if not x.endswith(".jar")]
         return [
             get_executable("kotlinc"),
-            f"-J-Xmx192M",
+            "-J-Xmx192M",
             *(f"-J{flag}" for flag in JIT_FLAGS),
             "-nowarn",
             "-jvm-target",

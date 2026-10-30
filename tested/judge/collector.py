@@ -35,11 +35,11 @@ class OutputManager:
     """
 
     __slots__ = [
+        "compiler_annotations",
+        "currently_open",
         "finalized",
         "open_stack",
-        "currently_open",
         "out",
-        "compiler_annotations",
     ]
 
     finalized: bool
@@ -163,7 +163,7 @@ class TestcaseCollector:
     will not be shown in Dodona.
     """
 
-    __slots__ = ["start", "content"]
+    __slots__ = ["content", "start"]
 
     def __init__(self, start: StartTestcase):
         assert isinstance(start, StartTestcase)

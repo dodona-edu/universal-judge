@@ -232,7 +232,6 @@ touch {pu.value_file} {pu.exception_file}
             result += f"context_{i} || (exit $?)\n"
         else:
             result += f"context_{i} || true\n"
-        result += f""
 
     result += "exit $?\n"
 
@@ -242,14 +241,14 @@ touch {pu.value_file} {pu.exception_file}
 # TODO: don't call Python to encode JSON in Bash.
 #   Use something like jq.
 def convert_encoder(values: list[Value]) -> str:
-    result = f"""
-function json_escape {{
+    result = """
+function json_escape {
     printf '%s' "$1" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
-}}
+}
 
-function send_value {{
-    echo "{{\\"type\\": \\"text\\", \\"data\\": $(json_escape "$1")}}␞"
-}}
+function send_value {
+    echo "{\\"type\\": \\"text\\", \\"data\\": $(json_escape "$1")}␞"
+}
 """
     for value in values:
         index_fun = unique_index_function()

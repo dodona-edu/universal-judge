@@ -60,7 +60,7 @@ def convert_value(value: Value) -> str:
             return "Float.POSITIVE_INFINITY"
         else:
             assert value.data == SpecialNumbers.NEG_INFINITY
-            return f"Float.NEGATIVE_INFINITY"
+            return "Float.NEGATIVE_INFINITY"
     elif value.type == AdvancedNumericTypes.INT_8:
         return f"(byte) {value.data}"
     elif value.type in (AdvancedNumericTypes.U_INT_8, AdvancedNumericTypes.INT_16):

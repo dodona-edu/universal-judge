@@ -44,7 +44,7 @@ def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedStringTypes.CHAR:
         assert isinstance(value, StringType)
-        return f"(char) '" + value.data.replace("'", "\\'") + "'"
+        return "(char) '" + value.data.replace("'", "\\'") + "'"
     elif value.type == AdvancedNumericTypes.INT_16:
         return f"((short) {value.data})"
     elif value.type == AdvancedNumericTypes.U_INT_16:
@@ -85,7 +85,7 @@ def convert_value(value: Value) -> str:
     elif value.type == BasicStringTypes.TEXT:
         return json.dumps(value.data)
     elif value.type == BasicBooleanTypes.BOOLEAN:
-        return f"(bool) " + str(value.data).lower()
+        return "(bool) " + str(value.data).lower()
     elif value.type == BasicNothingTypes.NOTHING:
         return "NULL"
     elif value.type == BasicStringTypes.UNKNOWN:

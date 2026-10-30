@@ -48,7 +48,7 @@ def test_javascript_assertion_error():
     at context0 ({workdir}/.tested/execution00/execution00.js:78:31)
     at async {workdir}/.tested/execution00/execution00.js:1515:13
 """
-    expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    expected_cleaned = """AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
     at <code>:98:32
     at Array.map (<anonymous>)
@@ -69,7 +69,7 @@ def test_typescript_assertion_error():
     at context0 ({workdir}/.tested/execution00/execution00.ts:78:31)
     at async {workdir}/.tested/execution00/execution00.ts:1515:13
 """
-    expected_cleaned = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    expected_cleaned = """AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
     at <code>:98:32
     at Array.map (<anonymous>)
@@ -93,7 +93,7 @@ def test_javascript_type_error():
     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:81:12)
     at node:internal/main/run_main_module:23:47
     """
-    expected_cleaned = f"TypeError: Codeersleutel is not a constructor\n"
+    expected_cleaned = "TypeError: Codeersleutel is not a constructor\n"
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
 
@@ -112,7 +112,7 @@ def test_typescript_type_error():
     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:81:12)
     at node:internal/main/run_main_module:23:47
     """
-    expected_cleaned = f"TypeError: Codeersleutel is not a constructor\n"
+    expected_cleaned = "TypeError: Codeersleutel is not a constructor\n"
     actual_cleaned = language_config.cleanup_stacktrace(original)
     assert actual_cleaned == expected_cleaned
 
@@ -203,7 +203,7 @@ def test_csharp_compilation(tmp_path: Path):
     {workdir}/.tested/common/Submission.cs(13,30): error CS1002: ; expected
     {workdir}/.tested/common/Submission.cs(13,34): error CS1002: ; expected
     """
-    expected = f"""    <code>:13:20: error CS1002: ; expected
+    expected = """    <code>:13:20: error CS1002: ; expected
     <code>:13:26: error CS1002: ; expected
     <code>:13:30: error CS1001: Identifier expected
     <code>:13:30: error CS1002: ; expected
@@ -464,13 +464,13 @@ def test_kotlin_run_error():
 
 
 def test_code_link_line_number_replacement_works(tmp_path: Path, pytestconfig):
-    stacktrace = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    stacktrace = """AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:86:13)
     at <code>:98:32
     at Array.map (<anonymous>)
     at Codeersleutel.decodeer (<code>:98:18)
     """
-    expected = f"""AssertionError [ERR_ASSERTION]: ongeldig bericht
+    expected = """AssertionError [ERR_ASSERTION]: ongeldig bericht
     at bigram2letter (<code>:91:13)
     at <code>:103:32
     at Array.map (<anonymous>)
