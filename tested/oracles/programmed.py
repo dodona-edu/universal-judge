@@ -160,9 +160,9 @@ def _evaluate_programmed(
         result_, stdout_, stderr_ = _execute_custom_check_function(
             bundle, oracle, context
         )
-    except SyntaxError as e:
+    except SyntaxError:
         # The oracle might be rubbish, so handle any exception.
-        _logger.exception(e)
+        _logger.exception("The custom check oracle has a syntax error")
         messages.append(
             ExtendedMessage(
                 description="The custom check oracle failed with the following syntax error:",
@@ -176,8 +176,8 @@ def _evaluate_programmed(
                 description=tb, format="code", permission=Permission.EDUCATOR
             )
         )
-    except Exception as e:
-        _logger.exception(e)
+    except Exception:
+        _logger.exception("The custom check oracle raised an exception")
         messages.append(
             ExtendedMessage(
                 description="The custom check oracle failed with the following exception:",
@@ -299,8 +299,8 @@ def evaluate(
             )
         try:
             evaluation_result = get_converter().loads(result.stdout, BooleanEvalResult)
-        except Exception as e:
-            _logger.exception(e)
+        except Exception:
+            _logger.exception("Could not parse the custom check result")
             messages: list[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(

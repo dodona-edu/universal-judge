@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import pytest
 from attrs import define
+from cattrs.errors import ClassValidationError
 
 from tested.dodona import ExtendedMessage, Message
 from tested.parsing import fallback_field, get_converter, ignore_field
@@ -127,7 +128,7 @@ def test_non_dict_input():
     converter = get_converter()
     # If input is not a dict, it should pass through to previous hook (which might fail or handle it)
     # Actually, cattrs' structure for a class usually expects a dict if it's using make_dict_structure_fn
-    with pytest.raises(Exception):
+    with pytest.raises(ClassValidationError):
         converter.structure("not a dict", NonDictDummy)
 
 

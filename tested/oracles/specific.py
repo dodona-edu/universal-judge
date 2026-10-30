@@ -37,8 +37,8 @@ def evaluate(
 
     try:
         actual = get_converter().loads(actual_str, BooleanEvalResult)
-    except Exception as e:
-        _logger.exception(e)
+    except Exception:
+        _logger.exception("Could not parse the language-specific oracle result")
         educator_message = ExtendedMessage(
             description=get_i18n_string(
                 "oracles.specific.educator", actual=actual_str, e=traceback.format_exc()

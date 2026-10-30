@@ -1,5 +1,6 @@
 import pytest
 from attrs import define
+from cattrs.errors import ClassValidationError
 
 from tested.parsing import fallback_field, get_converter, ignore_field, parse_json_suite
 from tested.serialisation import Identifier, StringType
@@ -190,7 +191,7 @@ class ReverseOrderTest:
 def test_reverse_decorator_order():
     data = {"old": "value"}
     # If ignore runs first, this should fail because "new" is missing.
-    with pytest.raises(Exception):
+    with pytest.raises(ClassValidationError):
         get_converter().structure(data, ReverseOrderTest)
 
 

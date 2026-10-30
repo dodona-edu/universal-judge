@@ -23,7 +23,7 @@ def try_as_readable_exception(
     # noinspection PyBroadException
     try:
         actual = get_converter().loads(value, ExceptionValue)
-    except Exception:
+    except Exception:  # noqa: BLE001 - any parse failure means this is not an exception value
         return None, None
     else:
         readable = actual.readable(omit_type=False)
@@ -62,8 +62,8 @@ def evaluate(
 
     try:
         actual = try_as_exception(actual_str)
-    except Exception as e:
-        _logger.exception(e)
+    except Exception:
+        _logger.exception("Could not parse the actual exception value")
         educator_message = ExtendedMessage(
             description=get_i18n_string(
                 "oracles.exception.educator",

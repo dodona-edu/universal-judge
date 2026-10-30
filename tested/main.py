@@ -29,7 +29,7 @@ def run(config: DodonaConfig, judge_output: IO):
         print(
             "Remember that the test suite is a path relative to the 'evaluation' folder of your exercise."
         )
-        raise e
+        raise
 
     _, ext = os.path.splitext(config.test_suite)
     is_yaml = ext.lower() in (".yaml", ".yml")

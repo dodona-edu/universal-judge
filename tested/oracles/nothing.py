@@ -45,7 +45,7 @@ def evaluate_no_return(
             value = NothingType()
         else:
             value = parse_value(actual)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - unparseable output must become feedback
         raw_message = f"Could not parse {actual}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.EDUCATOR

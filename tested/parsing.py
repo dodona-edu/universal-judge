@@ -80,7 +80,7 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
             result = _suite_converter.structure(to_convert, possible_class)
             _logger.debug("%s accepted.", debug_message)
             return result
-        except Exception:
+        except Exception:  # noqa: BLE001 - any failure means this candidate type is rejected
             _logger.debug("%s rejected.", debug_message)
     raise TypeError(
         f"{to_convert} could not be converted into a {the_type}. Check the syntax or file a bug."
