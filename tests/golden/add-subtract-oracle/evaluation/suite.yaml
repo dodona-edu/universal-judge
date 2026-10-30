@@ -1,0 +1,18 @@
+- tab: "Add"
+  testcases:
+    - expression: "add(2, 3)"
+      return: !oracle
+        oracle: specific_check
+        functions:
+          csharp:
+            file: Evaluator.cs
+            name: evaluate
+- tab: "Subtract"
+  testcases:
+    - expression: "subtract(5, 3)"
+      return: !oracle
+        oracle: specific_check
+        functions:
+          csharp:
+            file: Evaluator.cs
+            name: evaluate

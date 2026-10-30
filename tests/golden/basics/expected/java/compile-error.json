@@ -90,7 +90,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>: error: cannot find symbol<br>        return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>                           ^<br>  symbol:   variable nme<br>  location: class Submission<br>2 errors</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"7\">&lt;code&gt;:7</a>: error: cannot find symbol<br>        return &quot;Hello, &quot; + nme + &quot;!&quot;;<br>                           ^<br>  symbol:   variable nme<br>  location: class Submission<br>1 error</div>",
    "format": "html",
    "permission": "student"
   }

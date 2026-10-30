@@ -16,6 +16,7 @@ from tested.judge.utils import (
     run_command,
 )
 from tested.languages.conventionalize import selector_name
+from tested.languages.generation import generate_selector
 from tested.languages.preparation import exception_file, value_file
 from tested.testsuite import ContentPath
 from tested.utils import safe_del
@@ -225,6 +226,8 @@ def compile_unit(
     _logger.info(f"Compiling unit {unit.name}")
     remaining = plan.remaining_time()
     deps = [str(x) for x in dependencies]
+    if bundle.language.needs_selector():
+        deps.append(generate_selector(bundle, execution_dir, [unit.name]))
     result, files = run_compilation(bundle, execution_dir, deps, remaining)
 
     # A new compilation means a new file filtering
