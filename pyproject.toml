@@ -5,21 +5,12 @@ extend-exclude = ["tests/exercises/", "tests/golden/", "tests/descriptions/"]
 [tool.ruff.lint]
 # Rules with findings still to fix: drop one once its findings are fixed
 ignore = [
-    "B017",
-    "BLE001",
     "F401",
     "F541",
     "FURB105",
     "FURB167",
     "PIE790",
-    "RUF009",
     "RUF023",
-    "S102",
-    "S110",
-    "TRY002",
-    "TRY004",
-    "TRY201",
-    "TRY401",
     "UP006",
     "UP045",
 ]

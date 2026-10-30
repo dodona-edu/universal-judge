@@ -85,7 +85,7 @@ def structure_every_union(to_convert: Any, the_type: Any) -> Any:
             result = _suite_converter.structure(to_convert, possible_class)
             _logger.debug("%s accepted.", debug_message)
             return result
-        except Exception:
+        except Exception:  # noqa: BLE001 - asserts, validators and nested hooks raise any type
             _logger.debug("%s rejected.", debug_message)
     raise TypeError(
         f"{to_convert} could not be converted into a {the_type}. Check the syntax or file a bug."
@@ -113,10 +113,11 @@ def parse_json_value(value: str) -> "Value":
     """
     Parse the json of a value into the relevant data structures.
 
-    If ``value`` is not valid json, a `SerialisationError` will be thrown.
-
     :param value: The json to be parsed.
     :return: The parsed data.
+    :raises ValueError: If ``value`` is not valid json.
+    :raises TypeError: If the json is not a value (see ``structure_every_union``).
+    :raises RecursionError: If the json is nested too deeply.
     """
     initialise_converter()
     from tested.serialisation import Value
@@ -235,3 +236,13 @@ def fallback_field(
 def get_converter() -> JsonConverter:
     initialise_converter()
     return _suite_converter
+
+
+def try_loads[T](value: str, cl: type[T]) -> T | None:
+    """
+    Parse the json in ``value`` into ``cl``, or return None if it is not a ``cl``.
+    """
+    try:
+        return get_converter().loads(value, cl)
+    except Exception:  # noqa: BLE001 - arbitrary json makes cattrs raise many types
+        return None

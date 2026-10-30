@@ -20,6 +20,7 @@ from tested.internationalization import get_i18n_string
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
+from tested.oracles import text
 from tested.testsuite import (
     ContentPath,
     Context,
@@ -1091,3 +1092,41 @@ def test_nonzero_status_in_bash_function_testcase_checks_exit_code(
     ]
     exit_result = updates[updates.index(exit_tests[0]) + 1]
     assert exit_result["generated"] == "1"
+
+
+def test_crashing_oracle_only_fails_its_own_testcase(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    original = text.evaluate_text
+    calls = []
+
+    def crash_on_first_call(*args, **kwargs):
+        calls.append(args)
+        if len(calls) == 1:
+            raise RuntimeError("oracle bug")
+        return original(*args, **kwargs)
+
+    mocker.patch("tested.oracles.text.evaluate_text", side_effect=crash_on_first_call)
+    conf = configuration(
+        pytestconfig, "echo", "python", tmp_path, "two.tson", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["internal error", "correct"]
+    crashed, judged = updates.find_all("close-test")
+    assert crashed["generated"] == ""
+    assert judged["generated"] == "input-2\n"
+    educator = [
+        m["message"]
+        for m in updates.find_all("append-message")
+        if isinstance(m["message"], dict) and m["message"]["permission"] == "educator"
+    ]
+    assert [m["format"] for m in educator] == ["code", "code"]
+    assert "RuntimeError: oracle bug" in educator[0]["description"]
+    assert educator[1]["description"] == "input-1\n"
+    human = get_i18n_string("oracles.programmed.student.default")
+    assert human in [
+        u["status"]["human"]
+        for u in updates
+        if u.get("status", {}).get("enum") == "internal error"
+    ]

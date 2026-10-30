@@ -42,3 +42,7 @@ def evaluate_unknown_permission(actual):
     return EvaluationResult(actual == "correct", "correct", actual, [
         Message("secret for teachers", permission="teacher"),
     ])
+
+
+def evaluate_sys_without_import(_context):
+    return EvaluationResult(sys.modules["evaluation_utils"].EvaluationResult is EvaluationResult)

@@ -5,7 +5,7 @@ from tested.dodona import ExtendedMessage, Message, Permission, Status, StatusMe
 from tested.internationalization import get_i18n_string
 from tested.languages.utils import convert_stacktrace_to_clickable_feedback
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.parsing import get_converter
+from tested.parsing import get_converter, try_loads
 from tested.serialisation import ExceptionValue
 from tested.testsuite import ExceptionOutputChannel, OutputChannel
 
@@ -20,17 +20,14 @@ def try_as_exception(value: str) -> ExceptionValue:
 def try_as_readable_exception(
     config: OracleConfig, value: str
 ) -> tuple[str | None, Message | None]:
-    # noinspection PyBroadException
-    try:
-        actual = get_converter().loads(value, ExceptionValue)
-    except Exception:
+    actual = try_loads(value, ExceptionValue)
+    if actual is None:
         return None, None
-    else:
-        readable = actual.readable(omit_type=False)
-        message = convert_stacktrace_to_clickable_feedback(
-            config.bundle.language, actual.stacktrace
-        )
-        return readable, message
+    readable = actual.readable(omit_type=False)
+    message = convert_stacktrace_to_clickable_feedback(
+        config.bundle.language, actual.stacktrace
+    )
+    return readable, message
 
 
 def evaluate(
@@ -62,8 +59,8 @@ def evaluate(
 
     try:
         actual = try_as_exception(actual_str)
-    except Exception as e:
-        _logger.exception(e)
+    except Exception:
+        _logger.exception("Could not parse the actual exception value")
         educator_message = ExtendedMessage(
             description=get_i18n_string(
                 "oracles.exception.educator",

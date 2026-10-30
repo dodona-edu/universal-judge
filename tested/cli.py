@@ -171,12 +171,12 @@ if __name__ == "__main__":
             programming_language = config_file["programming_language"]
         except KeyError:
             if config_path.exists():
-                raise Exception(
+                raise ValueError(
                     f"Could not determine the programming language for {exercise_path}, as there was no programming language in the config file (at {config_path}).\n"
                     "Please add a programming language to the config file or provide the programming language via the --programming_language parameter on the command line."
                 )
             else:
-                raise Exception(
+                raise ValueError(
                     f"Could not determine the programming language for {exercise_path}, as there was no config file (at {config_path}) for this exercise.\n"
                     "Please create a config file or provide the programming language via the --programming_language parameter on the command line."
                 )

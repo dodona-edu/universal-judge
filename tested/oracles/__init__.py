@@ -1,6 +1,7 @@
 import functools
 from collections.abc import Callable
 from pathlib import Path
+from typing import assert_never
 
 from tested.configs import Bundle
 from tested.dodona import Status
@@ -86,4 +87,4 @@ def get_oracle(
     elif isinstance(oracle, LanguageSpecificOracle):
         return currier(specific.evaluate)
     else:
-        raise AssertionError(f"Unknown oracle type: {type(oracle)}")
+        assert_never(oracle)

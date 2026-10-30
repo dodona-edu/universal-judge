@@ -7,7 +7,7 @@ module handles that.
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal, assert_never, cast
 
 from attrs import define
 
@@ -216,9 +216,7 @@ def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
         assert isinstance(prepared, FunctionCall)
         assignment = assignment.replace_property(prepared)
     else:
-        raise AssertionError(
-            f"Unknown assignment class {type(assignment)} for {assignment}"
-        )
+        assert_never(assignment)
     prepared = prepare_expression(bundle, assignment.expression)
     return assignment.replace_expression(prepared)
 

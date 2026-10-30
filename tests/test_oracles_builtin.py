@@ -8,11 +8,12 @@ from pytest_mock import MockerFixture
 import tested
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
-from tested.dodona import Status
+from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.judge.evaluation import guess_expected_value
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.oracles.exception import evaluate as evaluate_exception
 from tested.oracles.file import evaluate_file
+from tested.oracles.nothing import evaluate_no_return, evaluate_nothing_others
 from tested.oracles.text import evaluate_text
 from tested.oracles.value import evaluate as evaluate_value
 from tested.parsing import get_converter
@@ -35,6 +36,8 @@ from tested.testsuite import (
     ValueOutputChannel,
 )
 from tests.manual_utils import configuration
+
+DEEPLY_NESTED_JSON = pytest.param("[" * 100_000 + "]" * 100_000, id="deeply-nested")
 
 
 def oracle_config(
@@ -1137,3 +1140,81 @@ def test_guess_expected_value_file_channel_requires_file_index(
     )
     with pytest.raises(AssertionError):
         guess_expected_value(config.bundle, channel, file_index=None)
+
+
+@pytest.mark.parametrize("actual", ["not json", "5", DEEPLY_NESTED_JSON])
+def test_value_oracle_unparseable_actual_is_internal_error(
+    actual: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="expected")
+    )
+    result = evaluate_value(config, channel, actual)
+    assert result.result.enum == Status.INTERNAL_ERROR
+    assert result.readable_actual == actual
+    [message] = result.messages
+    assert isinstance(message, ExtendedMessage)
+    assert message.permission == Permission.EDUCATOR
+    assert message.description.startswith(f"Received {actual}, which caused ")
+
+
+def test_value_oracle_passes_on_an_oracle_result(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    channel = ValueOutputChannel(
+        value=StringType(type=BasicStringTypes.TEXT, data="expected")
+    )
+    oracle_result = OracleResult(
+        result=StatusMessage(enum=Status.CORRECT),
+        readable_expected="expected",
+        readable_actual="actual",
+    )
+    actual = get_converter().dumps(oracle_result)
+    assert evaluate_value(config, channel, actual) == oracle_result
+
+
+@pytest.mark.parametrize("actual", ["not json", "5", DEEPLY_NESTED_JSON])
+def test_nothing_oracle_unparseable_return_is_internal_error(
+    actual: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    result = evaluate_no_return(config, actual)
+    assert result.result.enum == Status.INTERNAL_ERROR
+    assert result.readable_actual == actual
+    [message] = result.messages
+    assert isinstance(message, ExtendedMessage)
+    assert message.permission == Permission.EDUCATOR
+    assert message.description.startswith(f"Could not parse {actual}, which caused ")
+
+
+@pytest.mark.parametrize("actual", ["not json", "5", DEEPLY_NESTED_JSON])
+def test_nothing_oracle_shows_unparseable_output_as_is(
+    actual: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    result = evaluate_nothing_others(config, actual)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_actual == actual
+    assert result.messages == []
+
+
+def test_nothing_oracle_shows_a_value_readably(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    actual = '{"type": "text", "data": "hello"}'
+    result = evaluate_nothing_others(config, actual)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_actual == "'hello'"
+
+
+def test_nothing_oracle_shows_an_exception_readably(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    actual = '{"message": "boom", "type": "ValueError", "stacktrace": ""}'
+    result = evaluate_nothing_others(config, actual)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_actual == "ValueError: boom"

@@ -708,7 +708,7 @@ class Context(WithFeatures, WithFunctions):
     def check_testcases(self, _, value: list[Testcase]):
         # Check that only the first testcase has a main call.
         for non_first_testcase in value[1:]:
-            if isinstance(non_first_testcase.input, MainInput):
+            if non_first_testcase.is_main_testcase():
                 raise ValueError("Only the first testcase may have a main call.")
 
         # Check that only the last testcase has an exit code check.

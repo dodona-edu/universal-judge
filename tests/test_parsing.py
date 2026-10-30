@@ -2,9 +2,10 @@ from decimal import Decimal
 
 import pytest
 from attrs import define
+from cattrs.errors import ClassValidationError
 
 from tested.dodona import ExtendedMessage, Message
-from tested.parsing import fallback_field, get_converter, ignore_field
+from tested.parsing import fallback_field, get_converter, ignore_field, try_loads
 
 
 @define
@@ -127,7 +128,7 @@ def test_non_dict_input():
     converter = get_converter()
     # If input is not a dict, it should pass through to previous hook (which might fail or handle it)
     # Actually, cattrs' structure for a class usually expects a dict if it's using make_dict_structure_fn
-    with pytest.raises(Exception):
+    with pytest.raises(ClassValidationError):
         converter.structure("not a dict", NonDictDummy)
 
 
@@ -303,3 +304,23 @@ def test_a_structure_still_becomes_text_outside_a_message(value):
     # The readable values of an oracle can be a student's list or dict.
     converter = get_converter()
     assert converter.structure(value, str | None) == str(value)  # pyright: ignore
+
+
+def test_try_loads_parses_json_into_the_class():
+    assert try_loads('{"field1": "value"}', DummyClass) == DummyClass(field1="value")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "not json",
+        '"value"',
+        "5",
+        "[]",
+        '{"field2": 1}',
+        '{"field1": "value", "extra": 1}',
+        pytest.param("[" * 100_000 + "]" * 100_000, id="deeply-nested"),
+    ],
+)
+def test_try_loads_returns_none_if_not_the_class(value):
+    assert try_loads(value, DummyClass) is None

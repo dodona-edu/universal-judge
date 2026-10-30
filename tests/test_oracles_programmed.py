@@ -74,6 +74,22 @@ def test_custom_check_function_runtime_crash(
     assert len(updates.find_all("append-message")) == 4
 
 
+def test_custom_check_function_can_use_sys_without_import(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "programmed_sys.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 def test_custom_check_function_syntax_error(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
