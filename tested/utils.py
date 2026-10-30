@@ -5,6 +5,7 @@ import random
 import string
 import sys
 from collections.abc import Callable, Iterable
+from contextlib import AbstractContextManager
 from itertools import zip_longest
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, TypeGuard, TypeVar
@@ -16,16 +17,17 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 
-def smart_close(file: IO):
+def smart_open(path: str, mode: str) -> AbstractContextManager[IO]:
     """
-    A smart context manager that will close file handles, except the default ones
-    (namely stdin, stdout and stderr).
-    :param file: The file to close smartly.
+    A smart context manager that opens a file, except for "-", which means stdin
+    (when reading) or stdout (when writing). The standard streams are never closed.
+    :param path: The path of the file to open, or "-" for the standard stream.
+    :param mode: The mode to open the file in, e.g. "r" or "w".
     """
-    if file and file not in (sys.stdout, sys.stdin, sys.stderr):
-        return file
+    if path == "-":
+        return contextlib.nullcontext(sys.stdin if "r" in mode else sys.stdout)
 
-    return contextlib.nullcontext(file)
+    return open(path, mode)
 
 
 def basename(file: str | Path) -> str:

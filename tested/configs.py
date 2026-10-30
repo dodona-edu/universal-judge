@@ -10,7 +10,7 @@ from attrs import define, evolve, field
 
 from tested.parsing import fallback_field, get_converter
 from tested.testsuite import ExecutionMode, Suite, SupportedLanguage
-from tested.utils import get_identifier, smart_close
+from tested.utils import get_identifier
 
 # Prevent circular imports
 if TYPE_CHECKING:
@@ -113,11 +113,10 @@ class DodonaConfig:
 
 def read_config(config_in: IO) -> DodonaConfig:
     """
-    Read the configuration from the given file. If the file is not stdin, it will be
-    closed.
+    Read the configuration from the given file. The caller is responsible for closing
+    the file.
     """
-    with smart_close(config_in) as input_:
-        config_json = input_.read()
+    config_json = config_in.read()
 
     parsed = get_converter().loads(config_json, DodonaConfig)
     return parsed
