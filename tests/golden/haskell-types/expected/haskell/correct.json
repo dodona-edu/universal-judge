@@ -12,18 +12,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "smallest (5 :: Int) (6 :: Int)",
+   "description": "smallest 5 6",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "5 :: Int"
+  "expected": "5"
  },
  {
   "command": "close-test",
-  "generated": "5 :: Int",
+  "generated": "5",
   "status": {
    "enum": "correct"
   }
@@ -41,18 +41,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "smallest (-5 :: Int) (-6 :: Int)",
+   "description": "smallest (-5) (-6)",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "-6 :: Int"
+  "expected": "-6"
  },
  {
   "command": "close-test",
-  "generated": "-6 :: Int",
+  "generated": "-6",
   "status": {
    "enum": "correct"
   }
@@ -77,18 +77,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "total ([1 :: Int, 2 :: Int])",
+   "description": "total [1, 2]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "3 :: Int"
+  "expected": "3"
  },
  {
   "command": "close-test",
-  "generated": "3 :: Int",
+  "generated": "3",
   "status": {
    "enum": "correct"
   }
@@ -113,11 +113,11 @@
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "0 :: Int"
+  "expected": "0"
  },
  {
   "command": "close-test",
-  "generated": "0 :: Int",
+  "generated": "0",
   "status": {
    "enum": "correct"
   }
@@ -142,18 +142,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "positives ([1 :: Int, -2 :: Int])",
+   "description": "positives [1, -2]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[1 :: Int]"
+  "expected": "[1]"
  },
  {
   "command": "close-test",
-  "generated": "[1 :: Int]",
+  "generated": "[1]",
   "status": {
    "enum": "correct"
   }
@@ -171,7 +171,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "positives ([-1 :: Int])",
+   "description": "positives [-1]",
    "format": "haskell"
   }
  },
@@ -207,18 +207,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (0 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "nthElement 0 [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "1 :: Int"
+  "expected": "1"
  },
  {
   "command": "close-test",
-  "generated": "1 :: Int",
+  "generated": "1",
   "status": {
    "enum": "correct"
   }
@@ -236,18 +236,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (1 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "nthElement 1 [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "2 :: Int"
+  "expected": "2"
  },
  {
   "command": "close-test",
-  "generated": "2 :: Int",
+  "generated": "2",
   "status": {
    "enum": "correct"
   }
@@ -265,18 +265,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (2 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "nthElement 2 [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "3 :: Int"
+  "expected": "3"
  },
  {
   "command": "close-test",
-  "generated": "3 :: Int",
+  "generated": "3",
   "status": {
    "enum": "correct"
   }
@@ -294,18 +294,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (3 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "nthElement 3 [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "4 :: Int"
+  "expected": "4"
  },
  {
   "command": "close-test",
-  "generated": "4 :: Int",
+  "generated": "4",
   "status": {
    "enum": "correct"
   }
@@ -323,18 +323,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (4 :: Int) ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "nthElement 4 [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "5 :: Int"
+  "expected": "5"
  },
  {
   "command": "close-test",
-  "generated": "5 :: Int",
+  "generated": "5",
   "status": {
    "enum": "correct"
   }
@@ -359,18 +359,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (0 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "nthElement 0 [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "1.0 :: Double"
+  "expected": "1.0"
  },
  {
   "command": "close-test",
-  "generated": "1 :: Double",
+  "generated": "1",
   "status": {
    "enum": "correct"
   }
@@ -388,18 +388,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (1 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "nthElement 1 [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "2.0 :: Double"
+  "expected": "2.0"
  },
  {
   "command": "close-test",
-  "generated": "2 :: Double",
+  "generated": "2",
   "status": {
    "enum": "correct"
   }
@@ -417,18 +417,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (2 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "nthElement 2 [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "3.0 :: Double"
+  "expected": "3.0"
  },
  {
   "command": "close-test",
-  "generated": "3 :: Double",
+  "generated": "3",
   "status": {
    "enum": "correct"
   }
@@ -446,18 +446,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (3 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "nthElement 3 [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "4.0 :: Double"
+  "expected": "4.0"
  },
  {
   "command": "close-test",
-  "generated": "4 :: Double",
+  "generated": "4",
   "status": {
    "enum": "correct"
   }
@@ -475,18 +475,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (4 :: Int) ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "nthElement 4 [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "5.0 :: Double"
+  "expected": "5.0"
  },
  {
   "command": "close-test",
-  "generated": "5 :: Double",
+  "generated": "5",
   "status": {
    "enum": "correct"
   }
@@ -511,7 +511,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (0 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "description": "nthElement 0 [\"a\", \"b\", \"c\", \"d\", \"e\"]",
    "format": "haskell"
   }
  },
@@ -540,7 +540,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (1 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "description": "nthElement 1 [\"a\", \"b\", \"c\", \"d\", \"e\"]",
    "format": "haskell"
   }
  },
@@ -569,7 +569,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (2 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "description": "nthElement 2 [\"a\", \"b\", \"c\", \"d\", \"e\"]",
    "format": "haskell"
   }
  },
@@ -598,7 +598,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (3 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "description": "nthElement 3 [\"a\", \"b\", \"c\", \"d\", \"e\"]",
    "format": "haskell"
   }
  },
@@ -627,7 +627,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (4 :: Int) [\"a\", \"b\", \"c\", \"d\", \"e\"]",
+   "description": "nthElement 4 [\"a\", \"b\", \"c\", \"d\", \"e\"]",
    "format": "haskell"
   }
  },
@@ -663,18 +663,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (0 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "description": "nthElement 0 [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[1 :: Int, 5 :: Int]"
+  "expected": "[1, 5]"
  },
  {
   "command": "close-test",
-  "generated": "(1 :: Int, 5 :: Int)",
+  "generated": "(1, 5)",
   "status": {
    "enum": "correct"
   }
@@ -692,18 +692,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (1 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "description": "nthElement 1 [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[2 :: Int, 4 :: Int]"
+  "expected": "[2, 4]"
  },
  {
   "command": "close-test",
-  "generated": "(2 :: Int, 4 :: Int)",
+  "generated": "(2, 4)",
   "status": {
    "enum": "correct"
   }
@@ -721,18 +721,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (2 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "description": "nthElement 2 [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[3 :: Int, 3 :: Int]"
+  "expected": "[3, 3]"
  },
  {
   "command": "close-test",
-  "generated": "(3 :: Int, 3 :: Int)",
+  "generated": "(3, 3)",
   "status": {
    "enum": "correct"
   }
@@ -750,18 +750,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (3 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "description": "nthElement 3 [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[4 :: Int, 2 :: Int]"
+  "expected": "[4, 2]"
  },
  {
   "command": "close-test",
-  "generated": "(4 :: Int, 2 :: Int)",
+  "generated": "(4, 2)",
   "status": {
    "enum": "correct"
   }
@@ -779,18 +779,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (4 :: Int) ([(1 :: Int, 5 :: Int), (2 :: Int, 4 :: Int), (3 :: Int, 3 :: Int), (4 :: Int, 2 :: Int), (5 :: Int, 1 :: Int)])",
+   "description": "nthElement 4 [(1, 5), (2, 4), (3, 3), (4, 2), (5, 1)]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[5 :: Int, 1 :: Int]"
+  "expected": "[5, 1]"
  },
  {
   "command": "close-test",
-  "generated": "(5 :: Int, 1 :: Int)",
+  "generated": "(5, 1)",
   "status": {
    "enum": "correct"
   }
@@ -815,18 +815,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1 :: Int, 2 :: Int])",
+   "description": "secondToLast [1, 2]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "1 :: Int"
+  "expected": "1"
  },
  {
   "command": "close-test",
-  "generated": "1 :: Int",
+  "generated": "1",
   "status": {
    "enum": "correct"
   }
@@ -844,18 +844,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int])",
+   "description": "secondToLast [1, 2, 3]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "2 :: Int"
+  "expected": "2"
  },
  {
   "command": "close-test",
-  "generated": "2 :: Int",
+  "generated": "2",
   "status": {
    "enum": "correct"
   }
@@ -873,18 +873,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int])",
+   "description": "secondToLast [1, 2, 3, 4]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "3 :: Int"
+  "expected": "3"
  },
  {
   "command": "close-test",
-  "generated": "3 :: Int",
+  "generated": "3",
   "status": {
    "enum": "correct"
   }
@@ -902,18 +902,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int, 5 :: Int])",
+   "description": "secondToLast [1, 2, 3, 4, 5]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "4 :: Int"
+  "expected": "4"
  },
  {
   "command": "close-test",
-  "generated": "4 :: Int",
+  "generated": "4",
   "status": {
    "enum": "correct"
   }
@@ -931,18 +931,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1 :: Int, 0 :: Int, 1 :: Int, 0 :: Int, 1 :: Int])",
+   "description": "secondToLast [1, 0, 1, 0, 1]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "0 :: Int"
+  "expected": "0"
  },
  {
   "command": "close-test",
-  "generated": "0 :: Int",
+  "generated": "0",
   "status": {
    "enum": "correct"
   }
@@ -960,18 +960,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([9 :: Int, 81 :: Int, 1 :: Int, 2 :: Int, 4 :: Int, 1 :: Int, 42 :: Int, 1 :: Int])",
+   "description": "secondToLast [9, 81, 1, 2, 4, 1, 42, 1]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "42 :: Int"
+  "expected": "42"
  },
  {
   "command": "close-test",
-  "generated": "42 :: Int",
+  "generated": "42",
   "status": {
    "enum": "correct"
   }
@@ -996,18 +996,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double])",
+   "description": "secondToLast [1.0, 2.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "1.0 :: Double"
+  "expected": "1.0"
  },
  {
   "command": "close-test",
-  "generated": "1 :: Double",
+  "generated": "1",
   "status": {
    "enum": "correct"
   }
@@ -1025,18 +1025,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double])",
+   "description": "secondToLast [1.0, 2.0, 3.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "2.0 :: Double"
+  "expected": "2.0"
  },
  {
   "command": "close-test",
-  "generated": "2 :: Double",
+  "generated": "2",
   "status": {
    "enum": "correct"
   }
@@ -1054,18 +1054,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double])",
+   "description": "secondToLast [1.0, 2.0, 3.0, 4.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "3.0 :: Double"
+  "expected": "3.0"
  },
  {
   "command": "close-test",
-  "generated": "3 :: Double",
+  "generated": "3",
   "status": {
    "enum": "correct"
   }
@@ -1083,18 +1083,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1.0 :: Double, 2.0 :: Double, 3.0 :: Double, 4.0 :: Double, 5.0 :: Double])",
+   "description": "secondToLast [1.0, 2.0, 3.0, 4.0, 5.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "4.0 :: Double"
+  "expected": "4.0"
  },
  {
   "command": "close-test",
-  "generated": "4 :: Double",
+  "generated": "4",
   "status": {
    "enum": "correct"
   }
@@ -1112,18 +1112,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([1.0 :: Double, 0.0 :: Double, 1.0 :: Double, 0.0 :: Double, 1.0 :: Double])",
+   "description": "secondToLast [1.0, 0.0, 1.0, 0.0, 1.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "0.0 :: Double"
+  "expected": "0.0"
  },
  {
   "command": "close-test",
-  "generated": "0 :: Double",
+  "generated": "0",
   "status": {
    "enum": "correct"
   }
@@ -1141,18 +1141,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "secondToLast ([9.0 :: Double, 81.0 :: Double, 1.0 :: Double, 2.0 :: Double, 4.0 :: Double, 1.0 :: Double, 42.0 :: Double, 1.0 :: Double])",
+   "description": "secondToLast [9.0, 81.0, 1.0, 2.0, 4.0, 1.0, 42.0, 1.0]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "42.0 :: Double"
+  "expected": "42.0"
  },
  {
   "command": "close-test",
-  "generated": "42 :: Double",
+  "generated": "42",
   "status": {
    "enum": "correct"
   }
@@ -1358,7 +1358,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (0 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "description": "nthElement 0 ['a', 'b', 'c', 'd', 'e']",
    "format": "haskell"
   }
  },
@@ -1387,7 +1387,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (1 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "description": "nthElement 1 ['a', 'b', 'c', 'd', 'e']",
    "format": "haskell"
   }
  },
@@ -1416,7 +1416,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (2 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "description": "nthElement 2 ['a', 'b', 'c', 'd', 'e']",
    "format": "haskell"
   }
  },
@@ -1445,7 +1445,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (3 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "description": "nthElement 3 ['a', 'b', 'c', 'd', 'e']",
    "format": "haskell"
   }
  },
@@ -1474,7 +1474,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "nthElement (4 :: Int) ['a', 'b', 'c', 'd', 'e']",
+   "description": "nthElement 4 ['a', 'b', 'c', 'd', 'e']",
    "format": "haskell"
   }
  },

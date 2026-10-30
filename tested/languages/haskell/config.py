@@ -243,7 +243,7 @@ class Haskell(Language):
     def generate_statement(self, statement: Statement) -> str:
         from tested.languages.haskell import generators
 
-        return generators.convert_statement(statement)
+        return generators.convert_statement(statement, display=True)
 
     def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
         from tested.languages.haskell import generators

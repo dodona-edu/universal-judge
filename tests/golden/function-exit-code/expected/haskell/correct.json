@@ -12,7 +12,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "check (1 :: Int)",
+   "description": "check 1",
    "format": "haskell"
   }
  },

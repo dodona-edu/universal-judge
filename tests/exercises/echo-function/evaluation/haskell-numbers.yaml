@@ -1,0 +1,8 @@
+- tab: "Numbers"
+  testcases:
+    - expression: "toString(-5)"
+      return: "-5"
+    - expression: "add(12, -18)"
+      return: -6
+    - expression: "echo(5)"
+      return: 5

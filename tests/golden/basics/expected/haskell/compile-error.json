@@ -12,7 +12,7 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "add (2 :: Int) (3 :: Int)",
+   "description": "add 2 3",
    "format": "haskell"
   }
  },
