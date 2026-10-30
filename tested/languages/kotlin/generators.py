@@ -23,7 +23,6 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
     Expression,
     FunctionCall,
     FunctionType,
@@ -67,7 +66,7 @@ def convert_value(value: Value) -> str:
             return "Float.POSITIVE_INFINITY"
         else:
             assert value.data == SpecialNumbers.NEG_INFINITY
-            return f"Float.NEGATIVE_INFINITY"
+            return "Float.NEGATIVE_INFINITY"
     elif value.type == AdvancedNumericTypes.U_INT_32:
         return f"{value.data}U"
     elif value.type == AdvancedNumericTypes.U_INT_8:

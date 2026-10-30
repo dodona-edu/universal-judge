@@ -300,7 +300,6 @@ class Language(ABC):
 
         :param solution: Path to the solution and path for the modified solution.
         """
-        pass
 
     def compiler_output(
         self, stdout: str, stderr: str

@@ -1,16 +1,7 @@
-import json
 from pathlib import Path
 
 import pytest
-import yaml
 
-from tested.datatypes import (
-    AdvancedNothingTypes,
-    AdvancedSequenceTypes,
-    BasicNumericTypes,
-)
-from tested.serialisation import NothingType, NumberType, SequenceType
-from tested.utils import sorted_no_duplicates, sorting_value_extract
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 

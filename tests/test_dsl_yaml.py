@@ -33,7 +33,6 @@ from tested.testsuite import (
     ContentPath,
     CustomCheckOracle,
     FileOutputChannel,
-    FileUrl,
     GenericTextOracle,
     GenericValueOracle,
     LanguageLiterals,
@@ -764,7 +763,7 @@ def test_empty_constructor_with_param(function_name, result):
 
 
 def test_text_built_in_checks_implied():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -787,7 +786,7 @@ def test_text_built_in_checks_implied():
 
 
 def test_text_built_in_checks_explicit():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -811,7 +810,7 @@ def test_text_built_in_checks_explicit():
 
 
 def test_text_custom_checks_correct():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -852,7 +851,7 @@ def test_text_custom_checks_correct():
 
 
 def test_value_built_in_checks_implied():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -877,7 +876,7 @@ def test_value_built_in_checks_implied():
 
 
 def test_file_custom_check_correct():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -909,7 +908,7 @@ def test_file_custom_check_correct():
 
 
 def test_value_built_in_checks_explicit():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -935,7 +934,7 @@ def test_value_built_in_checks_explicit():
 
 
 def test_value_custom_checks_correct():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -978,7 +977,7 @@ def test_value_custom_checks_correct():
 
 
 def test_value_specific_checks_correct():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -1019,7 +1018,7 @@ def test_value_specific_checks_correct():
 
 
 def test_value_specific_checks_missing_evaluators():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:
@@ -1038,7 +1037,7 @@ def test_value_specific_checks_missing_evaluators():
 
 
 def test_value_specific_checks_weird_arguments():
-    yaml_str = f"""
+    yaml_str = """
     - tab: 'Test'
       contexts:
         - testcases:

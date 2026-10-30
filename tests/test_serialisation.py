@@ -56,7 +56,7 @@ from tested.serialisation import (
 )
 from tested.testsuite import Suite
 from tested.utils import get_args
-from tests.language_markers import SERIALIZABLE_LANGUAGES, all_languages_except
+from tests.language_markers import SERIALIZABLE_LANGUAGES
 from tests.manual_utils import configuration
 
 # A list of example values for basic types.

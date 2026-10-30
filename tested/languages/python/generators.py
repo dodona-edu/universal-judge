@@ -19,7 +19,6 @@ from tested.languages.preparation import (
 )
 from tested.languages.utils import convert_unknown_type
 from tested.serialisation import (
-    Assignment,
     Expression,
     FunctionCall,
     FunctionType,
@@ -62,12 +61,12 @@ def convert_value(value: Value, with_namespace=False) -> str:
         if not isinstance(value.data, SpecialNumbers):
             return f'Decimal("{value.data}")'
         elif value.data == SpecialNumbers.NOT_A_NUMBER:
-            return f'Decimal(float("nan"))'
+            return 'Decimal(float("nan"))'
         elif value.data == SpecialNumbers.POS_INFINITY:
-            return f'Decimal(float("inf"))'
+            return 'Decimal(float("inf"))'
         else:
             assert value.data == SpecialNumbers.NEG_INFINITY
-            return f'Decimal(float("-inf"))'
+            return 'Decimal(float("-inf"))'
     # Handle basic types
     value = as_basic_type(value)
     if value.type in (BasicNumericTypes.INTEGER, BasicNumericTypes.REAL):

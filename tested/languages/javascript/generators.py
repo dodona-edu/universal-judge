@@ -269,7 +269,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         """
 
     # Functions to write separators
-    result += f"(async () => {{\n"
+    result += "(async () => {\n"
 
     for i, ctx in enumerate(pu.contexts):
         result += f"""
