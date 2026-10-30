@@ -5,6 +5,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 cd "$ROOT"
 
-isort --check-only --diff ./tested ./tests
-black --check ./tested ./tests
+ruff check ./tested ./tests
+ruff format --check ./tested ./tests
 pyright ./tested ./tests
