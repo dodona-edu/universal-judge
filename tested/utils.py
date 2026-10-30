@@ -7,7 +7,7 @@ import sys
 from collections.abc import Callable, Iterable
 from itertools import zip_longest
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, TypeGuard, TypeVar
+from typing import IO, TYPE_CHECKING, Any, TypeGuard
 from typing import get_args as typing_get_args
 
 if TYPE_CHECKING:
@@ -52,10 +52,6 @@ def get_identifier() -> str:
     return letter + "".join(rest)
 
 
-K = TypeVar("K")
-T = TypeVar("T")
-
-
 def get_args(type_: Any) -> tuple[Any, ...]:
     """
     Get the args of a type or the type itself.
@@ -94,7 +90,7 @@ def get_args(type_: Any) -> tuple[Any, ...]:
         return (type_,)
 
 
-def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
+def flatten[T](nested: Iterable[Iterable[T]]) -> Iterable[T]:
     """
     Flatten a list of lists one level.
 
@@ -104,7 +100,7 @@ def flatten(nested: Iterable[Iterable[T]]) -> Iterable[T]:
     return itertools.chain.from_iterable(nested)
 
 
-def safe_del(l: list[T], index: int, f: Callable[[T], bool]) -> bool:
+def safe_del[T](l: list[T], index: int, f: Callable[[T], bool]) -> bool:
     """
     Delete an item from a list at a position if the filter is True. If the index
     is out of range or the filter is False, the function will return False, else
@@ -127,7 +123,7 @@ def safe_del(l: list[T], index: int, f: Callable[[T], bool]) -> bool:
         return False
 
 
-def safe_get(l: list[T], index: int) -> T | None:
+def safe_get[T](l: list[T], index: int) -> T | None:
     """
     Get the element at the given position or None if the index is out of bounds.
     """
@@ -168,7 +164,7 @@ def sorting_value_extract(maybe_value: Any) -> Any:
         return maybe_value
 
 
-def sorted_no_duplicates(
+def sorted_no_duplicates[T, K](
     iterable: Iterable[T],
     key: Callable[[T], K] = lambda x: x,
     recursive_key: Callable[[K], K] | None = None,

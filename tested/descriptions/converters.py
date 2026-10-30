@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from functools import partial
-from typing import Callable, cast
+from typing import cast, override
 
 from attr import dataclass
 from jinja2 import Environment, FileSystemLoader
 from marko import Markdown
-from typing_extensions import override
 
 from tested.configs import Bundle
 from tested.datatypes import AdvancedTypes, AllTypes, string_to_type
