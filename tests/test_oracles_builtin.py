@@ -41,7 +41,7 @@ def oracle_config(
     tmp_path: Path, pytestconfig, options=None, language="python"
 ) -> OracleConfig:
     if options is None:
-        options = dict()
+        options = {}
     conf = configuration(pytestconfig, "", language, tmp_path)
     plan = Suite()
     bundle = create_bundle(conf, sys.stdout, plan)

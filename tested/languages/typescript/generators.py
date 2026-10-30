@@ -144,9 +144,7 @@ def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> st
         return "boolean"
     elif basic == BasicStringTypes.TEXT:
         return "string"
-    elif basic == BasicNumericTypes.INTEGER:
-        return "number"
-    elif basic == BasicNumericTypes.REAL:
+    elif basic in (BasicNumericTypes.INTEGER, BasicNumericTypes.REAL):
         return "number"
     elif basic == BasicNothingTypes.NOTHING:
         return "null"

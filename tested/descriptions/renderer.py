@@ -86,11 +86,12 @@ class TestedRenderer(MarkdownRenderer):
         parsed_dsl = parse_dsl(rendered_dsl)
 
         # Get all actual tests
-        tests = []
-        for tab in parsed_dsl.tabs:
-            for context in tab.contexts:
-                for testcase in context.testcases:
-                    tests.append(testcase)
+        tests = [
+            testcase
+            for tab in parsed_dsl.tabs
+            for context in tab.contexts
+            for testcase in context.testcases
+        ]
 
         resulting_lines = []
         prompt = self.bundle.language.get_declaration_metadata().get("prompt", ">")

@@ -1,4 +1,4 @@
-import os
+import io
 from pathlib import Path
 
 from tested.configs import Bundle, DodonaConfig, GlobalConfig
@@ -35,7 +35,7 @@ def process_problem_statement(
     bundle = Bundle(
         global_config=global_config,
         language=language,
-        out=open(os.devnull, "w"),
+        out=io.StringIO(),
     )
 
     tested_markdown = convert_templated_problem(bundle, problem_statement)

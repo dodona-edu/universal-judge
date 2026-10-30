@@ -531,9 +531,12 @@ class Output(WithFeatures):
         ]
 
         # Handle special cases
-        if isinstance(self.exception, ExceptionOutputChannel):
-            if self.exception.exception is not None and self.exception.exception.types:
-                individual_languages.append(set(self.exception.exception.types.keys()))
+        if (
+            isinstance(self.exception, ExceptionOutputChannel)
+            and self.exception.exception is not None
+            and self.exception.exception.types
+        ):
+            individual_languages.append(set(self.exception.exception.types.keys()))
 
         # Remove all None elements and merge the rest.
         without_none = [x for x in individual_languages if x is not None]
@@ -672,7 +675,7 @@ class Testcase(WithFeatures, WithFunctions):
         output_languages = self.output.get_specific_languages()
         input_languages = None
         if isinstance(self.input, LanguageLiterals):
-            input_languages = {SupportedLanguage(x) for x in self.input.literals.keys()}
+            input_languages = {SupportedLanguage(x) for x in self.input.literals}
 
         if output_languages is None and input_languages is None:
             return None
@@ -722,11 +725,11 @@ class Context(WithFeatures, WithFunctions):
             for file in testcase.input_files:
                 if not file.path:
                     continue
-                if existing := input_files_by_path.get(file.path):
-                    if existing.content != file.content:
-                        raise ValueError(
-                            f"The same path with different content is used in input_files ({file.path})."
-                        )
+                existing = input_files_by_path.get(file.path)
+                if existing and existing.content != file.content:
+                    raise ValueError(
+                        f"The same path with different content is used in input_files ({file.path})."
+                    )
                 input_files_by_path[file.path] = file
 
         # Check that there are no duplicate output files with the same path but different content.
@@ -737,11 +740,11 @@ class Context(WithFeatures, WithFunctions):
             for file in testcase.output.file.files:
                 if not file.path:
                     continue
-                if existing := output_files_by_path.get(file.path):
-                    if existing.content != file.content:
-                        raise ValueError(
-                            f"The same path with different content is used in output_files ({file.path})."
-                        )
+                existing = output_files_by_path.get(file.path)
+                if existing and existing.content != file.content:
+                    raise ValueError(
+                        f"The same path with different content is used in output_files ({file.path})."
+                    )
                 output_files_by_path[file.path] = file
 
     def get_functions(self) -> Iterable[FunctionCall]:
@@ -762,7 +765,7 @@ class Context(WithFeatures, WithFunctions):
         return isinstance(self.testcases[0].input, MainInput)
 
     def has_exit_testcase(self):
-        return not self.testcases[-1].output.exit_code == IgnoredChannel.IGNORED
+        return self.testcases[-1].output.exit_code != IgnoredChannel.IGNORED
 
     def get_input_files(self) -> set[TextData]:
         all_files = set()
@@ -788,8 +791,7 @@ def _runs_to_tab_converter(runs: list | None, _):
         if "run" in run and run["run"]["input"]["main_call"]:
             contexts.append({"testcases": [run["run"]]})
         if "contexts" in run:
-            for context in run["contexts"]:
-                contexts.append(context)
+            contexts.extend(run["contexts"])
     return contexts
 
 
@@ -938,7 +940,7 @@ def _resolve_function_calls(function_calls: Iterable[FunctionCall]):
     for signature, calls in registry.items():
         # If there are default arguments, some function calls will not have the
         # same number of arguments.
-        if len(set(len(x.arguments) for x in calls)) != 1:
+        if len({len(x.arguments) for x in calls}) != 1:
             used_features.append(
                 FeatureSet({Construct.DEFAULT_PARAMETERS}, set(), set())
             )

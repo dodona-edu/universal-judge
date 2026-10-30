@@ -7,6 +7,7 @@ a single converter for all, both the serialization and suite.
 
 import logging
 from decimal import Decimal
+from types import NoneType
 from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
 
 from cattrs.gen import make_dict_structure_fn
@@ -28,9 +29,9 @@ T = TypeVar("T")
 
 # Saves the registry of structure hooks.
 # Note that this assumes we only have a single converter.
-_TESTED_STRUCTURE_HOOK_REGISTRIES: dict[type, Callable[[dict[str, Any], type], Any]] = (
-    dict()
-)
+_TESTED_STRUCTURE_HOOK_REGISTRIES: dict[
+    type, Callable[[dict[str, Any], type], Any]
+] = {}
 
 
 def structure_decimal(obj: Any, _) -> Decimal:
@@ -39,6 +40,11 @@ def structure_decimal(obj: Any, _) -> Decimal:
 
 def unstructure_decimal(obj: Decimal) -> str:
     return str(obj)
+
+
+def structure_none(obj: Any, _) -> None:
+    if obj is not None:
+        raise ValueError(f"{obj} is not None.")
 
 
 def structure_every_union(to_convert: Any, the_type: Any) -> Any:
@@ -95,6 +101,10 @@ def initialise_converter():
 
     _suite_converter.register_structure_hook(Decimal, structure_decimal)
     _suite_converter.register_unstructure_hook(Decimal, unstructure_decimal)
+    # A `None` annotation stays `None` unless attrs.resolve_types made it NoneType.
+    _suite_converter.register_structure_hook_func(
+        lambda t: t is None or t is NoneType, structure_none
+    )
     _suite_converter.register_structure_hook_factory(
         lambda t: bool(is_union_type(t)), lambda _: structure_every_union
     )
