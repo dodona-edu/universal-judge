@@ -20,6 +20,7 @@ from tested.datatypes import (
     StringTypes,
 )
 from tested.dsl import parse_dsl, translate_to_test_suite
+from tested.dsl.ast_translator import InvalidDslError
 from tested.dsl.translate_parser import load_schema_validator
 from tested.serialisation import (
     FunctionCall,
@@ -431,7 +432,7 @@ def test_invalid_yaml():
     - statement: 'data = () ()'
       return: !expression '() {}'
     """
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         translate_to_test_suite(yaml_str)
 
 
@@ -443,7 +444,7 @@ def test_invalid_context_as_testcase():
     statement: "5"
     return: 5
     """
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         translate_to_test_suite(yaml_str)
 
 
@@ -1033,7 +1034,7 @@ def test_value_specific_checks_missing_evaluators():
                   javascript:
                     - "js"
     """
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         translate_to_test_suite(yaml_str)
 
 
@@ -1052,7 +1053,7 @@ def test_value_specific_checks_weird_arguments():
                   javascript:
                     - "js"
     """
-    with pytest.raises(Exception):
+    with pytest.raises(InvalidDslError):
         translate_to_test_suite(yaml_str)
 
 
@@ -1337,7 +1338,7 @@ def test_additional_properties_are_not_allowed():
             javascript: "hello()"
             python: "hello_2()"
 """
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         parse_dsl(yaml_str)
 
 
@@ -1961,7 +1962,7 @@ _LANGUAGE_MAPPING_SUITES = [
 @pytest.mark.parametrize("valid,invalid", _LANGUAGE_MAPPING_SUITES)
 def test_language_mapping_values_are_validated(valid, invalid):
     translate_to_test_suite(valid)
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         translate_to_test_suite(invalid)
 
 
@@ -1970,5 +1971,5 @@ def test_language_mapping_values_are_validated(valid, invalid):
 )
 def test_language_mapping_keys_must_be_known_languages(valid):
     translate_to_test_suite(valid)
-    with pytest.raises(Exception):
+    with pytest.raises(ExceptionGroup):
         translate_to_test_suite(valid.replace("python", "cobol"))

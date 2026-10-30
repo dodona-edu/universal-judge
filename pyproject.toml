@@ -5,8 +5,6 @@ extend-exclude = ["tests/exercises/", "tests/golden/", "tests/descriptions/"]
 [tool.ruff.lint]
 # Rules with findings still to fix: drop one once its findings are fixed
 ignore = [
-    "B017",
-    "BLE001",
     "C400",
     "C401",
     "C408",
@@ -21,10 +19,7 @@ ignore = [
     "PIE810",
     "PYI025",
     "PYI061",
-    "RUF009",
     "RUF023",
-    "S102",
-    "S110",
     "SIM101",
     "SIM102",
     "SIM103",
@@ -33,10 +28,6 @@ ignore = [
     "SIM118",
     "SIM201",
     "SIM210",
-    "TRY002",
-    "TRY004",
-    "TRY201",
-    "TRY401",
     "UP006",
     "UP007",
     "UP035",
@@ -44,6 +35,10 @@ ignore = [
     "UP045",
     "UP047",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Running the exercise's custom check with exec is this module's job
+"tested/oracles/programmed.py" = ["S102"]
 
 [tool.pytest]
 strict = true

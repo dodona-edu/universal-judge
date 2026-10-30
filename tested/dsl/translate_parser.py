@@ -151,7 +151,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
 
         if exc.problem_mark is None:
             # There is no additional information, so what can we do?
-            raise exc
+            raise
 
         sys.stderr.write(
             textwrap.dedent(f"""
@@ -169,7 +169,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
         You might also find help by validating your YAML file with a YAML validator.\n
         """)
         )
-        raise exc
+        raise
 
 
 def load_schema_validator(dsl_object: YamlObject = None) -> Validator:

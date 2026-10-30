@@ -718,7 +718,7 @@ class ComparableFloat:
             if math.isnan(self.value) and math.isnan(other.value):
                 return True
             return math.isclose(self.value, other.value)
-        except Exception:
+        except Exception:  # noqa: BLE001 - incomparable values are simply not equal
             return False
 
     def __lt__(self, other):

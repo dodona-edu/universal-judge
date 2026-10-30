@@ -706,7 +706,9 @@ class Context(WithFeatures, WithFunctions):
         # Check that only the first testcase has a main call.
         for non_first_testcase in value[1:]:
             if isinstance(non_first_testcase.input, MainInput):
-                raise ValueError("Only the first testcase may have a main call.")
+                raise ValueError(  # noqa: TRY004 - validates a value, tests expect ValueError
+                    "Only the first testcase may have a main call."
+                )
 
         # Check that only the last testcase has an exit code check.
         for non_last_testcase in value[1:-1]:

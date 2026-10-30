@@ -48,7 +48,7 @@ def try_as_readable_value(
     # noinspection PyBroadException
     try:
         actual = parse_value(value)
-    except Exception:
+    except Exception:  # noqa: BLE001 - any parse failure means this is not a value
         return None, None
     else:
         return generate_statement(bundle, actual), None
@@ -64,7 +64,7 @@ def get_values(
     elif isinstance(output_channel, ValueOutputChannel):
         return _get_value_value(bundle, output_channel, actual_str)
     else:
-        raise ValueError(f"Unsupported output channel: {output_channel}")
+        raise TypeError(f"Unsupported output channel: {output_channel}")
 
 
 def _get_file_values(
@@ -121,7 +121,7 @@ def _get_value_value(
     # or a student is trying to cheat.
     try:
         actual_value = parse_value(actual_str)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - unparseable output must become feedback
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.EDUCATOR
@@ -334,7 +334,7 @@ def evaluate(
     # noinspection PyBroadException
     try:
         evaluation_result = get_converter().loads(actual_str, OracleResult)
-    except Exception:
+    except Exception:  # noqa: BLE001, S110 - not an OracleResult, try parsing a Value next
         pass
     else:
         return evaluation_result

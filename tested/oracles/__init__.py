@@ -86,4 +86,6 @@ def get_oracle(
     elif isinstance(oracle, LanguageSpecificOracle):
         return currier(specific.evaluate)
     else:
-        raise AssertionError(f"Unknown oracle type: {type(oracle)}")
+        raise AssertionError(  # noqa: TRY004 - unreachable invariant, not a caller type error
+            f"Unknown oracle type: {type(oracle)}"
+        )

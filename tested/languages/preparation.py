@@ -215,7 +215,7 @@ def prepare_assignment(bundle: Bundle, assignment: Assignment) -> Assignment:
         assert isinstance(prepared, FunctionCall)
         assignment = assignment.replace_property(prepared)
     else:
-        raise AssertionError(
+        raise AssertionError(  # noqa: TRY004 - unreachable invariant, not a caller type error
             f"Unknown assignment class {type(assignment)} for {assignment}"
         )
     prepared = prepare_expression(bundle, assignment.expression)
