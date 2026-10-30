@@ -42,8 +42,8 @@ from tested.datatypes import (
     BasicNothingTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
+    string_to_type,
 )
-from tested.parsing import get_converter
 from tested.serialisation import (
     Assignment,
     Expression,
@@ -75,11 +75,11 @@ def _is_and_get_allowed_empty(node: ast.Call) -> Value | None:
     Returns the empty value if allowed, otherwise None.
     """
     assert isinstance(node.func, ast.Name)
-    type_ = get_converter().structure(node.func.id, AllTypes)  # pyright: ignore
+    type_ = string_to_type(node.func.id)
     if isinstance(type_, AdvancedSequenceTypes):
-        return SequenceType(type=cast(AdvancedSequenceTypes, type_), data=[])
+        return SequenceType(type=type_, data=[])
     elif isinstance(type_, BasicSequenceTypes):
-        return SequenceType(type=cast(BasicSequenceTypes, type_), data=[])
+        return SequenceType(type=type_, data=[])
     elif isinstance(type_, BasicObjectTypes):
         return ObjectType(type=type_, data=[])
     else:
@@ -244,7 +244,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
                 )
         return evolve(
             value,
-            type=get_converter().structure(node.func.id, AllTypes),  # pyright: ignore
+            type=string_to_type(node.func.id),
         )
     elif isinstance(node, ast.Call):
         if is_return:

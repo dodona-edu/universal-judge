@@ -29,6 +29,7 @@ from tested.datatypes import (
     SequenceTypes,
     StringTypes,
     resolve_to_basic,
+    string_to_type,
 )
 from tested.dodona import ExtendedMessage
 from tested.dsl.ast_translator import InvalidDslError, extract_comment, parse_string
@@ -42,7 +43,7 @@ from tested.dsl.yaml_types import (
     YamlDict,
     YamlObject,
 )
-from tested.parsing import get_converter, suite_to_json
+from tested.parsing import suite_to_json
 from tested.serialisation import (
     BooleanType,
     NothingType,
@@ -220,7 +221,7 @@ def load_schema_validator(dsl_object: YamlObject = None) -> Validator:
     def _is_plain_value(value: object) -> bool:
         return not isinstance(value, (ReturnOracle, ExpressionString))
 
-    return original_validator(schema_object, format_checker=format_checker)
+    return original_validator(schema_object, format_checker=format_checker)  # ty: ignore[missing-argument]  # concrete validators default registry
 
 
 @define(frozen=True)
@@ -338,7 +339,7 @@ def _validate_dsl(dsl_object: YamlObject):
 
 
 def _tested_type_to_value(tested_type: TestedType) -> Value:
-    type_enum = get_converter().structure(tested_type.type, AllTypes)  # pyright: ignore
+    type_enum = string_to_type(tested_type.type)
     if isinstance(type_enum, NumericTypes):
         # Some special cases for advanced numeric types.
         if type_enum == AdvancedNumericTypes.FIXED_PRECISION:
