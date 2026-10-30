@@ -277,7 +277,7 @@ class Language(ABC):
 
         :return: Mapping of types to their restrictions. Unmapped types are unrestricted.
         """
-        return dict()
+        return {}
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
         """
@@ -288,7 +288,7 @@ class Language(ABC):
 
         :return: A dictionary of types mapped to their support level.
         """
-        return dict()
+        return {}
 
     def modify_solution(self, solution: Path):
         """
@@ -357,7 +357,7 @@ class Language(ABC):
             is_our_context = file.name.startswith(context_name + ".")
             return not is_context or is_our_context
 
-        return list(x for x in files if filter_function(x))
+        return [x for x in files if filter_function(x)]
 
     def find_main_file(
         self,

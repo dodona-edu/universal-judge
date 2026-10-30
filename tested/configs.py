@@ -102,7 +102,7 @@ class DodonaConfig:
         return self.workdir / TESTED_DIRECTORY
 
     def config_for(self) -> dict[str, Any]:
-        return self.options.language.get(self.programming_language, dict())
+        return self.options.language.get(self.programming_language, {})
 
     def linter(self) -> bool:
         local_config = self.config_for().get("linter", None)

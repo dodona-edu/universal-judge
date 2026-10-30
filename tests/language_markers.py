@@ -24,7 +24,7 @@ SERIALIZABLE_LANGUAGES = all_languages_except("haskell")
 
 @pytest.mark.parametrize("language", OBJECT_LANGUAGES)
 def test_object_languages_support_objects(language: str):
-    assert language in LANGUAGES.keys()
+    assert language in LANGUAGES
 
     config = LANGUAGES[language](None)
 
@@ -33,7 +33,7 @@ def test_object_languages_support_objects(language: str):
 
 @pytest.mark.parametrize("language", EXCEPTION_LANGUAGES)
 def test_exception_languages_support_exceptions(language: str):
-    assert language in LANGUAGES.keys()
+    assert language in LANGUAGES
 
     config = LANGUAGES[language](None)
 
