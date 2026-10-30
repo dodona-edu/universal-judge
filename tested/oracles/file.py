@@ -68,9 +68,9 @@ def compare_file(
     file: TextData,
     options: dict,
 ) -> OracleResult:
-    assert isinstance(
-        file.path, str
-    ), "File path must be a string when using file evaluator"
+    assert isinstance(file.path, str), (
+        "File path must be a string when using file evaluator"
+    )
 
     try:
         expected_content = file.get_data_as_string(config.bundle.config.resources)

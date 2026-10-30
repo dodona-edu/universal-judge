@@ -155,8 +155,7 @@ def convert_statement(statement: Statement, full=False) -> str:
         else:
             prefix = ""
         return (
-            f"{prefix}{statement.variable} = "
-            f"{convert_statement(statement.expression)};"
+            f"{prefix}{statement.variable} = {convert_statement(statement.expression)};"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
 

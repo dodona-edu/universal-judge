@@ -372,9 +372,9 @@ def evaluate_context_results(
             )
         else:
             missing_exit = False
-            assert (
-                testcase.output.exit_code == IgnoredChannel.IGNORED
-            ), "Only the last testcase may check the exit code."
+            assert testcase.output.exit_code == IgnoredChannel.IGNORED, (
+                "Only the last testcase may check the exit code."
+            )
 
         # Add messages if there was no output.
         if missing_values is not None:
@@ -519,9 +519,9 @@ def _add_channel(
     if should_show(output, channel):
         if isinstance(output, FileOutputChannel):
             for i, file in enumerate(output.files):
-                assert (
-                    file.path is not None
-                ), "File path must be set when using output_files"
+                assert file.path is not None, (
+                    "File path must be set when using output_files"
+                )
 
                 updates.append(
                     StartTest(
@@ -610,9 +610,9 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
     if collector.finalized:
         return
 
-    assert (
-        "judgement" in collector.open_stack
-    ), "A non-finalized output manager without open judgement is not possible."
+    assert "judgement" in collector.open_stack, (
+        "A non-finalized output manager without open judgement is not possible."
+    )
 
     tab_start, context_start, testcase_start = collector.currently_open
 

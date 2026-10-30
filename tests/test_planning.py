@@ -22,9 +22,9 @@ from tested.testsuite import (
     Suite,
     SupportedLanguage,
     Tab,
+    TextData,
 )
 from tested.testsuite import Testcase as SuiteTestcase
-from tested.testsuite import TextData
 from tests.manual_utils import configuration
 
 

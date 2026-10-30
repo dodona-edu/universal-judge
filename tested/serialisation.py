@@ -213,7 +213,7 @@ class NumberType(WithFeatures, WithFunctions):
             and resolve_to_basic(self.type) == BasicNumericTypes.INTEGER
         ):
             raise ValueError(
-                f"SpecialNumber '{self.data}' is only supported for " f"real numbers."
+                f"SpecialNumber '{self.data}' is only supported for real numbers."
             )
 
         if resolve_to_basic(self.type) == BasicNumericTypes.INTEGER and isinstance(

@@ -118,7 +118,7 @@ def _execute_custom_check_function(
         "__tested_test__": utils,
         "__tested_context__": ConvertedOracleContext.from_context(eval_bundle, context),
     }
-    exec("import sys\n" "sys.modules['evaluation_utils'] = __tested_test__", global_env)
+    exec("import sys\nsys.modules['evaluation_utils'] = __tested_test__", global_env)
 
     # Make the oracle available. This will fail on syntax errors.
     exec(evaluator_code, global_env)

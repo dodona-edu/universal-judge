@@ -66,8 +66,7 @@ def test_unsupported_constructs_are_listed_sorted():
         "<Construct.OBJECTS: 'objects'>}"
     ) in lines
     assert (
-        "{<Construct.FUNCTION_CALLS: 'function_calls'>, "
-        "<Construct.OBJECTS: 'objects'>}"
+        "{<Construct.FUNCTION_CALLS: 'function_calls'>, <Construct.OBJECTS: 'objects'>}"
     ) in lines
     assert (
         "{<Construct.ASSIGNMENTS: 'assignments'>, "

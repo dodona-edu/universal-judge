@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 class TypeScript(Language):
-
     def initial_dependencies(self) -> list[str]:
         return ["values.ts"]
 

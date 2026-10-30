@@ -221,7 +221,7 @@ def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config
     ]
     permutations = list(itertools.permutations(variant_types))
     valid_types = [
-        f"std::map<std::string, std::vector<std::variant<{", ".join(perm)}>>>"
+        f"std::map<std::string, std::vector<std::variant<{', '.join(perm)}>>>"
         for perm in permutations
     ]
     valid_value = '{{"1", {2, {3, {4, 5}}}}}'
