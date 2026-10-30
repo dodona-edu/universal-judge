@@ -1972,3 +1972,51 @@ def test_language_mapping_keys_must_be_known_languages(valid):
     translate_to_test_suite(valid)
     with pytest.raises(Exception):
         translate_to_test_suite(valid.replace("python", "cobol"))
+
+
+@pytest.mark.parametrize(
+    "tab_yaml",
+    [
+        """
+- tab: "Tab"
+  {hidden}
+  testcases:
+  - expression: 'test()'
+    return: 5
+""",
+        """
+- tab: "Tab"
+  {hidden}
+  contexts:
+  - testcases:
+    - expression: 'test()'
+      return: 5
+""",
+        """
+- unit: "Tab"
+  {hidden}
+  scripts:
+  - expression: 'test()'
+    return: 5
+""",
+        """
+- unit: "Tab"
+  {hidden}
+  cases:
+  - script:
+    - expression: 'test()'
+      return: 5
+""",
+    ],
+    ids=["testcases", "contexts", "unit-scripts", "unit-cases"],
+)
+@pytest.mark.parametrize(
+    "hidden,expected",
+    [("hidden: true", True), ("hidden: false", False), ("", None)],
+    ids=["true", "false", "absent"],
+)
+def test_tab_hidden_is_propagated(tab_yaml, hidden, expected):
+    yaml_str = tab_yaml.format(hidden=hidden)
+    assert parse_dsl(yaml_str).tabs[0].hidden is expected
+    suite = parse_test_suite(translate_to_test_suite(yaml_str))
+    assert suite.tabs[0].hidden is expected
