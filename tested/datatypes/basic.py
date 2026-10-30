@@ -3,7 +3,6 @@ Basic data types.
 """
 
 from enum import StrEnum, auto, unique
-from typing import Union
 
 
 @unique
@@ -40,11 +39,11 @@ class BasicNothingTypes(StrEnum):
     NOTHING = auto()
 
 
-BasicTypes = Union[
-    BasicNumericTypes,
-    BasicStringTypes,
-    BasicBooleanTypes,
-    BasicObjectTypes,
-    BasicNothingTypes,
-    BasicSequenceTypes,
-]
+BasicTypes = (
+    BasicNumericTypes
+    | BasicStringTypes
+    | BasicBooleanTypes
+    | BasicObjectTypes
+    | BasicNothingTypes
+    | BasicSequenceTypes
+)

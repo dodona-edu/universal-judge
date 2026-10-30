@@ -4,7 +4,7 @@ import textwrap
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Literal, Type, TypeVar, cast
+from typing import Any, Literal, cast
 
 import yaml
 from attrs import define, evolve, field
@@ -188,7 +188,7 @@ def load_schema_validator(dsl_object: YamlObject = None) -> Validator:
     with open(path_to_schema, "r") as schema_file:
         schema_object = json.load(schema_file)
 
-    original_validator: Type[Validator] = validator_for(schema_object)
+    original_validator: type[Validator] = validator_for(schema_object)
     format_checker = FormatChecker()
 
     @format_checker.checks("tested-dsl-expression", raises=SyntaxError)
@@ -844,10 +844,7 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     return Tab(name=name, contexts=contexts)
 
 
-T = TypeVar("T")
-
-
-def _convert_dsl_list(
+def _convert_dsl_list[T](
     dsl_list: YamlObject,
     context: DslContext,
     converter: Callable[[YamlDict, DslContext], T],
