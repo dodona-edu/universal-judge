@@ -16,9 +16,8 @@ from tested.descriptions.renderer import render_one_statement
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
 from tested.languages.c.generators import convert_value as c_convert_value
-from tested.languages.conventionalize import submission_name
 from tested.languages.cpp.generators import CPPGenerator
-from tested.languages.generation import generate_statement
+from tested.languages.generation import generate_statement, get_readable_input
 from tested.languages.haskell import config as haskell_config
 from tested.languages.java.generators import convert_value as java_convert_value
 from tested.languages.preparation import prepare_assignment, prepare_expression
@@ -31,7 +30,7 @@ from tested.serialisation import (
     NumberType,
     StringType,
 )
-from tested.testsuite import Suite
+from tested.testsuite import LanguageLiterals, Suite, SupportedLanguage, Testcase
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -402,7 +401,7 @@ def test_haskell_function_arguments_without_brackets(
     )
 
     result = generate_statement(bundle, statement)
-    assert result == f'{submission_name(bundle.language)}.test 5.5 (-5) "hallo" True'
+    assert result == 'test 5.5 (-5) "hallo" True'
 
 
 @pytest.mark.haskell
@@ -851,3 +850,62 @@ def test_is_void_method_matches_names_ending_in_combining_mark(
 def test_c_cpp_java_integer_accepts_float_and_decimal_data(convert, data, expected):
     value = NumberType(type=BasicNumericTypes.INTEGER, data=data)
     assert convert(value) == expected
+
+
+@pytest.mark.parametrize(
+    "language,literal,expected",
+    [
+        pytest.param(
+            SupportedLanguage.HASKELL,
+            "Submission.search 5 (Submission.insert 5 empty)",
+            "search 5 (insert 5 empty)",
+            marks=pytest.mark.haskell,
+            id="haskell",
+        ),
+        pytest.param(
+            SupportedLanguage.HASKELL,
+            'Submission.echo "Submission.x \\" Submission.y"',
+            'echo "Submission.x \\" Submission.y"',
+            marks=pytest.mark.haskell,
+            id="haskell-string-literal",
+        ),
+        pytest.param(
+            SupportedLanguage.JAVASCRIPT,
+            "submission.search(5, submission.insert(5, empty))",
+            "submission.search(5, submission.insert(5, empty))",
+            marks=pytest.mark.javascript,
+            id="javascript",
+        ),
+    ],
+)
+def test_description_of_language_literal(
+    language: SupportedLanguage,
+    literal: str,
+    expected: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    testcase = Testcase(input=LanguageLiterals(literals={language: literal}))
+    readable, _ = get_readable_input(bundle, testcase)
+    assert readable.description == expected
+
+
+@pytest.mark.haskell
+@pytest.mark.parametrize(
+    "statement,expected",
+    [
+        ("search(5, insert(5, empty))", "search 5 (insert 5 (empty))"),
+        ('echo("Submission.x")', 'echo "Submission.x"'),
+    ],
+)
+def test_haskell_description_without_submission_prefix(
+    statement: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    testcase = Testcase(input=parse_string(statement))
+    readable, _ = get_readable_input(bundle, testcase)
+    assert readable.description == expected
+    assert render_one_statement(bundle, statement) == expected

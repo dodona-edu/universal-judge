@@ -16,6 +16,7 @@ from tested.datatypes import (
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
+    PreparedFunctionCall,
     PreparedTestcase,
     PreparedTestcaseStatement,
 )
@@ -43,7 +44,7 @@ def convert_arguments(arguments: list[Expression], display=False) -> str:
     return ", ".join(convert_statement(arg, display=display) for arg in arguments)
 
 
-def convert_number(data: SpecialNumbers | int | float | Decimal) -> str:
+def convert_number(data: SpecialNumbers | float | Decimal) -> str:
     if data == SpecialNumbers.NOT_A_NUMBER:
         return "(0/0)"
     elif data == SpecialNumbers.POS_INFINITY:
@@ -95,7 +96,11 @@ def convert_value(value: Value, display=False) -> str:
 
 def convert_function_call(function: FunctionCall, display=False) -> str:
     result = ""
-    if function.namespace:
+    if function.namespace and not (
+        display
+        and isinstance(function, PreparedFunctionCall)
+        and function.has_root_namespace
+    ):
         result += convert_statement(function.namespace, display=display) + "."
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
