@@ -5,7 +5,7 @@
 # It should not contain any development tools or dependencies.
 # Add those to dev-dependencies.sh instead.
 
-FROM python:3.12.15-slim-trixie
+FROM python:3.15.0-slim-trixie
 
 # Set up the environment
 
