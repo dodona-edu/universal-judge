@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 from typing import Literal
 
 from tested.datatypes import (
@@ -41,7 +42,7 @@ from tested.serialisation import (
 from tested.testsuite import MainInput
 
 
-def convert_arguments(arguments: list[Expression | NamedArgument]) -> str:
+def convert_arguments(arguments: Sequence[Expression | NamedArgument]) -> str:
     results = []
     for arg in arguments:
         if isinstance(arg, NamedArgument):
@@ -55,10 +56,10 @@ def convert_value(value: Value) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.ARRAY:
         assert isinstance(value, SequenceType)
-        return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"  # pyright: ignore
+        return f"new {convert_declaration(value.type, value)}{{{convert_arguments(value.data)}}}"
     elif value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data)})"  # pyright: ignore
+        return f"({convert_arguments(value.data)})"
     elif value.type == AdvancedNumericTypes.SINGLE_PRECISION:
         if not isinstance(value.data, SpecialNumbers):
             return f"{value.data}f"
@@ -109,7 +110,7 @@ def convert_value(value: Value) -> str:
         return "null"
     elif value.type in (BasicSequenceTypes.SEQUENCE, BasicSequenceTypes.SET):
         assert isinstance(value, SequenceType)
-        return f"new {convert_declaration(value.type, value)}() {{{convert_arguments(value.data)}}}"  # pyright: ignore
+        return f"new {convert_declaration(value.type, value)}() {{{convert_arguments(value.data)}}}"
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = f"new {convert_declaration(value.type, value)}() {{"
@@ -138,7 +139,7 @@ def convert_function_call(function: FunctionCall) -> str:
         result += convert_statement(function.namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
+        result += f"({convert_arguments(function.arguments)})"
     return result
 
 
@@ -150,7 +151,9 @@ def convert_declaration(
     def extract_type_tuple(type_, generic=True):
         if isinstance(type_, tuple):
             if generic:
-                return type_
+                base_type, sub_type = type_
+                assert not isinstance(base_type, tuple)
+                return base_type, sub_type
             else:
                 return "Object", False
         else:

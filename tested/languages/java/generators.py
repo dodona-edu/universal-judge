@@ -156,7 +156,9 @@ def convert_declaration(
     def extract_type_tuple(type_, generic=True):
         if isinstance(type_, tuple):
             if generic:
-                return type_
+                base_type, sub_type = type_
+                assert not isinstance(base_type, tuple)
+                return base_type, sub_type
             else:
                 return "Object", False
         else:

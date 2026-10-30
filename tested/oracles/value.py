@@ -245,7 +245,7 @@ def _check_data_type(
         actual_elements = (
             prepared_actual.data if isinstance(prepared_actual.data, list) else []
         )
-        prepared_elements = []
+        prepared_elements: list[Expression] = []
         for expected_element, actual_element in zip(expected_elements, actual_elements):
             assert expected_element is None or isinstance(expected_element, Value)
             if not isinstance(actual_element, Value):
@@ -278,7 +278,7 @@ def _check_data_type(
         actual_elements = (
             prepared_actual.data if isinstance(prepared_actual.data, list) else []
         )
-        prepared_elements = []
+        prepared_pairs = []
         for i, expected_element in enumerate(expected_elements):
             expected_key, expected_value = expected_element.key, expected_element.value
             assert isinstance(expected_key, Value) and isinstance(expected_value, Value)
@@ -298,10 +298,10 @@ def _check_data_type(
                 bundle, expected_value, actual_value
             )
             valid = valid and key_valid and value_valid
-            prepared_elements.append(
+            prepared_pairs.append(
                 ObjectKeyValuePair(key=prepared_key, value=prepared_value)
             )
-        prepared_expected.data = prepared_elements
+        prepared_expected.data = prepared_pairs
     else:
         assert isinstance(prepared_expected.type, SimpleTypes)
     return valid, prepared_expected

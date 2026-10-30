@@ -17,6 +17,7 @@ from tested.datatypes import (
     BasicObjectTypes,
     BasicSequenceTypes,
     ComplexExpressionTypes,
+    ExpressionTypes,
     NestedTypes,
     resolve_to_basic,
 )
@@ -92,7 +93,9 @@ class TypeSupport(StrEnum):
     """
 
 
-def fallback_type_support_map(language: "Language") -> dict[AllTypes, TypeSupport]:
+def fallback_type_support_map(
+    language: "Language",
+) -> dict[ExpressionTypes, TypeSupport]:
     """
     Return a map containing the support for all types.
 
@@ -247,6 +250,7 @@ def is_supported(language: "Language") -> list[Message] | None:
         basic_value_types = set()
         for value_type in value_types:
             if mapping[value_type] == TypeSupport.REDUCED:
+                assert not isinstance(value_type, ComplexExpressionTypes)
                 basic_value_types.add(resolve_to_basic(value_type))
             else:
                 basic_value_types.add(value_type)
