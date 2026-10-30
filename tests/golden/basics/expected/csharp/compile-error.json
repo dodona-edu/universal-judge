@@ -98,7 +98,7 @@
  {
   "command": "append-message",
   "message": {
-   "description": "<div class='code'>Selector.cs(12,21): error CS0103: The name &#x27;Execution0&#x27; does not exist in the current context<br><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context</div>",
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"12\">&lt;code&gt;:12</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context</div>",
    "format": "html",
    "permission": "student"
   }

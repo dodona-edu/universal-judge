@@ -1,0 +1,83 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Add"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add 2 3",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Subtract"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "subtract 5 3",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>Execution1.hs:69:26: error: [GHC-76037]<br>    Not in scope: ‘Submission.subtract’<br>    NB: the module ‘Submission’ does not export ‘subtract’.<br>   |<br>69 |     runTestcase (return (Submission.subtract 5 3)) (\\r -&gt; sendValue (r)) (\\ee -&gt; sendException (ee))<br>   |                          ^^^^^^^^^^^^^^^^^^^</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

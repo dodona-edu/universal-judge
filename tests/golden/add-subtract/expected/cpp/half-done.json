@@ -1,0 +1,83 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Add"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(std::intmax_t(2), std::intmax_t(3))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Subtract"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "subtract(std::intmax_t(5), std::intmax_t(3))",
+   "format": "cpp"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>In file included from selector.cpp:8:<br>execution_1.cpp: In function ‘int execution_1_context_0()’:<br>execution_1.cpp:46:20: error: ‘subtract’ was not declared in this scope; did you mean ‘struct’?<br>   46 |         send_value(subtract(std::intmax_t(5), std::intmax_t(3)));<br>      |                    ^~~~~~~~<br>execution_1.cpp:29:63: note: in definition of macro ‘send_value’<br>   29 | #define send_value(value) write_value(execution_1_value_file, value)<br>      |                                                               ^~~~~</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
