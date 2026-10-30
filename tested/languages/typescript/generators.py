@@ -3,7 +3,6 @@ import json
 from tested.datatypes import (
     AdvancedNothingTypes,
     AdvancedNumericTypes,
-    AdvancedStringTypes,
     AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
@@ -285,7 +284,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
 
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
-    result = f"""
+    result = """
     import * as fs from 'fs';
     import * as values from './values.ts';
     """
@@ -340,7 +339,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
         """
 
     # Functions to write separators
-    result += f"(async () => {{\n"
+    result += "(async () => {\n"
 
     for i, ctx in enumerate(pu.contexts):
         result += f"""
@@ -348,10 +347,10 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
             await context{i}();
         """
 
-    result += f"""
+    result += """
         fs.closeSync(valueFile);
         fs.closeSync(exceptionFile);
-    }})();
+    })();
     """
 
     return result
@@ -370,13 +369,13 @@ def convert_check_function(evaluator: str, function: FunctionCall) -> str:
 
 
 def convert_encoder(values: list[Value]) -> str:
-    result = f"""
+    result = """
     import * as values from './values.ts';
     import * as fs from 'fs';
     """
 
     for value in values:
         result += f"values.sendValue(process.stdout.fd, {convert_value(value)});\n"
-        result += f'fs.writeSync(process.stdout.fd, "␞");\n'
+        result += 'fs.writeSync(process.stdout.fd, "␞");\n'
 
     return result

@@ -237,7 +237,7 @@ if __name__ == "__main__":
     print("The following options will be used:")
     print(f" - Test suite: {evaluation_path}/{suite_path}")
     print(f" - Submission: {submission_path}")
-    print("")
+    print()
     print(
         f"The execution will happen in {workdir_path}. This folder will remain available after execution for inspection."
     )

@@ -120,7 +120,7 @@ def _compiler_and_references() -> tuple[Path, TargetFramework, list[Path]]:
     ).stdout
     sdks = [
         Path(directory) / version
-        for version, directory in re.findall(r"^(\S+) \[(.+)\]$", listing, re.M)
+        for version, directory in re.findall(r"^(\S+) \[(.+)\]$", listing, re.MULTILINE)
     ]
     sdk = _newest(sdks, -1, ".NET SDK")
     framework, references = _pick_target_framework({x.parent.parent for x in sdks})

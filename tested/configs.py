@@ -4,7 +4,7 @@ Module for handling and bundling various configuration options for TESTed.
 
 import logging
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Optional
+from typing import IO, TYPE_CHECKING, Any
 
 from attrs import define, evolve, field
 
@@ -160,7 +160,7 @@ class Bundle:
         return self.global_config.context_separator_secret
 
 
-def _consume_shebang(submission: Path) -> tuple[bool, Optional[str]]:
+def _consume_shebang(submission: Path) -> tuple[bool, str | None]:
     """
     Find the shebang in the submission, and if it is present, consume it.
 
