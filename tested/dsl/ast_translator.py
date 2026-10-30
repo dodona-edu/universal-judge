@@ -111,8 +111,10 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     value = _convert_expression(node.value, False)
     if isinstance(node.annotation, ast.Name):
         type_ = node.annotation.id
-    elif isinstance(node.annotation, ast.Str):
-        type_ = node.annotation.s
+    elif isinstance(node.annotation, ast.Constant) and isinstance(
+        node.annotation.value, str
+    ):
+        type_ = node.annotation.value
     else:
         raise InvalidDslError("Type hints should be simple values.")
 

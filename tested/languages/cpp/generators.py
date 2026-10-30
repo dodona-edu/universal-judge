@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from typing import cast
 
 from tested.datatypes import AllTypes, resolve_to_basic
@@ -130,6 +131,7 @@ class CPPGenerator:
                 + "}"
             )
         elif basic.type == BasicNumericTypes.INTEGER:
+            assert isinstance(basic.data, int | float | Decimal)
             # Basic heuristic for long numbers
             if (basic.data > (2**31 - 1)) or (basic.data < -(2**31)):
                 return f"{basic.data}L"

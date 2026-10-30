@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from typing import cast
 
 from tested.datatypes import (
@@ -58,6 +59,7 @@ def convert_value(value: Value) -> str:
     original = value
     value = as_basic_type(value)
     if value.type == BasicNumericTypes.INTEGER:
+        assert isinstance(value.data, int | float | Decimal)
         # Basic heuristic for long numbers
         if (value.data > (2**31 - 1)) or (value.data < -(2**31)):
             return f"{value.data}L"

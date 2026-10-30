@@ -95,7 +95,7 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
         import dataclasses
 
-        if dataclasses.is_dataclass(o):
+        if dataclasses.is_dataclass(o) and not isinstance(o, type):
             data = dataclasses.asdict(o)
             # TESTed only accepts text here, but an evaluator may pass a student's value.
             for key in _TEXT_FIELDS:
