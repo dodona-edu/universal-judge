@@ -391,16 +391,48 @@ def test_haskell_function_arguments_without_brackets(
         namespace=None,
         arguments=[
             NumberType(type=BasicNumericTypes.REAL, data=5.5),
+            NumberType(type=BasicNumericTypes.INTEGER, data=-5),
             StringType(type=BasicStringTypes.TEXT, data="hallo"),
             BooleanType(type=BasicBooleanTypes.BOOLEAN, data=True),
         ],
     )
 
     result = generate_statement(bundle, statement)
-    assert (
-        result
-        == f'{submission_name(bundle.language)}.test (5.5 :: Double) "hallo" True'
+    assert result == f'{submission_name(bundle.language)}.test 5.5 (-5) "hallo" True'
+
+
+@pytest.mark.haskell
+def test_haskell_numbers_without_type_annotations(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "haskell",
+        tmp_path,
+        "haskell-numbers.yaml",
+        "correct",
     )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+
+
+@pytest.mark.haskell
+def test_haskell_whole_real_stays_real(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "haskell",
+        tmp_path,
+        "whole-real.json",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    testcase = updates.find_next("start-testcase")
+    assert testcase["description"]["description"] == "echo 5.0"
 
 
 def test_haskell_precompiled_helpers_must_match_templates(

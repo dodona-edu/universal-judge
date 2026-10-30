@@ -12,18 +12,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "rev ([1 :: Int, 2 :: Int])",
+   "description": "rev [1, 2]",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[2 :: Int, 1 :: Int]"
+  "expected": "[2, 1]"
  },
  {
   "command": "close-test",
-  "generated": "[2 :: Int, 1 :: Int]",
+  "generated": "[2, 1]",
   "status": {
    "enum": "correct"
   }

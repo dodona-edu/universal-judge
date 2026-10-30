@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -24,6 +25,7 @@ from tested.serialisation import (
     FunctionCall,
     Identifier,
     NamedArgument,
+    NumberType,
     SequenceType,
     SpecialNumbers,
     Statement,
@@ -37,72 +39,76 @@ from tested.testsuite import MainInput
 from tested.utils import is_statement_strict
 
 
-def convert_arguments(arguments: list[Expression]) -> str:
-    return ", ".join(convert_statement(arg) for arg in arguments)
+def convert_arguments(arguments: list[Expression], display=False) -> str:
+    return ", ".join(convert_statement(arg, display=display) for arg in arguments)
 
 
-def convert_value(value: Value) -> str:
+def convert_number(data: SpecialNumbers | int | float | Decimal) -> str:
+    if data == SpecialNumbers.NOT_A_NUMBER:
+        return "(0/0)"
+    elif data == SpecialNumbers.POS_INFINITY:
+        return "(1/0)"
+    elif data == SpecialNumbers.NEG_INFINITY:
+        return "(-1/0)"
+    return str(data)
+
+
+def convert_value(value: Value, display=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data)})"
+        return f"({convert_arguments(value.data, display)})"
     elif isinstance(value.type, AdvancedNumericTypes):
-        if not isinstance(value.data, SpecialNumbers):
-            return f"{value.data} :: {convert_declaration(value.type)}"
-        elif value.data == SpecialNumbers.NOT_A_NUMBER:
-            return f"(0/0) :: {convert_declaration(value.type)}"
-        elif value.data == SpecialNumbers.POS_INFINITY:
-            return f"(1/0) :: {convert_declaration(value.type)}"
-        else:
-            assert value.data == SpecialNumbers.NEG_INFINITY
-            return f"(-1/0) :: {convert_declaration(value.type)}"
+        assert isinstance(value, NumberType)
+        if display:
+            return convert_number(value.data)
+        return f"{convert_number(value.data)} :: {convert_declaration(value.type)}"
     elif value.type == AdvancedStringTypes.CHAR:
         assert isinstance(value, StringType)
         return "'" + value.data.replace("'", "\\'") + "'"
     # Handle basic types
     value = as_basic_type(value)
     if value.type == BasicNumericTypes.INTEGER:
-        return f"{value.data} :: Int"
+        assert isinstance(value, NumberType)
+        return convert_number(value.data)
     elif value.type == BasicNumericTypes.REAL:
-        if not isinstance(value.data, SpecialNumbers):
-            return f"{value.data} :: Double"
-        elif value.data == SpecialNumbers.NOT_A_NUMBER:
-            return "(0/0) :: Double"
-        elif value.data == SpecialNumbers.POS_INFINITY:
-            return "(1/0) :: Double"
-        else:
-            assert SpecialNumbers.NEG_INFINITY
-            return "(-1/0) :: Double"
+        assert isinstance(value, NumberType)
+        number = convert_number(value.data)
+        # Where the type is ambiguous, a literal without a decimal point defaults to Int.
+        if number.lstrip("-").isdigit():
+            number += ".0"
+        return number
     elif value.type == BasicStringTypes.TEXT:
         return json.dumps(value.data)
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data)
     elif value.type == BasicNothingTypes.NOTHING:
-        return "Nothing :: Maybe Integer"
+        return "Nothing" if display else "Nothing :: Maybe Integer"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data)}]"
+        return f"[{convert_arguments(value.data, display)}]"
     elif value.type == BasicStringTypes.UNKNOWN:
         assert isinstance(value, StringType)
         return convert_unknown_type(value)
     raise AssertionError(f"Invalid literal: {value!r}")
 
 
-def convert_function_call(function: FunctionCall) -> str:
+def convert_function_call(function: FunctionCall, display=False) -> str:
     result = ""
     if function.namespace:
-        result += convert_statement(function.namespace) + "."
+        result += convert_statement(function.namespace, display=display) + "."
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
-        if isinstance(argument, Value):
-            converted = convert_statement(argument)
-            # GHC can't parse a type annotation as a bare function argument.
-            if " :: " in converted:
-                converted = "(" + converted + ")"
-            result += converted
-        else:
-            assert not isinstance(argument, NamedArgument)
-            result += "(" + convert_statement(argument) + ")"
+        assert not isinstance(argument, NamedArgument)
+        converted = convert_statement(argument, display=display)
+        # GHC can't parse a type annotation or a negative number as a bare argument.
+        if (
+            not isinstance(argument, Value)
+            or " :: " in converted
+            or converted.startswith("-")
+        ):
+            converted = "(" + converted + ")"
+        result += converted
         if i != len(function.arguments) - 1:
             result += " "
     return result
@@ -149,7 +155,7 @@ def convert_declaration(tp: AllTypes | VariableType) -> str:
     raise AssertionError(f"Unknown type: {tp!r}")
 
 
-def convert_statement(statement: Statement, lifting=False) -> str:
+def convert_statement(statement: Statement, lifting=False, display=False) -> str:
     if isinstance(statement, Expression):
         result = ""
         if lifting:
@@ -157,23 +163,27 @@ def convert_statement(statement: Statement, lifting=False) -> str:
         if isinstance(statement, Identifier):
             result += statement
         elif isinstance(statement, FunctionCall):
-            result += convert_function_call(statement)
+            result += convert_function_call(statement, display)
         else:
             assert isinstance(statement, Value)
-            result += convert_value(statement)
+            result += convert_value(statement, display)
         if lifting:
             result += ")"
         return result
     else:
         assert isinstance(statement, VariableAssignment)
-        return f"let {statement.variable} = {convert_statement(statement.expression)}"
+        expression = convert_statement(statement.expression, display=display)
+        return f"let {statement.variable} = {expression}"
 
 
 indent = " " * 4
 
+# Number literals are not annotated: this picks their type where GHC can't infer one.
+DEFAULTING = "default (Int, Double)"
+
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
-    result = f"""{{-# LANGUAGE NamedFieldPuns #-}}
+    result = f"""{{-# LANGUAGE NamedFieldPuns, ExtendedDefaultRules #-}}
 module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
@@ -192,6 +202,8 @@ import Data.Word
 
     result += f"""
 import qualified {pu.submission_name}
+
+{DEFAULTING}
 
 value_file = "{pu.value_file}"
 exception_file = "{pu.exception_file}"
@@ -327,13 +339,14 @@ main = do
 
 
 def convert_check_function(evaluator: str, function: FunctionCall) -> str:
-    return f"""
+    return f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
 module EvaluatorExecutor where
 
 import qualified {evaluator}
 import Values
 import System.IO (stdout)
 
+{DEFAULTING}
 
 main = do x <- return $ {convert_function_call(function)}
           sendEvaluatedH stdout x
@@ -341,13 +354,15 @@ main = do x <- return $ {convert_function_call(function)}
 
 
 def convert_encoder(values: list[Value]) -> str:
-    result = """
+    result = f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
 module Encode where
 
 import Values
 import System.IO (stdout)
 import Data.Int
 import Data.Word
+
+{DEFAULTING}
 
 main = do
 """

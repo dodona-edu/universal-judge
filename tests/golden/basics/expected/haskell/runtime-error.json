@@ -12,18 +12,18 @@
  {
   "command": "start-testcase",
   "description": {
-   "description": "add (2 :: Int) (3 :: Int)",
+   "description": "add 2 3",
    "format": "haskell"
   }
  },
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "5 :: Int"
+  "expected": "5"
  },
  {
   "command": "close-test",
-  "generated": "5 :: Int",
+  "generated": "5",
   "status": {
    "enum": "correct"
   }
