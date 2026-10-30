@@ -112,7 +112,7 @@ def get_readable_input(
         else:
             stdin = ""
 
-        if stdin and isinstance(stdin, Path):
+        if isinstance(stdin, Path):
             text = f"{args} < {stdin}"
         elif case.input.arguments and stdin:
             # A here-string or heredoc always ends stdin with a newline.

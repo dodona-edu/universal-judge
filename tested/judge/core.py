@@ -416,8 +416,10 @@ def _process_results(
 def _get_meta_files(
     bundle: Bundle, planned: PlannedContext
 ) -> dict[str, LinkedFile] | None:
-    meta_files = {}
+    meta_files: dict[str, LinkedFile] = {}
     for f in planned.context.get_input_files():
+        if f.path is None:
+            continue
         display_path = f.get_display_path()
 
         if display_path is not None:

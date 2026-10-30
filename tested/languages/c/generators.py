@@ -97,7 +97,7 @@ def convert_value(value: Value) -> str:
 def convert_function_call(function: FunctionCall) -> str:
     result = function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments)})"  # pyright: ignore
+        result += f"({convert_arguments(function.arguments)})"
     return result
 
 

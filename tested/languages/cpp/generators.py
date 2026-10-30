@@ -125,7 +125,7 @@ class CPPGenerator:
             return (
                 "{"
                 + ", ".join(
-                    self.convert_value(cast(Value, cast(Value, v)))
+                    self.convert_value(cast(Value, v))
                     for v in cast(SequenceType, basic).data
                 )
                 + "}"
@@ -264,7 +264,7 @@ class CPPGenerator:
     def convert_function_call(self, function: FunctionCall) -> str:
         result = function.name
         if function.type != FunctionType.PROPERTY:
-            result += f"({self.convert_arguments(function.arguments)})"  # pyright: ignore
+            result += f"({self.convert_arguments(function.arguments)})"
 
         # if the function has a namespace, that is not the root namespace we assume it is a method call
         if (
