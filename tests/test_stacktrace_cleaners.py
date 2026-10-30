@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from tested.configs import DodonaConfig, GlobalConfig, Options
+from tested.dodona import AnnotateCode, Severity
 from tested.languages import Language
 from tested.languages import get_language as upstream_get_language
 
@@ -193,9 +194,9 @@ def test_csharp_exception():
     assert actual == expected
 
 
-def test_csharp_compilation():
+def test_csharp_compilation(tmp_path: Path):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
-    language_config = get_language(workdir, "csharp")
+    language_config = csharp_language_with_source(tmp_path, workdir, 13)
     original = f"""    {workdir}/.tested/common/Submission.cs(13,20): error CS1002: ; expected
     {workdir}/.tested/common/Submission.cs(13,26): error CS1002: ; expected
     {workdir}/.tested/common/Submission.cs(13,30): error CS1001: Identifier expected
@@ -775,9 +776,9 @@ def test_cpp_compile_snippet_gutter_offset_end_to_end():
     )
 
 
-def test_csharp_cleanup_stacktrace_execution_dir_compile():
+def test_csharp_cleanup_stacktrace_execution_dir_compile(tmp_path: Path):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
-    language_config = get_language(workdir, "csharp")
+    language_config = csharp_language_with_source(tmp_path, workdir, 14)
     original = (
         f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
         "The name 'foo' does not exist\n"
@@ -786,11 +787,33 @@ def test_csharp_cleanup_stacktrace_execution_dir_compile():
     assert language_config.cleanup_stacktrace(original) == expected
 
 
-def test_csharp_compile_line_offset_end_to_end():
-    workdir = "/home/bliep/bloep/universal-judge/workdir"
+def csharp_language_with_source(
+    tmp_path: Path, workdir: str, student_lines: int, class_based: bool = False
+):
+    """A C# language whose submission has the given number of lines."""
     language_config = get_language(workdir, "csharp")
     assert language_config.config
+    source = tmp_path / "submission.cs"
+    lines = [f"Console.WriteLine({i});\n" for i in range(student_lines)]
+    if class_based:
+        lines[0] = "class Program { static void Main() {\n"
+    source.write_text("".join(lines))
+    language_config.config.dodona.source = source
+    return language_config
+
+
+def csharp_wrapped_language(tmp_path: Path, workdir: str):
+    """A C# language with a 3-line top-level-statements submission, wrapped by a 12-line header."""
+    language_config = csharp_language_with_source(tmp_path, workdir, 3)
+    assert language_config.config
     language_config.config.dodona.source_offset = -12
+    return language_config
+
+
+def test_csharp_compile_line_offset_end_to_end(tmp_path: Path):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_wrapped_language(tmp_path, workdir)
+    assert language_config.config
     original = (
         f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
     )
@@ -799,6 +822,127 @@ def test_csharp_compile_line_offset_end_to_end():
         language_config.config.dodona.source_offset, cleaned
     )
     assert final == "<code>:2:19: error CS0103: undefined\n"
+
+
+@pytest.mark.parametrize(
+    "location, text",
+    [
+        ("Submission.cs(18,2)", "error CS1513: } expected"),
+        ("Submission.cs(3,1)", "error CS0246: missing"),
+    ],
+    ids=["footer-row", "header-row"],
+)
+def test_csharp_compile_wrapper_row_has_no_line_link(
+    tmp_path: Path, location: str, text: str
+):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_wrapped_language(tmp_path, workdir)
+    assert language_config.config
+    original = f"{workdir}/.tested/Execution0/{location}: {text}\n"
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == "<code>: " + text + "\n"
+
+
+def test_csharp_compiler_output_annotates_with_offset(tmp_path: Path):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_wrapped_language(tmp_path, workdir)
+    stdout = (
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
+        "The name 'foo' does not exist\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert annotations == [
+        AnnotateCode(
+            row=1,
+            column=18,
+            text="The name 'foo' does not exist",
+            externalUrl="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
+            type=Severity.ERROR,
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "stdout_line",
+    [
+        "Submission.cs(14,19): warning CS8602: Dereference of a possibly null reference.",
+        "Values.cs(14,19): error CS0103: other",
+        "Submission.cs(1,2): error CS1513: } expected",
+        "Submission.cs(12,2): error CS1513: } expected",
+        "Submission.cs(16,2): error CS1513: } expected",
+        "Submission.cs(17,2): error CS1513: } expected",
+        "Submission.cs(18,2): error CS1513: } expected",
+    ],
+    ids=[
+        "warning",
+        "other-file",
+        "header-row-1",
+        "header-row-12",
+        "footer-row-16",
+        "footer-row-17",
+        "footer-row-18",
+    ],
+)
+def test_csharp_compiler_output_has_no_annotation(tmp_path: Path, stdout_line: str):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_wrapped_language(tmp_path, workdir)
+    stdout = f"{workdir}/.tested/Execution0/{stdout_line}\n"
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert annotations == []
+
+
+def test_csharp_compiler_output_annotates_last_line_after_shebang(tmp_path: Path):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    # The shebang line is removed from the source and adds 1 to the offset.
+    language_config = csharp_language_with_source(tmp_path, workdir, 2)
+    assert language_config.config
+    language_config.config.dodona.source_offset = -11
+    stdout = (
+        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
+        "The name 'nme' does not exist\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    # Line 3 of the submitted file, which starts with the shebang line.
+    assert [a.row for a in annotations] == [2]
+    cleaned = language_config.cleanup_stacktrace(stdout)
+    assert cleaned.startswith("<code>:14:19: error CS0103")
+
+
+def test_csharp_compiler_output_shebang_header_row_has_no_annotation(tmp_path: Path):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_language_with_source(tmp_path, workdir, 2)
+    assert language_config.config
+    language_config.config.dodona.source_offset = -11
+    stdout = (
+        f"{workdir}/.tested/Execution0/Submission.cs(12,2): error CS1513: }} expected\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    assert annotations == []
+    assert (
+        language_config.cleanup_stacktrace(stdout)
+        == "<code>: error CS1513: } expected\n"
+    )
+
+
+def test_csharp_compiler_output_class_based_shebang_annotates_last_line(
+    tmp_path: Path,
+):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = csharp_language_with_source(
+        tmp_path, workdir, 3, class_based=True
+    )
+    assert language_config.config
+    language_config.config.dodona.source_offset = 1
+    stdout = (
+        f"{workdir}/.tested/Execution0/Submission.cs(3,19): error CS0103: "
+        "The name 'foo' does not exist\n"
+    )
+    _, annotations, _, _ = language_config.compiler_output(stdout, "")
+    # Row 3 of Submission.cs is line 4 of the submitted file, behind the shebang line.
+    assert [a.row for a in annotations] == [3]
 
 
 def test_csharp_compilation_hides_tested_directory():

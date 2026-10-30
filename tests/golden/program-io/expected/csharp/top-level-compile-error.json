@@ -1,0 +1,151 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Program"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Hello Alice Bob",
+   "format": "console"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br>Selector.cs(16,21): error CS0103: The name &#x27;Execution1&#x27; does not exist in the current context</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "column": 27,
+  "command": "annotate-code",
+  "externalUrl": "https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
+  "row": 1,
+  "text": "The name 'nme' does not exist in the current context",
+  "type": "error"
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Welcome Dodona",
+   "format": "console"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br>Selector.cs(16,21): error CS0103: The name &#x27;Execution1&#x27; does not exist in the current context</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission Hi << 'STDIN'\nTESTed\nJudge\nSTDIN",
+   "format": "console"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br>Selector.cs(12,21): error CS0103: The name &#x27;Execution0&#x27; does not exist in the current context</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "$ Submission",
+   "format": "console"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'><a href=\"#\" class=\"tab-link\" data-tab=\"code\" data-line=\"2\">&lt;code&gt;:2</a>:28: error CS0103: The name &#x27;nme&#x27; does not exist in the current context<br>Selector.cs(12,21): error CS0103: The name &#x27;Execution0&#x27; does not exist in the current context</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

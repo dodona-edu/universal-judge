@@ -70,7 +70,7 @@ def _handle_time_or_memory_compilation(
 ):
     assert _is_fatal_compilation_error(results)
     collector.add_messages(results.messages)
-    collector.add_all(results.annotations)
+    collector.add_compiler_annotations(results.annotations)
     terminate(
         bundle,
         collector,

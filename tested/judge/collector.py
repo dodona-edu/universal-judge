@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from typing import IO, Literal
 
 from tested.dodona import (
+    AnnotateCode,
     AppendMessage,
     CloseContext,
     CloseJudgement,
@@ -38,22 +39,32 @@ class OutputManager:
         "open_stack",
         "currently_open",
         "out",
+        "compiler_annotations",
     ]
 
     finalized: bool
     open_stack: list[str]
     currently_open: tuple[int, int, int]
     out: IO
+    compiler_annotations: list[AnnotateCode]
 
     def __init__(self, out: IO):
         self.finalized = False
         self.open_stack = []
         self.currently_open = (0, 0, 0)
         self.out = out
+        self.compiler_annotations = []
 
     def add_all(self, commands: Iterable[Update]):
         for command in commands:
             self.add(command)
+
+    def add_compiler_annotations(self, annotations: Iterable[AnnotateCode]):
+        """Add compiler annotations, skipping ones added before."""
+        for annotation in annotations:
+            if annotation not in self.compiler_annotations:
+                self.compiler_annotations.append(annotation)
+                self.add(annotation)
 
     def add_messages(self, messages: Iterable[Message]):
         self.add_all(AppendMessage(message=m) for m in messages)
