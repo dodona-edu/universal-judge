@@ -250,7 +250,7 @@ After an intended change in TESTed's output, rewrite the expected files with `UP
 UPDATE_EXPECTED=1 ./devel/run-tests.sh tests/test_golden.py
 ```
 
-We use `ruff` for linting and code formatting. `pyright` is used for type checking.
+We use `ruff` for linting and code formatting. `pyright` and `ty` are used for type checking.
 You can check them with:
 
 ```bash
