@@ -5,6 +5,7 @@ Tests for specific aspects of certain language implementations.
 import itertools
 import shutil
 import sys
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -14,9 +15,12 @@ from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTy
 from tested.descriptions.renderer import render_one_statement
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
+from tested.languages.c.generators import convert_value as c_convert_value
 from tested.languages.conventionalize import submission_name
+from tested.languages.cpp.generators import CPPGenerator
 from tested.languages.generation import generate_statement
 from tested.languages.haskell import config as haskell_config
+from tested.languages.java.generators import convert_value as java_convert_value
 from tested.languages.preparation import prepare_assignment, prepare_expression
 from tested.languages.python.generators import convert_statement
 from tested.serialisation import (
@@ -794,3 +798,24 @@ def test_is_void_method_matches_names_ending_in_combining_mark(
     bundle = create_bundle(conf, sys.stdout, Suite())
 
     assert bundle.language.is_void_method("test\u0301")
+
+
+@pytest.mark.parametrize(
+    "convert",
+    [
+        pytest.param(c_convert_value, marks=pytest.mark.c, id="c"),
+        pytest.param(CPPGenerator().convert_value, marks=pytest.mark.cpp, id="cpp"),
+        pytest.param(java_convert_value, marks=pytest.mark.java, id="java"),
+    ],
+)
+@pytest.mark.parametrize(
+    "data,expected",
+    [
+        (5.0, "5.0"),
+        (Decimal(5), "5"),
+        (Decimal(2**31), "2147483648L"),
+    ],
+)
+def test_c_cpp_java_integer_accepts_float_and_decimal_data(convert, data, expected):
+    value = NumberType(type=BasicNumericTypes.INTEGER, data=data)
+    assert convert(value) == expected

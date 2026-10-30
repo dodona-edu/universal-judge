@@ -32,6 +32,9 @@ from attrs import define, field, resolve_types, validators
 
 from tested.datatypes import (
     AdvancedNumericTypes,
+    AdvancedObjectTypes,
+    AdvancedSequenceTypes,
+    AdvancedStringTypes,
     AllTypes,
     BasicBooleanTypes,
     BasicNothingTypes,
@@ -201,7 +204,9 @@ class SpecialNumbers(StrEnum):
 
 @define
 class NumberType(WithFeatures, WithFunctions):
-    type: NumericTypes = field(validator=validators.instance_of(NumericTypes))
+    type: NumericTypes = field(
+        validator=validators.instance_of((BasicNumericTypes, AdvancedNumericTypes))
+    )
     data: SpecialNumbers | int | float | Decimal = field(
         validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
     )
@@ -230,7 +235,9 @@ class NumberType(WithFeatures, WithFunctions):
 
 @define
 class StringType(WithFeatures, WithFunctions):
-    type: StringTypes = field(validator=validators.instance_of(StringTypes))
+    type: StringTypes = field(
+        validator=validators.instance_of((BasicStringTypes, AdvancedStringTypes))
+    )
     data: str = field(validator=validators.instance_of(str))
 
     # Optional string representation of the type of the value, if the type is
@@ -261,7 +268,9 @@ class BooleanType(WithFeatures, WithFunctions):
 
 @define
 class SequenceType(WithFeatures, WithFunctions):
-    type: SequenceTypes = field(validator=validators.instance_of(SequenceTypes))
+    type: SequenceTypes = field(
+        validator=validators.instance_of((BasicSequenceTypes, AdvancedSequenceTypes))
+    )
     data: list["Expression"]
     diagnostic: Literal[None] = None  # Unused in this type.
 
@@ -316,7 +325,9 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
 
 @define
 class ObjectType(WithFeatures, WithFunctions):
-    type: ObjectTypes = field(validator=validators.instance_of(ObjectTypes))
+    type: ObjectTypes = field(
+        validator=validators.instance_of((BasicObjectTypes, AdvancedObjectTypes))
+    )
     data: list[ObjectKeyValuePair]
     diagnostic: Literal[None] = None  # Unused in this type.
 

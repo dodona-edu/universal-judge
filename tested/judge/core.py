@@ -205,7 +205,7 @@ def judge(bundle: Bundle):
                     currently_open_tab=currently_open_tab,
                 )
 
-                if result_status in (
+                if result_status is not None and result_status in (
                     Status.TIME_LIMIT_EXCEEDED,
                     Status.MEMORY_LIMIT_EXCEEDED,
                     Status.OUTPUT_LIMIT_EXCEEDED,
