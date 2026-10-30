@@ -192,9 +192,9 @@ def set_up_unit(
     dynamically_generated_files = unit.get_dynamically_generated_files()
     for dynamically_generated_file in dynamically_generated_files:
         destination = execution_dir / dynamically_generated_file.path
-        assert destination.resolve().is_relative_to(
-            execution_dir.resolve()
-        ), "Cannot write outside the execution directory"
+        assert destination.resolve().is_relative_to(execution_dir.resolve()), (
+            "Cannot write outside the execution directory"
+        )
         destination.parent.mkdir(parents=True, exist_ok=True)
 
         if isinstance(dynamically_generated_file.content, ContentPath):

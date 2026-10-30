@@ -128,7 +128,7 @@ def shift_gcc_gutter_line_number(offset: int, line: str) -> str:
         return line
     spaces, number, bar = match.groups()
     width = len(spaces) + len(number)
-    return f"{int(number) + offset:>{width}}{bar}{line[match.end():]}"
+    return f"{int(number) + offset:>{width}}{bar}{line[match.end() :]}"
 
 
 def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:

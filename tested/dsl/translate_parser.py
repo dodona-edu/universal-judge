@@ -120,9 +120,9 @@ def _expression_string(loader: yaml.Loader, node: yaml.Node) -> ExpressionString
 
 def _return_oracle(loader: yaml.Loader, node: yaml.Node) -> ReturnOracle:
     result = _parse_yaml_value(loader, node)
-    assert isinstance(
-        result, dict
-    ), f"A custom oracle must be an object, got {result} which is a {type(result)}."
+    assert isinstance(result, dict), (
+        f"A custom oracle must be an object, got {result} which is a {type(result)}."
+    )
     return ReturnOracle(result)
 
 
@@ -153,7 +153,8 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             # There is no additional information, so what can we do?
             raise exc
 
-        sys.stderr.write(textwrap.dedent(f"""
+        sys.stderr.write(
+            textwrap.dedent(f"""
         YAML error while parsing test suite. This means there is a YAML syntax error.
 
         The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
@@ -166,7 +167,8 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
             
         The detailed exception is provided below.
         You might also find help by validating your YAML file with a YAML validator.\n
-        """))
+        """)
+        )
         raise exc
 
 
@@ -279,9 +281,9 @@ class DslContext:
         specific_options = (
             level.get("config", dict()) if isinstance(level, dict) else dict()
         )
-        assert isinstance(
-            specific_options, dict
-        ), f"The config options for {config_names[-1]} must be a dictionary, not a {type(specific_options)}"
+        assert isinstance(specific_options, dict), (
+            f"The config options for {config_names[-1]} must be a dictionary, not a {type(specific_options)}"
+        )
         return recursive_dict_merge(inherited_options, specific_options)
 
 
@@ -513,9 +515,9 @@ def _convert_file_output_channel(
             ]
         else:
             file_list = stream.get("data")
-            assert isinstance(
-                file_list, list
-            ), "The data key must be a list of expected files."
+            assert isinstance(file_list, list), (
+                "The data key must be a list of expected files."
+            )
             files = [_convert_text_data_required_path(f) for f in file_list]
 
         if "oracle" not in stream or stream["oracle"] == "builtin":
@@ -542,9 +544,9 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
         value = _convert_value(stream)
     else:
         return None
-    assert isinstance(
-        value, Value
-    ), f"{value} is not of type Value, got {type(value)} instead"
+    assert isinstance(value, Value), (
+        f"{value} is not of type Value, got {type(value)} instead"
+    )
     return value
 
 
@@ -553,15 +555,15 @@ def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputCha
         return_object = stream
         if "oracle" not in return_object or return_object["oracle"] == "builtin":
             value = _convert_yaml_value(return_object["value"])
-            assert isinstance(
-                value, Value
-            ), "You must specify a value for a return oracle."
+            assert isinstance(value, Value), (
+                "You must specify a value for a return oracle."
+            )
             return ValueOutputChannel(value=value)
         elif return_object["oracle"] == "custom_check":
             value = _convert_yaml_value(return_object["value"])
-            assert isinstance(
-                value, Value
-            ), "You must specify a value for a return oracle."
+            assert isinstance(value, Value), (
+                "You must specify a value for a return oracle."
+            )
             return ValueOutputChannel(
                 value=value,
                 oracle=_convert_custom_check_oracle(return_object),
@@ -651,13 +653,13 @@ def _convert_text_data(stream: YamlDict) -> TextData:
     elif isinstance(raw_path, str):
         file_content = ContentPath(path=raw_path)
     else:
-        assert (
-            False
-        ), f"Invalid text data content is required but got {type(raw_content)}"
+        assert False, (
+            f"Invalid text data content is required but got {type(raw_content)}"
+        )
 
-    assert raw_path is None or isinstance(
-        raw_path, str
-    ), "Path must be a string if given."
+    assert raw_path is None or isinstance(raw_path, str), (
+        "Path must be a string if given."
+    )
     file_path = raw_path
 
     return TextData(content=file_content, path=file_path)
@@ -777,13 +779,13 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         else:
             assert isinstance(description, dict)
             dd = description["description"]
-            assert isinstance(
-                dd, str
-            ), f"The description.description field must be a string, got {dd!r}."
+            assert isinstance(dd, str), (
+                f"The description.description field must be a string, got {dd!r}."
+            )
             df = description.get("format", "text")
-            assert isinstance(
-                df, str
-            ), f"The description.format field must be a string, got {df!r}."
+            assert isinstance(df, str), (
+                f"The description.format field must be a string, got {df!r}."
+            )
             the_description = ExtendedMessage(
                 description=dd,
                 format=df,

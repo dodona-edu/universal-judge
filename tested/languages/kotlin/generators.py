@@ -173,7 +173,9 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt if nt else "Object"
+            else nt
+            if nt
+            else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_, False)
         return f"Array<{convert_declaration(base_type, None, sub_type)}>?"
@@ -203,7 +205,9 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt if nt else "Object"
+            else nt
+            if nt
+            else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
         return f"List<{convert_declaration(base_type, None, sub_type)}>?"
@@ -211,7 +215,9 @@ def convert_declaration(
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
-            else nt if nt else "Object"
+            else nt
+            if nt
+            else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
         return f"Set<{convert_declaration(base_type, None, sub_type)}>?"
@@ -254,8 +260,7 @@ def convert_statement(statement: Statement, full=False) -> str:
     elif isinstance(statement, VariableAssignment):
         prefix = "var " if full else ""
         return (
-            f"{prefix}{statement.variable} = "
-            f"{convert_statement(statement.expression)}"
+            f"{prefix}{statement.variable} = {convert_statement(statement.expression)}"
         )
     raise AssertionError(f"Unknown statement: {statement!r}")
 

@@ -76,7 +76,7 @@ def run_checkstyle(
             source = error_element.attrib.get("source", None)
             external = None
             if source:
-                external = f'https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace(".", "/")}.html'
+                external = f"https://checkstyle.sourceforge.io/apidocs/index.html?{source.replace('.', '/')}.html"
 
             position = get_linter_position(
                 raw_start_row=error_element.attrib.get("line"),

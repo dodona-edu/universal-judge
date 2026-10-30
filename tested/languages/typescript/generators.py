@@ -220,10 +220,7 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
                 f"{convert_statement(statement.expression, True)}"
             )
 
-        return (
-            f"{statement.variable} = "
-            f"{convert_statement(statement.expression, True)}"
-        )
+        return f"{statement.variable} = {convert_statement(statement.expression, True)}"
     raise AssertionError(f"Unknown statement: {statement!r}")
 
 

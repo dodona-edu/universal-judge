@@ -1,10 +1,49 @@
-[tool.isort]
-profile = "black"
-skip_glob = ["tests/exercises/*", "tests/golden/*"]
+[tool.ruff]
+target-version = "py312"
+extend-exclude = ["tests/exercises/", "tests/golden/", "tests/descriptions/"]
 
-[tool.black]
-line-length = 88
-extend-exclude="tests/(exercises|golden)/*"
+[tool.ruff.lint]
+# Rules with findings still to fix: drop one once its findings are fixed
+ignore = [
+    "B017",
+    "BLE001",
+    "C400",
+    "C401",
+    "C408",
+    "C417",
+    "F401",
+    "F541",
+    "F841",
+    "FURB105",
+    "FURB167",
+    "PERF402",
+    "PIE790",
+    "PIE810",
+    "PYI025",
+    "PYI061",
+    "RUF009",
+    "RUF023",
+    "S102",
+    "S110",
+    "SIM101",
+    "SIM102",
+    "SIM103",
+    "SIM114",
+    "SIM115",
+    "SIM118",
+    "SIM201",
+    "SIM210",
+    "TRY002",
+    "TRY004",
+    "TRY201",
+    "TRY401",
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP040",
+    "UP045",
+    "UP047",
+]
 
 [tool.pytest]
 strict = true

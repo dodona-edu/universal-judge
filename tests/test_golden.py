@@ -170,9 +170,9 @@ def test_golden(
         expected_file.write_text(_dump(actual))
         return
 
-    assert (
-        expected_file.is_file()
-    ), f"{expected_file} is missing: run with UPDATE_EXPECTED=1 to write it."
+    assert expected_file.is_file(), (
+        f"{expected_file} is missing: run with UPDATE_EXPECTED=1 to write it."
+    )
     expected = json.loads(expected_file.read_text())
 
     strict_actual, actual_texts = _split_toolchain_text(actual)

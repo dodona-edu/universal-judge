@@ -232,9 +232,9 @@ def send_specific_exception(exception):
             result += indent + "try:\n"
             if tc.testcase.is_main_testcase():
                 assert isinstance(tc.input, MainInput)
-                result += f"{indent*2}import {pu.submission_name}\n"
+                result += f"{indent * 2}import {pu.submission_name}\n"
                 if i != 0:
-                    result += f'{indent*2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
+                    result += f'{indent * 2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 result += (

@@ -350,8 +350,9 @@ def test_io_function_display_multiline_exercise(
     assert 1 == len(start_test)
     assert 1 == len(close_test)
     assert "return" == start_test[0].get("channel", "")
-    expected, actual = start_test[0].get("expected", ""), close_test[0].get(
-        "generated", ""
+    expected, actual = (
+        start_test[0].get("expected", ""),
+        close_test[0].get("generated", ""),
     )
     quote = STRING_QUOTES[SupportedLanguage(language)]
     assert expected[0] != quote and expected[-1] != quote
@@ -378,8 +379,9 @@ def test_io_function_display_no_multiline_exercise(
     assert 1 == len(start_test)
     assert 1 == len(close_test)
     assert "return" == start_test[0].get("channel", "")
-    expected, actual = start_test[0].get("expected", ""), close_test[0].get(
-        "generated", ""
+    expected, actual = (
+        start_test[0].get("expected", ""),
+        close_test[0].get("generated", ""),
     )
 
     quote = STRING_QUOTES[SupportedLanguage(language)]

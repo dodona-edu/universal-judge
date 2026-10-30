@@ -28,3 +28,6 @@ updates:
     time: "13:00"
     timezone: Europe/Brussels
   open-pull-requests-limit: 99
+  ignore:
+  # ruff bumps go through the dodona-tested image (docker-images) first, then this pin
+  - dependency-name: "ruff"

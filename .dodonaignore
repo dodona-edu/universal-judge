@@ -11,6 +11,7 @@
 /.devcontainer/
 /.github/
 /.editorconfig
+/.git-blame-ignore-revs
 /.gitignore
 /CITATION.cff
 /pyproject.toml

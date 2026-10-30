@@ -271,9 +271,9 @@ def generate_type_declaration(
         simple_result = _convert_single_type(language, declaration, inner)
         if isinstance(simple_result, tuple):
             simple_result = simple_result[1]
-        assert isinstance(
-            simple_result, str
-        ), f"{declaration} is a simple type and should generate a string"
+        assert isinstance(simple_result, str), (
+            f"{declaration} is a simple type and should generate a string"
+        )
         return simple_result
 
     meta = language.get_declaration_metadata()
@@ -288,9 +288,9 @@ def generate_type_declaration(
         start, finish = meta["nested_overrides"][base_type]  # type: ignore
 
     if isinstance(base_type, BasicObjectTypes):
-        assert (
-            len(nested) == 2
-        ), "Object types require exactly two nested types if present."
+        assert len(nested) == 2, (
+            "Object types require exactly two nested types if present."
+        )
 
     converted_nested = []
     for x in nested:

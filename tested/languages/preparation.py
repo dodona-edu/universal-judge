@@ -411,9 +411,9 @@ def prepare_testcase(
                 value_function_call = None
         elif isinstance(testcase.input, Assignment):
             command = prepare_assignment(bundle, testcase.input)
-            assert (
-                result_channel == IgnoredChannel.IGNORED
-            ), "Return values of statements must be ignored."
+            assert result_channel == IgnoredChannel.IGNORED, (
+                "Return values of statements must be ignored."
+            )
             value_function_call = None
         else:
             assert isinstance(testcase.input, LanguageLiterals)

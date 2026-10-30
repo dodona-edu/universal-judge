@@ -83,7 +83,7 @@ class Bash(Language):
             submission_file(self), "<code>"
         )
         regex = re.compile(
-            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\." f"{self.file_extension()}"
+            f"{EXECUTION_PREFIX}_[0-9]+_[0-9]+\\.{self.file_extension()}"
         )
         return regex.sub("<testcode>", stacktrace)
 

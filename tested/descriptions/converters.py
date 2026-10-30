@@ -77,9 +77,9 @@ class GenericDatatype(Datatype):
             }
             result = sorted(all_types)
 
-        assert (
-            len(result) > 0
-        ), f"Could not find concrete type for {self.type_} in {self.language.__class__.__name__}"
+        assert len(result) > 0, (
+            f"Could not find concrete type for {self.type_} in {self.language.__class__.__name__}"
+        )
         return result
 
     @override

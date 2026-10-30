@@ -98,7 +98,7 @@ def copy_from_paths_to_path(origins: list[Path], files: list[str], destination: 
                 break
         else:  # no break
             raise ValueError(
-                f"Could not find dependency file {file}, " f"looked in {origins}"
+                f"Could not find dependency file {file}, looked in {origins}"
             )
     for file in files_to_copy:
         shutil.copy2(file, destination)
