@@ -5,6 +5,7 @@ import pytest
 
 from tested.configs import create_bundle
 from tested.dodona import (
+    AnnotateCode,
     CloseContext,
     CloseTab,
     CloseTest,
@@ -264,3 +265,15 @@ def test_file_output_channel_rejects_none_path():
                 TextData(path="out2.txt", content="expected2"),
             ]
         )
+
+
+def test_compiler_annotations_are_added_once():
+    result = StringIO()
+    collector = OutputManager(out=result)
+    annotation = AnnotateCode(row=1, column=2, text="first")
+    other = AnnotateCode(row=1, column=2, text="second")
+
+    collector.add_compiler_annotations([annotation, other])
+    collector.add_compiler_annotations([AnnotateCode(row=1, column=2, text="first")])
+
+    assert result.getvalue().count('"command": "annotate-code"') == 2

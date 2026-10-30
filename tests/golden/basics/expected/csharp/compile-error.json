@@ -25,6 +25,14 @@
   }
  },
  {
+  "column": 27,
+  "command": "annotate-code",
+  "externalUrl": "https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
+  "row": 11,
+  "text": "The name 'nme' does not exist in the current context",
+  "type": "error"
+ },
+ {
   "command": "escalate-status",
   "status": {
    "enum": "compilation error"

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from tested.datatypes import AllTypes
-from tested.dodona import AnnotateCode, Message, Status
+from tested.dodona import AnnotateCode, Message, Severity, Status
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import (
     EXECUTION_PREFIX,
@@ -260,16 +260,13 @@ class CSharp(Language):
         else:
             return Status.COMPILATION_ERROR
 
-    def modify_solution(self, solution: Path):
-        assert self.config
-        with open(solution, "r") as file:
-            contents = file.read()
-
+    def _wrapper_header(self, contents: str) -> str:
+        """The header put before top-level statements, empty for a class-based submission."""
         if "class" in contents:
-            return  # No top-level statements; we are happy...
+            return ""
 
         class_name = submission_name(self)
-        header = f"""\
+        return f"""\
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -283,6 +280,16 @@ class {class_name}
     public static void Main(string[] args)
     {{
 """
+
+    def modify_solution(self, solution: Path):
+        assert self.config
+        with open(solution, "r") as file:
+            contents = file.read()
+
+        header = self._wrapper_header(contents)
+        if not header:
+            return  # No top-level statements; we are happy...
+
         footer = """
     }
 }
@@ -293,6 +300,13 @@ class {class_name}
             file.write(header + contents + footer)
 
         self.config.dodona.source_offset -= header.count("\n")
+
+    def _is_student_row(self, row: int) -> bool:
+        """Whether a row of the compiled Submission.cs is a line of the student's file."""
+        assert self.config
+        contents = self.config.dodona.source.read_text()
+        header_lines = self._wrapper_header(contents).count("\n")
+        return header_lines < row <= header_lines + len(contents.splitlines())
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         assert self.config
@@ -308,6 +322,12 @@ class {class_name}
             rf"{tested_directory}/{subdir}/{sub}\((\d+),(\d+)\)"
         )
 
+        def compilation_location(match: re.Match) -> str:
+            # TESTed's wrapper lines are not the student's: no link to them.
+            if not self._is_student_row(int(match.group(1))):
+                return "<code>"
+            return f"<code>:{match.group(1)}:{match.group(2)}"
+
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
             # If we encounter an execution location, we are done.
@@ -315,7 +335,7 @@ class {class_name}
                 break
 
             line = re.sub(submission_location_regex, r"<code>:\1", line)
-            line = re.sub(compilation_location_regex, r"<code>:\1:\2", line)
+            line = re.sub(compilation_location_regex, compilation_location, line)
             resulting_lines += line
 
         return resulting_lines
@@ -323,20 +343,29 @@ class {class_name}
     def compiler_output(
         self, stdout: str, stderr: str
     ) -> tuple[list[Message], list[AnnotateCode], str, str]:
+        # Import locally to prevent circular imports.
+        from tested.judge.linter import annotation_from_position, get_linter_position
+
+        assert self.config
         submission = submission_name(self)
-        message_regex = (
-            rf"{submission}\((\d+),(\d+)\): (error|warning) ([A-Z0-9]+): (.*)"
-        )
-        messages = re.findall(message_regex, stdout)
+        error_regex = rf"{submission}\.cs\((\d+),(\d+)\): error [A-Z0-9]+: (.*)"
         annotations = []
-        for message in messages:
+        for row, column, text in re.findall(error_regex, stdout):
+            if not self._is_student_row(int(row)):
+                continue
+            position = get_linter_position(
+                raw_start_row=row,
+                source_offset=self.config.dodona.source_offset,
+                raw_end_row=None,
+                raw_start_column=column,
+                raw_end_column=None,
+            )
             annotations.append(
-                AnnotateCode(
-                    row=int(message[0]),
-                    text=message[4],
-                    externalUrl="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
-                    column=int(message[1]),
-                    type=message[2],
+                annotation_from_position(
+                    position,
+                    text,
+                    external_url="https://learn.microsoft.com/dotnet/csharp/language-reference/compiler-messages/",
+                    type=Severity.ERROR,
                 )
             )
 
