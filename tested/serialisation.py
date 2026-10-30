@@ -79,7 +79,7 @@ def _get_type_for(expression: "Expression") -> WrappedAllTypes:
 
 
 def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
-    type_dict = dict()
+    type_dict = {}
     for data_type in types:
         if isinstance(data_type, tuple):
             try:
@@ -210,7 +210,7 @@ class NumberType(WithFeatures, WithFunctions):
     data: SpecialNumbers | int | float | Decimal = field(
         validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
     )
-    diagnostic: Literal[None] = None  # Unused in this type.
+    diagnostic: None = None  # Unused in this type.
 
     def __attrs_post_init__(self):
         if (
@@ -257,7 +257,7 @@ class StringType(WithFeatures, WithFunctions):
 class BooleanType(WithFeatures, WithFunctions):
     type: BooleanTypes = field(validator=validators.instance_of(BooleanTypes))
     data: bool = field(validator=validators.instance_of(bool))
-    diagnostic: Literal[None] = None  # Unused in this type.
+    diagnostic: None = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
@@ -272,7 +272,7 @@ class SequenceType(WithFeatures, WithFunctions):
         validator=validators.instance_of((BasicSequenceTypes, AdvancedSequenceTypes))
     )
     data: list["Expression"]
-    diagnostic: Literal[None] = None  # Unused in this type.
+    diagnostic: None = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         nested_features = [x.get_used_features() for x in self.data]
@@ -329,7 +329,7 @@ class ObjectType(WithFeatures, WithFunctions):
         validator=validators.instance_of((BasicObjectTypes, AdvancedObjectTypes))
     )
     data: list[ObjectKeyValuePair]
-    diagnostic: Literal[None] = None  # Unused in this type.
+    diagnostic: None = None  # Unused in this type.
 
     def get_key_type(self) -> WrappedAllTypes:
         """
@@ -367,8 +367,8 @@ class NothingType(WithFeatures, WithFunctions):
         default=BasicNothingTypes.NOTHING,
         validator=validators.instance_of(NothingTypes),  # type: ignore
     )
-    data: Literal[None] = None
-    diagnostic: Literal[None] = None  # Unused in this type.
+    data: None = None
+    diagnostic: None = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))

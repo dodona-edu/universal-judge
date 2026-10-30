@@ -74,7 +74,7 @@ def run_command(
         stderr=process.stderr,
         exit=process.returncode,
         timeout=False,
-        memory=True if process.returncode == -9 else False,
+        memory=process.returncode == -9,
     )
 
 
@@ -134,8 +134,6 @@ def copy_workdir_files(bundle: Bundle, destination: Path, all_files: bool) -> li
 
 def filter_files(files: list[str] | FileFilter, directory: Path) -> list[Path]:
     if callable(files):
-        return list(
-            x.relative_to(directory) for x in filter(files, directory.rglob("*"))
-        )
+        return [x.relative_to(directory) for x in filter(files, directory.rglob("*"))]
     else:
         return [Path(file) for file in files]

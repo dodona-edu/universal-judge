@@ -5,7 +5,8 @@ Module containing the definitions of the features we can support.
 import logging
 import operator
 from collections import defaultdict
-from collections.abc import Iterable, Set
+from collections.abc import Iterable
+from collections.abc import Set as AbstractSet
 from enum import StrEnum, auto, unique
 from functools import reduce
 from typing import TYPE_CHECKING, Any
@@ -130,7 +131,7 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
-def _sorted_repr(items: Set[Any]) -> str:
+def _sorted_repr(items: AbstractSet[Any]) -> str:
     """
     Format a set like its repr, but with the elements in a fixed order.
     """
@@ -205,22 +206,24 @@ def is_supported(language: "Language") -> list[Message] | None:
         for context in tab.contexts:
             for testcase in context.testcases:
                 languages = testcase.get_specific_languages()
-                if languages is not None:
-                    if language.config.dodona.programming_language not in languages:
-                        _logger.warning(
-                            f"Language-specific constructs are available only in "
-                            f"{languages}!"
-                        )
-                        message_text = f"""
+                if (
+                    languages is not None
+                    and language.config.dodona.programming_language not in languages
+                ):
+                    _logger.warning(
+                        f"Language-specific constructs are available only in "
+                        f"{languages}!"
+                    )
+                    message_text = f"""
                         This test suite is not solvable in {language.__class__.__name__}.
                         The test suite contains language-specific code, but code is only
                         provided for {languages}.
                         """
-                        return [
-                            ExtendedMessage(
-                                description=message_text, permission=Permission.EDUCATOR
-                            )
-                        ]
+                    return [
+                        ExtendedMessage(
+                            description=message_text, permission=Permission.EDUCATOR
+                        )
+                    ]
 
     nested_types = []
     for key, value_types in required.nested_types:

@@ -57,13 +57,13 @@ class CPPGenerator:
         )
 
     def convert_type(self, value: Expression) -> str:
-        if isinstance(value, Identifier) or isinstance(value, FunctionCall):
+        if isinstance(value, (Identifier, FunctionCall)):
             return "std::any"
         else:
             return self.convert_declaration(value.type, value)
 
     def combine_types(self, expressions: list[Expression]) -> str:
-        content_types = set(self.convert_type(content) for content in expressions)
+        content_types = {self.convert_type(content) for content in expressions}
         if len(content_types) == 1:
             return content_types.pop()
         elif len(content_types) > 1:
@@ -273,7 +273,7 @@ class CPPGenerator:
                 isinstance(function, PreparedFunctionCall)
                 and function.has_root_namespace
             )
-            and not function.type == FunctionType.CONSTRUCTOR
+            and function.type != FunctionType.CONSTRUCTOR
         ):
             if isinstance(function.namespace, Identifier):
                 if self.is_pascal_case(function.namespace):

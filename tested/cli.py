@@ -162,7 +162,7 @@ if __name__ == "__main__":
     try:
         config_file = json.loads(config_path.read_text())
     except FileNotFoundError:
-        config_file = dict()
+        config_file = {}
 
     if args.programming_language is not None:
         programming_language = args.programming_language

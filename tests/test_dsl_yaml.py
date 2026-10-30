@@ -1363,7 +1363,7 @@ def test_files_are_propagated():
     tab = suite.tabs[0]
     ctx0, ctx1 = tab.contexts
     testcases0, testcases1 = ctx0.testcases, ctx1.testcases
-    test0, test1 = testcases0[0], testcases1[0]
+    test0, _ = testcases0[0], testcases1[0]
     assert set(test0.input_files) == {
         TextData(
             path="test", content=ContentPath(path="test", display_override="test.md")

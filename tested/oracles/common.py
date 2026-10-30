@@ -177,7 +177,7 @@ def _curry_oracle(
     options: dict | None = None,
 ) -> Oracle:
     if options is None:
-        options = dict()
+        options = {}
     config = OracleConfig(bundle, options, context_dir)
     # noinspection PyTypeChecker
     return functools.partial(function, config)

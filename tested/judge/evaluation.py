@@ -458,13 +458,11 @@ def should_show(
         # We don't show the channel if we ignore it.
         if isinstance(test, IgnoredChannel):
             return False
-        if (
+        return not (
             isinstance(test, EmptyChannel)
             and result
             and result.result.enum == Status.CORRECT
-        ):
-            return False
-        return True
+        )
     elif channel == Channel.EXCEPTION:
         assert isinstance(test, ExceptionOutput)
         return not isinstance(test, SpecialOutputChannel)

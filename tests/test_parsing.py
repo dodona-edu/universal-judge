@@ -230,6 +230,36 @@ def test_parse_json_value():
     assert result.data == "hello"
 
 
+@pytest.mark.parametrize(
+    "json_str",
+    [
+        '{"type": "integer", "data": 5, "diagnostic": null}',
+        '{"type": "list", "data": [], "diagnostic": null}',
+        '{"type": "nothing", "data": null, "diagnostic": null}',
+    ],
+)
+def test_parse_json_value_accepts_null_in_unused_fields(json_str):
+    from tested.parsing import parse_json_value
+
+    assert parse_json_value(json_str).diagnostic is None
+
+
+@pytest.mark.parametrize(
+    "json_str",
+    [
+        '{"type": "integer", "data": 5, "diagnostic": "int"}',
+        '{"type": "list", "data": [], "diagnostic": "list"}',
+        '{"type": "dictionary", "data": [], "diagnostic": "dict"}',
+        '{"type": "nothing", "data": 5}',
+    ],
+)
+def test_parse_json_value_rejects_values_in_unused_fields(json_str):
+    from tested.parsing import parse_json_value
+
+    with pytest.raises(TypeError):
+        parse_json_value(json_str)
+
+
 def test_parse_json_suite_and_to_json():
     from tested.parsing import parse_json_suite, suite_to_json
     from tested.testsuite import Suite
