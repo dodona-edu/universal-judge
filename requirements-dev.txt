@@ -1,5 +1,5 @@
 -r requirements-test.txt
 
-pyright==1.1.365
+pyright==1.1.414
 # Same ruff as the student linter in the dodona-tested image (.devcontainer/dodona-tested.dockerfile)
 ruff==0.17.0
