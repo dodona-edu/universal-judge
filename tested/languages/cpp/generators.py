@@ -442,6 +442,9 @@ extern "C" int __wrap_main() {{
 
     def convert_selector(self, contexts: list[str]) -> str:
         result = """
+#include <iostream>
+#include <string>
+
 #define INCLUDED true
 """
 

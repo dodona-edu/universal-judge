@@ -1,0 +1,8 @@
+- tab: "Add"
+  testcases:
+    - expression: "add(2, 3)"
+      return: 5
+- tab: "Subtract"
+  testcases:
+    - expression: "subtract(5, 3)"
+      return: 2

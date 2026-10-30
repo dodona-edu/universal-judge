@@ -1,0 +1,83 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Add"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "add(2, 3)",
+   "format": "c"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "5"
+ },
+ {
+  "command": "close-test",
+  "generated": "5",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "Subtract"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "subtract(5, 3)",
+   "format": "c"
+  }
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>execution_1.c: In function ‘execution_1_context_0’:<br>execution_1.c:46:12: error: implicit declaration of function ‘subtract’; did you mean ‘strcat’? [-Wimplicit-function-declaration]<br>   46 | send_value(subtract(5, 3));<br>      |            ^~~~~~~~<br>values.h:40:43: note: in definition of macro ‘write_value_function’<br>   40 | #define write_value_function(x) _Generic((x),   \\<br>      |                                           ^<br>execution_1.c:34:31: note: in expansion of macro ‘write_value’<br>   34 |     #define send_value(value) write_value(execution_1_value_file, value)<br>      |                               ^~~~~~~~~~~<br>execution_1.c:46:1: note: in expansion of macro ‘send_value’<br>   46 | send_value(subtract(5, 3));<br>      | ^~~~~~~~~~</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error"
+  }
+ },
+ {
+  "accepted": false,
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
