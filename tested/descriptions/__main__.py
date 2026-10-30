@@ -43,11 +43,11 @@ Afterwards, the code blocks are replaced.
 """
 
 import sys
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 
 from tested.descriptions import process_problem_statement
 from tested.languages import LANGUAGES
-from tested.utils import smart_close
+from tested.utils import smart_open
 
 parser = ArgumentParser(
     description="Convert generic problem statements to language-specific ones"
@@ -56,14 +56,12 @@ parser = ArgumentParser(
 parser.add_argument(
     "-p",
     "--problem",
-    type=FileType("r"),
     help="Generic problem statement",
     default="-",
 )
 parser.add_argument(
     "-o",
     "--output",
-    type=FileType("w"),
     help="Language-specific problem statement",
     default="-",
 )
@@ -85,14 +83,14 @@ parser.add_argument(
 parser = parser.parse_args()
 
 try:
-    with smart_close(parser.problem) as problem_fd:
+    with smart_open(parser.problem, "r") as problem_fd:
         problem_statement = problem_fd.read()
 
     result = process_problem_statement(
         problem_statement, parser.language, parser.natural_language
     )
 
-    with smart_close(parser.output) as output_fd:
+    with smart_open(parser.output, "w") as output_fd:
         print(result, file=output_fd)
 
 except ValueError as e:

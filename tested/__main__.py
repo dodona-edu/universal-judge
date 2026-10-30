@@ -1,10 +1,10 @@
 import logging
 import sys
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 
 from tested.configs import read_config
 from tested.main import run
-from tested.utils import smart_close
+from tested.utils import smart_open
 
 parser = ArgumentParser(
     description="The programming-language-agnostic educational test framework."
@@ -12,14 +12,12 @@ parser = ArgumentParser(
 parser.add_argument(
     "-c",
     "--config",
-    type=FileType("r"),
     help="Where to read the config from",
     default="-",
 )
 parser.add_argument(
     "-o",
     "--output",
-    type=FileType("w"),
     help="Where the judge output should be written to.",
     default="-",
 )
@@ -40,6 +38,7 @@ if parser.verbose:
     ch.setFormatter(formatter)
     log.addHandler(ch)
 
-configuration = read_config(parser.config)
-with smart_close(parser.output) as out:
+with smart_open(parser.config, "r") as config_in:
+    configuration = read_config(config_in)
+with smart_open(parser.output, "w") as out:
     run(configuration, out)
