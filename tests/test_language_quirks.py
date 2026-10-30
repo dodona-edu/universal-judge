@@ -173,29 +173,27 @@ def test_cpp_main_trailing_return_type(tmp_path: Path, pytestconfig: pytest.Conf
 
 
 @pytest.mark.cpp
-def test_cpp_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+def test_cpp_function_assignment():
     statement_string = "test: string = foo()"
-    cpp = LANGUAGES["cpp"](pytestconfig)
+    cpp = LANGUAGES["cpp"]()
     result = cpp.generate_statement(parse_string(statement_string))
 
     assert result == "std::string test = foo()"
 
 
 @pytest.mark.cpp
-def test_cpp_complex_function_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+def test_cpp_complex_function_assignment():
     statement_string = 'test = { "a": foo() }'
-    cpp = LANGUAGES["cpp"](pytestconfig)
+    cpp = LANGUAGES["cpp"]()
     result = cpp.generate_statement(parse_string(statement_string))
 
     assert result == 'std::map<std::string, std::any> test = {{"a", foo()}}'
 
 
 @pytest.mark.cpp
-def test_cpp_types_get_cast_within_functions(
-    tmp_path: Path, pytestconfig: pytest.Config
-):
+def test_cpp_types_get_cast_within_functions():
     statement_string = 'test: string = foo(1, "2", [3, 4], (5, 6), {7: 8})'
-    cpp = LANGUAGES["cpp"](pytestconfig)
+    cpp = LANGUAGES["cpp"]()
     result = cpp.generate_statement(parse_string(statement_string))
 
     int_p = "std::intmax_t(1)"
@@ -210,9 +208,9 @@ def test_cpp_types_get_cast_within_functions(
 
 
 @pytest.mark.cpp
-def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config):
+def test_cpp_complex_type_assignment():
     statement_string = "test = {'1': [2 , (3, {4, 5})]}"
-    cpp = LANGUAGES["cpp"](pytestconfig)
+    cpp = LANGUAGES["cpp"]()
     result = cpp.generate_statement(parse_string(statement_string))
 
     variant_types = [
@@ -231,8 +229,8 @@ def test_cpp_complex_type_assignment(tmp_path: Path, pytestconfig: pytest.Config
 
 
 @pytest.mark.cpp
-def test_cpp_static_functions(tmp_path: Path, pytestconfig: pytest.Config):
-    cpp = LANGUAGES["cpp"](pytestconfig)
+def test_cpp_static_functions():
+    cpp = LANGUAGES["cpp"]()
     object_function = "foo.bar()"
     result = cpp.generate_statement(parse_string(object_function))
 
@@ -289,9 +287,9 @@ def test_cpp_results_survive_crash_and_timeout(
 
 
 @pytest.mark.typescript
-def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
+def test_typescript_array_typing():
     statement_string = "test = ['test', True, 10, 10.1, None, {'wow': 10}]"
-    ts = LANGUAGES["typescript"](pytestconfig)
+    ts = LANGUAGES["typescript"]()
     result = ts.generate_statement(parse_string(statement_string))
     types = ["string", "boolean", "number", "object", "null"]
     permutations = list(itertools.permutations(types))
@@ -304,9 +302,9 @@ def test_typescript_array_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.typescript
-def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
+def test_typescript_set_typing():
     statement_string = "test = {'test', True, 10, 10.1, None, {'wow': 10}}"
-    ts = LANGUAGES["typescript"](pytestconfig)
+    ts = LANGUAGES["typescript"]()
     result = ts.generate_statement(parse_string(statement_string))
     types = ["string", "boolean", "number", "object", "null"]
     permutations = list(itertools.permutations(types))
@@ -319,14 +317,14 @@ def test_typescript_set_typing(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.typescript
-def test_typescript_function_call_typing(tmp_path: Path, pytestconfig: pytest.Config):
+def test_typescript_function_call_typing():
     statement_string = "test = {'test', True, testing(10)}"
-    ts = LANGUAGES["typescript"](pytestconfig)
+    ts = LANGUAGES["typescript"]()
     result = ts.generate_statement(parse_string(statement_string))
     assert result == 'let test : Set<any> = new Set(["test", true, testing(10)])'
 
     statement_string = "test = ['test', True, testing(10)]"
-    ts = LANGUAGES["typescript"](pytestconfig)
+    ts = LANGUAGES["typescript"]()
     result = ts.generate_statement(parse_string(statement_string))
     assert result == 'let test : Array<any> = ["test", true, testing(10)]'
 

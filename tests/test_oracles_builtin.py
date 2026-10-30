@@ -5,7 +5,7 @@ from unittest.mock import ANY
 import pytest
 from pytest_mock import MockerFixture
 
-import tested
+import tested.oracles.file
 from tested.configs import create_bundle
 from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
 from tested.dodona import Status
