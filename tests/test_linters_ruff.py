@@ -211,6 +211,30 @@ def test_ruff_too_deeply_nested_to_compile(tmp_path: Path, pytestconfig: pytest.
     assert "compilation error" in statuses
 
 
+def test_ruff_ignores_a_stray_config_next_to_the_submission(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    source = tmp_path / "error.py"
+    source.write_text(
+        (pytestconfig.rootpath / "tests/exercises/linter/solution/error.py").read_text()
+    )
+    (tmp_path / "pyproject.toml").write_text('[tool.ruff.lint]\nignore = ["F821"]\n')
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "error",
+        {"source": source, "options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    assert len(annotations) == 1
+    assert "undefined-name" in annotations[0]["externalUrl"]
+
+
 def test_ruff_missing_custom_config_is_reported(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
