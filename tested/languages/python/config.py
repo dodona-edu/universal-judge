@@ -10,7 +10,7 @@ from tested.datatypes import (
     BasicSequenceTypes,
     ExpressionTypes,
 )
-from tested.dodona import AnnotateCode, Message, Severity
+from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import (
     Conventionable,
@@ -137,26 +137,6 @@ class Python(Language):
 
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         return [_executable(), "-u", file, *arguments]
-
-    def compiler_output(
-        self, stdout: str, stderr: str
-    ) -> tuple[list[Message], list[AnnotateCode], str, str]:
-        if match := re.search(r".*: (.+Error): (.+) \(<code>, line (\d+)\)", stdout):
-            error = match.group(1)
-            message = match.group(2)
-            line = match.group(3)
-            return (
-                [],
-                [
-                    AnnotateCode(
-                        row=int(line), text=f"{error}: {message}", type=Severity.ERROR
-                    )
-                ],
-                stdout,
-                stderr,
-            )
-        else:
-            return [], [], stdout, stderr
 
     def linter(self, remaining: float) -> tuple[list[Message], list[AnnotateCode]]:
         # Import locally to prevent errors.
