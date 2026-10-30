@@ -12,15 +12,16 @@ from tested.judge.compilation import process_compile_results
 from tested.judge.utils import BaseExecutionResult
 
 
-def compilation(**kwargs) -> BaseExecutionResult:
-    defaults = {
-        "stdout": "",
-        "stderr": "",
-        "exit": 0,
-        "timeout": False,
-        "memory": False,
-    }
-    return BaseExecutionResult(**(defaults | kwargs))
+def compilation(
+    stdout: str = "",
+    stderr: str = "",
+    exit: int = 0,
+    timeout: bool = False,
+    memory: bool = False,
+) -> BaseExecutionResult:
+    return BaseExecutionResult(
+        stdout=stdout, stderr=stderr, exit=exit, timeout=timeout, memory=memory
+    )
 
 
 @pytest.fixture
