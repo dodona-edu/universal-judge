@@ -65,6 +65,10 @@ def entries():
     ]
 
 
+def template_ids(pairs):
+    return [f"{code}: {entry['original']}" for code, entry in pairs]
+
+
 def test_every_selected_rule_has_texts_and_every_text_belongs_to_a_selected_rule():
     assert selected() == set(messages_data()) - {SYNTAX_ERROR}
 
@@ -100,17 +104,18 @@ def known(template: str, formats: list[str]) -> bool:
     )
 
 
+NON_SYNTAX_ENTRIES = [e for e in entries() if e[0] != SYNTAX_ERROR]
+
+
 @pytest.mark.parametrize(
-    ("code", "entry"),
-    [e for e in entries() if e[0] != SYNTAX_ERROR],
-    ids=lambda x: str(x)[:40],
+    ("code", "entry"), NON_SYNTAX_ENTRIES, ids=template_ids(NON_SYNTAX_ENTRIES)
 )
 def test_every_template_is_one_the_installed_ruff_writes(code, entry):
     assert code in ruff_formats(), f"{code} is not a rule of the installed ruff"
     assert known(entry["original"], ruff_formats()[code])
 
 
-@pytest.mark.parametrize(("code", "entry"), entries(), ids=lambda x: str(x)[:40])
+@pytest.mark.parametrize(("code", "entry"), entries(), ids=template_ids(entries()))
 def test_every_template_has_english_and_dutch_texts_with_only_its_own_placeholders(
     code, entry
 ):
