@@ -200,10 +200,6 @@ include = ["tested/serialisation.py"]
 rules = { invalid-argument-type = "ignore", invalid-return-type = "ignore", no-matching-overload = "ignore", not-subscriptable = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tests/test_compilation.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tests/test_dsl_expression.py"]
 rules = { invalid-argument-type = "ignore", invalid-assignment = "ignore", invalid-declaration = "ignore", not-subscriptable = "ignore", unresolved-attribute = "ignore" }
 
@@ -212,19 +208,7 @@ include = ["tests/test_dsl_yaml.py"]
 rules = { invalid-argument-type = "ignore", unresolved-attribute = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tests/test_language_quirks.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_oracles_builtin.py"]
-rules = { possibly-missing-submodule = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tests/test_parsing.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_serialisation.py"]
 rules = { invalid-argument-type = "ignore" }
 
 [tool.poetry]

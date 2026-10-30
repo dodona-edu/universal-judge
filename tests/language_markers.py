@@ -26,7 +26,7 @@ SERIALIZABLE_LANGUAGES = all_languages_except("haskell")
 def test_object_languages_support_objects(language: str):
     assert language in LANGUAGES.keys()
 
-    config = LANGUAGES[language](None)
+    config = LANGUAGES[language]()
 
     assert Construct.OBJECTS in config.supported_constructs()
 
@@ -35,7 +35,7 @@ def test_object_languages_support_objects(language: str):
 def test_exception_languages_support_exceptions(language: str):
     assert language in LANGUAGES.keys()
 
-    config = LANGUAGES[language](None)
+    config = LANGUAGES[language]()
 
     assert Construct.EXCEPTIONS in config.supported_constructs()
 

@@ -248,7 +248,9 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig: pytest.Config):
 
     # Create a list of basic types we want to test.
     # We want to test all supported or reduced types.
-    types = [v for v in ADVANCED_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED]
+    types: list[Value] = [
+        v for v in ADVANCED_VALUES if type_map[v.type] != TypeSupport.UNSUPPORTED
+    ]
 
     # Run the templates to encode the data.
     results = run_encoder(bundle, types)
@@ -289,7 +291,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig: pytest.Config):
     type_map = fallback_type_support_map(bundle.language)
 
     # Create a list of basic types we want to test.
-    types = []
+    types: list[Value] = []
     for t, n in itertools.product(
         [
             BasicNumericTypes.REAL,
