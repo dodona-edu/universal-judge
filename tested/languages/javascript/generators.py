@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 
 from tested.datatypes import (
     AdvancedNothingTypes,
@@ -38,7 +39,7 @@ from tested.serialisation import (
 from tested.testsuite import MainInput
 
 
-def convert_arguments(arguments: list[NamedArgument | Expression]) -> str:
+def convert_arguments(arguments: Sequence[NamedArgument | Expression]) -> str:
     results = []
     for arg in arguments:
         if isinstance(arg, NamedArgument):
@@ -92,10 +93,10 @@ def convert_value(value: Value) -> str:
         return "null"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data)}]"  # pyright: ignore
+        return f"[{convert_arguments(value.data)}]"
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"new Set([{convert_arguments(value.data)}])"  # pyright: ignore
+        return f"new Set([{convert_arguments(value.data)}])"
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "new Map(["
@@ -125,7 +126,7 @@ def convert_function_call(call: FunctionCall, internal=False) -> str:
         result += convert_statement(call.namespace, True) + "."
     result += call.name
     if call.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(call.arguments)})"  # pyright: ignore
+        result += f"({convert_arguments(call.arguments)})"
     return result
 
 

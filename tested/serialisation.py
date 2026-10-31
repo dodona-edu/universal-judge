@@ -60,11 +60,8 @@ from tested.utils import flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
-WrappedAllTypes = Union[
-    AllTypes,
-    tuple[SequenceTypes, "WrappedAllTypes"],
-    tuple[ObjectTypes, tuple["WrappedAllTypes", "WrappedAllTypes"]],
-]
+# (type, content) or (key, value) pairs; combined types can pair any two of them.
+WrappedAllTypes = Union[AllTypes, tuple["WrappedAllTypes", "WrappedAllTypes"]]
 
 
 def _get_type_for(expression: "Expression") -> WrappedAllTypes:
@@ -79,28 +76,32 @@ def _get_type_for(expression: "Expression") -> WrappedAllTypes:
 
 
 def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
-    type_dict = dict()
+    type_dict: dict[
+        WrappedAllTypes,
+        set[WrappedAllTypes] | tuple[set[WrappedAllTypes], set[WrappedAllTypes]] | None,
+    ] = {}
     for data_type in types:
         if isinstance(data_type, tuple):
+            key, content = data_type
             try:
-                type_item = type_dict[data_type[0]]
+                type_item = type_dict[key]
                 if isinstance(type_item, tuple):
-                    if isinstance(data_type[1], tuple):
-                        type_dict[data_type[0]][0].add(data_type[1][0])
-                        type_dict[data_type[0]][1].add(data_type[1][1])
+                    if isinstance(content, tuple):
+                        type_item[0].add(content[0])
+                        type_item[1].add(content[1])
                     else:
-                        type_dict[data_type[0]] = {BasicStringTypes.ANY}
+                        type_dict[key] = {BasicStringTypes.ANY}
                 else:
                     assert isinstance(type_item, set)
-                    if isinstance(data_type[1], tuple):
+                    if isinstance(content, tuple):
                         type_item.add(BasicStringTypes.ANY)
                     else:
-                        type_item.add(data_type[1])
+                        type_item.add(content)
             except KeyError:
-                if isinstance(data_type[1], tuple):
-                    type_dict[data_type[0]] = ({data_type[1][0]}, {data_type[1][1]})
+                if isinstance(content, tuple):
+                    type_dict[key] = ({content[0]}, {content[1]})
                 else:
-                    type_dict[data_type[0]] = {data_type[1]}
+                    type_dict[key] = {content}
         else:
             type_dict[data_type] = None
     if len(type_dict) == 1:
