@@ -88,14 +88,6 @@ include = ["tested/dsl/__main__.py"]
 rules = { deprecated = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tested/dsl/ast_translator.py"]
-rules = { deprecated = "ignore", invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/dsl/translate_parser.py"]
-rules = { invalid-argument-type = "ignore", missing-argument = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tested/features.py"]
 rules = { invalid-argument-type = "ignore" }
 
@@ -192,10 +184,6 @@ include = ["tested/oracles/value.py"]
 rules = { invalid-assignment = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tested/parsing.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tested/serialisation.py"]
 rules = { invalid-argument-type = "ignore", invalid-return-type = "ignore", no-matching-overload = "ignore", not-subscriptable = "ignore" }
 
@@ -218,10 +206,6 @@ rules = { invalid-argument-type = "ignore" }
 [[tool.ty.overrides]]
 include = ["tests/test_oracles_builtin.py"]
 rules = { possibly-missing-submodule = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_parsing.py"]
-rules = { invalid-argument-type = "ignore" }
 
 [[tool.ty.overrides]]
 include = ["tests/test_serialisation.py"]

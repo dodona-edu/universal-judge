@@ -257,14 +257,14 @@ def test_parse_json_suite_and_to_json():
 def test_a_structure_no_type_accepts_does_not_become_text(value):
     # As text, a message meant for educators would be shown to students.
     with pytest.raises(TypeError):
-        get_converter().structure(value, Message)  # pyright: ignore
+        get_converter().structure(value, Message)  # pyright: ignore  # ty: ignore[invalid-argument-type]
 
 
 def test_text_and_messages_still_parse_in_a_union():
     converter = get_converter()
-    assert converter.structure("plain", Message) == "plain"  # pyright: ignore
+    assert converter.structure("plain", Message) == "plain"  # pyright: ignore  # ty: ignore[invalid-argument-type]
     message = {"description": "for everyone", "format": "text"}
-    parsed = converter.structure(message, Message)  # pyright: ignore
+    parsed = converter.structure(message, Message)  # pyright: ignore  # ty: ignore[invalid-argument-type]
     assert parsed == ExtendedMessage(description="for everyone", format="text")
 
 
@@ -272,4 +272,4 @@ def test_text_and_messages_still_parse_in_a_union():
 def test_a_structure_still_becomes_text_outside_a_message(value):
     # The readable values of an oracle can be a student's list or dict.
     converter = get_converter()
-    assert converter.structure(value, str | None) == str(value)  # pyright: ignore
+    assert converter.structure(value, str | None) == str(value)  # pyright: ignore  # ty: ignore[invalid-argument-type]
