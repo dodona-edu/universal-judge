@@ -216,12 +216,10 @@ class Kotlin(Language):
             prefix = conventionalize_namespace(self, EXECUTION_PREFIX)
             file = str(file_path)
             is_context = file.startswith(prefix)
-            is_our_context = file.startswith(context_name + ".") or file.startswith(
-                context_name + "$"
-            )
+            is_our_context = file.startswith((context_name + ".", context_name + "$"))
             return not is_context or is_our_context
 
-        return list(x for x in files if filter_function(x))
+        return [x for x in files if filter_function(x)]
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
         return jvm_cleanup_stacktrace(stacktrace, submission_file(self))

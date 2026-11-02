@@ -273,14 +273,12 @@ class DslContext:
         self, level: YamlObject, *config_names: str
     ) -> dict:
         # The inherited options of later config names override those of earlier ones.
-        inherited_options: dict = dict()
+        inherited_options: dict = {}
         for config_name in config_names:
             inherited_options = recursive_dict_merge(
-                inherited_options, self.config.get(config_name, dict())
+                inherited_options, self.config.get(config_name, {})
             )
-        specific_options = (
-            level.get("config", dict()) if isinstance(level, dict) else dict()
-        )
+        specific_options = level.get("config", {}) if isinstance(level, dict) else {}
         assert isinstance(specific_options, dict), (
             f"The config options for {config_names[-1]} must be a dictionary, not a {type(specific_options)}"
         )
@@ -432,14 +430,14 @@ def _convert_custom_check_oracle(stream: dict) -> CustomCheckOracle:
 
 
 def _convert_language_specific_oracle(stream: dict) -> LanguageSpecificOracle:
-    the_functions = dict()
+    the_functions = {}
     for lang, a_function in stream["functions"].items():
         the_functions[SupportedLanguage(lang)] = _convert_evaluation_function(
             a_function
         )
 
-    the_args = dict()
-    for lang, args in stream.get("arguments", dict()).items():
+    the_args = {}
+    for lang, args in stream.get("arguments", {}).items():
         the_args[SupportedLanguage(lang)] = args
 
     if not set(the_args.keys()).issubset(the_functions.keys()):
@@ -458,7 +456,7 @@ def _convert_text_output_channel(
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
     if isinstance(stream, str):
-        config = context.config.get(config_name, dict())
+        config = context.config.get(config_name, {})
         raw_data = stream
     else:
         assert isinstance(stream, dict)
