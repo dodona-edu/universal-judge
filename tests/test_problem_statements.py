@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -242,3 +244,16 @@ def test_language_specific_construct_rejects_missing():
 
     with pytest.raises(AssertionError):
         process_problem_statement(template, "java")
+
+
+def test_cli_requires_language():
+    result = subprocess.run(
+        [sys.executable, "-m", "tested.descriptions"],
+        cwd=Path(__file__).parent.parent,
+        input="# Title\n",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 2
+    assert "the following arguments are required: -l/--language" in result.stderr

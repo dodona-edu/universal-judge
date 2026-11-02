@@ -71,6 +71,7 @@ parser.add_argument(
     type=str,
     help="Programming language to convert the generic problem statement into.",
     choices=LANGUAGES.keys(),
+    required=True,
 )
 parser.add_argument(
     "-n",
