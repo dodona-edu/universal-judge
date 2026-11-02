@@ -293,7 +293,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
                 )
                 + " "
             )
-            result += tc.input.statement.variable + " = null;\n"
+            result += tc.input.statement.variable + " = default;\n"
 
         result += "try {"
         if tc.testcase.is_main_testcase():
