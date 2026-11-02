@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -2047,3 +2048,23 @@ def test_language_mapping_keys_must_be_known_languages(valid):
     translate_to_test_suite(valid)
     with pytest.raises(ExceptionGroup):
         translate_to_test_suite(valid.replace("python", "cobol"))
+
+
+@pytest.mark.skipif(
+    not Path("/dodona-tested.dockerfile").exists(),
+    reason="only checks the judge image",
+)
+def test_image_parses_dsl_with_libyaml():
+    assert yaml.__with_libyaml__
+    assert hasattr(yaml, "CSafeLoader")
+    # The pure Python scanner rejects a tab after a value, libyaml accepts it.
+    yaml_str = (
+        'namespace: "solution"\t\n'
+        "tabs:\n"
+        '- tab: "Ctx"\n'
+        "  testcases:\n"
+        '  - stdin: "Input string"\n'
+        '    stdout: "Output string"\n'
+    )
+    suite = parse_dsl(yaml_str)
+    assert suite.namespace == "solution"
