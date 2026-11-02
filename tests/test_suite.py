@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from cattrs import ClassValidationError
 
 from tested.datatypes import BasicNumericTypes
 from tested.dsl import parse_string
@@ -312,8 +313,25 @@ def test_language_literals_require_at_least_one_literal():
 def test_custom_check_oracle_accepts_languages():
     function = EvaluationFunction(file=Path("check.py"))
     CustomCheckOracle(function=function, languages={SupportedLanguage.PYTHON})
-    CustomCheckOracle(function=function, languages=set())
     CustomCheckOracle(function=function)
+
+
+def test_custom_check_empty_languages_raises():
+    with pytest.raises(ValueError, match="At least one language is required."):
+        CustomCheckOracle(
+            function=EvaluationFunction(file=Path("evaluator.py")), languages=set()
+        )
+
+
+def test_custom_check_empty_languages_in_json_raises():
+    suite = {
+        "type": "custom_check",
+        "function": {"file": "evaluator.py"},
+        "languages": [],
+    }
+    with pytest.raises(ClassValidationError) as exc_info:
+        get_converter().structure(suite, CustomCheckOracle)
+    assert "At least one language is required." in str(exc_info.value.exceptions[0])
 
 
 def test_language_specific_oracle_requires_at_least_one_function():

@@ -142,7 +142,7 @@ class EvaluationFunction:
 
 
 def _check_languages(_instance, _attribute, value):
-    if value and not len(value):
+    if value is not None and not value:
         raise ValueError("At least one language is required.")
 
 
