@@ -1,0 +1,19 @@
+- tab: "Tuples"
+  contexts:
+    - testcases:
+        - expression: 'count_pairs({(1, 2), (2, 3)})'
+          return: 2
+    - testcases:
+        - expression: 'sum_firsts([(1, 2), (3, 4)])'
+          return: 4
+    - testcases:
+        - expression: 'second_of({"a": (1, 2)}, "a")'
+          return: 2
+    - testcases:
+        - statement: 'pair = (1, 2)'
+        - expression: 'first(pair)'
+          return: 1
+    - testcases:
+        - statement: 'mixed = (1, "a")'
+        - expression: 'describe(mixed)'
+          return: "1a"
