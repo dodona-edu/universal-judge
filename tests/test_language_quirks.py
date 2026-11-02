@@ -45,6 +45,16 @@ def test_csharp_14_field_keyword(tmp_path: Path, pytestconfig: pytest.Config):
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.csharp
+def test_csharp_nested_tuples(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig, "csharp-tuples", "csharp", tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 5
+
+
 @pytest.mark.c
 def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(

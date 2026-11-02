@@ -143,6 +143,17 @@ def convert_function_call(function: FunctionCall) -> str:
     return result
 
 
+def _element_declaration(element: Expression) -> str:
+    if isinstance(element, Value):
+        return convert_declaration(element.type, element)
+    return "Object"
+
+
+def _shared_declaration(elements: Sequence[Expression]) -> str | None:
+    declarations = {_element_declaration(element) for element in elements}
+    return declarations.pop() if len(declarations) == 1 else None
+
+
 def convert_declaration(
     tp: AllTypes | VariableType | Literal["Object"],
     value: Statement | None,
@@ -173,18 +184,9 @@ def convert_declaration(
         base_type, sub_type = extract_type_tuple(type_, False)
         return convert_declaration(base_type, None, sub_type) + "[]"
     elif tp == AdvancedSequenceTypes.TUPLE:
-        # TODO: rework this
-        type_ = (
-            (value.get_content_type() or "Object")
-            if isinstance(value, SequenceType)
-            else nt
-            if nt
-            else "Object"
-        )
-        assert isinstance(value, SequenceType)
-        base_type, sub_type = extract_type_tuple(type_, False)
-        converted_type = convert_declaration(base_type, None, sub_type)
-        return "(" + ", ".join(converted_type for _ in range(len(value.data)))
+        if not isinstance(value, SequenceType):
+            return "Object"
+        return "(" + ", ".join(_element_declaration(e) for e in value.data) + ")"
     elif tp == AdvancedNumericTypes.BIG_INT:
         return "BigInteger"
     elif tp == AdvancedNumericTypes.INT_8:
@@ -206,7 +208,13 @@ def convert_declaration(
     elif tp == "Object":
         return tp
     basic = resolve_to_basic(tp)
-    if basic == BasicSequenceTypes.SEQUENCE:
+    if basic in (BasicSequenceTypes.SEQUENCE, BasicSequenceTypes.SET):
+        collection = "List" if basic == BasicSequenceTypes.SEQUENCE else "HashSet"
+        shared = (
+            _shared_declaration(value.data) if isinstance(value, SequenceType) else None
+        )
+        if shared:
+            return f"{collection}<{shared}>"
         type_ = (
             (value.get_content_type() or "Object")
             if isinstance(value, SequenceType)
@@ -215,17 +223,7 @@ def convert_declaration(
             else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
-        return f"List<{convert_declaration(base_type, None, sub_type)}>"
-    elif basic == BasicSequenceTypes.SET:
-        type_ = (
-            (value.get_content_type() or "Object")
-            if isinstance(value, SequenceType)
-            else nt
-            if nt
-            else "Object"
-        )
-        base_type, sub_type = extract_type_tuple(type_)
-        return f"Set<{convert_declaration(base_type, None, sub_type)}>"
+        return f"{collection}<{convert_declaration(base_type, None, sub_type)}>"
     elif basic == BasicBooleanTypes.BOOLEAN:
         return "Boolean"
     elif basic == BasicStringTypes.TEXT:
@@ -235,7 +233,10 @@ def convert_declaration(
     elif basic == BasicNumericTypes.REAL:
         return "Double"
     elif basic == BasicObjectTypes.MAP:
+        shared_key = shared_value = None
         if isinstance(value, ObjectType):
+            shared_key = _shared_declaration([pair.key for pair in value.data])
+            shared_value = _shared_declaration([pair.value for pair in value.data])
             key_type_ = value.get_key_type() or "Object"
             value_type_ = value.get_value_type() or "Object"
         elif nt:
@@ -244,8 +245,18 @@ def convert_declaration(
             key_type_, value_type_ = "Object", "Object"
         key_base_type, key_sub_type = extract_type_tuple(key_type_)
         value_base_type, value_sub_type = extract_type_tuple(value_type_)
-        return f"Dictionary<{convert_declaration(key_base_type, None, key_sub_type)}, {convert_declaration(value_base_type, None, value_sub_type)}>"
-    elif basic in (BasicNothingTypes.NOTHING, BasicStringTypes.ANY):
+        key_declaration = shared_key or convert_declaration(
+            key_base_type, None, key_sub_type
+        )
+        value_declaration = shared_value or convert_declaration(
+            value_base_type, None, value_sub_type
+        )
+        return f"Dictionary<{key_declaration}, {value_declaration}>"
+    elif basic in (
+        BasicNothingTypes.NOTHING,
+        BasicStringTypes.ANY,
+        BasicStringTypes.UNKNOWN,
+    ):
         return "Object"
     raise AssertionError(f"Unknown type: {tp!r}")
 
@@ -293,7 +304,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
                 )
                 + " "
             )
-            result += tc.input.statement.variable + " = null;\n"
+            result += tc.input.statement.variable + " = default;\n"
 
         result += "try {"
         if tc.testcase.is_main_testcase():
