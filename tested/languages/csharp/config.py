@@ -432,6 +432,7 @@ class {class_name}
                 AdvancedSequenceTypes.TUPLE: "Tuple",
                 BasicStringTypes.ANY: "Object",
             },
+            "nested": ("<", ">"),
             "exception": "Exception",
         }
 
