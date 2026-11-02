@@ -35,9 +35,6 @@ markers = [
     "typescript",
 ]
 
-[tool.pyright]
-exclude = ["tests/exercises/", "tests/golden/", "tests/snapshots/", "tests/descriptions/"]
-
 [tool.ty.environment]
 python-version = "3.12"
 
@@ -45,8 +42,7 @@ python-version = "3.12"
 exclude = ["tests/exercises/", "tests/golden/"]
 
 [tool.ty.rules]
-# pyright still needs these `# type: ignore` comments
-unused-type-ignore-comment = "ignore"
+unused-type-ignore-comment = "error"
 
 # ty findings still to fix: drop a rule (or block) once its file passes it
 [[tool.ty.overrides]]
@@ -60,10 +56,6 @@ rules = { invalid-argument-type = "ignore", missing-argument = "ignore" }
 [[tool.ty.overrides]]
 include = ["tested/parsing.py"]
 rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/serialisation.py"]
-rules = { no-matching-overload = "ignore" }
 
 [[tool.ty.overrides]]
 include = ["tests/test_compilation.py"]

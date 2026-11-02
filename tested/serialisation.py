@@ -31,6 +31,7 @@ from typing import Any, Literal, Optional, Self, Union, cast, override
 from attrs import define, field, resolve_types, validators
 
 from tested.datatypes import (
+    AdvancedNothingTypes,
     AdvancedNumericTypes,
     AdvancedObjectTypes,
     AdvancedSequenceTypes,
@@ -209,7 +210,7 @@ class NumberType(WithFeatures, WithFunctions):
         validator=validators.instance_of((BasicNumericTypes, AdvancedNumericTypes))
     )
     data: SpecialNumbers | int | float | Decimal = field(
-        validator=validators.instance_of(SpecialNumbers | int | float | Decimal)
+        validator=validators.instance_of((SpecialNumbers, int, float, Decimal))
     )
     diagnostic: None = None  # Unused in this type.
 
@@ -366,7 +367,7 @@ class ObjectType(WithFeatures, WithFunctions):
 class NothingType(WithFeatures, WithFunctions):
     type: NothingTypes = field(
         default=BasicNothingTypes.NOTHING,
-        validator=validators.instance_of(NothingTypes),  # type: ignore
+        validator=validators.instance_of((BasicNothingTypes, AdvancedNothingTypes)),
     )
     data: None = None
     diagnostic: None = None  # Unused in this type.
@@ -559,20 +560,20 @@ class VariableAssignment(AbstractAssignment):
         )
 
 
+def _check_property(_instance, _attribute, value: FunctionCall):
+    if not value.type == FunctionType.PROPERTY:
+        raise ValueError(
+            f"Assigning to a property requires a property to assign to, got {value} instead."
+        )
+
+
 @define
 class PropertyAssignment(AbstractAssignment):
     """
     Assign the result of an expression to a property.
     """
 
-    property: FunctionCall = field()
-
-    @property.validator  # type: ignore
-    def check(self, attribute, value: FunctionCall):
-        if not value.type == FunctionType.PROPERTY:
-            raise ValueError(
-                f"Assigning to a property requires a property to assign to, got {value} instead."
-            )
+    property: FunctionCall = field(validator=_check_property)
 
     @override
     def get_used_features(self) -> FeatureSet:
@@ -605,7 +606,7 @@ def as_basic_type(value: Value) -> Value:
     """Convert a value's type to a basic type."""
     new_type = resolve_to_basic(value.type)
     cp = copy.copy(value)
-    cp.type = new_type  # type: ignore
+    cp.type = new_type  # ty: ignore[invalid-assignment]
     return cp
 
 

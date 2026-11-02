@@ -230,7 +230,7 @@ def sorted_no_duplicates[T, K](
 
         # Finally, attempt to use the values themselves.
         try:
-            return int(x < y) - int(x > y)  # type: ignore
+            return int(x < y) - int(x > y)  # ty: ignore[unsupported-operator]
         except TypeError:
             # These types cannot be compared, so fallback to string comparison.
             return int(str(x) < str(y)) - int(str(x) > str(y))

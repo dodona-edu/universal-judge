@@ -75,7 +75,7 @@ def _is_and_get_allowed_empty(node: ast.Call) -> Value | None:
     Returns the empty value if allowed, otherwise None.
     """
     assert isinstance(node.func, ast.Name)
-    type_ = get_converter().structure(node.func.id, AllTypes)  # pyright: ignore
+    type_ = get_converter().structure(node.func.id, AllTypes)
     if isinstance(type_, AdvancedSequenceTypes):
         return SequenceType(type=cast(AdvancedSequenceTypes, type_), data=[])
     elif isinstance(type_, BasicSequenceTypes):
@@ -244,7 +244,7 @@ def _convert_expression(node: ast.expr, is_return: bool) -> Expression:
                 )
         return evolve(
             value,
-            type=get_converter().structure(node.func.id, AllTypes),  # pyright: ignore
+            type=get_converter().structure(node.func.id, AllTypes),
         )
     elif isinstance(node, ast.Call):
         if is_return:

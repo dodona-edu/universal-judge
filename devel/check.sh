@@ -7,5 +7,4 @@ cd "$ROOT"
 
 ruff check ./tested ./tests
 ruff format --check ./tested ./tests
-pyright ./tested ./tests
 ty check
