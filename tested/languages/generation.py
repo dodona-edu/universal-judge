@@ -259,7 +259,7 @@ def _convert_single_type(
         return type_.data
     meta = language.get_declaration_metadata()
     if inner and type_ in meta.get("inner_names", {}):
-        return meta["inner_names"][type_]  # type: ignore
+        return meta["inner_names"][type_]
     else:
         return meta["names"].get(type_, type_)
 
@@ -285,7 +285,7 @@ def generate_type_declaration(
     start, finish = meta.get("nested", ("[", "]"))
 
     if base_type in meta.get("nested_overrides", {}):
-        start, finish = meta["nested_overrides"][base_type]  # type: ignore
+        start, finish = meta["nested_overrides"][base_type]
 
     if isinstance(base_type, BasicObjectTypes):
         assert len(nested) == 2, (

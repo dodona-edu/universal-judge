@@ -31,6 +31,7 @@ from typing import Any, Literal, Optional, Self, Union, cast, override
 from attrs import define, field, resolve_types, validators
 
 from tested.datatypes import (
+    AdvancedNothingTypes,
     AdvancedNumericTypes,
     AdvancedObjectTypes,
     AdvancedSequenceTypes,
@@ -366,7 +367,7 @@ class ObjectType(WithFeatures, WithFunctions):
 class NothingType(WithFeatures, WithFunctions):
     type: NothingTypes = field(
         default=BasicNothingTypes.NOTHING,
-        validator=validators.instance_of(NothingTypes),  # type: ignore
+        validator=validators.instance_of((BasicNothingTypes, AdvancedNothingTypes)),
     )
     data: None = None
     diagnostic: None = None  # Unused in this type.
@@ -605,7 +606,7 @@ def as_basic_type(value: Value) -> Value:
     """Convert a value's type to a basic type."""
     new_type = resolve_to_basic(value.type)
     cp = copy.copy(value)
-    cp.type = new_type  # type: ignore
+    cp.type = new_type  # ty: ignore[invalid-assignment]
     return cp
 
 

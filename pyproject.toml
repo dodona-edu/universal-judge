@@ -42,8 +42,7 @@ python-version = "3.12"
 exclude = ["tests/exercises/", "tests/golden/"]
 
 [tool.ty.rules]
-# pyright still needs these `# type: ignore` comments
-unused-type-ignore-comment = "ignore"
+unused-type-ignore-comment = "error"
 
 # ty findings still to fix: drop a rule (or block) once its file passes it
 [[tool.ty.overrides]]
