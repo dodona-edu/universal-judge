@@ -118,11 +118,13 @@ def _execute_custom_check_function(
     global_env = {
         "__tested_test__": utils,
         "__tested_context__": ConvertedOracleContext.from_context(eval_bundle, context),
+        # Custom checks may use sys without importing it.
+        "sys": sys,
     }
-    exec("import sys\nsys.modules['evaluation_utils'] = __tested_test__", global_env)
+    sys.modules["evaluation_utils"] = utils
 
     # Make the oracle available. This will fail on syntax errors.
-    exec(evaluator_code, global_env)
+    exec(evaluator_code, global_env)  # noqa: S102 - running the custom check is this oracle's job
 
     # Create the function we will call.
     check_function_call = FunctionCall(
@@ -135,7 +137,7 @@ def _execute_custom_check_function(
 
     # Call the function while intercepting all output.
     with _catch_output() as (stdout_, stderr_):
-        exec(f"__tested_test__result = {literal_function_call}", global_env)
+        exec(f"__tested_test__result = {literal_function_call}", global_env)  # noqa: S102 - calls the custom check
     result_ = cast(BooleanEvalResult | None, global_env["__tested_test__result"])
     stdout_ = stdout_.getvalue()
     stderr_ = stderr_.getvalue()
@@ -161,9 +163,9 @@ def _evaluate_programmed(
         result_, stdout_, stderr_ = _execute_custom_check_function(
             bundle, oracle, context
         )
-    except SyntaxError as e:
+    except SyntaxError:
         # The oracle might be rubbish, so handle any exception.
-        _logger.exception(e)
+        _logger.exception("The custom check oracle has a syntax error")
         messages.append(
             ExtendedMessage(
                 description="The custom check oracle failed with the following syntax error:",
@@ -177,8 +179,8 @@ def _evaluate_programmed(
                 description=tb, format="code", permission=Permission.EDUCATOR
             )
         )
-    except Exception as e:
-        _logger.exception(e)
+    except Exception:
+        _logger.exception("The custom check oracle raised an exception")
         messages.append(
             ExtendedMessage(
                 description="The custom check oracle failed with the following exception:",
@@ -300,8 +302,8 @@ def evaluate(
             )
         try:
             evaluation_result = get_converter().loads(result.stdout, BooleanEvalResult)
-        except Exception as e:
-            _logger.exception(e)
+        except Exception:
+            _logger.exception("Could not parse the custom check result")
             messages: list[Message] = [
                 ExtendedMessage(description=DEFAULT_STUDENT, format="text"),
                 ExtendedMessage(

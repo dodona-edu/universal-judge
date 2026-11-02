@@ -89,7 +89,7 @@ class DodonaConfig:
     test_suite: str = (
         "plan.json"  # We cannot change this default, as it breaks exercises.
     )
-    options: Options = Options()
+    options: Options = field(factory=Options)
     output_limit: int = 10240 * 1024  # Default value for backward compatibility.
     timing_statistics: bool = False
 

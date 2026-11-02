@@ -12,6 +12,7 @@ and Python doesn't have explicit support for e.g. int32, int64.
 """
 
 import itertools
+import math
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -43,6 +44,7 @@ from tested.languages.conventionalize import conventionalize_namespace
 from tested.oracles.value import _check_simple_type
 from tested.serialisation import (
     BooleanType,
+    ComparableFloat,
     NothingType,
     NumberType,
     ObjectKeyValuePair,
@@ -382,3 +384,16 @@ def test_heterogeneous_collections_are_detected(expression: str):
 def test_homogeneous_collections_are_not_flagged(expression: str):
     features = parse_string(expression).get_used_features()
     assert Construct.HETEROGENEOUS_COLLECTIONS not in features.constructs
+
+
+def test_comparable_floats_are_equal_when_close():
+    assert ComparableFloat(0.1 + 0.2) == ComparableFloat(0.3)
+    assert ComparableFloat(math.nan) == ComparableFloat(math.nan)
+    assert ComparableFloat(1.0) != ComparableFloat(2.0)
+    assert ComparableFloat(math.nan) != ComparableFloat(1.0)
+
+
+@pytest.mark.parametrize("other", [1.0, 1, "text", None, [1.0]])
+def test_comparable_float_is_not_equal_to_other_types(other):
+    assert ComparableFloat(1.0) != other
+    assert other != ComparableFloat(1.0)

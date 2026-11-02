@@ -613,10 +613,11 @@ def parse_value(value: str) -> Value:
     """
     Parse the json of a value into the relevant data structures.
 
-    If ``value`` is not valid json, a `SerialisationError` will be thrown.
-
     :param value: The json to be parsed.
     :return: The parsed data.
+    :raises ValueError: If ``value`` is not valid json.
+    :raises TypeError: If the json is not a value.
+    :raises RecursionError: If the json is nested too deeply.
     """
 
     return parse_json_value(value)
@@ -719,17 +720,15 @@ def serialize_from_python(value: Any, type_: AllTypes | None = None) -> Value:
 
 @total_ordering
 class ComparableFloat:
-    def __init__(self, value):
+    def __init__(self, value: float):
         self.value = value
 
     def __eq__(self, other):
-        # noinspection PyBroadException
-        try:
-            if math.isnan(self.value) and math.isnan(other.value):
-                return True
-            return math.isclose(self.value, other.value)
-        except Exception:
-            return False
+        if not isinstance(other, ComparableFloat):
+            return NotImplemented
+        if math.isnan(self.value) and math.isnan(other.value):
+            return True
+        return math.isclose(self.value, other.value)
 
     def __lt__(self, other):
         if not isinstance(other, ComparableFloat):

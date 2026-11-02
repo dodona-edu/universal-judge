@@ -18,7 +18,7 @@ from tested.features import TypeSupport, fallback_type_support_map
 from tested.internationalization import get_i18n_string
 from tested.languages.generation import generate_statement
 from tested.oracles.common import OracleConfig, OracleResult
-from tested.parsing import get_converter
+from tested.parsing import try_loads
 from tested.serialisation import (
     Expression,
     ObjectKeyValuePair,
@@ -45,10 +45,9 @@ logger = logging.getLogger(__name__)
 def try_as_readable_value(
     bundle: Bundle, value: str
 ) -> tuple[str | None, Message | None]:
-    # noinspection PyBroadException
     try:
         actual = parse_value(value)
-    except Exception:
+    except (ValueError, TypeError, RecursionError):
         return None, None
     else:
         return generate_statement(bundle, actual), None
@@ -64,7 +63,7 @@ def get_values(
     elif isinstance(output_channel, ValueOutputChannel):
         return _get_value_value(bundle, output_channel, actual_str)
     else:
-        raise ValueError(f"Unsupported output channel: {output_channel}")
+        raise TypeError(f"Unsupported output channel: {output_channel}")
 
 
 def _get_file_values(
@@ -121,7 +120,7 @@ def _get_value_value(
     # or a student is trying to cheat.
     try:
         actual_value = parse_value(actual_str)
-    except Exception as e:
+    except (ValueError, TypeError, RecursionError) as e:
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
             description=raw_message, format="text", permission=Permission.EDUCATOR
@@ -331,12 +330,8 @@ def evaluate(
 
     # Try parsing the value as an OracleResult.
     # This is the result of a custom oracle.
-    # noinspection PyBroadException
-    try:
-        evaluation_result = get_converter().loads(actual_str, OracleResult)
-    except Exception:
-        pass
-    else:
+    evaluation_result = try_loads(actual_str, OracleResult)
+    if evaluation_result is not None:
         return evaluation_result
 
     # Try parsing the value as an actual Value.

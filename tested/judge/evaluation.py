@@ -1,4 +1,5 @@
 import logging
+import traceback
 from collections.abc import Collection
 from enum import StrEnum, unique
 from pathlib import Path
@@ -14,6 +15,8 @@ from tested.dodona import (
     CloseTestcase,
     EscalateStatus,
     ExtendedMessage,
+    Message,
+    Permission,
     StartContext,
     StartTab,
     StartTest,
@@ -110,7 +113,34 @@ def _evaluate_channel(
     )
     # Run the oracle.
     # The file oracle produces multiple results if comparing multiple files.
-    evaluation_results = evaluator(output, actual if actual else "")
+    # A bug in one oracle must fail its own testcase, not the whole submission.
+    try:
+        evaluation_results = evaluator(output, actual if actual else "")
+    except Exception:
+        _logger.exception("Unexpected exception in the oracle for %s", channel)
+        messages: list[Message] = [
+            ExtendedMessage(
+                description=traceback.format_exc(),
+                format="code",
+                permission=Permission.EDUCATOR,
+            )
+        ]
+        if actual:
+            messages.append(
+                ExtendedMessage(
+                    description=actual, format="code", permission=Permission.EDUCATOR
+                )
+            )
+        evaluation_results = OracleResult(
+            result=StatusMessage(
+                enum=Status.INTERNAL_ERROR,
+                human=get_i18n_string("oracles.programmed.student.default"),
+            ),
+            readable_expected="",
+            # The oracle's input can be an evaluator result with staff-only messages.
+            readable_actual="",
+            messages=messages,
+        )
     evaluation_results = (
         [evaluation_results]
         if not isinstance(evaluation_results, list)
