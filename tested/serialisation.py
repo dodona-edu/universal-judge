@@ -76,47 +76,25 @@ def _get_type_for(expression: "Expression") -> WrappedAllTypes:
 
 
 def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
-    type_dict: dict[
-        WrappedAllTypes,
-        set[WrappedAllTypes] | tuple[set[WrappedAllTypes], set[WrappedAllTypes]] | None,
-    ] = {}
-    for data_type in types:
-        if isinstance(data_type, tuple):
-            key, content = data_type
-            try:
-                type_item = type_dict[key]
-                if isinstance(type_item, tuple):
-                    if isinstance(content, tuple):
-                        type_item[0].add(content[0])
-                        type_item[1].add(content[1])
-                    else:
-                        type_dict[key] = {BasicStringTypes.ANY}
-                else:
-                    assert isinstance(type_item, set)
-                    if isinstance(content, tuple):
-                        type_item.add(BasicStringTypes.ANY)
-                    else:
-                        type_item.add(content)
-            except KeyError:
-                if isinstance(content, tuple):
-                    type_dict[key] = ({content[0]}, {content[1]})
-                else:
-                    type_dict[key] = {content}
-        else:
-            type_dict[data_type] = None
-    if len(type_dict) == 1:
-        key_type, sub_type = next(iter(type_dict.items()))
-        if sub_type is None:
-            return key_type
-        elif isinstance(sub_type, tuple):
-            return key_type, (
-                _get_combined_types(sub_type[0]),
-                _get_combined_types(sub_type[1]),
-            )
-        else:
-            return key_type, _get_combined_types(sub_type)
-    else:
+    """Combine types pairwise: the collection type decides how contents combine."""
+
+    def combine(left: WrappedAllTypes, right: WrappedAllTypes) -> WrappedAllTypes:
+        if left == right:
+            return left
+        if isinstance(left, tuple) and isinstance(right, tuple) and left[0] == right[0]:
+            collection_type = left[0]
+            if isinstance(collection_type, ObjectTypes):
+                assert isinstance(left[1], tuple) and isinstance(right[1], tuple)
+                return collection_type, (
+                    combine(left[1][0], right[1][0]),
+                    combine(left[1][1], right[1][1]),
+                )
+            return collection_type, combine(left[1], right[1])
         return BasicStringTypes.ANY
+
+    iterator = iter(types)
+    first = next(iterator, BasicStringTypes.ANY)
+    return reduce(combine, iterator, first)
 
 
 def _get_checked_type(expression: "Expression") -> tuple | AllTypes | None:
