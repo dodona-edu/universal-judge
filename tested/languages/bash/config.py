@@ -111,6 +111,10 @@ class Bash(Language):
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
-            "names": {"text": "str", "char": "str", "string": "str"},  # type: ignore
+            "names": {
+                BasicStringTypes.TEXT: "str",
+                AdvancedStringTypes.CHAR: "str",
+                AdvancedStringTypes.STRING: "str",
+            },
             "prompt": "$",
         }

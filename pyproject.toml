@@ -58,46 +58,6 @@ include = ["tested/dsl/translate_parser.py"]
 rules = { invalid-argument-type = "ignore", missing-argument = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tested/languages/bash/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/c/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/cpp/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/csharp/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/haskell/config.py"]
-rules = { invalid-argument-type = "ignore", invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/java/config.py"]
-rules = { invalid-argument-type = "ignore", invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/javascript/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/kotlin/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/python/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/languages/typescript/config.py"]
-rules = { invalid-return-type = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tested/parsing.py"]
 rules = { invalid-argument-type = "ignore" }
 

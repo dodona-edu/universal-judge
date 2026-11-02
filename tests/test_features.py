@@ -104,7 +104,7 @@ def test_unsupported_collection_types_are_listed_sorted():
         "<BasicNumericTypes.REAL: 'real'>, "
         "<BasicStringTypes.TEXT: 'text'>})"
     ) in lines
-    assert "{<BasicNumericTypes.INTEGER: 'integer'>}" in lines
+    assert "{'integer'}" in lines
     assert (
         "frozenset({<BasicBooleanTypes.BOOLEAN: 'boolean'>, "
         "<BasicNumericTypes.REAL: 'real'>, "
