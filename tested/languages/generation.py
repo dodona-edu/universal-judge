@@ -7,7 +7,7 @@ import re
 import shlex
 from collections.abc import Collection
 from pathlib import Path
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING
 
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
@@ -37,8 +37,8 @@ _html_formatter = HtmlFormatter(nowrap=True)
 
 
 # Alias for type declarations
-NestedTypeDeclaration: TypeAlias = (
-    AllTypes | tuple[AllTypes, tuple["NestedTypeDeclaration", ...]]
+type NestedTypeDeclaration = (
+    AllTypes | tuple[AllTypes, tuple[NestedTypeDeclaration, ...]]
 )
 
 

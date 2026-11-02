@@ -6,8 +6,9 @@ a single converter for all, both the serialization and suite.
 """
 
 import logging
+from collections.abc import Callable
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from cattrs.gen import make_dict_structure_fn
 from cattrs.preconf.json import JsonConverter, make_converter
@@ -23,8 +24,6 @@ _logger = logging.getLogger(__name__)
 
 _suite_converter = make_converter(forbid_extra_keys=True, omit_if_default=True)
 initialized = False
-
-T = TypeVar("T")
 
 # Saves the registry of structure hooks.
 # Note that this assumes we only have a single converter.
@@ -128,7 +127,7 @@ def suite_to_json(suite: "Suite") -> str:
     return _suite_converter.dumps(suite)
 
 
-def _chain_structure_hook(
+def _chain_structure_hook[T](
     cls: type[T],
     wrapper: Callable[
         [dict[str, Any], type[T], Callable[[dict[str, Any], type[T]], Any]], Any

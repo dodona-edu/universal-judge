@@ -6,7 +6,6 @@ cases.
 """
 
 from enum import StrEnum
-from typing import Union
 
 from tested.datatypes.basic import (
     BasicNothingTypes,
@@ -123,10 +122,10 @@ class AdvancedObjectTypes(_AdvancedDataType):
     """
 
 
-AdvancedTypes = Union[
-    AdvancedNumericTypes,
-    AdvancedSequenceTypes,
-    AdvancedStringTypes,
-    AdvancedNothingTypes,
-    AdvancedObjectTypes,
-]
+AdvancedTypes = (
+    AdvancedNumericTypes
+    | AdvancedSequenceTypes
+    | AdvancedStringTypes
+    | AdvancedNothingTypes
+    | AdvancedObjectTypes
+)

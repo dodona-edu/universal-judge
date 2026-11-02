@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from enum import StrEnum, auto, unique
 from os import path
 from pathlib import Path, PurePath
-from typing import Any, Literal, Protocol, TypeGuard, Union
+from typing import Any, Literal, Protocol, TypeGuard
 
 from attrs import define, field
 
@@ -455,9 +455,9 @@ class IgnoredChannel(WithFeatures, StrEnum):
 
 SpecialOutputChannel = EmptyChannel | IgnoredChannel
 
-OracleOutputChannel = Union[
-    TextOutputChannel, FileOutputChannel, ValueOutputChannel, ExceptionOutputChannel
-]
+OracleOutputChannel = (
+    TextOutputChannel | FileOutputChannel | ValueOutputChannel | ExceptionOutputChannel
+)
 
 NormalOutputChannel = OracleOutputChannel | ExitCodeOutputChannel
 

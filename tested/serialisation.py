@@ -60,11 +60,11 @@ from tested.utils import flatten, sorted_no_duplicates
 
 logger = logging.getLogger(__name__)
 
-WrappedAllTypes = Union[
-    AllTypes,
-    tuple[SequenceTypes, "WrappedAllTypes"],
-    tuple[ObjectTypes, tuple["WrappedAllTypes", "WrappedAllTypes"]],
-]
+WrappedAllTypes = (
+    AllTypes
+    | tuple[SequenceTypes, "WrappedAllTypes"]
+    | tuple[ObjectTypes, tuple["WrappedAllTypes", "WrappedAllTypes"]]
+)
 
 
 def _get_type_for(expression: "Expression") -> WrappedAllTypes:
@@ -208,7 +208,7 @@ class NumberType(WithFeatures, WithFunctions):
         validator=validators.instance_of((BasicNumericTypes, AdvancedNumericTypes))
     )
     data: SpecialNumbers | int | float | Decimal = field(
-        validator=validators.instance_of(Union[SpecialNumbers, int, float, Decimal])
+        validator=validators.instance_of(SpecialNumbers | int | float | Decimal)
     )
     diagnostic: Literal[None] = None  # Unused in this type.
 
@@ -378,9 +378,7 @@ class NothingType(WithFeatures, WithFunctions):
 
 
 # A value is one of the preceding types.
-Value = Union[
-    NumberType, StringType, BooleanType, SequenceType, ObjectType, NothingType
-]
+Value = NumberType | StringType | BooleanType | SequenceType | ObjectType | NothingType
 
 
 class Identifier(str, WithFeatures, WithFunctions):

@@ -2,10 +2,11 @@ import contextlib
 import logging
 import sys
 import traceback
+from collections.abc import Generator
 from io import StringIO
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Generator, cast
+from typing import Any, cast
 
 from attrs import define
 

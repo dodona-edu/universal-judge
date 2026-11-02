@@ -5,8 +5,9 @@ Most input from a test suite needs to be prepared to easily generated code. This
 module handles that.
 """
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from attrs import define
 

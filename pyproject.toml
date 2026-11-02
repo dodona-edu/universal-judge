@@ -38,12 +38,12 @@ ignore = [
     "TRY201",
     "TRY401",
     "UP006",
-    "UP007",
-    "UP035",
-    "UP040",
     "UP045",
-    "UP047",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# These tests check that typing.Union is handled like X | Y
+"tests/test_parsing.py" = ["UP007"]
 
 [tool.pytest]
 strict = true

@@ -12,7 +12,7 @@ the authoritative json-schema, provided by Dodona.
 
 import json
 from enum import StrEnum, auto, unique
-from typing import IO, Literal, Union
+from typing import IO, Literal
 
 from attrs import define
 from cattrs.preconf.json import make_converter
@@ -229,21 +229,21 @@ class CloseJudgement:
     command: Literal["close-judgement"] = "close-judgement"
 
 
-Update = Union[
-    StartJudgement,
-    StartTab,
-    StartContext,
-    StartTestcase,
-    StartTest,
-    AppendMessage,
-    AnnotateCode,
-    CloseTest,
-    CloseTestcase,
-    CloseContext,
-    CloseTab,
-    CloseJudgement,
-    EscalateStatus,
-]
+Update = (
+    StartJudgement
+    | StartTab
+    | StartContext
+    | StartTestcase
+    | StartTest
+    | AppendMessage
+    | AnnotateCode
+    | CloseTest
+    | CloseTestcase
+    | CloseContext
+    | CloseTab
+    | CloseJudgement
+    | EscalateStatus
+)
 
 
 def _clean_dictionary(d):
