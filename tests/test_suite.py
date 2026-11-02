@@ -1,18 +1,32 @@
+from pathlib import Path
+
 import pytest
 
+from tested.datatypes import BasicNumericTypes
 from tested.dsl import parse_string
 from tested.features import Construct
 from tested.parsing import get_converter
-from tested.serialisation import FunctionCall, FunctionType
+from tested.serialisation import (
+    FunctionCall,
+    FunctionType,
+    Identifier,
+    NumberType,
+    PropertyAssignment,
+)
 from tested.testsuite import (
     ContentPath,
     Context,
     CustomCheckOracle,
+    EvaluationFunction,
     ExceptionOutputChannel,
     ExitCodeOutputChannel,
     FileOutputChannel,
+    LanguageLiterals,
+    LanguageSpecificOracle,
     MainInput,
     Output,
+    SupportedLanguage,
+    Tab,
     Testcase,
     TextData,
     TextOutputChannel,
@@ -285,3 +299,82 @@ def test_nested_empty_list_is_not_heterogeneous():
 def test_mixed_list_is_heterogeneous():
     features = parse_string('[1, "a"]').get_used_features()
     assert Construct.HETEROGENEOUS_COLLECTIONS in features.constructs
+
+
+def test_language_literals_require_at_least_one_literal():
+    with pytest.raises(
+        ValueError, match="At least one language-specific literal is required."
+    ):
+        LanguageLiterals(literals={})
+    LanguageLiterals(literals={SupportedLanguage.PYTHON: "1"})
+
+
+def test_custom_check_oracle_accepts_languages():
+    function = EvaluationFunction(file=Path("check.py"))
+    CustomCheckOracle(function=function, languages={SupportedLanguage.PYTHON})
+    CustomCheckOracle(function=function, languages=set())
+    CustomCheckOracle(function=function)
+
+
+def test_language_specific_oracle_requires_at_least_one_function():
+    with pytest.raises(
+        ValueError, match="At least one language-specific oracle is required."
+    ):
+        LanguageSpecificOracle(functions={})
+    LanguageSpecificOracle(
+        functions={SupportedLanguage.PYTHON: EvaluationFunction(file=Path("a.py"))}
+    )
+
+
+def test_builtin_value_oracle_requires_a_value():
+    with pytest.raises(
+        ValueError, match="When using the built-in oracle, a value is required."
+    ):
+        ValueOutputChannel()
+    ValueOutputChannel(value=NumberType(type=BasicNumericTypes.INTEGER, data=1))
+    ValueOutputChannel(
+        oracle=CustomCheckOracle(function=EvaluationFunction(file=Path("a.py")))
+    )
+
+
+def _tab_with_oracle_files(*files: str) -> Tab:
+    testcases = [
+        Testcase(
+            input=FunctionCall(type=FunctionType.FUNCTION, name="f"),
+            output=Output(
+                result=ValueOutputChannel(
+                    oracle=LanguageSpecificOracle(
+                        functions={
+                            SupportedLanguage.PYTHON: EvaluationFunction(
+                                file=Path(file)
+                            )
+                        }
+                    )
+                )
+            ),
+        )
+        for file in files
+    ]
+    return Tab(name="tab", contexts=[Context(testcases=[tc]) for tc in testcases])
+
+
+def test_oracle_function_names_must_be_unique_over_files():
+    with pytest.raises(
+        ValueError, match="Oracle function names must be unique within the same run."
+    ):
+        _tab_with_oracle_files("a.py", "b.py")
+    _tab_with_oracle_files("a.py", "a.py")
+
+
+def test_property_assignment_requires_a_property():
+    with pytest.raises(
+        ValueError, match="Assigning to a property requires a property to assign to"
+    ):
+        PropertyAssignment(
+            property=FunctionCall(type=FunctionType.FUNCTION, name="f"),
+            expression=Identifier("x"),
+        )
+    PropertyAssignment(
+        property=FunctionCall(type=FunctionType.PROPERTY, name="p"),
+        expression=Identifier("x"),
+    )

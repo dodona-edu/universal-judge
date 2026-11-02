@@ -77,9 +77,14 @@ class SupportedLanguage(StrEnum):
 LanguageMapping = dict[SupportedLanguage, str]
 
 
+def _check_literals(_instance, _attribute, value):
+    if len(value.keys()) == 0:
+        raise ValueError("At least one language-specific literal is required.")
+
+
 @define
 class LanguageLiterals(WithFunctions, WithFeatures):
-    literals: LanguageMapping = field()
+    literals: LanguageMapping = field(validator=_check_literals)
     type: Literal["expression", "statement"] = "expression"
 
     def get_for(self, language: SupportedLanguage):
@@ -93,12 +98,6 @@ class LanguageLiterals(WithFunctions, WithFeatures):
 
     def get_used_features(self) -> FeatureSet:
         return NOTHING
-
-    @literals.validator  # type: ignore
-    def validate_literals(self, _, value):
-        """There should be at least one evaluator."""
-        if len(value.keys()) == 0:
-            raise ValueError("At least one language-specific literal is required.")
 
 
 @define
@@ -142,6 +141,11 @@ class EvaluationFunction:
     name: str = "evaluate"
 
 
+def _check_languages(_instance, _attribute, value):
+    if value and not len(value):
+        raise ValueError("At least one language is required.")
+
+
 @define
 class CustomCheckOracle:
     """
@@ -166,13 +170,14 @@ class CustomCheckOracle:
     function: EvaluationFunction
     arguments: list[Value] = field(factory=list)
     type: Literal["programmed", "custom_check"] = "custom_check"
-    languages: set[SupportedLanguage] | None = field(default=None)
+    languages: set[SupportedLanguage] | None = field(
+        default=None, validator=_check_languages
+    )
 
-    @languages.validator  # type: ignore
-    def validate_languages(self, _, value):
-        """There should be at least one evaluator."""
-        if value and not len(value):
-            raise ValueError("At least one language is required.")
+
+def _check_functions(_instance, _attribute, value):
+    if len(value.keys()) == 0:
+        raise ValueError("At least one language-specific oracle is required.")
 
 
 @fallback_field({"evaluators": "functions"})
@@ -203,7 +208,9 @@ class LanguageSpecificOracle:
     want to evaluate stdout, you should use the custom check oracle instead.
     """
 
-    functions: dict[SupportedLanguage, EvaluationFunction] = field()
+    functions: dict[SupportedLanguage, EvaluationFunction] = field(
+        validator=_check_functions
+    )
     type: Literal["specific"] = "specific"
     arguments: dict[SupportedLanguage, list[str]] = field(factory=dict)
 
@@ -212,12 +219,6 @@ class LanguageSpecificOracle:
 
     def get_arguments(self, language: SupportedLanguage) -> list[str]:
         return self.arguments.get(language, [])
-
-    @functions.validator  # type: ignore
-    def validate_evaluator(self, _, value):
-        """There should be at least one evaluator."""
-        if len(value.keys()) == 0:
-            raise ValueError("At least one language-specific oracle is required.")
 
 
 def _resolve_path(working_directory, file_path):
@@ -339,6 +340,11 @@ class FileOutputChannel(WithFeatures):
         return self.files[file_index].get_data_as_string(resources)
 
 
+def _check_value_requirements(instance, _attribute, oracle):
+    if isinstance(oracle, GenericValueOracle) and not instance.value:
+        raise ValueError("When using the built-in oracle, a value is required.")
+
+
 @fallback_field({"evaluator": "oracle"})
 @ignore_field("show_expected")
 @define
@@ -347,18 +353,13 @@ class ValueOutputChannel(WithFeatures):
 
     value: Value | None = None
     oracle: GenericValueOracle | CustomCheckOracle | LanguageSpecificOracle = field(
-        factory=GenericValueOracle
+        factory=GenericValueOracle, validator=_check_value_requirements
     )
 
     def get_used_features(self) -> FeatureSet:
         if self.value:
             return self.value.get_used_features()
         return NOTHING
-
-    @oracle.validator  # type: ignore
-    def value_requirements(self, _, oracle):
-        if isinstance(oracle, GenericValueOracle) and not self.value:
-            raise ValueError("When using the built-in oracle, a value is required.")
 
 
 @define
@@ -692,6 +693,49 @@ class Testcase(WithFeatures, WithFunctions):
 Code = dict[str, TextData]
 
 
+def _check_testcases(_instance, _attribute, value: list[Testcase]):
+    # Check that only the first testcase has a main call.
+    for non_first_testcase in value[1:]:
+        if non_first_testcase.is_main_testcase():
+            raise ValueError("Only the first testcase may have a main call.")
+
+    # Check that only the last testcase has an exit code check.
+    for non_last_testcase in value[1:-1]:
+        if non_last_testcase.output.exit_code not in (
+            IgnoredChannel.IGNORED,
+            EmptyChannel.NONE,
+        ):
+            raise ValueError("Only the last testcase may have an exit code check.")
+
+    # Check that there are no input files with the same path but different content.
+    input_files_by_path: dict[str, TextData] = {}
+    for testcase in value:
+        for file in testcase.input_files:
+            if not file.path:
+                continue
+            existing = input_files_by_path.get(file.path)
+            if existing and existing.content != file.content:
+                raise ValueError(
+                    f"The same path with different content is used in input_files ({file.path})."
+                )
+            input_files_by_path[file.path] = file
+
+    # Check that there are no duplicate output files with the same path but different content.
+    output_files_by_path: dict[str, TextData] = {}
+    for testcase in value:
+        if not isinstance(testcase.output.file, FileOutputChannel):
+            continue
+        for file in testcase.output.file.files:
+            if not file.path:
+                continue
+            existing = output_files_by_path.get(file.path)
+            if existing and existing.content != file.content:
+                raise ValueError(
+                    f"The same path with different content is used in output_files ({file.path})."
+                )
+            output_files_by_path[file.path] = file
+
+
 @ignore_field("link_files")
 @define
 class Context(WithFeatures, WithFunctions):
@@ -699,53 +743,10 @@ class Context(WithFeatures, WithFunctions):
     A context is a set of dependant test cases.
     """
 
-    testcases: list[Testcase] = field(factory=list)
+    testcases: list[Testcase] = field(factory=list, validator=_check_testcases)
     before: Code = field(factory=dict)
     after: Code = field(factory=dict)
     description: str | None = None
-
-    @testcases.validator  # type: ignore
-    def check_testcases(self, _, value: list[Testcase]):
-        # Check that only the first testcase has a main call.
-        for non_first_testcase in value[1:]:
-            if non_first_testcase.is_main_testcase():
-                raise ValueError("Only the first testcase may have a main call.")
-
-        # Check that only the last testcase has an exit code check.
-        for non_last_testcase in value[1:-1]:
-            if non_last_testcase.output.exit_code not in (
-                IgnoredChannel.IGNORED,
-                EmptyChannel.NONE,
-            ):
-                raise ValueError("Only the last testcase may have an exit code check.")
-
-        # Check that there are no input files with the same path but different content.
-        input_files_by_path: dict[str, TextData] = {}
-        for testcase in value:
-            for file in testcase.input_files:
-                if not file.path:
-                    continue
-                existing = input_files_by_path.get(file.path)
-                if existing and existing.content != file.content:
-                    raise ValueError(
-                        f"The same path with different content is used in input_files ({file.path})."
-                    )
-                input_files_by_path[file.path] = file
-
-        # Check that there are no duplicate output files with the same path but different content.
-        output_files_by_path: dict[str, TextData] = {}
-        for testcase in value:
-            if not isinstance(testcase.output.file, FileOutputChannel):
-                continue
-            for file in testcase.output.file.files:
-                if not file.path:
-                    continue
-                existing = output_files_by_path.get(file.path)
-                if existing and existing.content != file.content:
-                    raise ValueError(
-                        f"The same path with different content is used in output_files ({file.path})."
-                    )
-                output_files_by_path[file.path] = file
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.testcases)
@@ -795,13 +796,54 @@ def _runs_to_tab_converter(runs: list | None, _):
     return contexts
 
 
+def _check_unique_evaluation_functions(_instance, _attribute, value: list[Context]):
+    eval_functions: dict[str, list[EvaluationFunction]] = defaultdict(list)
+
+    for context in value:
+        for testcase in context.testcases:
+            output = testcase.output
+            if isinstance(output.result, ValueOutputChannel) and isinstance(
+                output.result.oracle, LanguageSpecificOracle
+            ):
+                for (
+                    language,
+                    function,
+                ) in output.result.oracle.functions.items():
+                    eval_functions[language].append(function)
+            if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
+                output.exception.oracle, LanguageSpecificOracle
+            ):
+                for (
+                    language,
+                    function,
+                ) in output.exception.oracle.functions.items():
+                    eval_functions[language].append(function)
+
+    # Check within each language that the functions are unique over the
+    # files. Two calls to a function with the same name in the same file is
+    # obviously allowed, as they refer to the same function.
+
+    for language, functions in eval_functions.items():
+        # Map every function name to the files it is present in.
+        function_file: dict[str, set[Path]] = defaultdict(set)
+        for function in functions:
+            function_file[function.name].add(function.file)
+
+        for function, file in function_file.items():
+            if len(file) > 1:
+                raise ValueError(
+                    f"Oracle function names must be unique within the same "
+                    f"run. {function} was used in multiple files: {file}"
+                )
+
+
 @fallback_field({"runs": ("contexts", _runs_to_tab_converter)})
 @define
 class Tab(WithFeatures, WithFunctions):
     """Represents a tab on Dodona."""
 
     name: str
-    contexts: list[Context] = field()
+    contexts: list[Context] = field(validator=_check_unique_evaluation_functions)
     hidden: bool | None = None
 
     def get_used_features(self) -> FeatureSet:
@@ -819,47 +861,6 @@ class Tab(WithFeatures, WithFunctions):
     def __attrs_post_init__(self):
         if not self.contexts:
             raise ValueError("At least one context is required.")
-
-    @contexts.validator  # type: ignore
-    def unique_evaluation_functions(self, _, value: list[Context]):
-        eval_functions: dict[str, list[EvaluationFunction]] = defaultdict(list)
-
-        for context in value:
-            for testcase in context.testcases:
-                output = testcase.output
-                if isinstance(output.result, ValueOutputChannel) and isinstance(
-                    output.result.oracle, LanguageSpecificOracle
-                ):
-                    for (
-                        language,
-                        function,
-                    ) in output.result.oracle.functions.items():
-                        eval_functions[language].append(function)
-                if isinstance(output.exception, ExceptionOutputChannel) and isinstance(
-                    output.exception.oracle, LanguageSpecificOracle
-                ):
-                    for (
-                        language,
-                        function,
-                    ) in output.exception.oracle.functions.items():
-                        eval_functions[language].append(function)
-
-        # Check within each language that the functions are unique over the
-        # files. Two calls to a function with the same name in the same file is
-        # obviously allowed, as they refer to the same function.
-
-        for language, functions in eval_functions.items():
-            # Map every function name to the files it is present in.
-            function_file: dict[str, set[Path]] = defaultdict(set)
-            for function in functions:
-                function_file[function.name].add(function.file)
-
-            for function, file in function_file.items():
-                if len(file) > 1:
-                    raise ValueError(
-                        f"Oracle function names must be unique within the same "
-                        f"run. {function} was used in multiple files: {file}"
-                    )
 
 
 @unique

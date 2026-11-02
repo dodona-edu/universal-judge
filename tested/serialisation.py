@@ -559,20 +559,20 @@ class VariableAssignment(AbstractAssignment):
         )
 
 
+def _check_property(_instance, _attribute, value: FunctionCall):
+    if not value.type == FunctionType.PROPERTY:
+        raise ValueError(
+            f"Assigning to a property requires a property to assign to, got {value} instead."
+        )
+
+
 @define
 class PropertyAssignment(AbstractAssignment):
     """
     Assign the result of an expression to a property.
     """
 
-    property: FunctionCall = field()
-
-    @property.validator  # type: ignore
-    def check(self, attribute, value: FunctionCall):
-        if not value.type == FunctionType.PROPERTY:
-            raise ValueError(
-                f"Assigning to a property requires a property to assign to, got {value} instead."
-            )
+    property: FunctionCall = field(validator=_check_property)
 
     @override
     def get_used_features(self) -> FeatureSet:
