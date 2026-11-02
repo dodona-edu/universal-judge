@@ -43,7 +43,7 @@ def convert_arguments(arguments: list[Expression], display=False) -> str:
     return ", ".join(convert_statement(arg, display=display) for arg in arguments)
 
 
-def convert_number(data: SpecialNumbers | int | float | Decimal) -> str:
+def convert_number(data: SpecialNumbers | float | Decimal) -> str:
     if data == SpecialNumbers.NOT_A_NUMBER:
         return "(0/0)"
     elif data == SpecialNumbers.POS_INFINITY:
