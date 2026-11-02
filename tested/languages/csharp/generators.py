@@ -225,7 +225,7 @@ def convert_declaration(
             else "Object"
         )
         base_type, sub_type = extract_type_tuple(type_)
-        return f"Set<{convert_declaration(base_type, None, sub_type)}>"
+        return f"HashSet<{convert_declaration(base_type, None, sub_type)}>"
     elif basic == BasicBooleanTypes.BOOLEAN:
         return "Boolean"
     elif basic == BasicStringTypes.TEXT:
