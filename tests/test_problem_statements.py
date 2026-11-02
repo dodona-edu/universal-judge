@@ -64,6 +64,7 @@ def test_template_function_name(lang: str, expected: str):
         ("c", "'integer'", "int"),
         ("c", "'real'", "double"),
         ("c", "'text'", "char*"),
+        ("csharp", "'set'", "HashSet"),
         ("kotlin", "'integer'", "Int"),
         ("kotlin", "'real'", "Double"),
         ("kotlin", "'text'", "String"),

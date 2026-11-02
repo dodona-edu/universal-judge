@@ -414,7 +414,7 @@ class {class_name}
                 AdvancedStringTypes.STRING: "string",
                 BasicBooleanTypes.BOOLEAN: "Boolean",
                 BasicSequenceTypes.SEQUENCE: "List",
-                BasicSequenceTypes.SET: "Set",
+                BasicSequenceTypes.SET: "HashSet",
                 BasicObjectTypes.MAP: "Dictionary",
                 AdvancedNumericTypes.INT_8: "SByte",
                 AdvancedNumericTypes.U_INT_8: "Byte",
