@@ -1,4 +1,3 @@
-# type: ignore[reportAttributeAccessIssue]
 import json
 import re
 from pathlib import Path
@@ -32,12 +31,15 @@ from tested.serialisation import (
 from tested.testsuite import (
     ContentPath,
     CustomCheckOracle,
+    ExceptionOutputChannel,
+    ExpectedException,
     FileOutputChannel,
     FileUrl,
     GenericTextOracle,
     GenericValueOracle,
     LanguageLiterals,
     LanguageSpecificOracle,
+    MainInput,
     SupportedLanguage,
     TextData,
     TextOutputChannel,
@@ -70,9 +72,13 @@ tabs:
     assert len(context.testcases) == 1
     tc = context.testcases[0]
     assert tc.is_main_testcase()
+    assert isinstance(tc.input, MainInput)
+    assert isinstance(tc.input.stdin, TextData)
     assert tc.input.stdin.content == "Input string\n"
     assert tc.input.arguments == ["--arg", "argument"]
+    assert isinstance(tc.output.stderr, TextOutputChannel)
     assert tc.output.stderr.content == "Error string\n"
+    assert isinstance(tc.output.stdout, TextOutputChannel)
     assert tc.output.stdout.content == "Output string\n"
     assert tc.output.exit_code.value == 1
 
@@ -101,11 +107,15 @@ def test_parse_ctx_exception():
     context = tab.contexts[0]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "fail"]
+    assert isinstance(tc.output.exception, ExceptionOutputChannel)
+    assert isinstance(tc.output.exception.exception, ExpectedException)
     assert tc.output.exception.exception.message == "Exception message"
     context = tab.contexts[1]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "fail2"]
     assert tc.output.exit_code.value == 10
     tab = suite.tabs[1]
@@ -114,7 +124,10 @@ def test_parse_ctx_exception():
     context = tab.contexts[0]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "error"]
+    assert isinstance(tc.output.exception, ExceptionOutputChannel)
+    assert isinstance(tc.output.exception.exception, ExpectedException)
     assert tc.output.exception.exception.message == "Error"
 
 
@@ -150,7 +163,10 @@ def test_parse_ctx_exception_types():
     context = tab.contexts[0]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "fail"]
+    assert isinstance(tc.output.exception, ExceptionOutputChannel)
+    assert isinstance(tc.output.exception.exception, ExpectedException)
     assert tc.output.exception.exception.message == "Exception message"
     assert tc.output.exception.exception.types == {
         "javascript": "AssertionError",
@@ -159,6 +175,7 @@ def test_parse_ctx_exception_types():
     context = tab.contexts[1]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "fail2"]
     assert tc.output.exit_code.value == 10
     tab = suite.tabs[1]
@@ -167,7 +184,10 @@ def test_parse_ctx_exception_types():
     context = tab.contexts[0]
     assert len(context.testcases) == 1
     tc = context.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["--arg", "error"]
+    assert isinstance(tc.output.exception, ExceptionOutputChannel)
+    assert isinstance(tc.output.exception.exception, ExpectedException)
     assert tc.output.exception.exception.message == "Error"
     assert tc.output.exception.exception.types == {
         "csharp": "System.DivideByZeroException",
@@ -219,13 +239,19 @@ def test_parse_ctx_with_config():
     assert len(ctx2.testcases) == 1
     assert len(ctx3.testcases) == 1
     tc0, tc1, tc2, tc3 = [c.testcases[0] for c in tab.contexts]
+    assert isinstance(tc0.input, MainInput)
     assert tc0.input.arguments == args
+    assert isinstance(tc1.input, MainInput)
     assert tc1.input.arguments == args
+    assert isinstance(tc2.input, MainInput)
     assert tc2.input.arguments == args
+    assert isinstance(tc3.input, MainInput)
     assert tc3.input.arguments == ["-e"]
 
     stdout = tc0.output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert stdout.content == "3.34\n"
+    assert isinstance(stdout.oracle, GenericTextOracle)
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -233,7 +259,9 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stdout = tc1.output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert stdout.content == "3.337\n"
+    assert isinstance(stdout.oracle, GenericTextOracle)
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -241,7 +269,9 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 3
 
     stdout = tc2.output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert stdout.content == "3.3\n"
+    assert isinstance(stdout.oracle, GenericTextOracle)
     options = stdout.oracle.options
     assert len(options) == 3
     assert options["tryFloatingPoint"]
@@ -249,7 +279,9 @@ def test_parse_ctx_with_config():
     assert options["roundTo"] == 2
 
     stderr = tc3.output.stderr
+    assert isinstance(stderr, TextOutputChannel)
     assert stderr.content == " Fail \n"
+    assert isinstance(stderr.oracle, GenericTextOracle)
     options = stderr.oracle.options
     assert len(options) == 2
     assert not options["caseInsensitive"]
@@ -290,16 +322,24 @@ def test_statements():
 
     assert len(tests0) == 2
     assert isinstance(tests0[0].input, VariableAssignment)
+    assert isinstance(tests0[0].output.stdout, TextOutputChannel)
     assert tests0[0].output.stdout.content == "New safe\n"
+    assert isinstance(tests0[0].output.stdout.oracle, GenericTextOracle)
     assert tests0[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests0[1].input, FunctionCall)
+    assert isinstance(tests0[1].output.result, ValueOutputChannel)
+    assert isinstance(tests0[1].output.result.value, StringType)
     assert tests0[1].output.result.value.data == "Ignore whitespace"
 
     assert len(tests1) == 2
     assert isinstance(tests1[0].input, VariableAssignment)
+    assert isinstance(tests1[0].output.stdout, TextOutputChannel)
     assert tests1[0].output.stdout.content == "New safe\n"
+    assert isinstance(tests1[0].output.stdout.oracle, GenericTextOracle)
     assert not tests1[0].output.stdout.oracle.options["ignoreWhitespace"]
     assert isinstance(tests1[1].input, FunctionCall)
+    assert isinstance(tests1[1].output.result, ValueOutputChannel)
+    assert isinstance(tests1[1].output.result.value, NumberType)
     assert tests1[1].output.result.value.data == 5
     assert tests1[1].output.result.value.type == AdvancedNumericTypes.U_INT_8
 
@@ -325,11 +365,16 @@ def test_expression_and_main():
     ctx = tab.contexts[0]
     assert len(ctx.testcases) == 2
     tc = ctx.testcases[0]
+    assert isinstance(tc.input, MainInput)
     assert tc.input.arguments == ["-a", "5", "7"]
+    assert isinstance(tc.output.stdout, TextOutputChannel)
     assert tc.output.stdout.content == "12\n"
+    assert isinstance(tc.output.stdout.oracle, GenericTextOracle)
     assert tc.output.stdout.oracle.options["tryFloatingPoint"]
     test = ctx.testcases[1]
     assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result, ValueOutputChannel)
+    assert isinstance(test.output.result.value, NumberType)
     assert test.output.result.value.data == 12
     assert test.output.result.value.type == BasicNumericTypes.INTEGER
 
@@ -492,6 +537,7 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert isinstance(stdout.oracle, GenericTextOracle)
     config = stdout.oracle.options
     assert config["applyRounding"]
@@ -522,6 +568,7 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert isinstance(stdout.oracle, GenericTextOracle)
     config = stdout.oracle.options
     assert config["applyRounding"]
@@ -550,6 +597,7 @@ def test_tab_config_trickles_down_stdout():
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
     assert isinstance(stdout.oracle, GenericTextOracle)
     config = stdout.oracle.options
     assert config["applyRounding"]
@@ -578,6 +626,7 @@ def test_tab_config_trickles_down_stderr():
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr, TextOutputChannel)
     assert isinstance(stderr.oracle, GenericTextOracle)
     config = stderr.oracle.options
     assert config["applyRounding"]
@@ -699,6 +748,7 @@ def test_expression_raw_return():
     assert isinstance(test.input, FunctionCall)
     assert isinstance(test.output.result.value, SequenceType)
     for element in test.output.result.value.data:
+        assert isinstance(element, SequenceType)
         assert element.type == AdvancedSequenceTypes.TUPLE
 
 
@@ -729,6 +779,7 @@ def test_empty_constructor(function_name, result):
     assert len(testcases) == 1
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result.value, (SequenceType, ObjectType))
     assert test.output.result.value.type == result
     assert len(test.output.result.value.data) == 0
 
@@ -759,6 +810,7 @@ def test_empty_constructor_with_param(function_name, result):
     assert len(testcases) == 1
     test = testcases[0]
     assert isinstance(test.input, FunctionCall)
+    assert isinstance(test.output.result.value, SequenceType)
     assert test.output.result.value.type == result
     assert len(test.output.result.value.data) == 0
 
@@ -1070,11 +1122,14 @@ def test_untagged_mapping_is_not_an_oracle():
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result, ValueOutputChannel)
     assert isinstance(result.oracle, GenericValueOracle)
     assert isinstance(result.value, ObjectType)
     assert result.value.type == BasicObjectTypes.MAP
     (pair,) = result.value.data
+    assert isinstance(pair.key, StringType)
     assert pair.key.data == "value"
+    assert isinstance(pair.value, NumberType)
     assert pair.value.data == 5
 
 
@@ -1090,6 +1145,7 @@ def test_tagged_mapping_is_an_oracle():
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
     result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result, ValueOutputChannel)
     assert isinstance(result.oracle, GenericValueOracle)
     assert isinstance(result.value, NumberType)
     assert result.value.data == 5
@@ -1157,6 +1213,7 @@ def test_yaml_custom_tags_are_supported(all_types, value):
             assert isinstance(test.input, FunctionCall)
             assert isinstance(test.output.result, ValueOutputChannel)
             value = test.output.result.value
+            assert value is not None
             assert value.type == the_type
 
 
@@ -1387,8 +1444,9 @@ def test_newlines_are_added_to_stdout():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
-    assert actual_stdout == "12\n"
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
+    assert stdout.content == "12\n"
 
     yaml_str2 = """
 - unit: "Statement and main"
@@ -1399,8 +1457,9 @@ def test_newlines_are_added_to_stdout():
         """
     json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
-    actual_stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
-    assert actual_stdout == "hello\n"
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
+    assert stdout.content == "hello\n"
 
 
 def test_newlines_are_added_to_stderr():
@@ -1416,8 +1475,9 @@ def test_newlines_are_added_to_stderr():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
-    assert actual_stderr == "12\n"
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr, TextOutputChannel)
+    assert stderr.content == "12\n"
 
     yaml_str2 = """
 - unit: "Statement and main"
@@ -1428,8 +1488,9 @@ def test_newlines_are_added_to_stderr():
         """
     json_str = translate_to_test_suite(yaml_str2)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
-    assert actual_stderr == "hello\n"
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr, TextOutputChannel)
+    assert stderr.content == "hello\n"
 
 
 def test_no_duplicate_newlines_are_added():
@@ -1444,8 +1505,9 @@ def test_no_duplicate_newlines_are_added():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual = suite.tabs[0].contexts[0].testcases[0].output.stdout.content
-    assert actual == "hello\nworld\n"
+    stdout = suite.tabs[0].contexts[0].testcases[0].output.stdout
+    assert isinstance(stdout, TextOutputChannel)
+    assert stdout.content == "hello\nworld\n"
 
 
 def test_can_disable_normalizing_newlines():
@@ -1462,8 +1524,9 @@ def test_can_disable_normalizing_newlines():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
-    assert actual_stderr == "12"
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr, TextOutputChannel)
+    assert stderr.content == "12"
 
 
 def test_empty_text_data_newlines():
@@ -1476,8 +1539,9 @@ def test_empty_text_data_newlines():
         """
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
-    actual_stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr.content
-    assert actual_stderr == ""
+    stderr = suite.tabs[0].contexts[0].testcases[0].output.stderr
+    assert isinstance(stderr, TextOutputChannel)
+    assert stderr.content == ""
 
 
 def test_programming_language_can_be_globally_configured():
@@ -1521,7 +1585,10 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
 
-    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.input, MainInput)
+    stdin_def = testcase.input.stdin
+    assert isinstance(stdin_def, TextData)
 
     assert stdin_def.content == "hello\n"
     assert stdin_def.path is None
@@ -1540,9 +1607,13 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
 
-    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.input, MainInput)
+    stdin_def = testcase.input.stdin
+    assert isinstance(stdin_def, TextData)
 
     assert stdin_def.path == "hello.txt"
+    assert isinstance(stdin_def.content, ContentPath)
     assert stdin_def.content.path == "hello.txt"
 
 
@@ -1560,7 +1631,10 @@ tabs:
     json_str = translate_to_test_suite(yaml_str)
     suite = parse_test_suite(json_str)
 
-    stdin_def = suite.tabs[0].contexts[0].testcases[0].input.stdin
+    testcase = suite.tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.input, MainInput)
+    stdin_def = testcase.input.stdin
+    assert isinstance(stdin_def, TextData)
 
     assert stdin_def.path == "hello.txt"
     assert stdin_def.content == "hello\n"
@@ -1609,6 +1683,7 @@ tabs:
     assert testcase.input_files[0].path == "data.txt"
     assert testcase.input_files[0].content == "hello\n"
     assert testcase.input_files[1].path == "config.json"
+    assert isinstance(testcase.input_files[1].content, ContentPath)
     assert testcase.input_files[1].content.path == "configs/test.json"
 
 
