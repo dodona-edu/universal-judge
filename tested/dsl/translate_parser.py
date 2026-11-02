@@ -137,16 +137,24 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
     """
-    loader: type[yaml.Loader] = cast(type[yaml.Loader], yaml.CSafeLoader)
+    base: type[yaml.CSafeLoader | yaml.SafeLoader] = getattr(
+        yaml, "CSafeLoader", yaml.SafeLoader
+    )
+
+    # Private subclass: the tags must not leak into yaml.SafeLoader or CSafeLoader.
+    DslLoader = type("DslLoader", (base,), {})
+
     for types in get_args(AllTypes):
         for actual_type in types:
-            yaml.add_constructor("!" + actual_type, _custom_type_constructors, loader)
-    yaml.add_constructor("!expression", _expression_string, loader)
-    yaml.add_constructor("!oracle", _return_oracle, loader)
-    yaml.add_constructor("!path", _return_path, loader)
+            yaml.add_constructor(
+                "!" + actual_type, _custom_type_constructors, DslLoader
+            )
+    yaml.add_constructor("!expression", _expression_string, DslLoader)
+    yaml.add_constructor("!oracle", _return_oracle, DslLoader)
+    yaml.add_constructor("!path", _return_path, DslLoader)
 
     try:
-        return yaml.load(yaml_stream, loader)
+        return yaml.load(yaml_stream, DslLoader)
     except yaml.MarkedYAMLError as exc:
         lines = yaml_stream.splitlines()
 
