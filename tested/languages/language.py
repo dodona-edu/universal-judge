@@ -68,7 +68,7 @@ class Language(ABC):
 
     config: Optional["GlobalConfig"]
 
-    def __init__(self, config: Optional["GlobalConfig"]):
+    def __init__(self, config: Optional["GlobalConfig"] = None):
         """
         :param config: If the config is None, only "config" methods will work.
         """

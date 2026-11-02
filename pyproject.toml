@@ -58,23 +58,7 @@ include = ["tested/parsing.py"]
 rules = { invalid-argument-type = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tests/test_compilation.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_language_quirks.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_oracles_builtin.py"]
-rules = { possibly-missing-submodule = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tests/test_parsing.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_serialisation.py"]
 rules = { invalid-argument-type = "ignore" }
 
 [tool.poetry]
