@@ -44,23 +44,6 @@ exclude = ["tests/exercises/", "tests/golden/"]
 [tool.ty.rules]
 unused-type-ignore-comment = "error"
 
-# ty findings still to fix: drop a rule (or block) once its file passes it
-[[tool.ty.overrides]]
-include = ["tested/dsl/ast_translator.py"]
-rules = { deprecated = "ignore", invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/dsl/translate_parser.py"]
-rules = { invalid-argument-type = "ignore", missing-argument = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/parsing.py"]
-rules = { invalid-argument-type = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tests/test_parsing.py"]
-rules = { invalid-argument-type = "ignore" }
-
 [tool.poetry]
 name = "tested"
 version = "1.0.0"
