@@ -62,10 +62,6 @@ include = ["tested/parsing.py"]
 rules = { invalid-argument-type = "ignore" }
 
 [[tool.ty.overrides]]
-include = ["tested/serialisation.py"]
-rules = { no-matching-overload = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tests/test_compilation.py"]
 rules = { invalid-argument-type = "ignore" }
 

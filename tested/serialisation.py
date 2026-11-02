@@ -209,7 +209,7 @@ class NumberType(WithFeatures, WithFunctions):
         validator=validators.instance_of((BasicNumericTypes, AdvancedNumericTypes))
     )
     data: SpecialNumbers | int | float | Decimal = field(
-        validator=validators.instance_of(SpecialNumbers | int | float | Decimal)
+        validator=validators.instance_of((SpecialNumbers, int, float, Decimal))
     )
     diagnostic: None = None  # Unused in this type.
 
