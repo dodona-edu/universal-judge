@@ -429,8 +429,14 @@ class {class_name}
                 AdvancedNumericTypes.DOUBLE_PRECISION: "Double",
                 AdvancedNumericTypes.DOUBLE_EXTENDED: "BigInteger",
                 AdvancedSequenceTypes.LIST: "List",
-                AdvancedSequenceTypes.TUPLE: "Tuple",
+                AdvancedSequenceTypes.ARRAY: (False, "array"),
+                AdvancedSequenceTypes.TUPLE: (True, "tuple"),
                 BasicStringTypes.ANY: "Object",
+            },
+            "nested": ("<", ">"),
+            "nested_overrides": {
+                AdvancedSequenceTypes.ARRAY: ("[", "]"),
+                AdvancedSequenceTypes.TUPLE: ("(", ")"),
             },
             "exception": "Exception",
         }
