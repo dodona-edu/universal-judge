@@ -16,6 +16,7 @@ from tested.datatypes import (
 from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
+    PreparedFunctionCall,
     PreparedTestcase,
     PreparedTestcaseStatement,
 )
@@ -95,7 +96,11 @@ def convert_value(value: Value, display=False) -> str:
 
 def convert_function_call(function: FunctionCall, display=False) -> str:
     result = ""
-    if function.namespace:
+    if function.namespace and not (
+        display
+        and isinstance(function, PreparedFunctionCall)
+        and function.has_root_namespace
+    ):
         result += convert_statement(function.namespace, display=display) + "."
     result += function.name + " "
     for i, argument in enumerate(function.arguments):

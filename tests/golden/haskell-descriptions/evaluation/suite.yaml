@@ -1,0 +1,14 @@
+- tab: "search"
+  testcases:
+    - expression: "search(5, insert(5, [4]))"
+      return: true
+    - expression:
+        haskell: "Submission.search 5 (Submission.insert 5 [4])"
+      return: true
+- tab: "echo"
+  testcases:
+    - expression: 'echo("Submission.x")'
+      return: "Submission.x"
+    - expression:
+        haskell: 'Submission.echo "Submission.x"'
+      return: "Submission.x"
