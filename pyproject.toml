@@ -35,9 +35,6 @@ markers = [
     "typescript",
 ]
 
-[tool.pyright]
-exclude = ["tests/exercises/", "tests/golden/", "tests/snapshots/", "tests/descriptions/"]
-
 [tool.ty.environment]
 python-version = "3.12"
 
