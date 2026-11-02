@@ -3,7 +3,16 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from tested.datatypes import AllTypes
+from tested.datatypes import (
+    AdvancedNothingTypes,
+    AdvancedNumericTypes,
+    AdvancedStringTypes,
+    AllTypes,
+    BasicBooleanTypes,
+    BasicNothingTypes,
+    BasicNumericTypes,
+    BasicStringTypes,
+)
 from tested.dodona import AnnotateCode, Message
 from tested.features import Construct, TypeSupport
 from tested.languages.conventionalize import (
@@ -52,27 +61,27 @@ class C(Language):
         }
 
     def datatype_support(self) -> dict[AllTypes, TypeSupport]:
-        return {  # type: ignore
-            "integer": "supported",
-            "real": "supported",
-            "char": "supported",
-            "text": "supported",
-            "string": "supported",
-            "boolean": "supported",
-            "nothing": "supported",
-            "undefined": "reduced",
-            "null": "reduced",
-            "int8": "reduced",
-            "uint8": "reduced",
-            "int16": "supported",
-            "uint16": "supported",
-            "int32": "supported",
-            "uint32": "supported",
-            "int64": "supported",
-            "uint64": "supported",
-            "single_precision": "supported",
-            "double_precision": "supported",
-            "double_extended": "supported",
+        return {
+            BasicNumericTypes.INTEGER: TypeSupport.SUPPORTED,
+            BasicNumericTypes.REAL: TypeSupport.SUPPORTED,
+            AdvancedStringTypes.CHAR: TypeSupport.SUPPORTED,
+            BasicStringTypes.TEXT: TypeSupport.SUPPORTED,
+            AdvancedStringTypes.STRING: TypeSupport.SUPPORTED,
+            BasicBooleanTypes.BOOLEAN: TypeSupport.SUPPORTED,
+            BasicNothingTypes.NOTHING: TypeSupport.SUPPORTED,
+            AdvancedNothingTypes.UNDEFINED: TypeSupport.REDUCED,
+            AdvancedNothingTypes.NULL: TypeSupport.REDUCED,
+            AdvancedNumericTypes.INT_8: TypeSupport.REDUCED,
+            AdvancedNumericTypes.U_INT_8: TypeSupport.REDUCED,
+            AdvancedNumericTypes.INT_16: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.U_INT_16: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.INT_32: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.U_INT_32: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.INT_64: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.U_INT_64: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.SINGLE_PRECISION: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.DOUBLE_PRECISION: TypeSupport.SUPPORTED,
+            AdvancedNumericTypes.DOUBLE_EXTENDED: TypeSupport.SUPPORTED,
         }
 
     def compilation(self, files: list[str]) -> CallbackResult:
@@ -170,27 +179,27 @@ class C(Language):
 
     def get_declaration_metadata(self) -> TypeDeclarationMetadata:
         return {
-            "names": {  # type: ignore
-                "integer": "int",
-                "real": "double",
-                "char": "char",
-                "text": "char*",
-                "string": "char*",
-                "boolean": "bool",
-                "nothing": "void",
-                "undefined": "void",
-                "int8": "signed char",
-                "uint8": "unsigned char",
-                "int16": "short",
-                "uint16": "unsigned short",
-                "int32": "int",
-                "uint32": "unsigned int",
-                "int64": "long",
-                "uint64": "unsigned long",
-                "bigint": "long long",
-                "single_precision": "float",
-                "double_precision": "double",
-                "any": "void*",
+            "names": {
+                BasicNumericTypes.INTEGER: "int",
+                BasicNumericTypes.REAL: "double",
+                AdvancedStringTypes.CHAR: "char",
+                BasicStringTypes.TEXT: "char*",
+                AdvancedStringTypes.STRING: "char*",
+                BasicBooleanTypes.BOOLEAN: "bool",
+                BasicNothingTypes.NOTHING: "void",
+                AdvancedNothingTypes.UNDEFINED: "void",
+                AdvancedNumericTypes.INT_8: "signed char",
+                AdvancedNumericTypes.U_INT_8: "unsigned char",
+                AdvancedNumericTypes.INT_16: "short",
+                AdvancedNumericTypes.U_INT_16: "unsigned short",
+                AdvancedNumericTypes.INT_32: "int",
+                AdvancedNumericTypes.U_INT_32: "unsigned int",
+                AdvancedNumericTypes.INT_64: "long",
+                AdvancedNumericTypes.U_INT_64: "unsigned long",
+                AdvancedNumericTypes.BIG_INT: "long long",
+                AdvancedNumericTypes.SINGLE_PRECISION: "float",
+                AdvancedNumericTypes.DOUBLE_PRECISION: "double",
+                BasicStringTypes.ANY: "void*",
             }
         }
 

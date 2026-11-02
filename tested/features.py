@@ -255,7 +255,7 @@ def is_supported(language: "Language") -> list[Message] | None:
             else:
                 basic_value_types.add(value_type)
 
-        if not (basic_value_types <= restrictions):  # type: ignore
+        if not (basic_value_types <= restrictions):
             _logger.warning("This test suite is not compatible!")
             _logger.warning(
                 f"Required {key} types are {value_types} (or {basic_value_types})."
@@ -270,7 +270,7 @@ def is_supported(language: "Language") -> list[Message] | None:
             {_sorted_repr(value_types)}
             
             The programming language has support for:
-            {_sorted_repr(restrictions)}
+            {_sorted_repr({str(t) for t in restrictions})}
             
             This means support is lacking for these:
             {_sorted_repr(missing)}
