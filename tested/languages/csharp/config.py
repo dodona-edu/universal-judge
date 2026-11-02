@@ -430,12 +430,13 @@ class {class_name}
                 AdvancedNumericTypes.DOUBLE_EXTENDED: "BigInteger",
                 AdvancedSequenceTypes.LIST: "List",
                 AdvancedSequenceTypes.ARRAY: (False, "array"),
-                AdvancedSequenceTypes.TUPLE: "Tuple",
+                AdvancedSequenceTypes.TUPLE: (True, "tuple"),
                 BasicStringTypes.ANY: "Object",
             },
             "nested": ("<", ">"),
             "nested_overrides": {
                 AdvancedSequenceTypes.ARRAY: ("[", "]"),
+                AdvancedSequenceTypes.TUPLE: ("(", ")"),
             },
             "exception": "Exception",
         }

@@ -69,6 +69,7 @@ def test_template_function_name(lang: str, expected: str):
         ("csharp", '"map", "text", "integer"', "Dictionary<string, Int32>"),
         ("csharp", '"sequence", ("sequence", ("integer",))', "List<List<Int32>>"),
         ("csharp", '"array", "integer"', "Int32[]"),
+        ("csharp", '"tuple", "integer", "text"', "(Int32, string)"),
         ("kotlin", "'integer'", "Int"),
         ("kotlin", "'real'", "Double"),
         ("kotlin", "'text'", "String"),
