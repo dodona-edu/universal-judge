@@ -13,6 +13,8 @@ and Python doesn't have explicit support for e.g. int32, int64.
 
 import itertools
 import math
+import os
+import subprocess
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -53,6 +55,7 @@ from tested.serialisation import (
     SpecialNumbers,
     StringType,
     Value,
+    WrappedAllTypes,
     parse_value,
     to_python_comparable,
 )
@@ -399,3 +402,59 @@ def test_comparable_floats_are_equal_when_close():
 def test_comparable_float_is_not_equal_to_other_types(other):
     assert ComparableFloat(1.0) != other
     assert other != ComparableFloat(1.0)
+
+
+SEQUENCE = BasicSequenceTypes.SEQUENCE
+MAP = BasicObjectTypes.MAP
+INTEGER = BasicNumericTypes.INTEGER
+ANY = BasicStringTypes.ANY
+TEXT = BasicStringTypes.TEXT
+
+COMBINED_TYPE_CASES: list[tuple[str, WrappedAllTypes]] = [
+    ("[]", ANY),
+    ("[[1], [2]]", (SEQUENCE, INTEGER)),
+    ("[[[1]], [[1.0]]]", (SEQUENCE, (SEQUENCE, ANY))),
+    ("[[[1]], [[[1]]]]", (SEQUENCE, (SEQUENCE, ANY))),
+    ("[[1], 1]", ANY),
+    ('[{"a": [1]}, {"a": [1.0]}]', (MAP, (TEXT, (SEQUENCE, ANY)))),
+    ('{"a": [1], "b": {1: 2}}', (TEXT, ANY)),
+    ("[{}, {1: 2}]", (MAP, (ANY, ANY))),
+    ("{(1,): 1, (1.0,): 2}", ((AdvancedSequenceTypes.TUPLE, ANY), INTEGER)),
+    ('[[{1: 1, "a": 1}], [[1, "a"]]]', (SEQUENCE, ANY)),
+    ("[[[1]], [{1: 1}]]", (SEQUENCE, ANY)),
+    ("[[[1]], [{1}]]", (SEQUENCE, ANY)),
+    ('[[1, "a"], [{1: 1}]]', (SEQUENCE, ANY)),
+]
+
+
+def observed_combined_type(expression: str) -> WrappedAllTypes:
+    value = parse_string(expression, True)
+    if isinstance(value, ObjectType):
+        return value.get_key_type(), value.get_value_type()
+    assert isinstance(value, SequenceType)
+    return value.get_content_type()
+
+
+@pytest.mark.parametrize(("expression", "expected"), COMBINED_TYPE_CASES)
+def test_combined_types(expression: str, expected: WrappedAllTypes):
+    assert observed_combined_type(expression) == expected
+
+
+@pytest.mark.parametrize("seed", ["0", "1", "2", "3", "42"])
+def test_combined_types_do_not_depend_on_hash_seed(seed: str):
+    script = (
+        "from tests.test_serialisation import COMBINED_TYPE_CASES, observed_combined_type\n"
+        "for expression, _ in COMBINED_TYPE_CASES:\n"
+        "    print(repr(observed_combined_type(expression)))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        env={**os.environ, "PYTHONHASHSEED": seed},
+        cwd=Path(__file__).parent.parent,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    expected = "".join(f"{case_type!r}\n" for _, case_type in COMBINED_TYPE_CASES)
+    assert result.stdout == expected
