@@ -76,18 +76,6 @@ unused-type-ignore-comment = "ignore"
 
 # ty findings still to fix: drop a rule (or block) once its file passes it
 [[tool.ty.overrides]]
-include = ["tested/__main__.py"]
-rules = { deprecated = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/descriptions/__main__.py"]
-rules = { deprecated = "ignore" }
-
-[[tool.ty.overrides]]
-include = ["tested/dsl/__main__.py"]
-rules = { deprecated = "ignore" }
-
-[[tool.ty.overrides]]
 include = ["tested/dsl/ast_translator.py"]
 rules = { deprecated = "ignore", invalid-argument-type = "ignore" }
 

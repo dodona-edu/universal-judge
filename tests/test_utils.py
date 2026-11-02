@@ -14,7 +14,7 @@ from tested.datatypes import (
 from tested.judge.utils import copy_workdir_files
 from tested.serialisation import NothingType, NumberType, SequenceType
 from tested.testsuite import Suite
-from tested.utils import sorted_no_duplicates, sorting_value_extract
+from tested.utils import smart_open, sorted_no_duplicates, sorting_value_extract
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
 
@@ -357,3 +357,25 @@ def test_invalid_utf8_output_is_caught(tmp_path: Path, pytestconfig: pytest.Conf
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["wrong"] * 5
+
+
+def test_smart_open_dash_is_stdin_when_reading():
+    with smart_open("-", "r") as file:
+        assert file is sys.stdin
+    assert not sys.stdin.closed
+
+
+def test_smart_open_dash_is_stdout_when_writing():
+    with smart_open("-", "w") as file:
+        assert file is sys.stdout
+    assert not sys.stdout.closed
+
+
+def test_smart_open_writes_and_reads_a_file(tmp_path: Path):
+    path = tmp_path / "file.txt"
+    with smart_open(str(path), "w") as file:
+        file.write("hello")
+    assert file.closed
+    with smart_open(str(path), "r") as file:
+        assert file.read() == "hello"
+    assert file.closed
