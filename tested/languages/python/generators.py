@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -39,7 +40,7 @@ from tested.testsuite import MainInput
 
 
 def convert_arguments(
-    arguments: list[NamedArgument | Expression], with_namespace=False
+    arguments: Sequence[NamedArgument | Expression], with_namespace=False
 ) -> str:
     results = []
     for arg in arguments:
@@ -54,7 +55,7 @@ def convert_value(value: Value, with_namespace=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data, with_namespace)})"  # pyright: ignore
+        return f"({convert_arguments(value.data, with_namespace)})"
     elif value.type in (
         AdvancedNumericTypes.DOUBLE_EXTENDED,
         AdvancedNumericTypes.FIXED_PRECISION,
@@ -88,10 +89,10 @@ def convert_value(value: Value, with_namespace=False) -> str:
         return "None"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return f"[{convert_arguments(value.data, with_namespace)}]"  # pyright: ignore
+        return f"[{convert_arguments(value.data, with_namespace)}]"
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"{{{convert_arguments(value.data, with_namespace)}}}"  # pyright: ignore
+        return f"{{{convert_arguments(value.data, with_namespace)}}}"
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "{"
@@ -118,7 +119,7 @@ def convert_function_call(function: FunctionCall, with_namespace=False) -> str:
         result += convert_statement(function.namespace, with_namespace) + "."
     result += function.name
     if function.type != FunctionType.PROPERTY:
-        result += f"({convert_arguments(function.arguments, with_namespace)})"  # pyright: ignore
+        result += f"({convert_arguments(function.arguments, with_namespace)})"
     return result
 
 

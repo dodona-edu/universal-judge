@@ -24,7 +24,7 @@ For example, such a function looks like this:
 """
 
 import functools
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -184,7 +184,7 @@ def _curry_oracle(
 
 
 def try_outputs(
-    actual: str, parsers: list[Callable[[str], tuple[str | None, Message | None]]]
+    actual: str, parsers: Sequence[Callable[[str], tuple[str | None, Message | None]]]
 ) -> tuple[str, Message | None]:
     if not actual:
         return actual, None
