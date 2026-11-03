@@ -70,6 +70,17 @@ def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
 
 
 @pytest.mark.c
+@pytest.mark.parametrize("submission", ["libm", "posix", "mathconst"])
+def test_c_libm_and_glibc_declarations(
+    submission: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "echo", "c", tmp_path, "one.tson", submission)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.c
 def test_c_compilation_error_message_with_dots(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

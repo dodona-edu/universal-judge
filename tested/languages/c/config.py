@@ -92,7 +92,8 @@ class C(Language):
         return (
             [
                 "gcc",
-                "-std=c11",
+                "-std=c17",
+                "-D_DEFAULT_SOURCE",
                 "-Wall",
                 "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.c",
@@ -101,6 +102,7 @@ class C(Language):
                 "-Wl,--wrap=main",
                 "-o",
                 result,
+                "-lm",
             ],
             [result],
         )
