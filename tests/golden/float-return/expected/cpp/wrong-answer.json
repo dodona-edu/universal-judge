@@ -1,0 +1,160 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Floats"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "third(((double) 1.0))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.3333333333333333"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.333333",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "third(((double) 1e-06))",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3.333333333333333e-07"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.0",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "tenth()",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.1"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.2",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "two()",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2.0"
+ },
+ {
+  "command": "close-test",
+  "generated": "3.0",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "tenth_float()",
+   "format": "cpp"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.100000001"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.200000003f",
+  "status": {
+   "enum": "wrong"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

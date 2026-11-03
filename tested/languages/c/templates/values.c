@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <float.h>
 
 #include "values.h"
 
@@ -116,8 +117,8 @@ void write_float(FILE* out, float value) {
           fprintf(out, asString, "\"inf\"");
         }
     } else {
-        const char* asString = format("single_precision", %f);
-        fprintf(out, asString, value);
+        const char* asString = format("single_precision", %.*g);
+        fprintf(out, asString, FLT_DECIMAL_DIG, value);
     }
 }
 
@@ -133,8 +134,8 @@ void write_double(FILE* out, double value) {
           fprintf(out, asString, "\"inf\"");
         }
     } else {
-        const char* asString = format("double_precision", %lf);
-        fprintf(out, asString, value);
+        const char* asString = format("double_precision", %.*g);
+        fprintf(out, asString, DBL_DECIMAL_DIG, value);
     }
 }
 
@@ -143,8 +144,8 @@ void write_ldouble(FILE* out, long double value) {
         const char* asString = format("double_extended", %s);
         fprintf(out, asString, "\"nan\"");
     } else if (isfinite(value)) {
-        const char* asString = format("double_extended", %Lf);
-        fprintf(out, asString, value);
+        const char* asString = format("double_extended", %.*Lg);
+        fprintf(out, asString, LDBL_DECIMAL_DIG, value);
     } else if (value < 0) {
         const char* asString = format("double_extended", %s);
         fprintf(out, asString, "\"-inf\"");

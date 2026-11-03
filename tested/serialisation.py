@@ -206,6 +206,13 @@ class NumberType(WithFeatures, WithFunctions):
         ):
             self.data = self.data.to_integral_value()
 
+        if (
+            resolve_to_basic(self.type) == BasicNumericTypes.REAL
+            and isinstance(self.data, int)
+            and not isinstance(self.data, bool)
+        ):
+            self.data = float(self.data)
+
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 

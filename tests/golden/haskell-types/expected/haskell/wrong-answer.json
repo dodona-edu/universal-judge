@@ -370,7 +370,7 @@
  },
  {
   "command": "close-test",
-  "generated": "1",
+  "generated": "1.0",
   "status": {
    "enum": "correct"
   }
@@ -399,7 +399,7 @@
  },
  {
   "command": "close-test",
-  "generated": "2",
+  "generated": "2.0",
   "status": {
    "enum": "correct"
   }
@@ -428,7 +428,7 @@
  },
  {
   "command": "close-test",
-  "generated": "3",
+  "generated": "3.0",
   "status": {
    "enum": "correct"
   }
@@ -457,7 +457,7 @@
  },
  {
   "command": "close-test",
-  "generated": "4",
+  "generated": "4.0",
   "status": {
    "enum": "correct"
   }
@@ -486,7 +486,7 @@
  },
  {
   "command": "close-test",
-  "generated": "4",
+  "generated": "4.0",
   "status": {
    "enum": "wrong"
   }
@@ -1007,7 +1007,7 @@
  },
  {
   "command": "close-test",
-  "generated": "2",
+  "generated": "2.0",
   "status": {
    "enum": "wrong"
   }
@@ -1036,7 +1036,7 @@
  },
  {
   "command": "close-test",
-  "generated": "2",
+  "generated": "2.0",
   "status": {
    "enum": "correct"
   }
@@ -1065,7 +1065,7 @@
  },
  {
   "command": "close-test",
-  "generated": "2",
+  "generated": "2.0",
   "status": {
    "enum": "wrong"
   }
@@ -1094,7 +1094,7 @@
  },
  {
   "command": "close-test",
-  "generated": "2",
+  "generated": "2.0",
   "status": {
    "enum": "wrong"
   }
@@ -1123,7 +1123,7 @@
  },
  {
   "command": "close-test",
-  "generated": "0",
+  "generated": "0.0",
   "status": {
    "enum": "correct"
   }
@@ -1152,7 +1152,7 @@
  },
  {
   "command": "close-test",
-  "generated": "81",
+  "generated": "81.0",
   "status": {
    "enum": "wrong"
   }

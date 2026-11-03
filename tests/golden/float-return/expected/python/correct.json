@@ -1,0 +1,170 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "Floats"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "third(1.0)",
+   "format": "python"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.3333333333333333"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.3333333333333333",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "third(1.0)"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "third(1e-06)",
+   "format": "python"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3.333333333333333e-07"
+ },
+ {
+  "command": "close-test",
+  "generated": "3.333333333333333e-07",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "third(1e-06)"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "tenth()",
+   "format": "python"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.1"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.1",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "tenth()"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "two()",
+   "format": "python"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2.0"
+ },
+ {
+  "command": "close-test",
+  "generated": "2.0",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "two()"
+  }
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "tenth_float()",
+   "format": "python"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "0.100000001"
+ },
+ {
+  "command": "close-test",
+  "generated": "0.100000001",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {
+   "statements": "tenth_float()"
+  }
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]

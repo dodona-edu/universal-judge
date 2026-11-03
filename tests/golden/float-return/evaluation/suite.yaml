@@ -1,0 +1,12 @@
+- tab: "Floats"
+  testcases:
+    - expression: "third(1.0)"
+      return: 0.3333333333333333
+    - expression: "third(0.000001)"
+      return: 3.333333333333333e-07
+    - expression: "tenth()"
+      return: 0.1
+    - expression: "two()"
+      return: 2.0
+    - expression: "tenth_float()"
+      return: 0.100000001
