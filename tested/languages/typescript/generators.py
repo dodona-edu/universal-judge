@@ -225,8 +225,10 @@ def convert_statement(statement: Statement, internal=False, full=False) -> str:
 def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) -> str:
     result = ctx.before + "\n"
 
-    # Import the submission if there is no main call.
-    if not ctx.context.has_main_testcase():
+    # A main call assigns the submission inside its try block; declare it for later testcases.
+    if ctx.context.has_main_testcase():
+        result += f"let {pu.submission_name};\n"
+    else:
         result += f"""
             writeSeparator();
             delete require.cache[require.resolve("./{submission_file(pu.language)}")];
@@ -264,7 +266,7 @@ def _generate_internal_context(ctx: PreparedContext, pu: PreparedExecutionUnit) 
             assert isinstance(tc.input, MainInput)
             result += f"""
                 delete require.cache[require.resolve("./{pu.submission_name}.ts")];
-                let {pu.submission_name} = require('./{pu.submission_name}.ts');
+                {pu.submission_name} = require('./{pu.submission_name}.ts');
             """
         else:
             assert isinstance(tc.input, PreparedTestcaseStatement)
