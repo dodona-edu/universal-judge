@@ -17,6 +17,7 @@ from tested.configs import create_bundle
 from tested.dodona import Status
 from tested.features import Construct
 from tested.internationalization import get_i18n_string
+from tested.judge import core
 from tested.judge.execution import ExecutionResult
 from tested.languages import LANGUAGES, get_language
 from tested.languages.generation import get_readable_input
@@ -466,20 +467,19 @@ def test_unit_without_main_file_does_not_fail_later_units(
 
 @pytest.mark.parametrize("language", ["python"])
 @pytest.mark.parametrize(
-    "suite, tabs, contexts, not_executed",
+    "suite, tabs, contexts",
     [
         # Contexts 1 and 2 share an execution, context 3 has stdin and starts a new one.
-        ("plan-crash.yaml", 1, 3, [1]),
+        ("plan-crash.yaml", 1, 3),
         # Each execution crashes after its first context, across tabs.
-        ("plan-crash-tabs.yaml", 3, 4, [1, 3]),
+        ("plan-crash-tabs.yaml", 3, 4),
     ],
 )
-def test_crash_keeps_remaining_contexts_of_execution(
+def test_crash_reruns_remaining_contexts_of_execution(
     language: str,
     suite: str,
     tabs: int,
     contexts: int,
-    not_executed: list[int],
     tmp_path: Path,
     pytestconfig: pytest.Config,
 ):
@@ -489,15 +489,46 @@ def test_crash_keeps_remaining_contexts_of_execution(
     assert len(updates.find_all("start-tab")) == tabs
     assert len(updates.find_all("close-tab")) == tabs
     assert len(updates.find_all("start-context")) == contexts
-    close_contexts = updates.find_all("close-context")
-    assert len(close_contexts) == contexts
-    # Only the skipped contexts are reported as not executed.
-    assert [i for i, c in enumerate(close_contexts) if c.get("accepted") is False] == (
-        not_executed
+    assert len(updates.find_all("close-context")) == contexts
+    assert updates.find_status_enum() == ["correct"] * contexts
+    assert not updates.find_all("append-message")
+
+
+@pytest.mark.parametrize("language", ["python"])
+@pytest.mark.parametrize(
+    "submission, statuses, reruns",
+    [
+        (
+            "exit-in-function",
+            # A crashing context fails its exit code and its missing return value.
+            ["correct", *["runtime error", "wrong", "correct"] * 2],
+            2,
+        ),
+        ("correct", ["correct"] * 5, 0),
+    ],
+)
+def test_exit_in_function_context_reruns_later_contexts(
+    language: str,
+    submission: str,
+    statuses: list[str],
+    reruns: int,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    mocker: MockerFixture,
+):
+    rerun = mocker.spy(core, "_execute_contexts")
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "exit-in-contexts.yaml",
+        submission,
     )
-    assert [u["message"] for u in updates.find_all("append-message")] == [
-        get_i18n_string("judge.evaluation.not-executed")
-    ] * len(not_executed)
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == statuses
+    assert rerun.call_count == reruns
 
 
 @pytest.mark.parametrize("language", ["python"])
@@ -538,19 +569,7 @@ def test_program_params(lang: str, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("start-test")) == 4
 
 
-@pytest.mark.parametrize(
-    "lang",
-    [
-        *all_languages_except("haskell", "c"),
-        pytest.param(
-            "c",
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="exit(0) ends the execution: https://github.com/dodona-edu/universal-judge/issues/431",
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("lang", all_languages_except("haskell"))
 def test_program_params_in_one_execution(
     lang: str, tmp_path: Path, pytestconfig: pytest.Config
 ):

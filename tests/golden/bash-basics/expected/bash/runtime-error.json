@@ -65,14 +65,23 @@
   "command": "start-context"
  },
  {
-  "command": "append-message",
-  "message": "These test(s) were not executed"
- },
- {
   "command": "start-testcase",
   "description": {
    "description": "greet Dodona",
    "format": "bash"
+  }
+ },
+ {
+  "channel": "stderr",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "close-test",
+  "generated": "cannot greet Dodona\n",
+  "status": {
+   "enum": "wrong",
+   "human": "Unexpected output"
   }
  },
  {
@@ -81,7 +90,6 @@
   "expected": "Hello, Dodona!\n"
  },
  {
-  "accepted": false,
   "command": "close-test",
   "generated": "",
   "status": {
@@ -89,12 +97,24 @@
   }
  },
  {
-  "accepted": false,
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "0"
+ },
+ {
+  "command": "close-test",
+  "generated": "1",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
   "command": "close-testcase"
  },
  {
-  "accepted": false,
-  "command": "close-context"
+  "command": "close-context",
+  "data": {}
  },
  {
   "command": "close-tab"

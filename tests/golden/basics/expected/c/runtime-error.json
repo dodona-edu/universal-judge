@@ -89,10 +89,6 @@
   "command": "start-context"
  },
  {
-  "command": "append-message",
-  "message": "These test(s) were not executed"
- },
- {
   "command": "start-testcase",
   "description": {
    "description": "print_greeting(\"Dodona\")",
@@ -105,20 +101,18 @@
   "expected": "Hello, Dodona!\n"
  },
  {
-  "accepted": false,
   "command": "close-test",
-  "generated": "",
+  "generated": "Hello, Dodona!\n",
   "status": {
-   "enum": "wrong"
+   "enum": "correct"
   }
  },
  {
-  "accepted": false,
   "command": "close-testcase"
  },
  {
-  "accepted": false,
-  "command": "close-context"
+  "command": "close-context",
+  "data": {}
  },
  {
   "command": "close-tab"

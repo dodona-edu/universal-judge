@@ -4,7 +4,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from attrs import evolve
+from attrs import define, evolve, field
 
 from tested.configs import Bundle
 from tested.dodona import (
@@ -24,13 +24,18 @@ from tested.dodona import (
 from tested.features import is_supported
 from tested.internationalization import get_i18n_string, set_locale
 from tested.judge.collector import OutputManager
-from tested.judge.compilation import precompile
+from tested.judge.compilation import (
+    precompile,
+    process_compile_results,
+    run_compilation,
+)
 from tested.judge.evaluation import (
     add_not_executed_context,
     evaluate_context_results,
     terminate,
 )
 from tested.judge.execution import (
+    ContextResult,
     ExecutionResult,
     compile_unit,
     execute_unit,
@@ -45,8 +50,8 @@ from tested.judge.planning import (
     PlanStrategy,
     plan_test_suite,
 )
-from tested.judge.utils import copy_from_paths_to_path
-from tested.languages.conventionalize import submission_file
+from tested.judge.utils import copy_from_paths_to_path, filter_files
+from tested.languages.conventionalize import execution_name, submission_file
 from tested.languages.generation import (
     generate_execution,
     generate_selector,
@@ -56,6 +61,36 @@ from tested.serialisation import Statement
 from tested.testsuite import LanguageLiterals, MainInput, TextData
 
 _logger = logging.getLogger(__name__)
+
+
+@define
+class _UnitRun:
+    """A process that ran an execution unit, or the contexts a crash left over."""
+
+    compilation: CompilationResult
+    directory: Path
+    execution: ExecutionResult | None
+    context_results: list[ContextResult] = field(init=False)
+
+    def __attrs_post_init__(self):
+        if self.execution is None:
+            self.context_results = []
+        else:
+            self.context_results = self.execution.to_context_results()
+
+    def can_resume(self) -> bool:
+        """Whether a new process may get past the point where this one stopped."""
+        execution = self.execution
+        if execution is None or execution.timeout or execution.memory:
+            return False
+        # A crash before the first context would happen again in every new process.
+        streams = (
+            execution.results,
+            execution.exceptions,
+            execution.stdout,
+            execution.stderr,
+        )
+        return any(execution.context_separator in stream for stream in streams)
 
 
 def _is_fatal_compilation_error(compilation_results: CompilationResult) -> bool:
@@ -168,10 +203,9 @@ def judge(bundle: Bundle):
 
     _logger.info("Starting execution")
 
-    def _process_one_unit(
-        index: int,
-    ) -> tuple[CompilationResult, ExecutionResult | None, Path]:
-        return _execute_one_unit(bundle, plan, compilation_results, index)
+    def _process_one_unit(index: int) -> list[_UnitRun]:
+        first_run = _execute_one_unit(bundle, plan, compilation_results, index)
+        return _rerun_after_crash(bundle, plan, index, first_run)
 
     if bundle.config.options.parallel:
         max_workers = None
@@ -188,19 +222,13 @@ def judge(bundle: Bundle):
         )
         try:
             currently_open_tab = -1
-            for i, (
-                local_compilation_results,
-                execution_result,
-                execution_dir,
-            ) in enumerate(results):
+            for i, runs in enumerate(results):
                 planned_unit = plan.units[i]
                 _logger.debug("Processing results for execution unit %s", i)
                 result_status, currently_open_tab = _process_results(
                     bundle=bundle,
                     unit=planned_unit,
-                    execution_result=execution_result,
-                    execution_dir=execution_dir,
-                    compilation_results=local_compilation_results,
+                    runs=runs,
                     collector=collector,
                     currently_open_tab=currently_open_tab,
                 )
@@ -221,12 +249,84 @@ def judge(bundle: Bundle):
     terminate(bundle, collector, Status.CORRECT)
 
 
+def _rerun_after_crash(
+    bundle: Bundle, plan: ExecutionPlan, index: int, first_run: _UnitRun
+) -> list[_UnitRun]:
+    """
+    Run the contexts a crash left unexecuted in a new process, until every context
+    of the unit ran or a rerun cannot get further. A run without a crash returns
+    right away.
+    """
+    unit = plan.units[index]
+    runs = [first_run]
+    executed = len(first_run.context_results)
+    while (
+        executed < len(unit.contexts)
+        and runs[-1].can_resume()
+        and plan.remaining_time() > 0
+    ):
+        # Unique among the planned units and the other reruns.
+        number = len(plan.units) * len(runs) + index
+        rerun = _execute_contexts(bundle, plan, unit.contexts[executed:], number)
+        if rerun is None:
+            break
+        runs.append(rerun)
+        executed += len(rerun.context_results)
+    return runs
+
+
+def _execute_contexts(
+    bundle: Bundle, plan: ExecutionPlan, contexts: list[PlannedContext], number: int
+) -> _UnitRun | None:
+    """
+    Generate, compile and execute a new unit with the given contexts, in its own
+    directory. Returns None if it cannot be executed.
+    """
+    unit = PlannedExecutionUnit(
+        contexts=contexts, name=execution_name(bundle.language, number), index=number
+    )
+    _logger.info("Running %d remaining contexts as %s", len(contexts), unit.name)
+    sources = [
+        *bundle.language.initial_dependencies(),
+        submission_file(bundle.language),
+    ]
+    execution_dir, dependencies = set_up_unit(
+        bundle, evolve(plan, units=[unit], files=sources), 0
+    )
+
+    generated, evaluators = generate_execution(bundle, execution_dir, unit)
+    for evaluator in evaluators:
+        shutil.copy2(bundle.config.resources / evaluator, execution_dir)
+    files = [*(str(d) for d in dependencies), *evaluators, generated]
+    if bundle.language.needs_selector():
+        files.append(generate_selector(bundle, execution_dir, [unit.name]))
+
+    result, compiled = run_compilation(
+        bundle, execution_dir, files, plan.remaining_time()
+    )
+    compilation = process_compile_results(bundle.language, result)
+    if compilation.status != Status.CORRECT:
+        _logger.warning("Remaining contexts did not compile: %s", compilation.status)
+        return None
+
+    execution = execute_unit(
+        bundle,
+        unit,
+        execution_dir,
+        filter_files(compiled, execution_dir),
+        plan.remaining_time(),
+    )
+    if isinstance(execution, Status):
+        return None
+    return _UnitRun(compilation, execution_dir, execution)
+
+
 def _execute_one_unit(
     bundle: Bundle,
     plan: ExecutionPlan,
     compilation_results: CompilationResult | None,
     index: int,
-) -> tuple[CompilationResult, ExecutionResult | None, Path]:
+) -> _UnitRun:
     planned_unit = plan.units[index]
     # Prepare the unit.
     execution_dir, dependencies = set_up_unit(bundle, plan, index)
@@ -253,7 +353,7 @@ def _execute_one_unit(
     else:
         execution_result = None
 
-    return local_compilation_results, execution_result, execution_dir
+    return _UnitRun(local_compilation_results, execution_dir, execution_result)
 
 
 def _generate_files(
@@ -315,15 +415,15 @@ def _process_results(
     bundle: Bundle,
     collector: OutputManager,
     unit: PlannedExecutionUnit,
-    compilation_results: CompilationResult,
-    execution_result: ExecutionResult | None,
-    execution_dir: Path,
+    runs: list[_UnitRun],
     currently_open_tab: int,
 ) -> tuple[Status | None, int]:
-    if execution_result:
-        context_results = execution_result.to_context_results()
+    # Only the first run can be without execution: a rerun always executes.
+    context_results: list[tuple[ContextResult | None, _UnitRun]]
+    if runs[0].execution is None:
+        context_results = [(None, runs[0])] * len(unit.contexts)
     else:
-        context_results = [None] * len(unit.contexts)
+        context_results = [(r, run) for run in runs for r in run.context_results]
 
     for index, planned in enumerate(unit.contexts):
         if currently_open_tab < planned.tab_index:
@@ -344,13 +444,14 @@ def _process_results(
         # Handle the contexts.
         collector.add(StartContext(description=planned.context.description))
 
+        context_result, run = context_results[index]
         continue_ = evaluate_context_results(
             bundle,
             context=planned.context,
-            exec_results=context_results[index],
-            context_dir=execution_dir,
+            exec_results=context_result,
+            context_dir=run.directory,
             collector=collector,
-            compilation_results=compilation_results,
+            compilation_results=run.compilation,
         )
 
         if bundle.language.supports_debug_information():
