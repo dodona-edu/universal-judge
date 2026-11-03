@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from yaml.constructor import ConstructorError
 
 from tested.datatypes import (
     AdvancedNumericTypes,
@@ -343,6 +344,44 @@ def test_statements():
     assert isinstance(tests1[1].output.result.value, NumberType)
     assert tests1[1].output.result.value.data == 5
     assert tests1[1].output.result.value.type == AdvancedNumericTypes.U_INT_8
+
+
+@pytest.mark.parametrize("value", ["!expression 'uint8(5)'", "!uint8 5"])
+def test_parse_without_libyaml(monkeypatch: pytest.MonkeyPatch, value: str):
+    monkeypatch.delattr(yaml, "CSafeLoader", raising=False)
+    json_str = translate_to_test_suite(f"""
+- tab: "Fallback"
+  testcases:
+  - expression: 'safe.content()'
+    return: {value}
+""")
+    suite = parse_test_suite(json_str)
+    result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result, ValueOutputChannel)
+    assert isinstance(result.value, NumberType)
+    assert result.value.type == AdvancedNumericTypes.U_INT_8
+    assert result.value.data == 5
+
+
+@pytest.mark.parametrize("with_libyaml", [True, False])
+def test_dsl_tags_do_not_leak_into_safe_loader(
+    monkeypatch: pytest.MonkeyPatch, with_libyaml: bool
+):
+    if with_libyaml and not hasattr(yaml, "CSafeLoader"):
+        pytest.skip("PyYAML is built without libyaml")
+    if not with_libyaml:
+        monkeypatch.delattr(yaml, "CSafeLoader", raising=False)
+    translate_to_test_suite("""
+- tab: "Leak"
+  testcases:
+  - expression: 'safe.content()'
+    return: !expression 'uint8(5)'
+""")
+    with pytest.raises(ConstructorError):
+        yaml.safe_load("!integer 5")
+    if with_libyaml:
+        with pytest.raises(ConstructorError):
+            yaml.load("!integer 5", yaml.CSafeLoader)
 
 
 def test_expression_and_main():
