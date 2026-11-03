@@ -263,6 +263,40 @@ def test_io_function_additional_source_files(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_workdir_helper_sources_are_compiled(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "helper-sources", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_workdir_helper_sources_with_relative_workdir(
+    language: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.chdir(tmp_path)
+    conf = configuration(
+        pytestconfig,
+        "helper-sources",
+        language,
+        Path("workdir"),
+        "plan.yaml",
+        "correct",
+    )
+    assert not conf.workdir.is_absolute()
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 def test_csharp_compiles_source_files_in_workdir_subdirectories(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

@@ -27,7 +27,11 @@ from tested.languages.language import (
     Language,
     TypeDeclarationMetadata,
 )
-from tested.languages.utils import executable_name, shift_gcc_gutter_line_number
+from tested.languages.utils import (
+    executable_name,
+    shift_gcc_gutter_line_number,
+    workdir_sources,
+)
 from tested.serialisation import Statement, Value
 
 logger = logging.getLogger(__name__)
@@ -98,6 +102,7 @@ class C(Language):
                 "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.c",
                 "values.c",
+                *workdir_sources(self),
                 main_file,
                 "-Wl,--wrap=main",
                 "-o",

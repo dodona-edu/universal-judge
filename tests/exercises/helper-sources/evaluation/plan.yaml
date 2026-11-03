@@ -1,0 +1,6 @@
+- tab: "Helper"
+  testcases:
+    - expression:
+        c: "triple(add_one(1))"
+        cpp: "triple(add_one(1))"
+      return: 6

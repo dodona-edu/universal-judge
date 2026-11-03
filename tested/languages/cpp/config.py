@@ -30,7 +30,11 @@ from tested.languages.language import (
     TypeDeclarationMetadata,
 )
 from tested.languages.preparation import PreparedExecutionUnit
-from tested.languages.utils import executable_name, shift_gcc_gutter_line_number
+from tested.languages.utils import (
+    executable_name,
+    shift_gcc_gutter_line_number,
+    workdir_sources,
+)
 from tested.serialisation import Statement, Value
 
 
@@ -118,6 +122,7 @@ class CPP(Language):
                 "-O3" if self.config.options.compiler_optimizations else "-O0",
                 "evaluation_result.cpp",
                 "values.cpp",
+                *workdir_sources(self),
                 main_file,
                 "-Wl,--wrap=main",
                 "-o",
