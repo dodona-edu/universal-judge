@@ -20,6 +20,14 @@ code_regex = re.compile(r"<code>:(\d+)")
 gcc_gutter_regex = re.compile(r"^( *)(\d+)( \|)")
 
 
+def workdir_sources(lang_config: "Language") -> list[str]:
+    """The top-level workdir files in the language's extension, sorted."""
+    assert lang_config.config
+    workdir = lang_config.config.dodona.workdir
+    sources = workdir.glob(f"*.{lang_config.file_extension()}")
+    return sorted(str(f.absolute()) for f in sources if f.is_file())
+
+
 def cleanup_description(lang_config: "Language", description: str) -> str:
     return description.replace(rf"{submission_name(lang_config)}.", r"", 1)
 
