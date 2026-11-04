@@ -12,6 +12,8 @@
 #include <concepts>
 #include <type_traits>
 #include <cmath>
+#include <charconv>
+#include <limits>
 
 // Define a concept to check if a type supports the << operator with std::ostream
 template <typename T>
@@ -82,9 +84,9 @@ std::string to_json_value(const T& value) {
         } else if (std::isinf(value)) {
             return value > 0 ? "\"inf\"" : "\"-inf\"";
         }
-        std::ostringstream oss;
-        oss << value;
-        return oss.str();
+        char buffer[64];
+        auto result = std::to_chars(buffer, buffer + sizeof buffer, value, std::chars_format::general, std::numeric_limits<T>::max_digits10);
+        return std::string(buffer, result.ptr);
     } else if constexpr (IsAnyOf<T, int, std::int8_t, std::uint8_t, std::int16_t, std::uint16_t,
                                          std::int32_t, std::uint32_t, std::int64_t, std::uint64_t,
                                          long, long long, unsigned, unsigned long, unsigned long long>) {

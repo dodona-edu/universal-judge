@@ -128,8 +128,8 @@ ADVANCED_VALUES = [
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=-(2**150)),
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=2**150),
     # Floats
-    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.3),
-    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.3),
+    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.5),
+    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.5),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=0.3),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=-0.3),
     NumberType(
@@ -327,6 +327,57 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig: pytest.Config):
         py_actual = to_python_comparable(actual)
         print(f"{actual} and {expected}")
         assert py_expected == py_actual
+
+
+@pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
+def test_floats_keep_full_precision(
+    language, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    plan = Suite()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    type_map = fallback_type_support_map(bundle.language)
+
+    types: list[Value] = []
+    for t, numbers in [
+        (BasicNumericTypes.REAL, [1 / 3, 1e-7 / 3, 1e9 / 3, 0.1, 1e-20, -2.5]),
+        (
+            AdvancedNumericTypes.DOUBLE_PRECISION,
+            [1 / 3, 1e-7 / 3, 1e9 / 3, 0.1, 1e-20, 1.0],
+        ),
+        (
+            AdvancedNumericTypes.SINGLE_PRECISION,
+            [0.5, -2.25, 0.125, 1.0, 3.0],
+        ),
+    ]:
+        if type_map[t] == TypeSupport.SUPPORTED:
+            types.extend(NumberType(type=t, data=n) for n in numbers)
+
+    results = run_encoder(bundle, types)
+    assert len(results) == len(types)
+
+    for result, expected in zip(results, types):
+        actual = parse_value(result)
+        assert to_python_comparable(expected) == to_python_comparable(actual), result
+
+
+@pytest.mark.parametrize(
+    "type_",
+    [
+        BasicNumericTypes.REAL,
+        AdvancedNumericTypes.SINGLE_PRECISION,
+        AdvancedNumericTypes.DOUBLE_PRECISION,
+    ],
+)
+def test_real_number_with_integral_data_becomes_float(type_):
+    number = NumberType(type=type_, data=2)
+    assert isinstance(number.data, float)
+    assert number.data == 2.0
+
+
+def test_integer_number_keeps_integral_data():
+    number = NumberType(type=BasicNumericTypes.INTEGER, data=2)
+    assert isinstance(number.data, int)
 
 
 @pytest.mark.parametrize("language", SERIALIZABLE_LANGUAGES)
