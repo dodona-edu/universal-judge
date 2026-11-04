@@ -1,0 +1,19 @@
+- tab: "let"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let xs = [3, 1, 2]"
+        - expression:
+            haskell: "Submission.sortDesc xs"
+          return: [3, 2, 1]
+        - expression:
+            haskell: "length xs"
+          return: 3
+- tab: "bind"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "n <- return (5 :: Int)"
+        - expression:
+            haskell: "Submission.double n"
+          return: 10

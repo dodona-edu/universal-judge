@@ -1,0 +1,122 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "let"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "let xs = [3, 1, 2]",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "sortDesc xs",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[3, 2, 1]"
+ },
+ {
+  "command": "close-test",
+  "generated": "[3, 2, 1]",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "length xs",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "3"
+ },
+ {
+  "command": "close-test",
+  "generated": "3",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "bind"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "n <- return (5 :: Int)",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double n",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "10"
+ },
+ {
+  "command": "close-test",
+  "generated": "10",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
