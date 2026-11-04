@@ -1,4 +1,5 @@
 import json
+import textwrap
 from decimal import Decimal
 
 from tested.datatypes import (
@@ -293,11 +294,8 @@ nonExit e = case fromException e :: Maybe ExitCode of
                     isinstance(tc.input.statement, PreparedLanguageLiteral)
                     and tc.input.statement.is_statement()
                 ):
-                    result += (
-                        indent
-                        + convert_statement(tc.input.unwrapped_input_statement())
-                        + "\n"
-                    )
+                    statement = convert_statement(tc.input.unwrapped_input_statement())
+                    result += textwrap.indent(statement, indent) + "\n"
                 else:
                     action = convert_statement(
                         tc.input.unwrapped_input_statement(), True

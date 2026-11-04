@@ -114,6 +114,45 @@
   "data": {}
  },
  {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "m <- do\n  let k = 3\n  return (k + 1 :: Int)",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double m",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "8"
+ },
+ {
+  "command": "close-test",
+  "generated": "8",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
   "command": "close-tab"
  },
  {

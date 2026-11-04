@@ -17,3 +17,12 @@
         - expression:
             haskell: "Submission.double n"
           return: 10
+    - testcases:
+        - statement:
+            haskell: |-
+              m <- do
+                let k = 3
+                return (k + 1 :: Int)
+        - expression:
+            haskell: "Submission.double m"
+          return: 8
