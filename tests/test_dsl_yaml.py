@@ -1914,6 +1914,64 @@ tabs:
         parse_dsl(yaml_str)
 
 
+@pytest.mark.parametrize(
+    "key, value, pronoun",
+    [("stdin", '"hello"', "it"), ("arguments", '["a"]', "them")],
+)
+def test_main_call_keys_above_testcase_fail(key, value, pronoun):
+    suffix = ", as a main call."
+    root = f"""
+{key}: {value}
+tabs:
+  - tab: "Main"
+    testcases:
+      - expression: "test()"
+"""
+    tab = f"""
+tabs:
+  - tab: "Main"
+    {key}: {value}
+    testcases:
+      - expression: "test()"
+"""
+    context = f"""
+tabs:
+  - tab: "Main"
+    contexts:
+      - testcases:
+          - expression: "one()"
+      - {key}: {value}
+        testcases:
+          - expression: "two()"
+"""
+    expected = {
+        root: f"{key} can't be set on the root of the test suite: move {pronoun} "
+        f"to the first test case of each context that uses {pronoun}{suffix}",
+        tab: f"Tab 'Main': {key} can't be set on a tab: move {pronoun} "
+        f"to the first test case of each context that uses {pronoun}{suffix}",
+        context: f"Tab 'Main', context 2: {key} can't be set on a context: "
+        f"move {pronoun} to the first test case of the context{suffix}",
+    }
+    for yaml_str, message in expected.items():
+        with pytest.raises(ValueError, match=re.escape(message)):
+            parse_dsl(yaml_str)
+
+
+def test_main_call_keys_on_first_testcase_of_context_parse():
+    yaml_str = """
+tabs:
+  - tab: "Main"
+    contexts:
+      - testcases:
+          - stdin: "hello"
+            arguments: ["a"]
+            stdout: "hello"
+"""
+    testcase = parse_dsl(yaml_str).tabs[0].contexts[0].testcases[0]
+    assert isinstance(testcase.input, MainInput)
+    assert testcase.input.arguments == ["a"]
+
+
 def test_files_on_context_fails_in_legacy_structure():
     yaml_str = """
 units:
