@@ -128,8 +128,8 @@ ADVANCED_VALUES = [
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=-(2**150)),
     NumberType(type=AdvancedNumericTypes.BIG_INT, data=2**150),
     # Floats
-    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.5),
-    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.5),
+    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.3),
+    NumberType(type=AdvancedNumericTypes.SINGLE_PRECISION, data=2.3),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=0.3),
     NumberType(type=AdvancedNumericTypes.DOUBLE_PRECISION, data=-0.3),
     NumberType(
@@ -268,7 +268,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig: pytest.Config):
         actual = parse_value(result)
         type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
-        py_expected = to_python_comparable(expected)
+        py_expected = to_python_comparable(expected, expected=True)
         py_actual = to_python_comparable(actual)
         assert py_expected == py_actual
 

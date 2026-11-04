@@ -310,7 +310,7 @@ def compare_values(
     config: OracleConfig, actual: Value | None, expected: Value
 ) -> tuple[bool, Value, bool]:
     type_check, expected = _check_data_type(config.bundle, expected, actual)
-    py_expected = to_python_comparable(expected)
+    py_expected = to_python_comparable(expected, expected=True)
     py_actual = to_python_comparable(actual)
 
     content_check = py_expected == py_actual

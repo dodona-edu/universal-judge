@@ -21,6 +21,7 @@ import copy
 import logging
 import math
 import operator
+import struct
 from collections.abc import Iterable
 from decimal import Decimal
 from enum import StrEnum, auto, unique
@@ -704,16 +705,27 @@ def serialize_from_python(value: Any, type_: AllTypes | None = None) -> Value:
         raise TypeError(f"No clue how to convert {value} into TESTed value.")
 
 
+def _to_single(value: float) -> float:
+    """Round to the nearest IEEE-754 binary32 float."""
+    try:
+        return struct.unpack("f", struct.pack("f", value))[0]
+    except OverflowError:
+        return math.copysign(math.inf, value)
+
+
 @total_ordering
 class ComparableFloat:
-    def __init__(self, value: float):
+    def __init__(self, value: float, single_precision: bool = False):
         self.value = value
+        self.single_precision = single_precision
 
     def __eq__(self, other):
         if not isinstance(other, ComparableFloat):
             return NotImplemented
         if math.isnan(self.value) and math.isnan(other.value):
             return True
+        if self.single_precision or other.single_precision:
+            return _to_single(self.value) == _to_single(other.value)
         return math.isclose(self.value, other.value)
 
     def __lt__(self, other):
@@ -731,7 +743,7 @@ class ComparableFloat:
         return bool(self.value)
 
 
-def to_python_comparable(value: Value | None) -> Any:
+def to_python_comparable(value: Value | None, expected: bool = False) -> Any:
     """
     Convert the value into a comparable Python value. Most values are just converted
     to their built-in Python variant. Some, however, are not. For example, floats
@@ -740,6 +752,9 @@ def to_python_comparable(value: Value | None) -> Any:
     This does mean that the type of the returned value can differ from the type in
     the return channel (in the test suite). The returned value is only guaranteed
     to support the following operations: eq, str, repr and bool.
+
+    If `expected` is set, the value is the expected side of a comparison, and
+    single_precision values are compared at float precision.
     """
     if value is None:
         return None
@@ -749,19 +764,19 @@ def to_python_comparable(value: Value | None) -> Any:
         return Decimal(value.data)
     if basic_type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
-        return [to_python_comparable(cast(Value, x)) for x in value.data]
+        return [to_python_comparable(cast(Value, x), expected) for x in value.data]
     if basic_type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
         return sorted_no_duplicates(
-            to_python_comparable(cast(Value, x)) for x in value.data
+            to_python_comparable(cast(Value, x), expected) for x in value.data
         )
     if basic_type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         return sorted_no_duplicates(
             (
                 (
-                    to_python_comparable(cast(Value, pair.key)),
-                    to_python_comparable(cast(Value, pair.value)),
+                    to_python_comparable(cast(Value, pair.key), expected),
+                    to_python_comparable(cast(Value, pair.value), expected),
                 )
                 for pair in value.data
             ),
@@ -769,7 +784,10 @@ def to_python_comparable(value: Value | None) -> Any:
         )
     if basic_type == BasicNumericTypes.REAL:
         assert isinstance(value, NumberType)
-        return ComparableFloat(float(value.data))
+        return ComparableFloat(
+            float(value.data),
+            expected and value.type == AdvancedNumericTypes.SINGLE_PRECISION,
+        )
     if basic_type == BasicNumericTypes.INTEGER:
         assert isinstance(value, NumberType)
         return value.data

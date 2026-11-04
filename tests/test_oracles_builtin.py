@@ -7,7 +7,13 @@ from pytest_mock import MockerFixture
 
 import tested.oracles.file
 from tested.configs import create_bundle
-from tested.datatypes import BasicObjectTypes, BasicSequenceTypes, BasicStringTypes
+from tested.datatypes import (
+    AdvancedNumericTypes,
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+)
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.judge.evaluation import guess_expected_value
 from tested.oracles.common import OracleConfig, OracleResult
@@ -19,10 +25,13 @@ from tested.oracles.value import evaluate as evaluate_value
 from tested.parsing import get_converter
 from tested.serialisation import (
     ExceptionValue,
+    NumberType,
     ObjectKeyValuePair,
     ObjectType,
     SequenceType,
+    SpecialNumbers,
     StringType,
+    Value,
 )
 from tested.testsuite import (
     ContentPath,
@@ -824,6 +833,110 @@ def test_values_identical_list_is_detected(tmp_path: Path, pytestconfig: pytest.
     )
     config = oracle_config(tmp_path, pytestconfig, language="python")
     result = evaluate_value(config, channel, actual_value)
+    assert result.result.enum == Status.CORRECT
+
+
+def _single_precision_result(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    expected: Value,
+    actual: Value,
+    language: str = "c",
+):
+    channel = ValueOutputChannel(value=expected)
+    config = oracle_config(tmp_path, pytestconfig, language=language)
+    return evaluate_value(config, channel, get_converter().dumps(actual))
+
+
+def _number(type_, data) -> NumberType:
+    return NumberType(type=type_, data=data)
+
+
+SINGLE = AdvancedNumericTypes.SINGLE_PRECISION
+
+
+@pytest.mark.parametrize(
+    ("expected", "expected_data", "actual", "actual_data", "language", "status"),
+    [
+        # C sends the float 99.9f as 99.9000015.
+        (SINGLE, 99.9, SINGLE, 99.9000015, "c", Status.CORRECT),
+        (SINGLE, 99.9, SINGLE, 99.9, "c", Status.CORRECT),
+        (SINGLE, 99.9, SINGLE, 99.91, "c", Status.WRONG),
+        # Without the tag, the comparison stays at double precision.
+        (BasicNumericTypes.REAL, 99.9, SINGLE, 99.9000015, "c", Status.WRONG),
+        (
+            AdvancedNumericTypes.DOUBLE_PRECISION,
+            99.9,
+            SINGLE,
+            99.9000015,
+            "c",
+            Status.WRONG,
+        ),
+        # The actual type never enables float precision.
+        (
+            SINGLE,
+            99.9,
+            AdvancedNumericTypes.DOUBLE_PRECISION,
+            99.9000015,
+            "c",
+            Status.WRONG,
+        ),
+        # Python reduces single_precision to real.
+        (SINGLE, 99.9, SINGLE, 99.9000015, "python", Status.WRONG),
+    ],
+)
+def test_single_precision_expected_is_compared_as_float(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    expected,
+    expected_data,
+    actual,
+    actual_data,
+    language,
+    status,
+):
+    result = _single_precision_result(
+        tmp_path,
+        pytestconfig,
+        _number(expected, expected_data),
+        _number(actual, actual_data),
+        language=language,
+    )
+    assert result.result.enum == status
+
+
+@pytest.mark.parametrize(
+    ("expected", "status"),
+    [
+        (SINGLE, Status.CORRECT),
+        (BasicNumericTypes.REAL, Status.WRONG),
+    ],
+)
+def test_single_precision_expected_nested_in_list(
+    tmp_path: Path, pytestconfig: pytest.Config, expected, status
+):
+    def sequence(type_, *data) -> SequenceType:
+        return SequenceType(
+            type=BasicSequenceTypes.SEQUENCE, data=[_number(type_, d) for d in data]
+        )
+
+    result = _single_precision_result(
+        tmp_path,
+        pytestconfig,
+        sequence(expected, 99.9, 0.1),
+        sequence(SINGLE, 99.9000015, 0.100000001),
+        language="java",
+    )
+    assert result.result.enum == status
+
+
+def test_single_precision_expected_nan(tmp_path: Path, pytestconfig: pytest.Config):
+    result = _single_precision_result(
+        tmp_path,
+        pytestconfig,
+        _number(SINGLE, SpecialNumbers.NOT_A_NUMBER),
+        _number(SINGLE, SpecialNumbers.NOT_A_NUMBER),
+    )
     assert result.result.enum == Status.CORRECT
 
 

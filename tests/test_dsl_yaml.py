@@ -346,6 +346,21 @@ def test_statements():
     assert tests1[1].output.result.value.type == AdvancedNumericTypes.U_INT_8
 
 
+def test_single_precision_tag_gives_single_precision_value():
+    json_str = translate_to_test_suite("""
+- tab: "Precision"
+  testcases:
+  - expression: 'f()'
+    return: !single_precision 99.9
+""")
+    suite = parse_test_suite(json_str)
+    result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result, ValueOutputChannel)
+    assert isinstance(result.value, NumberType)
+    assert result.value.type == AdvancedNumericTypes.SINGLE_PRECISION
+    assert result.value.data == 99.9
+
+
 @pytest.mark.parametrize("value", ["!expression 'uint8(5)'", "!uint8 5"])
 def test_parse_without_libyaml(monkeypatch: pytest.MonkeyPatch, value: str):
     monkeypatch.delattr(yaml, "CSafeLoader", raising=False)
