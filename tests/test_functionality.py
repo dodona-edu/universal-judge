@@ -676,6 +676,23 @@ def test_named_parameters(
     assert updates.find_status_enum() == result
 
 
+@pytest.mark.parametrize("language", ["javascript", "typescript"])
+def test_function_call_after_main_call(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "main-then-function.yaml",
+        "top-level-output",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct", "correct"]
+
+
 def test_timeouts_propagate_to_contexts():
     execution_result = ExecutionResult(
         stdout="--PaqJwrEn0-- SEP--pBoq4YdEP-- SEP",

@@ -1,0 +1,6 @@
+- tab: "My tab"
+  contexts:
+    - testcases:
+        - stdout: "This is top-level output"
+        - expression: 'echo("input-1")'
+          return: "input-1"
