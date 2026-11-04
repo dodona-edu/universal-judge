@@ -405,6 +405,20 @@ def test_haskell_runtime_error():
     assert actual == expected
 
 
+def test_haskell_runtime_error_exception_context():
+    original = """cannot continue
+HasCallStack backtrace:
+  error, called at Submission.hs:5:5 in main:Submission
+"""
+    language_config = get_language("test", "haskell")
+    expected = """cannot continue
+HasCallStack backtrace:
+  error, called at <code>:5:5 in main:Submission
+"""
+    actual = language_config.cleanup_stacktrace(original)
+    assert actual == expected
+
+
 def test_kotlin_compilation_error():
     original = """Execution00.kt:52:13: error: unresolved reference: solutionMain
             solutionMain(arrayOf())
