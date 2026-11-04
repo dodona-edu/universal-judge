@@ -596,27 +596,32 @@ def _validate_testcase_combinations(testcase: YamlDict):
         raise ValueError("A statement cannot have an expected return value.")
 
 
-def _validate_no_file_keys(
+def _validate_no_testcase_keys(
     level: YamlDict, location: str, level_name: str, many_contexts: bool
 ):
     """
-    Reject input_files and output_files on a level above the test cases.
+    Reject input_files, output_files, stdin and arguments on a level above the
+    test cases.
 
     :param location: Prefix naming where we are, empty for the root.
     :param level_name: The level, as it appears in the message.
     :param many_contexts: Whether the level contains several contexts.
     """
-    for key, position, verb in (
-        ("input_files", "first", "uses"),
-        ("output_files", "last", "checks"),
+    for key, pronoun, position, verb, suffix in (
+        ("input_files", "them", "first", "uses", ""),
+        ("output_files", "them", "last", "checks", ""),
+        ("stdin", "it", "first", "uses", ", as a main call"),
+        ("arguments", "them", "first", "uses", ", as a main call"),
     ):
         if key in level:
             target = (
-                f"each context that {verb} them" if many_contexts else "the context"
+                f"each context that {verb} {pronoun}"
+                if many_contexts
+                else "the context"
             )
             raise ValueError(
                 f"{location}{key} can't be set on {level_name}: "
-                f"move them to the {position} test case of {target}."
+                f"move {pronoun} to the {position} test case of {target}{suffix}."
             )
 
 
@@ -627,7 +632,7 @@ def _validate_context_file_keys(context: YamlDict, location: str):
 
     :param location: Prefix naming the tab and context, e.g. "Tab 'Files', context 2: ".
     """
-    _validate_no_file_keys(context, location, "a context", many_contexts=False)
+    _validate_no_testcase_keys(context, location, "a context", many_contexts=False)
 
     testcases = context["testcases"]
     assert isinstance(testcases, list)
@@ -830,7 +835,7 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     name = tab["tab"]
     assert isinstance(name, str)
 
-    _validate_no_file_keys(tab, f"Tab '{name}': ", "a tab", many_contexts=True)
+    _validate_no_testcase_keys(tab, f"Tab '{name}': ", "a tab", many_contexts=True)
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
@@ -883,7 +888,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         tab_list = dsl_object
     else:
         assert isinstance(dsl_object, dict)
-        _validate_no_file_keys(
+        _validate_no_testcase_keys(
             dsl_object, "", "the root of the test suite", many_contexts=True
         )
         namespace = dsl_object.get("namespace")
