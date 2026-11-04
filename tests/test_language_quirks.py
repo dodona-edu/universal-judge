@@ -647,6 +647,23 @@ def test_haskell_runtime_error_links_call_site(
     assert any(call_site in description for description in descriptions)
 
 
+@pytest.mark.haskell
+def test_haskell_multiline_code_keeps_its_layout(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "haskell",
+        tmp_path,
+        "haskell-multiline.json",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 4
+
+
 def test_haskell_precompiled_helpers_must_match_templates(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):

@@ -1,6 +1,5 @@
 import json
 import re
-import textwrap
 from decimal import Decimal
 
 from tested.datatypes import (
@@ -163,21 +162,15 @@ def convert_declaration(tp: AllTypes | VariableType) -> str:
     raise AssertionError(f"Unknown type: {tp!r}")
 
 
-def convert_statement(statement: Statement, lifting=False, display=False) -> str:
+def convert_statement(statement: Statement, display=False) -> str:
     if isinstance(statement, Expression):
-        result = ""
-        if lifting:
-            result += "return ("
         if isinstance(statement, Identifier):
-            result += statement
+            return statement
         elif isinstance(statement, FunctionCall):
-            result += convert_function_call(statement, display)
+            return convert_function_call(statement, display)
         else:
             assert isinstance(statement, Value)
-            result += convert_value(statement, display)
-        if lifting:
-            result += ")"
-        return result
+            return convert_value(statement, display)
     else:
         assert isinstance(statement, VariableAssignment)
         expression = convert_statement(statement.expression, display=display)
@@ -217,6 +210,14 @@ def bind_parts(code: str) -> tuple[str, str] | None:
         return None
     arrow = code.index("<-")
     return code[:arrow].strip(), code[arrow + 2 :].strip()
+
+
+def place_code(prefix: str, code: str, column: int = 0) -> str:
+    """
+    Write code after prefix. The first line of the code starts at column in the
+    suite, and its next lines keep their position relative to that column.
+    """
+    return prefix + code.replace("\n", "\n" + " " * (len(prefix) - column))
 
 
 # Number literals and empty collections are not annotated: this picks their type
@@ -301,7 +302,7 @@ nonExit e = case fromException e :: Maybe ExitCode of
     for i, ctx in enumerate(pu.contexts):
         result += f"{pu.unit.name.lower()}Context{i} :: IO ()\n"
         result += f"{pu.unit.name.lower()}Context{i} = do\n"
-        result += indent + ctx.before + "\n"
+        result += place_code(indent, ctx.before) + "\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
@@ -335,21 +336,29 @@ nonExit e = case fromException e :: Maybe ExitCode of
                     literal is not None and is_let(literal)
                 ):
                     statement = convert_statement(tc.input.unwrapped_input_statement())
-                    result += textwrap.indent(statement, indent) + "\n"
+                    result += place_code(indent, statement) + "\n"
                 elif literal is not None and (bind := bind_parts(literal)):
                     pattern, action = bind
+                    after_arrow = literal[literal.index("<-") + 2 :]
+                    column = len(literal) - len(after_arrow.lstrip())
                     name = f"testedBind{j}"
                     on_exception = convert_statement(tc.exception_statement("ee"))
-                    code = (
-                        f"{name} <- tryJust nonExit ({action})\n"
-                        f"either (\\e -> let ee = Just e in {on_exception}) (\\_ -> return ()) {name}\n"
-                        f"let {pattern} = either throw id {name}"
+                    result += (
+                        place_code(
+                            f"{indent}{name} <- tryJust nonExit (", action, column
+                        )
+                        + ")\n"
                     )
-                    result += textwrap.indent(code, indent) + "\n"
+                    result += (
+                        indent
+                        + f"either (\\e -> let ee = Just e in {on_exception}) (\\_ -> return ()) {name}\n"
+                    )
+                    result += (
+                        place_code(indent + "let ", pattern)
+                        + f" = either throw id {name}\n"
+                    )
                 else:
-                    action = convert_statement(
-                        tc.input.unwrapped_input_statement(), True
-                    )
+                    expression = convert_statement(tc.input.unwrapped_input_statement())
                     id_result = tc.input.input_statement("r")
                     if isinstance(id_result, Identifier):
                         on_value = f"sendValue {convert_statement(id_result)}"
@@ -357,10 +366,10 @@ nonExit e = case fromException e :: Maybe ExitCode of
                         on_value = convert_statement(id_result)
                     on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        indent
-                        + f"runTestcase ({action}) (\\r -> {on_value}) (\\ee -> {on_exception})\n"
+                        place_code(indent + "runTestcase (return (", expression)
+                        + f")) (\\r -> {on_value}) (\\ee -> {on_exception})\n"
                     )
-        result += indent + ctx.after + "\n"
+        result += place_code(indent, ctx.after) + "\n"
         result += indent + 'putStr ""\n'
 
     result += """
