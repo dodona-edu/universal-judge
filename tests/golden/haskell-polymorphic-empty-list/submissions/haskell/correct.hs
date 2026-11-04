@@ -10,3 +10,7 @@ firstOr (x : _) = Just x
 
 actions :: [IO Int]
 actions = [return 1, return 2]
+
+isNone :: Maybe Int -> Bool
+isNone Nothing = True
+isNone _ = False

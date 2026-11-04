@@ -21,3 +21,10 @@
     - expression:
         haskell: "Submission.actions"
       return: [1, 2]
+- tab: "isNone"
+  testcases:
+    - expression: "is_none(None)"
+      return: true
+    - expression:
+        haskell: "Submission.isNone (Just 5)"
+      return: false

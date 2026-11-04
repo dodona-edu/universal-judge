@@ -84,7 +84,7 @@ def convert_value(value: Value, display=False) -> str:
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data)
     elif value.type == BasicNothingTypes.NOTHING:
-        return "Nothing" if display else "Nothing :: Maybe Integer"
+        return "Nothing"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data, display)}]"
