@@ -215,8 +215,10 @@ def bind_parts(code: str) -> tuple[str, str] | None:
 def place_code(prefix: str, code: str, column: int = 0) -> str:
     """
     Write code after prefix. The first line of the code starts at column in the
-    suite, and its next lines keep their position relative to that column.
+    suite, and its next lines keep their position relative to that column. They
+    move by at least the do-block indentation, so they stay inside the do block.
     """
+    prefix = prefix.ljust(column + len(indent))
     return prefix + code.replace("\n", "\n" + " " * (len(prefix) - column))
 
 
