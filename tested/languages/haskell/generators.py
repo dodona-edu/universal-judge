@@ -205,8 +205,9 @@ def is_let(code: str) -> bool:
     let statement has one "let" more than it has "in"s.
     """
     code = without_strings_and_comments(code)
-    lets = len(re.findall(r"\blet\b", code))
-    return bool(re.match(r"\s*let\b", code)) and lets > len(re.findall(r"\bin\b", code))
+    lets = len(re.findall(r"(?<![\w'])let(?![\w'])", code))
+    ins = len(re.findall(r"(?<![\w'])in(?![\w'])", code))
+    return bool(re.match(r"\s*let(?![\w'])", code)) and lets > ins
 
 
 def bind_parts(code: str) -> tuple[str, str] | None:

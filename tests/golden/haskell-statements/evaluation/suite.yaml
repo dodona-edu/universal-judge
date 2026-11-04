@@ -87,3 +87,11 @@
         - expression:
             haskell: "x + length xs + a + b"
           return: 10
+- tab: "primed names"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let in' = 5"
+        - expression:
+            haskell: "Submission.double in'"
+          return: 10
