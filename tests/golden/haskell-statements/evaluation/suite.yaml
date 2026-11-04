@@ -69,3 +69,11 @@
         - expression:
             haskell: "Submission.double 2"
           return: 4
+- tab: "nested let"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let f x = let y = x * 2 in y + 1"
+        - expression:
+            haskell: "f 3"
+          return: 7

@@ -444,6 +444,52 @@
   "command": "close-tab"
  },
  {
+  "command": "start-tab",
+  "title": "nested let"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "let f x = let y = x * 2 in y + 1",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "f 3",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "7"
+ },
+ {
+  "command": "close-test",
+  "generated": "7",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
   "command": "close-judgement"
  }
 ]

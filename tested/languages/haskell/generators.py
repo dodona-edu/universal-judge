@@ -200,9 +200,13 @@ def without_strings_and_comments(code: str) -> str:
 
 
 def is_let(code: str) -> bool:
-    """A let statement, not a let expression with "in"."""
+    """
+    A let statement, not a let expression. Each let expression has an "in", so a
+    let statement has one "let" more than it has "in"s.
+    """
     code = without_strings_and_comments(code)
-    return bool(re.match(r"\s*let\b", code)) and not re.search(r"\bin\b", code)
+    lets = len(re.findall(r"\blet\b", code))
+    return bool(re.match(r"\s*let\b", code)) and lets > len(re.findall(r"\bin\b", code))
 
 
 def bind_parts(code: str) -> tuple[str, str] | None:
