@@ -191,7 +191,7 @@ KEYWORDS = frozenset(
     ["case", "class", "data", "do", "else", "if", "import", "in", "let", "module"]
     + ["newtype", "of", "then", "type", "where"]
 )
-BIND = re.compile(r"\s*([\w'(),\[\]:\s]+?)\s*<-")
+BIND = re.compile(r"\s*([\w'(),\[\]:@~\s]+?)\s*<-")
 
 
 def without_strings_and_comments(code: str) -> str:

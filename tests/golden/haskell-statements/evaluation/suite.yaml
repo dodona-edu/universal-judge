@@ -77,3 +77,13 @@
         - expression:
             haskell: "f 3"
           return: 7
+- tab: "pattern forms"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "xs@(x : _) <- return [1, 2]"
+        - statement:
+            haskell: "~(a, b) <- return (3, 4)"
+        - expression:
+            haskell: "x + length xs + a + b"
+          return: 10
