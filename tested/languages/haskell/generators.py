@@ -183,12 +183,13 @@ def convert_statement(statement: Statement, lifting=False, display=False) -> str
 
 indent = " " * 4
 
-# Number literals are not annotated: this picks their type where GHC can't infer one.
-DEFAULTING = "default (Int, Double)"
+# Number literals and empty collections are not annotated: this picks their type
+# where GHC can't infer one.
+DEFAULTING = "default (Int, Double)\ndefault Values.JsonTypeable (Int, Double)"
 
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
-    result = f"""{{-# LANGUAGE NamedFieldPuns, ExtendedDefaultRules #-}}
+    result = f"""{{-# LANGUAGE NamedFieldPuns, ExtendedDefaultRules, NamedDefaults #-}}
 module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
@@ -344,7 +345,7 @@ main = do
 
 
 def convert_check_function(evaluator: str, function: FunctionCall) -> str:
-    return f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
+    return f"""{{-# LANGUAGE ExtendedDefaultRules, NamedDefaults #-}}
 module EvaluatorExecutor where
 
 import qualified {evaluator}
@@ -359,7 +360,7 @@ main = do x <- return $ {convert_function_call(function)}
 
 
 def convert_encoder(values: list[Value]) -> str:
-    result = f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
+    result = f"""{{-# LANGUAGE ExtendedDefaultRules, NamedDefaults #-}}
 module Encode where
 
 import Values
