@@ -50,3 +50,22 @@
         - expression:
             haskell: "a + b + x"
           return: 10
+- tab: "throwing bind"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "n <- Submission.boomIO"
+          exception: "boomIO"
+        - expression:
+            haskell: "Submission.double 1"
+          return: 2
+        - expression:
+            haskell: "Submission.double n"
+          exception: "boomIO"
+    - testcases:
+        - statement:
+            haskell: "n <- Submission.boomIO"
+    - testcases:
+        - expression:
+            haskell: "Submission.double 2"
+          return: 4

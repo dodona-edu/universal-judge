@@ -297,6 +297,153 @@
   "command": "close-tab"
  },
  {
+  "command": "start-tab",
+  "title": "throwing bind"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "n <- boomIO",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": "ErrorCall: boomIO"
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: boomIO",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double 1",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "2"
+ },
+ {
+  "command": "close-test",
+  "generated": "2",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double n",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": "ErrorCall: boomIO"
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: boomIO",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "n <- boomIO",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>boomIO</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: boomIO",
+  "status": {
+   "enum": "runtime error",
+   "human": "Runtime error"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double 2",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "4"
+ },
+ {
+  "command": "close-test",
+  "generated": "4",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
   "command": "close-judgement"
  }
 ]

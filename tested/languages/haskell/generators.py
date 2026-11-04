@@ -199,15 +199,19 @@ def without_strings_and_comments(code: str) -> str:
     return re.sub(r"--.*", "", code)
 
 
-def is_binding(code: str) -> bool:
-    """A let or a bind, which must be a line of the do block."""
+def is_let(code: str) -> bool:
+    """A let statement, not a let expression with "in"."""
     code = without_strings_and_comments(code)
-    if re.match(r"\s*let\b", code):
-        return not re.search(r"\bin\b", code)
-    pattern = BIND.match(code)
-    return pattern is not None and not (
-        set(re.findall(r"[\w']+", pattern.group(1))) & KEYWORDS
-    )
+    return bool(re.match(r"\s*let\b", code)) and not re.search(r"\bin\b", code)
+
+
+def bind_parts(code: str) -> tuple[str, str] | None:
+    """The pattern and the action of a bind, such as "(a, b) <- action"."""
+    pattern = BIND.match(without_strings_and_comments(code))
+    if pattern is None or set(re.findall(r"[\w']+", pattern.group(1))) & KEYWORDS:
+        return None
+    arrow = code.index("<-")
+    return code[:arrow].strip(), code[arrow + 2 :].strip()
 
 
 # Number literals and empty collections are not annotated: this picks their type
@@ -296,7 +300,7 @@ nonExit e = case fromException e :: Maybe ExitCode of
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for tc in ctx.testcases:
+        for j, tc in enumerate(ctx.testcases):
             result += indent + "writeSeparator\n"
 
             if tc.testcase.is_main_testcase():
@@ -313,15 +317,30 @@ nonExit e = case fromException e :: Maybe ExitCode of
                 )
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
-                # In Haskell we do not have statements, so we need to keep them separate.
-                # Additionally, exceptions with "statements" are not supported at this time.
-                if is_statement_strict(tc.input.statement) or (
+                literal = None
+                if (
                     isinstance(tc.input.statement, PreparedLanguageLiteral)
                     and tc.input.statement.is_statement()
-                    and is_binding(tc.input.statement.literal)
+                ):
+                    literal = tc.input.statement.literal
+                # An assignment or a let is a line of the do block. A bind runs its
+                # action like a testcase: an exception goes to the exception channel,
+                # and the bound names throw it when they are used.
+                if is_statement_strict(tc.input.statement) or (
+                    literal is not None and is_let(literal)
                 ):
                     statement = convert_statement(tc.input.unwrapped_input_statement())
                     result += textwrap.indent(statement, indent) + "\n"
+                elif literal is not None and (bind := bind_parts(literal)):
+                    pattern, action = bind
+                    name = f"testedBind{j}"
+                    on_exception = convert_statement(tc.exception_statement("ee"))
+                    code = (
+                        f"{name} <- tryJust nonExit ({action})\n"
+                        f"either (\\e -> let ee = Just e in {on_exception}) (\\_ -> return ()) {name}\n"
+                        f"let {pattern} = either throw id {name}"
+                    )
+                    result += textwrap.indent(code, indent) + "\n"
                 else:
                     action = convert_statement(
                         tc.input.unwrapped_input_statement(), True
