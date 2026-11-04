@@ -91,7 +91,7 @@ instance JsonTypeable Char where
 
 instance JsonTypeable Text where toType _ = "text"
 
-instance JsonTypeable a => JsonTypeable [a] where
+instance {-# OVERLAPPABLE #-} JsonTypeable a => JsonTypeable [a] where
     toType = listType
     toJson = listToJson
 
