@@ -169,6 +169,33 @@
               }
             }
           ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "-- the value\nx <- case Submission.echo (5 :: Int) of 0 -> return \"zero\"\n                                        _ -> return \"other\""
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "x"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "other"
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     }
