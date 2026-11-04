@@ -123,6 +123,52 @@
               }
             }
           ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "case Submission.echo [1, 2] of\n  [] -> 0 -- empty\n  _ -> 1 -- not empty"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 1
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "n <- return (5 :: Int) -- five"
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "n"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 5
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     }

@@ -661,7 +661,7 @@ def test_haskell_multiline_code_keeps_its_layout(
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"] * 5
+    assert updates.find_status_enum() == ["correct"] * 7
 
 
 def test_haskell_precompiled_helpers_must_match_templates(

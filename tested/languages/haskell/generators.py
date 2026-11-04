@@ -222,6 +222,13 @@ def place_code(prefix: str, code: str, column: int = 0) -> str:
     return prefix + code.replace("\n", "\n" + " " * (len(prefix) - column))
 
 
+def close_code(code: str, suffix: str) -> str:
+    """Add suffix after code, on a new line if a comment ends the code."""
+    if "--" in code.rsplit("\n", 1)[-1]:
+        return code + "\n" + indent * 2 + suffix
+    return code + suffix
+
+
 # Number literals and empty collections are not annotated: this picks their type
 # where GHC can't infer one.
 DEFAULTING = "default (Int, Double)\ndefault Values.JsonTypeable (Int, Double)"
@@ -346,10 +353,13 @@ nonExit e = case fromException e :: Maybe ExitCode of
                     name = f"testedBind{j}"
                     on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        place_code(
-                            f"{indent}{name} <- tryJust nonExit (", action, column
+                        close_code(
+                            place_code(
+                                f"{indent}{name} <- tryJust nonExit (", action, column
+                            ),
+                            ")",
                         )
-                        + ")\n"
+                        + "\n"
                     )
                     result += (
                         indent
@@ -368,8 +378,11 @@ nonExit e = case fromException e :: Maybe ExitCode of
                         on_value = convert_statement(id_result)
                     on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        place_code(indent + "runTestcase (return (", expression)
-                        + f")) (\\r -> {on_value}) (\\ee -> {on_exception})\n"
+                        close_code(
+                            place_code(indent + "runTestcase (return (", expression),
+                            f")) (\\r -> {on_value}) (\\ee -> {on_exception})",
+                        )
+                        + "\n"
                     )
         result += place_code(indent, ctx.after) + "\n"
         result += indent + 'putStr ""\n'
