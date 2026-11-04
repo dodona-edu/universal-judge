@@ -457,6 +457,27 @@ def test_haskell_whole_real_stays_real(tmp_path: Path, pytestconfig: pytest.Conf
     assert testcase["description"]["description"] == "echo 5.0"
 
 
+@pytest.mark.haskell
+def test_haskell_runtime_error_links_call_site(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "error"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert "runtime error" in updates.find_status_enum()
+    call_site = (
+        'error, called at <a href="#" class="tab-link" data-tab="code" '
+        'data-line="2">&lt;code&gt;:2</a>:10 in main:Submission'
+    )
+    descriptions = [
+        update["message"]["description"]
+        for update in updates.find_all("append-message")
+    ]
+    assert any(call_site in description for description in descriptions)
+
+
 def test_haskell_precompiled_helpers_must_match_templates(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):

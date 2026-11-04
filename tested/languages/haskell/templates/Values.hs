@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, OverloadedStrings, DefaultSignatures, NamedFieldPuns #-}
+{-# LANGUAGE CPP, FlexibleInstances, OverloadedStrings, DefaultSignatures, NamedFieldPuns #-}
 
 module Values where
 
@@ -7,6 +7,9 @@ import Data.Text (Text)
 import Data.Word as W
 import Data.Int as I
 import Control.Exception
+#if MIN_VERSION_base(4,20,0)
+import Control.Exception.Context (displayExceptionContext)
+#endif
 import qualified Data.ByteString.Lazy as LBS
 import EvaluationUtils
 import System.IO (Handle)
@@ -314,10 +317,18 @@ sendEvaluatedH file r =
 sendException :: FilePath -> Maybe SomeException -> IO ()
 sendException file (Just e@(SomeException ex)) = LBS.appendFile file (encode (object [
         "message" .= toJSON (exceptionMessage e),
-        "stacktrace" .= toJSON (show ex),
+        "stacktrace" .= toJSON (exceptionStacktrace e),
         "type" .= show (typeOf ex)
     ]))
 sendException _ Nothing = return ()
+
+-- base-4.20 moved the CallStack of an ErrorCall out of show into the exception context.
+exceptionStacktrace :: SomeException -> String
+#if MIN_VERSION_base(4,20,0)
+exceptionStacktrace e@(SomeException ex) = show ex ++ "\n" ++ displayExceptionContext (someExceptionContext e)
+#else
+exceptionStacktrace (SomeException ex) = show ex
+#endif
 
 -- show of an ErrorCall appends its CallStack, which belongs in the stack trace only.
 exceptionMessage :: SomeException -> String
