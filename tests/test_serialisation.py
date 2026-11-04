@@ -414,6 +414,9 @@ def test_valid_type_map(language: str, tmp_path: Path, pytestconfig: pytest.Conf
         "{(1,), ('a',)}",
         "[{'a': 1}, {'a': 'b'}]",
         "[{'a': 1}, {1: 1}]",
+        "[(1, 'a'), ('a', 1)]",
+        "[(1, 'a'), (1, 'a', 2)]",
+        "(1, [1, 'a'])",
     ],
 )
 def test_heterogeneous_collections_are_detected(expression: str):
@@ -436,6 +439,11 @@ def test_heterogeneous_collections_are_detected(expression: str):
         "[{'a': 1}, {'b': 2}]",
         "[{'a': []}, {'b': [1]}]",
         "[[1.5], [2.5]]",
+        "(1, 'a')",
+        "(1, 'a', 2.5, True)",
+        "[(2, 'a'), (1, 'b')]",
+        "[(1, []), (2, [3])]",
+        "((1, 'a'), [(2, 'b')])",
     ],
 )
 def test_homogeneous_collections_are_not_flagged(expression: str):

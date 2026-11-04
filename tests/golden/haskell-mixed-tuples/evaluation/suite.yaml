@@ -1,0 +1,16 @@
+- tab: "swapPair"
+  testcases:
+    - expression: "swapPair((1, \"a\"))"
+      return: !expression "(\"a\", 1)"
+- tab: "encode"
+  testcases:
+    - expression: "encode(\"aab\")"
+      return: !expression "[(2, char('a')), (1, char('b'))]"
+- tab: "decode"
+  testcases:
+    - expression: "decode([(2, char('a')), (1, char('b'))])"
+      return: "aab"
+- tab: "record"
+  testcases:
+    - expression: "record(5)"
+      return: !expression "(5, \"five\", True, 2.5)"
