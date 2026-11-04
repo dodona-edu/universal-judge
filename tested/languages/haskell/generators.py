@@ -17,6 +17,7 @@ from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedFunctionCall,
+    PreparedLanguageLiteral,
     PreparedTestcase,
     PreparedTestcaseStatement,
 )
@@ -288,7 +289,10 @@ nonExit e = case fromException e :: Maybe ExitCode of
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 # In Haskell we do not have statements, so we need to keep them separate.
                 # Additionally, exceptions with "statements" are not supported at this time.
-                if is_statement_strict(tc.input.statement):
+                if is_statement_strict(tc.input.statement) or (
+                    isinstance(tc.input.statement, PreparedLanguageLiteral)
+                    and tc.input.statement.is_statement()
+                ):
                     result += (
                         indent
                         + convert_statement(tc.input.unwrapped_input_statement())
