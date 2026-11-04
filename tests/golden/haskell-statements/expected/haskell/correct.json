@@ -156,6 +156,147 @@
   "command": "close-tab"
  },
  {
+  "command": "start-tab",
+  "title": "expression"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "boom 0",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "exception",
+  "command": "start-test",
+  "expected": "ErrorCall: boom"
+ },
+ {
+  "command": "close-test",
+  "generated": "ErrorCall: boom",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double 3",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "let k = 2 in double k",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "double 4",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "8"
+ },
+ {
+  "command": "close-test",
+  "generated": "8",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "patterns"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "(a, b) <- return (1, 2)",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "x : _ <- return [7, 8]",
+   "format": "haskell"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "a + b + x",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "10"
+ },
+ {
+  "command": "close-test",
+  "generated": "10",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
   "command": "close-judgement"
  }
 ]

@@ -1,4 +1,5 @@
 import json
+import re
 import textwrap
 from decimal import Decimal
 
@@ -185,6 +186,30 @@ def convert_statement(statement: Statement, lifting=False, display=False) -> str
 
 indent = " " * 4
 
+# Keywords can't occur in the pattern of a bind, such as "do x <- getLine; ...".
+KEYWORDS = frozenset(
+    ["case", "class", "data", "do", "else", "if", "import", "in", "let", "module"]
+    + ["newtype", "of", "then", "type", "where"]
+)
+BIND = re.compile(r"\s*([\w'(),\[\]:\s]+?)\s*<-")
+
+
+def without_strings_and_comments(code: str) -> str:
+    code = re.sub(r'"(?:\\.|[^"\\\n])*"', '""', code)
+    return re.sub(r"--.*", "", code)
+
+
+def is_binding(code: str) -> bool:
+    """A let or a bind, which must be a line of the do block."""
+    code = without_strings_and_comments(code)
+    if re.match(r"\s*let\b", code):
+        return not re.search(r"\bin\b", code)
+    pattern = BIND.match(code)
+    return pattern is not None and not (
+        set(re.findall(r"[\w']+", pattern.group(1))) & KEYWORDS
+    )
+
+
 # Number literals and empty collections are not annotated: this picks their type
 # where GHC can't infer one.
 DEFAULTING = "default (Int, Double)\ndefault Values.JsonTypeable (Int, Double)"
@@ -293,6 +318,7 @@ nonExit e = case fromException e :: Maybe ExitCode of
                 if is_statement_strict(tc.input.statement) or (
                     isinstance(tc.input.statement, PreparedLanguageLiteral)
                     and tc.input.statement.is_statement()
+                    and is_binding(tc.input.statement.literal)
                 ):
                     statement = convert_statement(tc.input.unwrapped_input_statement())
                     result += textwrap.indent(statement, indent) + "\n"

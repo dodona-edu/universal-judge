@@ -26,3 +26,27 @@
         - expression:
             haskell: "Submission.double m"
           return: 8
+- tab: "expression"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "Submission.boom 0"
+          exception: "boom"
+    - testcases:
+        - statement:
+            haskell: "Submission.double 3"
+        - statement:
+            haskell: "let k = 2 in Submission.double k"
+        - expression:
+            haskell: "Submission.double 4"
+          return: 8
+- tab: "patterns"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "(a, b) <- return (1, 2)"
+        - statement:
+            haskell: "x : _ <- return [7, 8]"
+        - expression:
+            haskell: "a + b + x"
+          return: 10
