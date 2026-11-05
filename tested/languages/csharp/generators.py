@@ -78,8 +78,6 @@ def convert_value(value: Value) -> str:
         return f"(short) {value.data}"
     elif value.type == AdvancedNumericTypes.U_INT_16:
         return f"(ushort) {value.data}"
-    elif value.type == AdvancedNumericTypes.INT_32:
-        return f"(int) {value.data}"
     elif value.type == AdvancedNumericTypes.U_INT_32:
         return f"(uint) {value.data}"
     elif value.type == AdvancedNumericTypes.INT_64:
