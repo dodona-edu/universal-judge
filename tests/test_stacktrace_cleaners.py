@@ -420,9 +420,9 @@ HasCallStack backtrace:
 
 
 def test_kotlin_compilation_error():
-    original = """Execution00.kt:52:13: error: unresolved reference: solutionMain
+    original = """Execution00.kt:52:13: error: unresolved reference 'solutionMain'.
             solutionMain(arrayOf())
-            ^
+            ^^^^^^^^^^^^
     Submission.kt:1:1: error: expecting a top level declaration
     mfzej àryhg çyh aiogharuio ghqgh
     ^
@@ -453,6 +453,78 @@ def test_kotlin_compilation_error():
 """
     actual = language_config.cleanup_stacktrace(original)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "original, expected",
+    [
+        (
+            """Execution0.kt:52:23: error: unresolved reference 'f'.
+            sendValue(f(1))
+                      ^
+""",
+            "error: unresolved reference 'f'.\n",
+        ),
+        (
+            """Execution0.kt:52:25: error: argument type mismatch: actual type is 'String', but 'Int' was expected.
+            sendValue(f("a"))
+                        ^^^
+""",
+            "error: argument type mismatch: actual type is 'String', but 'Int' was expected.\n",
+        ),
+        (
+            """Execution0.kt:52:23: error: unresolved reference 'format'.
+            sendValue(format(1))
+                      ^^^^^^
+""",
+            "error: unresolved reference 'format'.\n",
+        ),
+        (
+            """Execution0.kt:52:9: warning: variable 'x' is never used.
+        val x = 1
+            ^
+""",
+            "",
+        ),
+        (
+            """Submission.kt:11:16: error: initializer type mismatch: expected 'Int', actual 'String'.
+    val q: Int = "s"
+               ^
+""",
+            """<code>:11:16: error: initializer type mismatch: expected 'Int', actual 'String'.
+    val q: Int = "s"
+               ^
+""",
+        ),
+        (
+            """Execution0.kt:10:5: error: unresolved reference 'Execution0'.
+    Execution0(1)
+    ^^^^^^^^^^
+Execution0.kt:52:9: error: unresolved reference 'execute'.
+        execute()
+        ^^^^^^^
+Submission.kt:6:21: error: unresolved reference 'nme'.
+    return "Hello, $nme!"
+                    ^^^
+""",
+            """<code>:6:21: error: unresolved reference 'nme'.
+    return "Hello, $nme!"
+                    ^^^
+""",
+        ),
+    ],
+    ids=[
+        "unresolved-reference",
+        "type-mismatch",
+        "snippet-containing-at",
+        "warning-dropped",
+        "submission-error",
+        "generated-errors-dropped-with-submission-error",
+    ],
+)
+def test_kotlin_generated_file_diagnostics(original: str, expected: str):
+    language_config = get_language("test", "kotlin")
+    assert language_config.cleanup_stacktrace(original) == expected
 
 
 def test_kotlin_run_error():

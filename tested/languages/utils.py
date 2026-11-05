@@ -47,27 +47,37 @@ def jvm_memory_limit(config: GlobalConfig) -> int:
 def jvm_cleanup_stacktrace(stacktrace_str: str, submission_filename: str) -> str:
     context_file_regex = re.compile(r"(Context[0-9]+|Selector)")
     execution_regex = re.compile(r"Execution(\d+)\.kt")
-    unresolved_main_regex = r"error: unresolved reference: solutionMain"
-    unresolved_reference_regex = re.compile(
-        r"(error: unresolved reference: [a-zA-Z$_0-9]+)"
+    generated_kotlin_regex = re.compile(
+        r"^\s*(?:\S*/)?(?:Execution\d+|Context\d+|Selector)\.kt:\d+:\d+: (error|warning): (.*)$"
     )
     stacktrace = stacktrace_str.splitlines(True)
 
-    skip_line, lines = False, []
+    skip_line, in_generated_diagnostic = False, False
+    lines, generated_errors = [], []
     for line in stacktrace:
         line = line.strip("\n")
 
         if not line:
             continue
 
+        # skip the snippet and caret lines below a diagnostic in a generated file
+        if (
+            in_generated_diagnostic
+            and line.startswith(" ")
+            and submission_filename not in line
+        ):
+            continue
+        in_generated_diagnostic = False
+
+        if match := generated_kotlin_regex.match(line):
+            if match[1] == "error":
+                message = match[2].replace("solutionMain", "main")
+                generated_errors.append(f"error: {message}\n")
+            in_generated_diagnostic = True
+            continue
+
         # skip line if not a new File line is started
         if context_file_regex.search(line):
-            if unresolved_main_regex in line:
-                lines.append("error: unresolved reference: main\n")
-            else:
-                match = unresolved_reference_regex.search(line)
-                if match:
-                    lines.append(match[0] + "\n")
             skip_line = True
             continue
         elif skip_line and (line.startswith(" ") and "at" not in line):
@@ -88,6 +98,10 @@ def jvm_cleanup_stacktrace(stacktrace_str: str, submission_filename: str) -> str
 
         skip_line = False
         lines.append(line + "\n")
+
+    # Errors in generated files are often fallout of an error in the submission.
+    if not any("<code>" in line and "error:" in line for line in lines):
+        lines.extend(generated_errors)
 
     return "".join(lines)
 

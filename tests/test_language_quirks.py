@@ -2,6 +2,7 @@
 Tests for specific aspects of certain language implementations.
 """
 
+import html
 import itertools
 import shutil
 import sys
@@ -52,6 +53,29 @@ def test_csharp_nested_tuples(tmp_path: Path, pytestconfig: pytest.Config):
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"] * 5
+
+
+@pytest.mark.kotlin
+def test_kotlin_package_submission_has_compilation_message(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    source = tmp_path / "submission.kt"
+    source.write_text("package foo\n\nfun echo(content: Any?): Any? = content\n")
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "kotlin",
+        tmp_path,
+        "one.tson",
+        options={"source": source},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"]
+    descriptions = [
+        m["message"]["description"] for m in updates.find_all("append-message")
+    ]
+    assert any("unresolved reference 'echo'" in html.unescape(d) for d in descriptions)
 
 
 @pytest.mark.c
