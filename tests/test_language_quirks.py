@@ -11,7 +11,14 @@ from pathlib import Path
 import pytest
 
 from tested.configs import create_bundle
-from tested.datatypes import BasicBooleanTypes, BasicNumericTypes, BasicStringTypes
+from tested.datatypes import (
+    AdvancedSequenceTypes,
+    BasicBooleanTypes,
+    BasicNumericTypes,
+    BasicObjectTypes,
+    BasicSequenceTypes,
+    BasicStringTypes,
+)
 from tested.descriptions.renderer import render_one_statement
 from tested.dsl import parse_string
 from tested.languages import LANGUAGES
@@ -25,9 +32,13 @@ from tested.languages.python.generators import convert_statement
 from tested.serialisation import (
     Assignment,
     BooleanType,
+    Expression,
     FunctionCall,
     FunctionType,
     NumberType,
+    ObjectKeyValuePair,
+    ObjectType,
+    SequenceType,
     StringType,
 )
 from tested.testsuite import LanguageLiterals, Suite, SupportedLanguage, Testcase
@@ -949,3 +960,65 @@ def test_haskell_description_without_submission_prefix(
     readable, _ = get_readable_input(bundle, testcase)
     assert readable.description == expected
     assert render_one_statement(bundle, statement) == expected
+
+
+def _sequence(kind: BasicSequenceTypes | AdvancedSequenceTypes, *numbers: int):
+    data: list[Expression] = [
+        NumberType(type=BasicNumericTypes.INTEGER, data=n) for n in numbers
+    ]
+    return SequenceType(type=kind, data=data)
+
+
+@pytest.mark.parametrize(
+    "value, rendered, expected",
+    [
+        (
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    _sequence(BasicSequenceTypes.SEQUENCE, 1, 2),
+                    _sequence(BasicSequenceTypes.SEQUENCE, 3, 4),
+                ],
+            ),
+            "{(1, 2), (3, 4)}",
+            {(1, 2), (3, 4)},
+        ),
+        (
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[_sequence(BasicSequenceTypes.SEQUENCE, 1)],
+            ),
+            "{(1,)}",
+            {(1,)},
+        ),
+        (
+            SequenceType(
+                type=BasicSequenceTypes.SET,
+                data=[
+                    _sequence(BasicSequenceTypes.SET, 1, 2),
+                    _sequence(BasicSequenceTypes.SET),
+                    _sequence(AdvancedSequenceTypes.TUPLE, 5),
+                ],
+            ),
+            "{frozenset({1, 2}), frozenset(), (5,)}",
+            {frozenset({1, 2}), frozenset(), (5,)},
+        ),
+        (
+            ObjectType(
+                type=BasicObjectTypes.MAP,
+                data=[
+                    ObjectKeyValuePair(
+                        key=_sequence(BasicSequenceTypes.SEQUENCE, 1, 2),
+                        value=NumberType(type=BasicNumericTypes.INTEGER, data=3),
+                    )
+                ],
+            ),
+            "{(1, 2): 3}",
+            {(1, 2): 3},
+        ),
+    ],
+)
+def test_python_set_elements_and_map_keys_are_hashable(value, rendered, expected):
+    result = convert_statement(value)
+    assert result == rendered
+    assert eval(result) == expected

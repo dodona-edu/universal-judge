@@ -50,3 +50,7 @@ def evaluate_staff_permission(actual):
 
 def evaluate_sys_without_import(_context):
     return EvaluationResult(sys.modules["evaluation_utils"].EvaluationResult is EvaluationResult)
+
+
+def evaluate_set_of_arrays(context):
+    return EvaluationResult(context.actual == {(1, 2), (3, 4)})
