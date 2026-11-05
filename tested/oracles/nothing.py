@@ -2,6 +2,7 @@ import functools
 
 from tested.dodona import ExtendedMessage, Permission, Status, StatusMessage
 from tested.internationalization import get_i18n_string
+from tested.languages.generation import generate_statement
 from tested.oracles.common import OracleConfig, OracleResult, try_outputs
 from tested.oracles.exception import try_as_readable_exception
 from tested.oracles.value import compare_values, try_as_readable_value
@@ -72,7 +73,10 @@ def evaluate_no_return(
             human=get_i18n_string(f"oracles.nothing.{error}"),
         )
         return OracleResult(
-            result=result, readable_expected="", readable_actual=actual, messages=[]
+            result=result,
+            readable_expected="",
+            readable_actual=generate_statement(config.bundle, value),
+            messages=[],
         )
 
 

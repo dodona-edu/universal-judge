@@ -1323,6 +1323,16 @@ def test_nothing_oracle_shows_a_value_readably(
     assert result.readable_actual == "'hello'"
 
 
+def test_no_return_oracle_shows_an_unexpected_value_readably(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig)
+    actual = '{"type": "integer", "data": 5}'
+    result = evaluate_no_return(config, actual)
+    assert result.result.enum == Status.WRONG
+    assert result.readable_actual == "5"
+
+
 def test_nothing_oracle_shows_an_exception_readably(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
