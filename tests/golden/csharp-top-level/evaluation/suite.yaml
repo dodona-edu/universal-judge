@@ -1,0 +1,4 @@
+- tab: "Main"
+  testcases:
+    - stdout: "Hello"
+      exit_code: 0
