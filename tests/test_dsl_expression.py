@@ -392,6 +392,12 @@ def test_parse_fun_assign():
     assert len(data.arguments) == 0
 
 
+def test_parse_builtin_type_hint_is_enum_member():
+    assign = parse_string("xs: list = numbers()")
+    assert isinstance(assign, VariableAssignment)
+    assert assign.type is AdvancedSequenceTypes.LIST
+
+
 def test_parse_constructor_assign():
     assign = parse_string("cont: Container = Container({object.version})")
     assert isinstance(assign, VariableAssignment)

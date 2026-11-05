@@ -116,15 +116,16 @@ def _convert_ann_assignment(node: ast.AnnAssign) -> Assignment:
     else:
         raise InvalidDslError("Type hints should be simple values.")
 
-    # Check if the type is built-in type or not.
-    is_our_type = any(type_ in x.__members__.values() for x in get_args(AllTypes))
-    if not is_our_type:
-        type_ = VariableType(data=type_)
+    resolved: VariableType | AllTypes
+    try:
+        resolved = string_to_type(type_)
+    except ValueError:
+        resolved = VariableType(data=type_)
 
     return VariableAssignment(
         variable=node.target.id,
         expression=value,
-        type=cast(VariableType | AllTypes, type_),
+        type=resolved,
     )
 
 
