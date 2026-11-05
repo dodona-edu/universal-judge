@@ -690,19 +690,22 @@ def test_js_ts_exception_correct(
     assert len(updates.find_all("append-message")) == 0
 
 
-def test_javascript_exception_correct_temp(tmp_path: Path, pytestconfig: pytest.Config):
+@pytest.mark.parametrize("lang", ["javascript", "typescript"])
+def test_js_ts_exception_plain_object(
+    lang: str, tmp_path: Path, pytestconfig: pytest.Config
+):
     conf = configuration(
         pytestconfig,
         "js-ts-exceptions",
-        "javascript",
+        lang,
         tmp_path,
         "plan.yaml",
-        "correct-temp",
+        "plain-object",
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["correct"]
-    assert len(updates.find_all("append-message")) == 0
+    assert updates.find_status_enum() == ["wrong"]
+    assert "geen instantie van Error" in result
 
 
 @pytest.mark.parametrize("lang", ["javascript", "typescript"])
