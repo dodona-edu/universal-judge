@@ -1,0 +1,6 @@
+- tab: "542"
+  contexts:
+    - testcases:
+        - statement: 'x = 1'
+    - testcases:
+        - statement: 'x = 2'
