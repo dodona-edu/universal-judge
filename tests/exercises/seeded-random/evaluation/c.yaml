@@ -1,0 +1,18 @@
+language: c
+tabs:
+  - tab: "Rolls"
+    contexts:
+      - before: "srand(7);"
+        after: 'printf("done\n");'
+        testcases:
+          - expression: "roll()"
+            return: 4
+          - expression: "roll()"
+            return: 4
+            stdout: "done\n"
+      - before: "srand(11);"
+        testcases:
+          - expression: "roll()"
+            return: 6
+          - expression: "roll()"
+            return: 3

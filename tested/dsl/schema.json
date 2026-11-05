@@ -133,6 +133,14 @@
           "type" : "string",
           "description" : "Description or name of this context."
         },
+        "before" : {
+          "$ref" : "#/$defs/contextCode",
+          "description" : "Code that runs before the first testcase of this context, per programming language."
+        },
+        "after" : {
+          "$ref" : "#/$defs/contextCode",
+          "description" : "Code that runs after the last testcase of this context, per programming language."
+        },
         "testcases" : {
           "description" : "List of testcases in this context.",
           "type" : "array",
@@ -259,6 +267,26 @@
           "description" : "Expected exit code for the context. Only the last testcase of a context may define exit_code."
         }
       }
+    },
+    "contextCode" : {
+      "oneOf" : [
+        {
+          "type" : "string",
+          "description" : "Code for the programming language set at the root of the test suite."
+        },
+        {
+          "description" : "Programming-language-specific code.",
+          "type" : "object",
+          "minProperties" : 1,
+          "propertyNames" : {
+            "$ref" : "#/$defs/programmingLanguage"
+          },
+          "additionalProperties" : {
+            "type" : "string",
+            "description" : "Code in that language, which will be used verbatim."
+          }
+        }
+      ]
     },
     "expressionOrStatement" : {
       "oneOf" : [

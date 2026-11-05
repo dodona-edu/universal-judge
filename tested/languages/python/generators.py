@@ -1,4 +1,5 @@
 import json
+import textwrap
 from collections.abc import Sequence
 
 from tested.datatypes import (
@@ -220,7 +221,7 @@ def send_specific_exception(exception):
     for i, ctx in enumerate(pu.contexts):
         indent = " " * 4
         result += f"def {pu.unit.name}_context_{i}():\n"
-        result += indent + ctx.before + "\n"
+        result += textwrap.indent(ctx.before, indent) + "\n"
 
         if not ctx.context.has_main_testcase():
             result += indent + "write_separator()\n"
@@ -262,7 +263,7 @@ def send_specific_exception(exception):
             result += indent + "else:\n"
             result += indent * 2 + convert_statement(tc.exception_statement()) + "\n"
 
-        result += indent + ctx.after + "\n"
+        result += textwrap.indent(ctx.after, indent) + "\n"
 
     for i, ctx in enumerate(pu.contexts):
         result += "write_context_separator()\n"
