@@ -68,7 +68,8 @@ def convert_value(value: Value, with_namespace=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
-        return f"({convert_arguments(value.data, with_namespace)})"
+        trailing_comma = "," if len(value.data) == 1 else ""
+        return f"({convert_arguments(value.data, with_namespace)}{trailing_comma})"
     elif value.type in (
         AdvancedNumericTypes.DOUBLE_EXTENDED,
         AdvancedNumericTypes.FIXED_PRECISION,

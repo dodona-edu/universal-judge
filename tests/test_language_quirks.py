@@ -1294,3 +1294,36 @@ def test_python_import_traceback_hides_harness_frames(
     assert "importlib" not in stderr
     assert crash_line in stderr
     assert "ZeroDivisionError: division by zero" in stderr
+
+
+@pytest.mark.python
+@pytest.mark.parametrize("literal", ["()", "(1,)", "(1, 2)"])
+def test_python_tuple_literal(literal: str):
+    assert convert_statement(parse_string(literal)) == literal
+
+
+@pytest.mark.python
+def test_python_one_element_tuple_argument(tmp_path: Path, pytestconfig: pytest.Config):
+    (tmp_path / "plan.yaml").write_text(
+        """
+- tab: "kinds"
+  testcases:
+    - expression: "kind((1,))"
+      return: "tuple"
+"""
+    )
+    source = tmp_path / "submission.py"
+    source.write_text("def kind(x):\n    return type(x).__name__\n")
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "plan.yaml",
+        options={"source": source, "resources": tmp_path},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+    description = updates.find_next("start-testcase")["description"]["description"]
+    assert description == "kind((1,))"
