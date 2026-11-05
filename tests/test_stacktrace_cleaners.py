@@ -512,28 +512,75 @@ def test_code_is_linked():
     assert actual == expected
 
 
-def test_csharp_modify_solution_wraps_and_offsets(tmp_path: Path):
-    language_config = get_language(str(tmp_path), "csharp")
-    assert language_config.config
+def wrap_csharp(tmp_path: Path, source: str) -> tuple[str, int]:
+    language = get_language(str(tmp_path), "csharp")
+    assert language.config
     solution = tmp_path / "Submission.cs"
-    solution.write_text("Console.WriteLine(foo);\n")
-    language_config.modify_solution(solution)
-    wrapped = solution.read_text()
+    solution.write_text(source)
+    language.modify_solution(solution)
+    return solution.read_text(), language.config.dodona.source_offset
+
+
+def test_csharp_modify_solution_wraps_and_offsets(tmp_path: Path):
+    wrapped, offset = wrap_csharp(tmp_path, "Console.WriteLine(foo);\n")
     assert "class Submission" in wrapped
     assert "static void Main" in wrapped
-    assert language_config.config.dodona.source_offset == -12
-    assert wrapped.splitlines()[12] == "Console.WriteLine(foo);"
+    assert offset == -4
+    assert wrapped.splitlines()[4] == "Console.WriteLine(foo);"
 
 
-def test_csharp_modify_solution_explicit_class_keeps_offset(tmp_path: Path):
-    language_config = get_language(str(tmp_path), "csharp")
-    assert language_config.config
-    original = "class Submission { static void Main() { } }\n"
-    solution = tmp_path / "Submission.cs"
-    solution.write_text(original)
-    language_config.modify_solution(solution)
-    assert solution.read_text() == original
-    assert language_config.config.dodona.source_offset == 0
+def test_csharp_wrap_class_in_comment(tmp_path: Path):
+    wrapped, offset = wrap_csharp(
+        tmp_path, '// A classic greeting\nConsole.WriteLine("Hello");\n'
+    )
+    assert wrapped == (
+        "class Submission\n{\n    public static void Main(string[] args)\n    {\n"
+        '// A classic greeting\nConsole.WriteLine("Hello");\n'
+        "\n    }\n}\n"
+    )
+    assert offset == -4
+
+
+def test_csharp_wrap_after_usings_keeps_lines(tmp_path: Path):
+    source = 'using System.Text;\n\nConsole.WriteLine(new StringBuilder("Hello"));\n'
+    wrapped, offset = wrap_csharp(tmp_path, source)
+    assert wrapped == (
+        "using System.Text; class Submission { public static void Main(string[] args) {\n"
+        '\nConsole.WriteLine(new StringBuilder("Hello"));\n'
+        "\n    }\n}\n"
+    )
+    assert offset == 0
+
+
+def test_csharp_wrap_keeps_declarations_top_level(tmp_path: Path):
+    source = 'Console.WriteLine("Hello");\n\nrecord P(int X);\n'
+    wrapped, offset = wrap_csharp(tmp_path, source)
+    assert wrapped == (
+        "class Submission\n{\n    public static void Main(string[] args)\n    {\n"
+        'Console.WriteLine("Hello"); } }\n\nrecord P(int X);\n'
+    )
+    assert offset == -4
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "class Submission { static void Main() { } }\n",
+        "using System;\n\nclass Submission { static void Main() { } }\n",
+    ],
+    ids=["class", "usings-and-class"],
+)
+def test_csharp_wrap_leaves_class_based_submission(tmp_path: Path, source: str):
+    assert wrap_csharp(tmp_path, source) == (source, 0)
+
+
+def test_csharp_wrap_comment_only_submission(tmp_path: Path):
+    wrapped, offset = wrap_csharp(tmp_path, "// TODO\n")
+    assert wrapped == (
+        "class Submission\n{\n    public static void Main(string[] args)\n    {\n"
+        "// TODO\n\n    }\n}\n"
+    )
+    assert offset == -4
 
 
 def test_c_modify_solution_offsets(tmp_path: Path):
@@ -692,10 +739,10 @@ def test_csharp_runtime_line_offset_end_to_end():
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = get_language(workdir, "csharp")
     assert language_config.config
-    language_config.config.dodona.source_offset = -12
+    language_config.config.dodona.source_offset = -4
     original = (
         f"at Submission.Main(String[] args) in "
-        f"{workdir}/.tested/common/Submission.cs:line 15\n"
+        f"{workdir}/.tested/common/Submission.cs:line 7\n"
     )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
@@ -817,10 +864,10 @@ def csharp_language_with_source(
 
 
 def csharp_wrapped_language(tmp_path: Path, workdir: str):
-    """A C# language with a 3-line top-level-statements submission, wrapped by a 12-line header."""
+    """A C# language with a 3-line top-level-statements submission, wrapped by a 4-line header."""
     language_config = csharp_language_with_source(tmp_path, workdir, 3)
     assert language_config.config
-    language_config.config.dodona.source_offset = -12
+    language_config.config.dodona.source_offset = -4
     return language_config
 
 
@@ -829,7 +876,7 @@ def test_csharp_compile_line_offset_end_to_end(tmp_path: Path):
     language_config = csharp_wrapped_language(tmp_path, workdir)
     assert language_config.config
     original = (
-        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: undefined\n"
+        f"{workdir}/.tested/Execution0/Submission.cs(6,19): error CS0103: undefined\n"
     )
     cleaned = language_config.cleanup_stacktrace(original)
     final = _replace_code_line_number(
@@ -839,9 +886,39 @@ def test_csharp_compile_line_offset_end_to_end(tmp_path: Path):
 
 
 @pytest.mark.parametrize(
+    "source, row, student_row",
+    [
+        ("using System.Text;\n\nConsole.WriteLine(foo);\n", 3, 3),
+        ('Console.WriteLine("Hi");\n\nrecord P(int X) { int Y => foo; }\n', 7, 3),
+        ("using System.Text;\nConsole.WriteLine(1);\nrecord P(Foo X);\n", 3, 3),
+    ],
+    ids=["statement-after-using", "declaration-after-statements", "both"],
+)
+def test_csharp_compile_line_offset_wrapper_layout(
+    tmp_path: Path, source: str, row: int, student_row: int
+):
+    workdir = "/home/bliep/bloep/universal-judge/workdir"
+    language_config = get_language(workdir, "csharp")
+    assert language_config.config
+    language_config.config.dodona.source = tmp_path / "submission.cs"
+    language_config.config.dodona.source.write_text(source)
+    solution = tmp_path / "Submission.cs"
+    solution.write_text(source)
+    language_config.modify_solution(solution)
+    original = (
+        f"{workdir}/.tested/Execution0/Submission.cs({row},19): error CS0103: x\n"
+    )
+    cleaned = language_config.cleanup_stacktrace(original)
+    final = _replace_code_line_number(
+        language_config.config.dodona.source_offset, cleaned
+    )
+    assert final == f"<code>:{student_row}:19: error CS0103: x\n"
+
+
+@pytest.mark.parametrize(
     "location, text",
     [
-        ("Submission.cs(18,2)", "error CS1513: } expected"),
+        ("Submission.cs(9,2)", "error CS1513: } expected"),
         ("Submission.cs(3,1)", "error CS0246: missing"),
     ],
     ids=["footer-row", "header-row"],
@@ -864,7 +941,7 @@ def test_csharp_compiler_output_annotates_with_offset(tmp_path: Path):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = csharp_wrapped_language(tmp_path, workdir)
     stdout = (
-        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
+        f"{workdir}/.tested/Execution0/Submission.cs(6,19): error CS0103: "
         "The name 'foo' does not exist\n"
     )
     _, annotations, _, _ = language_config.compiler_output(stdout, "")
@@ -882,22 +959,22 @@ def test_csharp_compiler_output_annotates_with_offset(tmp_path: Path):
 @pytest.mark.parametrize(
     "stdout_line",
     [
-        "Submission.cs(14,19): warning CS8602: Dereference of a possibly null reference.",
-        "Values.cs(14,19): error CS0103: other",
+        "Submission.cs(6,19): warning CS8602: Dereference of a possibly null reference.",
+        "Values.cs(6,19): error CS0103: other",
         "Submission.cs(1,2): error CS1513: } expected",
-        "Submission.cs(12,2): error CS1513: } expected",
-        "Submission.cs(16,2): error CS1513: } expected",
-        "Submission.cs(17,2): error CS1513: } expected",
-        "Submission.cs(18,2): error CS1513: } expected",
+        "Submission.cs(4,2): error CS1513: } expected",
+        "Submission.cs(8,2): error CS1513: } expected",
+        "Submission.cs(9,2): error CS1513: } expected",
+        "Submission.cs(10,2): error CS1513: } expected",
     ],
     ids=[
         "warning",
         "other-file",
         "header-row-1",
-        "header-row-12",
-        "footer-row-16",
-        "footer-row-17",
-        "footer-row-18",
+        "header-row-4",
+        "footer-row-8",
+        "footer-row-9",
+        "footer-row-10",
     ],
 )
 def test_csharp_compiler_output_has_no_annotation(tmp_path: Path, stdout_line: str):
@@ -913,25 +990,25 @@ def test_csharp_compiler_output_annotates_last_line_after_shebang(tmp_path: Path
     # The shebang line is removed from the source and adds 1 to the offset.
     language_config = csharp_language_with_source(tmp_path, workdir, 2)
     assert language_config.config
-    language_config.config.dodona.source_offset = -11
+    language_config.config.dodona.source_offset = -3
     stdout = (
-        f"{workdir}/.tested/Execution0/Submission.cs(14,19): error CS0103: "
+        f"{workdir}/.tested/Execution0/Submission.cs(6,19): error CS0103: "
         "The name 'nme' does not exist\n"
     )
     _, annotations, _, _ = language_config.compiler_output(stdout, "")
     # Line 3 of the submitted file, which starts with the shebang line.
     assert [a.row for a in annotations] == [2]
     cleaned = language_config.cleanup_stacktrace(stdout)
-    assert cleaned.startswith("<code>:14:19: error CS0103")
+    assert cleaned.startswith("<code>:6:19: error CS0103")
 
 
 def test_csharp_compiler_output_shebang_header_row_has_no_annotation(tmp_path: Path):
     workdir = "/home/bliep/bloep/universal-judge/workdir"
     language_config = csharp_language_with_source(tmp_path, workdir, 2)
     assert language_config.config
-    language_config.config.dodona.source_offset = -11
+    language_config.config.dodona.source_offset = -3
     stdout = (
-        f"{workdir}/.tested/Execution0/Submission.cs(12,2): error CS1513: }} expected\n"
+        f"{workdir}/.tested/Execution0/Submission.cs(4,2): error CS1513: }} expected\n"
     )
     _, annotations, _, _ = language_config.compiler_output(stdout, "")
     assert annotations == []

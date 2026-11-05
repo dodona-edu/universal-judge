@@ -31,6 +31,7 @@ from tested.languages.conventionalize import (
     submission_file,
     submission_name,
 )
+from tested.languages.csharp.top_level import scan_top_level
 from tested.languages.language import (
     CallbackResult,
     Command,
@@ -273,52 +274,46 @@ class CSharp(Language):
         else:
             return Status.COMPILATION_ERROR
 
-    def _wrapper_header(self, contents: str) -> str:
-        """The header put before top-level statements, empty for a class-based submission."""
-        if "class" in contents:
-            return ""
+    def _wrap(self, contents: str) -> tuple[str, int]:
+        """The submission wrapped in a Main method and the number of lines put before it."""
+        layout = scan_top_level(contents)
+        if layout.has_declarations:
+            if layout.statements_end is None:
+                return contents, 0
+            end = layout.statements_end
+            contents = contents[:end] + " } }" + contents[end:]
+        else:
+            contents += "\n    }\n}\n"
 
         class_name = submission_name(self)
-        return f"""\
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+        if layout.usings_end is not None:
+            end = layout.usings_end
+            opener = f" class {class_name} {{ public static void Main(string[] args) {{"
+            return contents[:end] + opener + contents[end:], 0
 
+        header = f"""\
 class {class_name}
 {{
     public static void Main(string[] args)
     {{
 """
+        return header + contents, header.count("\n")
 
     def modify_solution(self, solution: Path):
         assert self.config
-        with open(solution, "r") as file:
-            contents = file.read()
-
-        header = self._wrapper_header(contents)
-        if not header:
+        contents = solution.read_text()
+        wrapped, header_lines = self._wrap(contents)
+        if wrapped == contents:
             return  # No top-level statements; we are happy...
 
-        footer = """
-    }
-}
-"""
-
-        # noinspection PyTypeChecker
-        with open(solution, "w") as file:
-            file.write(header + contents + footer)
-
-        self.config.dodona.source_offset -= header.count("\n")
+        solution.write_text(wrapped)
+        self.config.dodona.source_offset -= header_lines
 
     def _is_student_row(self, row: int) -> bool:
         """Whether a row of the compiled Submission.cs is a line of the student's file."""
         assert self.config
         contents = self.config.dodona.source.read_text()
-        header_lines = self._wrapper_header(contents).count("\n")
+        _, header_lines = self._wrap(contents)
         return header_lines < row <= header_lines + len(contents.splitlines())
 
     def cleanup_stacktrace(self, stacktrace: str) -> str:
