@@ -55,6 +55,7 @@ from tested.serialisation import (
     Value,
 )
 from tested.testsuite import (
+    Code,
     ContentPath,
     Context,
     CustomCheckOracle,
@@ -625,6 +626,20 @@ def _validate_no_testcase_keys(
             )
 
 
+def _validate_no_code_keys(level: YamlDict, location: str, level_name: str):
+    """
+    Reject before and after on a level above the contexts.
+
+    :param location: Prefix naming where we are, empty for the root.
+    :param level_name: The level, as it appears in the message.
+    """
+    for key in ("before", "after"):
+        if key in level:
+            raise ValueError(
+                f"{location}{key} can't be set on {level_name}: set it on each context."
+            )
+
+
 def _validate_context_file_keys(context: YamlDict, location: str):
     """
     Check that input_files are only on the first test case of a context, and
@@ -815,12 +830,48 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     )
 
 
+def _validate_code_shorthand(
+    context: YamlDict, language: SupportedLanguage | Literal["tested"], location: str
+):
+    """
+    Reject a plain-string before or after when the suite has no root language.
+
+    :param location: Prefix naming the tab and context, e.g. "Tab 'Files', context 2: ".
+    """
+    for key in ("before", "after"):
+        if language == "tested" and isinstance(context.get(key), str):
+            raise ValueError(
+                f"{location}{key} is a plain string, which needs a root-level "
+                f"language: set language on the test suite, "
+                f"or map each programming language to its code."
+            )
+
+
+def _convert_code(
+    raw: YamlObject, language: SupportedLanguage | Literal["tested"]
+) -> Code:
+    if raw is None:
+        return {}
+    if isinstance(raw, str):
+        raw = {language: raw}
+    assert isinstance(raw, dict)
+    code: Code = {}
+    for language_name, text in raw.items():
+        assert isinstance(text, str)
+        code[SupportedLanguage(language_name)] = TextData(content=text)
+    return code
+
+
 def _convert_context(context: YamlDict, dsl_context: DslContext) -> Context:
     dsl_context = dsl_context.deepen_context(context)
     raw_testcases = context["testcases"]
     assert isinstance(raw_testcases, list)
     testcases = _convert_dsl_list(raw_testcases, dsl_context, _convert_testcase)
-    return Context(testcases=testcases)
+    return Context(
+        testcases=testcases,
+        before=_convert_code(context.get("before"), dsl_context.language),
+        after=_convert_code(context.get("after"), dsl_context.language),
+    )
 
 
 def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
@@ -836,6 +887,7 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
     assert isinstance(name, str)
 
     _validate_no_testcase_keys(tab, f"Tab '{name}': ", "a tab", many_contexts=True)
+    _validate_no_code_keys(tab, f"Tab '{name}': ", "a tab")
 
     # The tab can have testcases or contexts.
     if "contexts" in tab:
@@ -845,6 +897,9 @@ def _convert_tab(tab: YamlDict, context: DslContext) -> Tab:
             assert isinstance(raw_context, dict)
             _validate_context_file_keys(
                 raw_context, f"Tab '{name}', context {number}: "
+            )
+            _validate_code_shorthand(
+                raw_context, context.language, f"Tab '{name}', context {number}: "
             )
         contexts = _convert_dsl_list(raw_contexts, context, _convert_context)
     elif "testcases" in tab:
@@ -891,6 +946,7 @@ def _convert_dsl(dsl_object: YamlObject) -> Suite:
         _validate_no_testcase_keys(
             dsl_object, "", "the root of the test suite", many_contexts=True
         )
+        _validate_no_code_keys(dsl_object, "", "the root of the test suite")
         namespace = dsl_object.get("namespace")
         context = context.deepen_context(dsl_object)
         tab_list = dsl_object["tabs"]

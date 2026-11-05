@@ -2180,3 +2180,215 @@ def test_image_parses_dsl_with_libyaml():
     )
     suite = parse_dsl(yaml_str)
     assert suite.namespace == "solution"
+
+
+def _before_after_dsl() -> str:
+    return """
+- tab: "Seeded"
+  contexts:
+  - before:
+      python: "import random; random.seed(7)"
+      c: "srand(7);"
+    after:
+      python: "print('done')"
+    testcases:
+      - expression: "roll()"
+        return: 1
+"""
+
+
+def test_context_before_after_per_language():
+    suite = parse_dsl(_before_after_dsl())
+    context = suite.tabs[0].contexts[0]
+    assert context.before == {
+        SupportedLanguage.PYTHON: TextData(content="import random; random.seed(7)"),
+        SupportedLanguage.C: TextData(content="srand(7);"),
+    }
+    assert context.after == {
+        SupportedLanguage.PYTHON: TextData(content="print('done')")
+    }
+
+
+def test_context_without_before_after_is_empty():
+    suite = parse_dsl(
+        """
+- tab: "Plain"
+  contexts:
+  - testcases:
+      - expression: "roll()"
+        return: 1
+"""
+    )
+    context = suite.tabs[0].contexts[0]
+    assert context.before == {}
+    assert context.after == {}
+
+
+def test_context_before_after_equals_json_suite():
+    json_str = json.dumps(
+        {
+            "tabs": [
+                {
+                    "name": "Seeded",
+                    "contexts": [
+                        {
+                            "before": {
+                                "python": {"data": "import random; random.seed(7)"},
+                                "c": {"data": "srand(7);"},
+                            },
+                            "after": {"python": {"data": "print('done')"}},
+                            "testcases": [
+                                {
+                                    "input": {
+                                        "type": "function",
+                                        "name": "roll",
+                                        "arguments": [],
+                                    },
+                                    "output": {
+                                        "result": {
+                                            "value": {
+                                                "type": "integer",
+                                                "data": 1,
+                                            }
+                                        }
+                                    },
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    assert parse_dsl(_before_after_dsl()) == parse_test_suite(json_str)
+
+
+def test_context_before_after_legacy_cases_layout():
+    yaml_str = """
+- unit: "Seeded"
+  cases:
+  - before:
+      python: "random.seed(7)"
+    after:
+      python: "random.seed(8)"
+    script:
+      - expression: "roll()"
+        return: 1
+"""
+    context = parse_dsl(yaml_str).tabs[0].contexts[0]
+    assert context.before == {
+        SupportedLanguage.PYTHON: TextData(content="random.seed(7)")
+    }
+    assert context.after == {
+        SupportedLanguage.PYTHON: TextData(content="random.seed(8)")
+    }
+
+
+def test_context_before_after_string_uses_root_language():
+    yaml_str = """
+language: python
+tabs:
+- tab: "Seeded"
+  contexts:
+  - before: "random.seed(7)"
+    after: "random.seed(8)"
+    testcases:
+      - expression: "roll()"
+        return: 1
+"""
+    context = parse_dsl(yaml_str).tabs[0].contexts[0]
+    assert context.before == {
+        SupportedLanguage.PYTHON: TextData(content="random.seed(7)")
+    }
+    assert context.after == {
+        SupportedLanguage.PYTHON: TextData(content="random.seed(8)")
+    }
+
+
+@pytest.mark.parametrize("key", ["before", "after"])
+def test_context_before_after_string_without_root_language_is_rejected(key: str):
+    yaml_str = f"""
+- tab: "Seeded"
+  contexts:
+  - {key}: "random.seed(7)"
+    testcases:
+      - expression: "roll()"
+        return: 1
+"""
+    with pytest.raises(
+        ValueError, match=rf"Tab 'Seeded', context 1: {key} is a plain string"
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize("key", ["before", "after"])
+@pytest.mark.parametrize(
+    "body",
+    [
+        """  contexts:
+    - testcases:
+        - expression: "roll()"
+          return: 1
+""",
+        """  testcases:
+    - expression: "roll()"
+      return: 1
+""",
+    ],
+    ids=["contexts", "testcases"],
+)
+def test_tab_before_after_is_rejected(key: str, body: str):
+    yaml_str = f"""
+- tab: "Rolls"
+  {key}:
+    python: "random.seed(7)"
+{body}"""
+    with pytest.raises(
+        ValueError,
+        match=rf"Tab 'Rolls': {key} can't be set on a tab: set it on each context",
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize("key", ["before", "after"])
+def test_root_before_after_is_rejected(key: str):
+    yaml_str = f"""
+{key}:
+  python: "random.seed(7)"
+tabs:
+  - tab: "Rolls"
+    contexts:
+      - testcases:
+          - expression: "roll()"
+            return: 1
+"""
+    with pytest.raises(
+        ValueError,
+        match=rf"{key} can't be set on the root of the test suite: "
+        r"set it on each context",
+    ):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"cobol": "x"},
+        {"python": 5},
+        {},
+        5,
+    ],
+)
+def test_schema_rejects_invalid_before_after(value: object):
+    suite = [
+        {
+            "tab": "Seeded",
+            "contexts": [
+                {
+                    "before": value,
+                    "testcases": [{"expression": "roll()", "return": 1}],
+                }
+            ],
+        }
+    ]
+    assert not load_schema_validator().is_valid(suite)
