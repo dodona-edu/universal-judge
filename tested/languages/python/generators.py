@@ -50,6 +50,19 @@ def convert_arguments(
     return ", ".join(results)
 
 
+def _convert_hashable(statement: Statement, with_namespace=False) -> str:
+    """Render a set element or map key so Python can hash it."""
+    if isinstance(statement, Value):
+        basic = as_basic_type(statement)
+        if basic.type in (BasicSequenceTypes.SEQUENCE, BasicSequenceTypes.SET):
+            assert isinstance(basic, SequenceType)
+            items = [_convert_hashable(item, with_namespace) for item in basic.data]
+            if basic.type == BasicSequenceTypes.SET:
+                return f"frozenset({{{', '.join(items)}}})" if items else "frozenset()"
+            return f"({', '.join(items)}{',' if len(items) == 1 else ''})"
+    return convert_statement(statement, with_namespace)
+
+
 def convert_value(value: Value, with_namespace=False) -> str:
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
@@ -91,12 +104,13 @@ def convert_value(value: Value, with_namespace=False) -> str:
         return f"[{convert_arguments(value.data, with_namespace)}]"
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
-        return f"{{{convert_arguments(value.data, with_namespace)}}}"
+        elements = ", ".join(_convert_hashable(e, with_namespace) for e in value.data)
+        return f"{{{elements}}}"
     elif value.type == BasicObjectTypes.MAP:
         assert isinstance(value, ObjectType)
         result = "{"
         for i, pair in enumerate(value.data):
-            result += convert_statement(pair.key, with_namespace)
+            result += _convert_hashable(pair.key, with_namespace)
             result += ": "
             result += convert_statement(pair.value, with_namespace)
             if i != len(value.data) - 1:

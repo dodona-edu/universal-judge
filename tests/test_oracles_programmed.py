@@ -90,6 +90,23 @@ def test_custom_check_function_can_use_sys_without_import(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ["javascript", "typescript"])
+def test_custom_check_function_receives_set_of_arrays(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "programmed_set_of_arrays.yaml",
+        "set-of-arrays",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]
+
+
 def test_custom_check_function_syntax_error(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
