@@ -1,9 +1,13 @@
 - tab: "Rolls"
   contexts:
     - before:
-        python: "import random; random.seed(7)"
+        python: |
+          import random
+          random.seed(7)
       after:
-        python: 'print("done")'
+        python: |
+          message = "done"
+          print(message)
       testcases:
         - expression: "roll()"
           return: 3
