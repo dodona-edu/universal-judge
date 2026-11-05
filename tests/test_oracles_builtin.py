@@ -1208,6 +1208,23 @@ def test_file_oracle_missing_actual_file(
     assert result[0].channel_override == "expected.txt"
 
 
+def test_file_oracle_directory_instead_of_file(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    (tmp_path / "actual").mkdir()
+    channel = FileOutputChannel(
+        files=[TextData(path="actual", content="expected content")]
+    )
+    result = evaluate_file(config, channel, "")
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0].result.enum == Status.WRONG
+    assert result[0].readable_expected == "expected content"
+    assert result[0].readable_actual == ""
+    assert result[0].channel_override == "actual"
+
+
 def test_file_oracle_missing_expected_resource(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):

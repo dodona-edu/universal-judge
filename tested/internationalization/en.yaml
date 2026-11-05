@@ -43,6 +43,7 @@ en:
           status: "Unexpected output."
           message: "Doesn't expect output for channel, but found: %{actual}."
         not-found: "File not found."
+        is-directory: "Expected a file, but found a directory."
     value:
       missing: "Missing return value."
       datatype:

@@ -102,6 +102,16 @@ def compare_file(
             readable_actual="",
             channel_override=file.path,
         )
+    except IsADirectoryError:
+        return OracleResult(
+            result=StatusMessage(
+                enum=Status.WRONG,
+                human=get_i18n_string("oracles.text.file.is-directory"),
+            ),
+            readable_expected=expected_content,
+            readable_actual="",
+            channel_override=file.path,
+        )
 
     if options["mode"] == "full":
         text_result = compare_text(options, expected_content, actual)
