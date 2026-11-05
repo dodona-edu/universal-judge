@@ -162,6 +162,7 @@ def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
 import values
 import sys
 import importlib
+import traceback
 from decimal import Decimal
 import builtins
 """
@@ -214,22 +215,33 @@ def send_specific_value(value):
 
 def send_specific_exception(exception):
     values.send_evaluated(exception_file, exception)
+
+def print_submission_exception(exception):
+    tb = exception.__traceback__
+    while tb is not None and tb.tb_frame.f_globals.get("__name__") != "{pu.submission_name}":
+        tb = tb.tb_next
+    traceback.print_exception(type(exception), exception, tb)
 """
 
     # Generate code for each context.
     ctx: PreparedContext
     for i, ctx in enumerate(pu.contexts):
         indent = " " * 4
+        import_submission = f"{indent * 2}import {pu.submission_name}\n"
+        if i != 0:
+            import_submission += (
+                f'{indent * 2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
+            )
         result += f"def {pu.unit.name}_context_{i}():\n"
         result += textwrap.indent(ctx.before, indent) + "\n"
 
         if not ctx.context.has_main_testcase():
             result += indent + "write_separator()\n"
-            result += indent + f"import {pu.submission_name}\n"
-            if i != 0:
-                result += (
-                    f'{indent}importlib.reload(sys.modules["{pu.submission_name}"])\n'
-                )
+            result += indent + "try:\n"
+            result += import_submission
+            result += indent + "except Exception as e:\n"
+            result += indent * 2 + "print_submission_exception(e)\n"
+            result += indent * 2 + "sys.exit(1)\n"
 
         tc: PreparedTestcase
         for j, tc in enumerate(ctx.testcases):
@@ -247,9 +259,7 @@ def send_specific_exception(exception):
             result += indent + "try:\n"
             if tc.testcase.is_main_testcase():
                 assert isinstance(tc.input, MainInput)
-                result += f"{indent * 2}import {pu.submission_name}\n"
-                if i != 0:
-                    result += f'{indent * 2}importlib.reload(sys.modules["{pu.submission_name}"])\n'
+                result += import_submission
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
                 result += (

@@ -1267,3 +1267,30 @@ def test_kotlin_main_forms(source: str, tmp_path: Path, pytestconfig: pytest.Con
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
+
+
+@pytest.mark.python
+@pytest.mark.parametrize(
+    ("solution", "crash_line"),
+    [
+        ("crash-first-import", "line 1, in <module>"),
+        ("crash-second-import", "line 4, in <module>"),
+    ],
+)
+def test_python_import_traceback_hides_harness_frames(
+    solution: str,
+    crash_line: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    conf = configuration(
+        pytestconfig, "python-import-crash", "python", tmp_path, "suite.yaml", solution
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    texts = [t["generated"] for t in updates.find_all("close-test")]
+    stderr = next(t for t in texts if "ZeroDivisionError" in t)
+    assert "execution_" not in stderr
+    assert "importlib" not in stderr
+    assert crash_line in stderr
+    assert "ZeroDivisionError: division by zero" in stderr
