@@ -8,7 +8,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
 
-from attrs import define
+from attrs import define, evolve
 
 from tested.configs import Bundle, create_bundle
 from tested.datatypes import BasicStringTypes
@@ -145,6 +145,10 @@ def _execute_custom_check_function(
     return result_, stdout_, stderr_
 
 
+def _as_text(value: str | None) -> str | None:
+    return None if value is None else str(value)
+
+
 def _evaluate_programmed(
     bundle: Bundle,
     oracle: CustomCheckOracle,
@@ -213,6 +217,14 @@ def _evaluate_programmed(
             messages=messages,
         )
 
+    # TESTed only accepts text here, but an evaluator may pass a student's value.
+    result_ = evolve(
+        result_,
+        readable_expected=_as_text(result_.readable_expected),
+        readable_actual=_as_text(result_.readable_actual),
+        dsl_expected=_as_text(result_.dsl_expected),
+        dsl_actual=_as_text(result_.dsl_actual),
+    )
     result_.messages.extend(messages)
     return result_
 
