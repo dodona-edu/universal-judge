@@ -106,6 +106,8 @@ def convert_value(value: Value, with_namespace=False) -> str:
         return f"[{convert_arguments(value.data, with_namespace)}]"
     elif value.type == BasicSequenceTypes.SET:
         assert isinstance(value, SequenceType)
+        if not value.data:
+            return "set()"
         elements = ", ".join(_convert_hashable(e, with_namespace) for e in value.data)
         return f"{{{elements}}}"
     elif value.type == BasicObjectTypes.MAP:
