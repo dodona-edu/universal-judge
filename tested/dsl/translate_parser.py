@@ -465,13 +465,12 @@ def _convert_text_output_channel(
 ) -> TextOutputChannel:
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
-    if isinstance(stream, str):
-        config = context.config.get(config_name, {})
-        raw_data = stream
-    else:
-        assert isinstance(stream, dict)
+    if isinstance(stream, dict):
         config = context.merge_inheritable_with_specific_config(stream, config_name)
         raw_data = str(stream["data"])
+    else:
+        config = context.config.get(config_name, {})
+        raw_data = str(stream)
 
     # Normalize the data if necessary.
     if config.get("normalizeTrailingNewlines", True):
@@ -479,10 +478,7 @@ def _convert_text_output_channel(
     else:
         data = raw_data
 
-    if isinstance(stream, str):
-        return TextOutputChannel(content=data, oracle=GenericTextOracle(options=config))
-    else:
-        assert isinstance(stream, dict)
+    if isinstance(stream, dict):
         if "oracle" not in stream or stream["oracle"] == "builtin":
             return TextOutputChannel(
                 content=data, oracle=GenericTextOracle(options=config)
@@ -492,6 +488,8 @@ def _convert_text_output_channel(
                 content=data, oracle=_convert_custom_check_oracle(stream)
             )
         raise TypeError(f"Unknown text oracle type: {stream['oracle']}")
+    else:
+        return TextOutputChannel(content=data, oracle=GenericTextOracle(options=config))
 
 
 def _convert_file_output_channel(
@@ -733,8 +731,7 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
             if isinstance(stdin_object, dict):
                 stdin = _convert_text_data(stdin_object)
             else:
-                assert isinstance(stdin_object, str)
-                file_content = _ensure_trailing_newline(stdin_object)
+                file_content = _ensure_trailing_newline(str(stdin_object))
                 stdin = TextData(content=file_content, path=None)
         else:
             stdin = EmptyChannel.NONE
