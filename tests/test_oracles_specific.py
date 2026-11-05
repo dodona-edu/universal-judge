@@ -98,28 +98,28 @@ def test_specific_oracle_messages_keep_their_permission(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     messages = [m["message"] for m in updates.find_all("append-message")]
-    # Dodona's former "staff" is still accepted, as "educator": a message that
-    # isn't understood would become text that students see.
     assert messages == [
-        {
-            "description": "for educators (staff)",
-            "format": "text",
-            "permission": "educator",
-        },
         {"description": "for educators", "format": "text", "permission": "educator"},
         {"description": "for everyone", "format": "text"},
     ]
 
 
+@pytest.mark.parametrize(
+    "suite",
+    [
+        pytest.param("specific-unknown-permission.yaml", id="teacher"),
+        pytest.param("specific-staff-permission.yaml", id="staff"),
+    ],
+)
 def test_specific_oracle_message_with_unknown_permission_is_not_shown_to_students(
-    tmp_path: Path, pytestconfig: pytest.Config
+    suite: str, tmp_path: Path, pytestconfig: pytest.Config
 ):
     conf = configuration(
         pytestconfig,
         "echo-function",
         "python",
         tmp_path,
-        "specific-unknown-permission.yaml",
+        suite,
         "correct",
     )
     result = execute_config(conf)
