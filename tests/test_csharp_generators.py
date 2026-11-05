@@ -1,6 +1,7 @@
 import pytest
 
 from tested.datatypes import (
+    AdvancedNumericTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
@@ -77,6 +78,7 @@ def test_convert_statement(source, full, expected):
             ),
             "new Dictionary<Int32, Object>() {{1, Foo{x=1}}}",
         ),
+        (NumberType(type=AdvancedNumericTypes.INT_32, data=5), "5"),
     ],
 )
 def test_convert_value(value, expected):
