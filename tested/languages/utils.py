@@ -92,24 +92,50 @@ def jvm_cleanup_stacktrace(stacktrace_str: str, submission_filename: str) -> str
     return "".join(lines)
 
 
+_haskell_header_skip = re.compile(
+    r"\s+|--[^\n]*|(?P<pragma>\{-#.*?#-\})|\{-.*?-\}", re.DOTALL
+)
+_haskell_module_header = re.compile(r"module(\s+)[\w.']+")
+
+
+def haskell_add_module_header(contents: str, name: str) -> tuple[str, bool]:
+    """
+    Make the file a module called `name`.
+
+    Adds a `module <name> where` line after the pragmas at the top of the file, or
+    renames the module if the file declares its own. Returns the new contents and
+    whether a line was added.
+    """
+    position = 0
+    pragmas_end = 0
+    while match := _haskell_header_skip.match(contents, position):
+        position = match.end()
+        if match.group("pragma"):
+            pragmas_end = position
+    if header := _haskell_module_header.match(contents, position):
+        return (
+            f"{contents[:position]}module{header.group(1)}{name}{contents[header.end() :]}",
+            False,
+        )
+    if pragmas_end == 0:
+        return f"module {name} where\n{contents}", True
+    line_end = contents.find("\n", pragmas_end)
+    if line_end == -1:
+        return f"{contents}\nmodule {name} where", True
+    split = line_end + 1
+    return f"{contents[:split]}module {name} where\n{contents[split:]}", True
+
+
 def haskell_solution(lang_config: "Language", solution: Path):
     """Support implicit modules if needed."""
     assert lang_config.config
     if lang_config.config.dodona.config_for().get("implicitModule", True):
-        name = submission_name(lang_config)
-        # noinspection PyTypeChecker
-        with open(solution, "r") as file:
-            contents = file.read()
-        # noinspection PyTypeChecker
-        with open(solution, "w") as file:
-            original_lines = contents.split("\n")
-            i = next(
-                i for i, line in enumerate(original_lines) if not line.startswith("{-#")
-            )
-            result = f"module {name} where"
-            resulting_lines = original_lines[:i] + [result] + original_lines[i:]
-            file.write("\n".join(resulting_lines))
-        lang_config.config.dodona.source_offset -= 1
+        contents, added = haskell_add_module_header(
+            solution.read_text(), submission_name(lang_config)
+        )
+        solution.write_text(contents)
+        if added:
+            lang_config.config.dodona.source_offset -= 1
 
 
 def executable_name(basename: str) -> str:

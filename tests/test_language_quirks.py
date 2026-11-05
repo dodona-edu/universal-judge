@@ -22,6 +22,7 @@ from tested.languages.haskell import config as haskell_config
 from tested.languages.java.generators import convert_value as java_convert_value
 from tested.languages.preparation import prepare_assignment, prepare_expression
 from tested.languages.python.generators import convert_statement
+from tested.languages.utils import haskell_add_module_header
 from tested.serialisation import (
     Assignment,
     BooleanType,
@@ -455,6 +456,119 @@ def test_haskell_whole_real_stays_real(tmp_path: Path, pytestconfig: pytest.Conf
     assert updates.find_status_enum() == ["correct"]
     testcase = updates.find_next("start-testcase")
     assert testcase["description"]["description"] == "echo 5.0"
+
+
+HASKELL_COMMENT_BEFORE_PRAGMA = """\
+-- Greeting program
+{-# LANGUAGE LambdaCase #-}
+
+main :: IO ()
+main = mapM_ (\\case
+    1 -> putStrLn "Hello"
+    _ -> putStrLn "Other") [1 :: Int]
+"""
+
+HASKELL_MULTILINE_PRAGMA = """\
+{-# LANGUAGE ScopedTypeVariables,
+             TupleSections #-}
+
+main :: IO ()
+main = putStrLn "Hello"
+"""
+
+HASKELL_OWN_MAIN_HEADER = """\
+module Main where
+
+main :: IO ()
+main = putStrLn "Hello"
+"""
+
+HASKELL_OWN_SUBMISSION_HEADER = HASKELL_OWN_MAIN_HEADER.replace("Main", "Submission")
+
+HASKELL_ONLY_PRAGMA = "{-# LANGUAGE ScopedTypeVariables #-}"
+
+
+@pytest.mark.parametrize(
+    "contents, expected",
+    [
+        ("main = pure ()\n", "module M where\nmain = pure ()\n"),
+        (
+            "{-# LANGUAGE LambdaCase #-}\nmain = pure ()\n",
+            "{-# LANGUAGE LambdaCase #-}\nmodule M where\nmain = pure ()\n",
+        ),
+        (
+            HASKELL_COMMENT_BEFORE_PRAGMA,
+            HASKELL_COMMENT_BEFORE_PRAGMA.replace(
+                "LambdaCase #-}\n", "LambdaCase #-}\nmodule M where\n"
+            ),
+        ),
+        (
+            HASKELL_MULTILINE_PRAGMA,
+            HASKELL_MULTILINE_PRAGMA.replace(
+                "TupleSections #-}\n", "TupleSections #-}\nmodule M where\n"
+            ),
+        ),
+        (HASKELL_ONLY_PRAGMA, HASKELL_ONLY_PRAGMA + "\nmodule M where"),
+    ],
+)
+def test_haskell_module_header_is_added(contents: str, expected: str):
+    assert haskell_add_module_header(contents, "M") == (expected, True)
+
+
+@pytest.mark.parametrize(
+    "contents, expected",
+    [
+        (HASKELL_OWN_MAIN_HEADER, HASKELL_OWN_MAIN_HEADER.replace("Main", "M")),
+        (
+            "{- note -}\n-- more\nmodule Foo.Bar (main) where\n",
+            "{- note -}\n-- more\nmodule M (main) where\n",
+        ),
+        (
+            "module\n  Main where\n\nmain = pure ()\n",
+            "module\n  M where\n\nmain = pure ()\n",
+        ),
+    ],
+)
+def test_haskell_module_header_is_renamed(contents: str, expected: str):
+    assert haskell_add_module_header(contents, "M") == (expected, False)
+
+
+@pytest.mark.haskell
+@pytest.mark.parametrize(
+    "contents, expected",
+    [
+        pytest.param(
+            HASKELL_COMMENT_BEFORE_PRAGMA, "correct", id="comment-before-pragma"
+        ),
+        pytest.param(HASKELL_MULTILINE_PRAGMA, "correct", id="multiline-pragma"),
+        pytest.param(HASKELL_OWN_MAIN_HEADER, "correct", id="main-header"),
+        pytest.param(HASKELL_OWN_SUBMISSION_HEADER, "correct", id="own-header"),
+        pytest.param(HASKELL_ONLY_PRAGMA, "compilation error", id="only-pragma"),
+    ],
+)
+def test_haskell_submission_header(
+    contents: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    resources = tmp_path / "resources"
+    resources.mkdir()
+    workdir = tmp_path / "workdir"
+    workdir.mkdir()
+    (resources / "plan.yaml").write_text(
+        '- tab: "Tests"\n  testcases:\n    - stdout: "Hello"\n'
+    )
+    source = tmp_path / "submission.hs"
+    source.write_text(contents)
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "haskell",
+        workdir,
+        "plan.yaml",
+        options={"source": source, "resources": resources},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == [expected]
 
 
 @pytest.mark.haskell
