@@ -136,13 +136,22 @@ def judge(bundle: Bundle):
     planned_units = plan_test_suite(bundle, strategy=PlanStrategy.OPTIMAL)
 
     # Attempt to precompile everything.
-    common_dir, dependencies, selector = _generate_files(bundle, planned_units)
+    common_dir, dependencies = _prepare_common_directory(bundle)
+    execution_files = _generate_execution_files(bundle, planned_units, common_dir)
+    if bundle.language.needs_selector():
+        _logger.debug("Generating selector.")
+        selector = generate_selector(
+            bundle, common_dir, [unit.name for unit in planned_units]
+        )
+        execution_files.append(selector)
+    else:
+        selector = None
 
     # Create an execution plan.
     plan = ExecutionPlan(
         units=planned_units,
         common_directory=common_dir,
-        files=dependencies,
+        files=dependencies + execution_files,
         selector=selector,
         max_time=max_time,
         start_time=start,
@@ -164,6 +173,9 @@ def judge(bundle: Bundle):
         _logger.warning("Precompilation failed. Falling back to unit compilation.")
         planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
         plan.units = planned_units
+        plan.files = dependencies + _generate_execution_files(
+            bundle, planned_units, common_dir
+        )
         compilation_results = None
 
     _logger.info("Starting execution")
@@ -256,19 +268,17 @@ def _execute_one_unit(
     return local_compilation_results, execution_result, execution_dir
 
 
-def _generate_files(
-    bundle: Bundle, execution_plan: list[PlannedExecutionUnit]
-) -> tuple[Path, list[str], str | None]:
+def _prepare_common_directory(bundle: Bundle) -> tuple[Path, list[str]]:
     """
-    Generate all necessary files, using the templates. This creates a common
-    directory, copies all dependencies to that folder and runs the generation.
+    Create the common directory and copy the language dependencies and the
+    submission into it.
     """
     dependencies = bundle.language.initial_dependencies()
     bundle.config.tested_directory.mkdir()
     common_dir = bundle.config.tested_directory / "common"
     common_dir.mkdir()
 
-    _logger.debug("Generating files in common directory %s", common_dir)
+    _logger.debug("Preparing common directory %s", common_dir)
 
     # Copy dependencies
     dependency_paths = bundle.language.path_to_dependencies()
@@ -283,32 +293,37 @@ def _generate_files(
     # Allow modifications of the submission file.
     bundle.language.modify_solution(solution_path)
 
-    # The names of the executions for the test suite.
-    execution_names = []
+    return common_dir, dependencies
+
+
+def _generate_execution_files(
+    bundle: Bundle, units: list[PlannedExecutionUnit], destination: Path
+) -> list[str]:
+    """
+    Generate the execution files for the given units and copy the oracles they
+    need.
+    """
+    files = []
     # Generate the files for each execution.
-    for execution_unit in execution_plan:
+    for execution_unit in units:
         _logger.debug("Generating file for execution %s", execution_unit.name)
         generated, evaluators = generate_execution(
-            bundle=bundle, destination=common_dir, execution_unit=execution_unit
+            bundle=bundle, destination=destination, execution_unit=execution_unit
         )
 
         # Copy functions to the directory.
         for evaluator in evaluators:
+            # Units can share an oracle; a duplicate would clash when hardlinked.
+            if evaluator in files:
+                continue
             source = Path(bundle.config.resources) / evaluator
-            _logger.debug("Copying oracle from %s to %s", source, common_dir)
-            shutil.copy2(source, common_dir)
+            _logger.debug("Copying oracle from %s to %s", source, destination)
+            shutil.copy2(source, destination)
+            files.append(evaluator)
 
-        dependencies.extend(evaluators)
-        dependencies.append(generated)
-        execution_names.append(execution_unit.name)
+        files.append(generated)
 
-    if bundle.language.needs_selector():
-        _logger.debug("Generating selector.")
-        generated = generate_selector(bundle, common_dir, execution_names)
-        dependencies.append(generated)
-    else:
-        generated = None
-    return common_dir, dependencies, generated
+    return files
 
 
 def _process_results(
