@@ -1022,3 +1022,107 @@ def test_python_set_elements_and_map_keys_are_hashable(value, rendered, expected
     result = convert_statement(value)
     assert result == rendered
     assert eval(result) == expected
+
+
+@pytest.mark.kotlin
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        (
+            "fun main(vararg args: String) {\n}",
+            "fun solutionMain(args: Array<String>) {\n}",
+        ),
+        (
+            "// The entry point is fun main() {\nfun main() {\n}",
+            (
+                "// The entry point is fun main() {\n"
+                "fun solutionMain(args: Array<String> = emptyArray()) {\n}"
+            ),
+        ),
+        (
+            "fun main() {\n}",
+            "fun solutionMain(args: Array<String> = emptyArray()) {\n}",
+        ),
+        (
+            "fun main(args: Array<String>) {\n}",
+            "fun solutionMain(args: Array<String>) {\n}",
+        ),
+        (
+            "suspend fun main() {\n}",
+            "suspend fun solutionMain(args: Array<String> = emptyArray()) {\n}",
+        ),
+        ("fun main(x: String) {\n}", "fun main(x: String) {\n}"),
+        (
+            "/* Entry point */ fun main() {\n}",
+            "/* Entry point */ fun solutionMain(args: Array<String> = emptyArray()) {\n}",
+        ),
+        (
+            "fun main(vararg args: StringBuilder) {\n}",
+            "fun main(vararg args: StringBuilder) {\n}",
+        ),
+        (
+            '/*\nfun main() {\n    println("old")\n}\n*/\nfun main() {\n    println("Hello")\n}',
+            (
+                '/*\nfun main() {\n    println("old")\n}\n*/\n'
+                "fun solutionMain(args: Array<String> = emptyArray()) {\n"
+                '    println("Hello")\n}'
+            ),
+        ),
+        (
+            "val x = 1 // fun main() {\nfun main() {\n}",
+            (
+                "val x = 1 // fun main() {\n"
+                "fun solutionMain(args: Array<String> = emptyArray()) {\n}"
+            ),
+        ),
+    ],
+    ids=[
+        "vararg",
+        "main-in-comment",
+        "no-args",
+        "array-args",
+        "suspend",
+        "string",
+        "closed-block-comment",
+        "vararg-string-prefix",
+        "commented-out-block",
+        "trailing-line-comment",
+    ],
+)
+def test_kotlin_main_is_renamed(source: str, expected: str, tmp_path: Path):
+    solution = tmp_path / "submission.kt"
+    solution.write_text(source)
+    LANGUAGES["kotlin"]().modify_solution(solution)
+    assert solution.read_text() == expected
+
+
+@pytest.mark.kotlin
+@pytest.mark.parametrize(
+    "source",
+    [
+        'fun main(vararg args: String) {\n    println("Hello")\n}\n',
+        '// The entry point is fun main() {\nfun main() {\n    println("Hello")\n}\n',
+    ],
+    ids=["vararg", "main-in-comment"],
+)
+def test_kotlin_main_forms(source: str, tmp_path: Path, pytestconfig: pytest.Config):
+    resources = tmp_path / "resources"
+    resources.mkdir()
+    (resources / "plan.yaml").write_text(
+        '- tab: "Tests"\n  testcases:\n    - stdout: "Hello"\n'
+    )
+    submission = tmp_path / "submission.kt"
+    submission.write_text(source)
+    workdir = tmp_path / "workdir"
+    workdir.mkdir()
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "kotlin",
+        workdir,
+        "plan.yaml",
+        options={"source": submission, "resources": resources},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"]

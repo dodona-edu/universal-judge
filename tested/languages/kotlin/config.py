@@ -55,6 +55,19 @@ def get_executable(name):
 JIT_FLAGS = ["-XX:TieredStopAtLevel=1"]
 
 
+def _rename_first_outside(
+    contents: str, pattern: re.Pattern[str], template: str, spans: list[tuple[int, int]]
+) -> str | None:
+    for match in pattern.finditer(contents):
+        if not any(start <= match.start() < end for start, end in spans):
+            return (
+                contents[: match.start()]
+                + match.expand(template)
+                + contents[match.end() :]
+            )
+    return None
+
+
 class Kotlin(Language):
     def initial_dependencies(self) -> list[str]:
         return ["Values.kt", "EvaluationResult.kt"]
@@ -187,21 +200,30 @@ class Kotlin(Language):
     def modify_solution(self, solution: Path):
         with open(solution, "r") as file:
             contents = file.read()
-        # We use regex to find the main function.
-        # First, check if we have a no-arg main function.
-        # If so, replace it with a renamed main function that does have args.
-        # Needed for main outside class
-        no_args = re.compile(r"fun(\s+)main(\s*)\((\s*)\)")
-        replacement = r"fun\1solutionMain\2(args: Array<String> = emptyArray()\3)"
-        contents, nr = re.subn(no_args, replacement, contents, count=1)
-        if nr == 0:
-            # There was no main function without arguments. Now we try a main
-            # function with arguments.
-            with_args = re.compile(
-                r"fun(\s+)main(\s*)\((\s*[^\s]*\s*:\s*" r"Array\s*<\s*String\s*>)"
+        # The generated code calls solutionMain(Array<String>); skip commented-out mains.
+        comments = [
+            match.span() for match in re.finditer(r"//[^\n]*|/\*[\s\S]*?\*/", contents)
+        ]
+        no_args = re.compile(r"\bfun(\s+)main(\s*)\((\s*)\)")
+        with_args = re.compile(
+            r"\bfun(\s+)main(\s*)\((\s*)(?:vararg\s+([^\s:]*)\s*:\s*String\b"
+            r"|([^\s:]*)\s*:\s*Array\s*<\s*String\s*>)"
+        )
+        renamed = _rename_first_outside(
+            contents,
+            no_args,
+            r"fun\1solutionMain\2(args: Array<String> = emptyArray()\3)",
+            comments,
+        )
+        if renamed is None:
+            renamed = _rename_first_outside(
+                contents,
+                with_args,
+                r"fun\1solutionMain\2(\3\4\5: Array<String>",
+                comments,
             )
-            replacement = r"fun\1solutionMain\2(\3"
-            contents = re.sub(with_args, replacement, contents, count=1)
+        if renamed is not None:
+            contents = renamed
         with open(solution, "w") as file:
             file.write(contents)
 
