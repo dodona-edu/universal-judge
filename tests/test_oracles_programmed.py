@@ -107,6 +107,24 @@ def test_custom_check_function_receives_set_of_arrays(
     assert updates.find_status_enum() == ["correct"]
 
 
+def test_custom_check_function_non_text_readable_values(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "programmed_non_text.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["wrong"]
+    assert updates.find_next("start-test")["expected"] == "5"
+    assert updates.find_next("close-test")["generated"] == "True"
+
+
 def test_custom_check_function_syntax_error(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

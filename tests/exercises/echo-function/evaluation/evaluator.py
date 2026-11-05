@@ -54,3 +54,7 @@ def evaluate_sys_without_import(_context):
 
 def evaluate_set_of_arrays(context):
     return EvaluationResult(context.actual == {(1, 2), (3, 4)})
+
+
+def evaluate_non_text_readable(_context):
+    return EvaluationResult(False, readable_expected=5, readable_actual=True)
