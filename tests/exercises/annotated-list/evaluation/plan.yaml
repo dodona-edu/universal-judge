@@ -1,0 +1,6 @@
+- tab: "annotated list"
+  contexts:
+    - testcases:
+        - statement: "xs: list = numbers()"
+        - expression: "total(xs)"
+          return: 6

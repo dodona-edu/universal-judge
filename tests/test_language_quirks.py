@@ -90,6 +90,26 @@ def test_kotlin_package_submission_has_compilation_message(
     assert any("unresolved reference 'echo'" in html.unescape(d) for d in descriptions)
 
 
+@pytest.mark.parametrize(
+    ("language", "expected"),
+    [
+        pytest.param("typescript", ["correct"], marks=pytest.mark.typescript),
+        pytest.param("java", ["compilation error"], marks=pytest.mark.java),
+        pytest.param("kotlin", ["compilation error"], marks=pytest.mark.kotlin),
+        pytest.param("csharp", ["compilation error"], marks=pytest.mark.csharp),
+    ],
+)
+def test_bare_list_type_hint(
+    language: str, expected: list[str], tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "annotated-list", language, tmp_path, "plan.yaml", "correct"
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == expected
+
+
 @pytest.mark.c
 def test_c_pointer_char_return(tmp_path: Path, pytestconfig: pytest.Config):
     conf = configuration(
