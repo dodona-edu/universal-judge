@@ -43,6 +43,7 @@ es:
           status: "Salida inesperada."
           message: "No se esperaba salida para el canal, pero se encontró: %{actual}."
         not-found: "Archivo no encontrado."
+        is-directory: "Se esperaba un archivo, pero se encontró un directorio."
     value:
       missing: "Falta el valor de retorno."
       datatype:

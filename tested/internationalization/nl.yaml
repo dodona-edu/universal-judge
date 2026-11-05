@@ -43,6 +43,7 @@ nl:
           status: "Onverwachte uitvoer."
           message: "Verwachtte geen uitvoer voor kanaal, maar vond %{actual}."
         not-found: "Bestand niet gevonden."
+        is-directory: "Verwachtte een bestand, maar vond een map."
     value:
       missing: "Ontbrekende returnwaarde"
       datatype:
