@@ -344,21 +344,6 @@ main = do
     return result
 
 
-def convert_check_function(evaluator: str, function: FunctionCall) -> str:
-    return f"""{{-# LANGUAGE ExtendedDefaultRules, NamedDefaults #-}}
-module EvaluatorExecutor where
-
-import qualified {evaluator}
-import Values
-import System.IO (stdout)
-
-{DEFAULTING}
-
-main = do x <- return $ {convert_function_call(function)}
-          sendEvaluatedH stdout x
-"""
-
-
 def convert_encoder(values: list[Value]) -> str:
     result = f"""{{-# LANGUAGE ExtendedDefaultRules, NamedDefaults #-}}
 module Encode where
