@@ -23,7 +23,7 @@
  },
  {
   "command": "close-test",
-  "generated": "(int) 5",
+  "generated": "5",
   "status": {
    "enum": "correct"
   }
@@ -59,7 +59,7 @@
  },
  {
   "command": "close-test",
-  "generated": "(int) 2",
+  "generated": "2",
   "status": {
    "enum": "correct"
   }
