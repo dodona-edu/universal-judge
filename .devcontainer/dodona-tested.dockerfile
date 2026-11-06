@@ -5,7 +5,7 @@
 # It should not contain any development tools or dependencies.
 # Add those to dev-dependencies.sh instead.
 
-FROM python:3.12.15-slim-trixie
+FROM python:3.15.2-slim-trixie
 
 # Set up the environment
 
@@ -54,13 +54,18 @@ CFG
         unzip
 
     # Python dependencies
-    pip install --no-cache-dir --upgrade \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        libc6-dev \
+        libyaml-dev
+    # Without a wheel, fail the build instead of silently building PyYAML without libyaml
+    PYYAML_FORCE_LIBYAML=1 pip install --no-cache-dir --upgrade \
         psutil==5.9.8 \
         attrs==26.1.0 \
         cattrs==26.2.1 \
         jsonschema==4.22.0 \
         typing_inspect==0.9.0 \
-        pyyaml==6.0.1 \
+        pyyaml==6.0.3 \
         Pygments==2.18.0 \
         python-i18n==0.3.9 \
         ruff==0.17.0
@@ -105,7 +110,7 @@ CFG
         zlib1g-dev \
         libgmp-dev
     bash -c "set -o pipefail && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_MINIMAL=1 sh"
-    bash -c "source /root/.ghcup/env && ghcup install ghc 9.6 --isolate $HASKELL_DIR/ghc"
+    bash -c "source /root/.ghcup/env && ghcup install ghc 9.12.4 --isolate $HASKELL_DIR/ghc"
     bash -c "source /root/.ghcup/env && ghcup install cabal --isolate $HASKELL_DIR/cabal"
     cabal update
     cabal v1-install --global aeson
@@ -136,11 +141,11 @@ CFG
 
     # Exercise dependencies
     pip install --no-cache-dir --upgrade \
-      numpy==2.4.6 \
-      pandas==3.0.3 \
+      numpy==2.5.4 \
+      pandas==3.1.0 \
       openpyxl==3.1.5 \
-      matplotlib==3.10.9 \
-      lxml==6.1.1
+      matplotlib==3.11.2 \
+      lxml==6.1.3
 
     # Clean up caches
     apt-get clean
@@ -165,8 +170,7 @@ CFG
 EOF
 
 # Precompile TESTed's Haskell helper modules with the flags of Haskell.compilation
-# in tested/languages/haskell/config.py: "static" for ghc, "dynamic" for runhaskell
-# (GHCi only loads dynamic objects). TESTed only uses them if these sources match
+# in tested/languages/haskell/config.py. TESTed only uses them if these sources match
 # its templates. ADD keys the build cache on the downloaded content, so the next
 # image build recompiles them after a template change (a RUN curl stays cached).
 # The judge reads them as runner, but a remote ADD writes mode 600, and
@@ -179,10 +183,7 @@ ADD ${TESTED_TEMPLATES}/EvaluationUtils.hs ${TESTED_TEMPLATES}/Values.hs /usr/lo
 RUN <<EOF
     set -eux
     chmod 644 /usr/local/share/tested/haskell/static/*.hs
-    mkdir /usr/local/share/tested/haskell/dynamic
-    cp /usr/local/share/tested/haskell/static/*.hs /usr/local/share/tested/haskell/dynamic/
     bash -c "cd /usr/local/share/tested/haskell/static && ghc -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
-    bash -c "cd /usr/local/share/tested/haskell/dynamic && ghc -no-link -dynamic -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
 EOF
 
 USER runner
