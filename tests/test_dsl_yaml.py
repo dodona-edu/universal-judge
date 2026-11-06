@@ -661,6 +661,37 @@ def test_tab_config_trickles_down_stdout():
     assert config["caseInsensitive"]
 
 
+@pytest.mark.parametrize("channel", ["stdout", "stderr"])
+def test_number_output_is_text(channel: str):
+    yaml_str = f"""
+- tab: "Ctx"
+  testcases:
+  - arguments: [ "--arg" ]
+    {channel}: 42
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    output = suite.tabs[0].contexts[0].testcases[0].output
+    stream = getattr(output, channel)
+    assert isinstance(stream, TextOutputChannel)
+    assert stream.content == "42\n"
+
+
+def test_number_stdin_is_text():
+    yaml_str = """
+- tab: "Ctx"
+  testcases:
+  - stdin: 42
+    stdout: "x"
+    """
+    json_str = translate_to_test_suite(yaml_str)
+    suite = parse_test_suite(json_str)
+    tc_input = suite.tabs[0].contexts[0].testcases[0].input
+    assert isinstance(tc_input, MainInput)
+    assert isinstance(tc_input.stdin, TextData)
+    assert tc_input.stdin.content == "42\n"
+
+
 def test_tab_config_trickles_down_stderr():
     yaml_str = """
 - tab: "Ctx"
