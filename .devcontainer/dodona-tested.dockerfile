@@ -110,7 +110,7 @@ CFG
         zlib1g-dev \
         libgmp-dev
     bash -c "set -o pipefail && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_MINIMAL=1 sh"
-    bash -c "source /root/.ghcup/env && ghcup install ghc 9.6 --isolate $HASKELL_DIR/ghc"
+    bash -c "source /root/.ghcup/env && ghcup install ghc 9.12.4 --isolate $HASKELL_DIR/ghc"
     bash -c "source /root/.ghcup/env && ghcup install cabal --isolate $HASKELL_DIR/cabal"
     cabal update
     cabal v1-install --global aeson
