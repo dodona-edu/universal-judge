@@ -104,7 +104,13 @@ def _get_checked_type(expression: "Expression") -> tuple | AllTypes | None:
     Like `_get_type_for`, but for the heterogeneity check: collections become
     `(type, *content types)` and `None` means there are no elements to disagree.
     """
-    if isinstance(expression, SequenceType):
+    if (
+        isinstance(expression, SequenceType)
+        and expression.type == AdvancedSequenceTypes.TUPLE
+    ):
+        # A tuple is typed per position, so its elements may differ.
+        return expression.type, *(_get_checked_type(x) for x in expression.data)
+    elif isinstance(expression, SequenceType):
         return expression.type, _merge_checked_types(
             _get_checked_type(x) for x in expression.data
         )

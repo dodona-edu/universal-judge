@@ -1,0 +1,152 @@
+[
+ {
+  "command": "start-judgement"
+ },
+ {
+  "command": "start-tab",
+  "title": "swapPair"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "swapPair (1, \"a\")",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "(\"a\", 1)"
+ },
+ {
+  "command": "close-test",
+  "generated": "(\"a\", 1)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "encode"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "encode \"aab\"",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "[(2, 'a'), (1, 'b')]"
+ },
+ {
+  "command": "close-test",
+  "generated": "[(2, 'a'), (1, 'b')]",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "decode"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "decode [(2, 'a'), (1, 'b')]",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "\"aab\""
+ },
+ {
+  "command": "close-test",
+  "generated": "\"aab\"",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "start-tab",
+  "title": "record"
+ },
+ {
+  "command": "start-context"
+ },
+ {
+  "command": "start-testcase",
+  "description": {
+   "description": "record 5",
+   "format": "haskell"
+  }
+ },
+ {
+  "channel": "return",
+  "command": "start-test",
+  "expected": "(5, \"five\", True, 2.5)"
+ },
+ {
+  "command": "close-test",
+  "generated": "(5, \"five\", True, 2.5)",
+  "status": {
+   "enum": "correct"
+  }
+ },
+ {
+  "command": "close-testcase"
+ },
+ {
+  "command": "close-context",
+  "data": {}
+ },
+ {
+  "command": "close-tab"
+ },
+ {
+  "command": "close-judgement"
+ }
+]
