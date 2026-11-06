@@ -28,6 +28,11 @@ class JsonTypeable a where
     toJsonIO :: a -> IO (String, Value)
     default toJsonIO :: a -> IO (String, Value)
     toJsonIO a = return ((toType a), (toJson a))
+    -- Char overrides these, so a String is sent as text.
+    listType :: [a] -> String
+    listType _ = "list"
+    listToJson :: [a] -> Value
+    listToJson l = toJSON (map toObject l)
 
 -- We support maybe as the null value
 instance (JsonTypeable a) => JsonTypeable (Maybe a) where
@@ -79,14 +84,16 @@ instance JsonTypeable Integer where toType _ = "bigint"
 instance JsonTypeable Int where toType _ = "integer"
 
 instance JsonTypeable Bool where toType _ = "boolean"
-instance JsonTypeable Char where toType _ = "char"
+instance JsonTypeable Char where
+    toType _ = "char"
+    listType _ = "text"
+    listToJson = toJSON
 
 instance JsonTypeable Text where toType _ = "text"
-instance {-# OVERLAPPABLE #-} JsonTypeable String where toType _ = "text"
 
 instance {-# OVERLAPPABLE #-} JsonTypeable a => JsonTypeable [a] where
-    toType m = "list"
-    toJson l = toJSON (map toObject l)
+    toType = listType
+    toJson = listToJson
 
 instance () => JsonTypeable () where
     toType _ = "undefined"

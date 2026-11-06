@@ -1,0 +1,97 @@
+- tab: "let"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let xs = [3, 1, 2]"
+        - expression:
+            haskell: "Submission.sortDesc xs"
+          return: [3, 2, 1]
+        - expression:
+            haskell: "length xs"
+          return: 3
+- tab: "bind"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "n <- return (5 :: Int)"
+        - expression:
+            haskell: "Submission.double n"
+          return: 10
+    - testcases:
+        - statement:
+            haskell: |-
+              m <- do
+                let k = 3
+                return (k + 1 :: Int)
+        - expression:
+            haskell: "Submission.double m"
+          return: 8
+- tab: "expression"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "Submission.boom 0"
+          exception: "boom"
+    - testcases:
+        - statement:
+            haskell: "Submission.double 3"
+        - statement:
+            haskell: "let k = 2 in Submission.double k"
+        - expression:
+            haskell: "Submission.double 4"
+          return: 8
+- tab: "patterns"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "(a, b) <- return (1, 2)"
+        - statement:
+            haskell: "x : _ <- return [7, 8]"
+        - expression:
+            haskell: "a + b + x"
+          return: 10
+- tab: "throwing bind"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "n <- Submission.boomIO"
+          exception: "boomIO"
+        - expression:
+            haskell: "Submission.double 1"
+          return: 2
+        - expression:
+            haskell: "Submission.double n"
+          exception: "boomIO"
+    - testcases:
+        - statement:
+            haskell: "n <- Submission.boomIO"
+    - testcases:
+        - expression:
+            haskell: "Submission.double 2"
+          return: 4
+- tab: "nested let"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let f x = let y = x * 2 in y + 1"
+        - expression:
+            haskell: "f 3"
+          return: 7
+- tab: "pattern forms"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "xs@(x : _) <- return [1, 2]"
+        - statement:
+            haskell: "~(a, b) <- return (3, 4)"
+        - expression:
+            haskell: "x + length xs + a + b"
+          return: 10
+- tab: "primed names"
+  contexts:
+    - testcases:
+        - statement:
+            haskell: "let in' = 5"
+        - expression:
+            haskell: "Submission.double in'"
+          return: 10

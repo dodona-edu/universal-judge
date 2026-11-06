@@ -4,3 +4,27 @@
       return: [2, 1]
     - expression: "rev([])"
       return: []
+- tab: "flatten"
+  testcases:
+    - expression: "flatten([[1], [2, 3]])"
+      return: [1, 2, 3]
+    - expression: "flatten([[]])"
+      return: []
+- tab: "firstOr"
+  testcases:
+    - expression: "firstOr([\"a\", \"b\"])"
+      return: "a"
+    - expression: "firstOr([[]])"
+      return: []
+- tab: "actions"
+  testcases:
+    - expression:
+        haskell: "Submission.actions"
+      return: [1, 2]
+- tab: "isNone"
+  testcases:
+    - expression: "is_none(None)"
+      return: true
+    - expression:
+        haskell: "Submission.isNone (Just 5)"
+      return: false

@@ -1,0 +1,203 @@
+{
+  "tabs": [
+    {
+      "name": "Multiline",
+      "contexts": [
+        {
+          "before": {
+            "haskell": {
+              "data": "let a = 1\nlet b = 2"
+            }
+          },
+          "after": {
+            "haskell": {
+              "data": "let c = a + b\nc `seq` return ()"
+            }
+          },
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "a + b"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 3
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "case Submission.echo [1, 2] of\n  [] -> 0\n  _ -> 1"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 1
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "case Submission.echo (5 :: Int) of 0 -> \"zero\"\n                                   _ -> \"other\""
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "other"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "x <- case Submission.echo (5 :: Int) of 0 -> return \"zero\"\n                                        _ -> return \"other\""
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "x"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "other"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "(aaaaaa, bbbbbb, cccccc, dddddd) <- do\n  return (1 :: Int, 2 :: Int, 3 :: Int, 4 :: Int)"
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "aaaaaa + dddddd"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 5
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "case Submission.echo [1, 2] of\n  [] -> 0 -- empty\n  _ -> 1 -- not empty"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 1
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "n <- return (5 :: Int) -- five"
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "n"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "integer",
+                    "data": 5
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "testcases": [
+            {
+              "input": {
+                "literals": {
+                  "haskell": "-- the value\nx <- case Submission.echo (5 :: Int) of 0 -> return \"zero\"\n                                        _ -> return \"other\""
+                },
+                "type": "statement"
+              }
+            },
+            {
+              "input": {
+                "literals": {
+                  "haskell": "x"
+                }
+              },
+              "output": {
+                "result": {
+                  "value": {
+                    "type": "text",
+                    "data": "other"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

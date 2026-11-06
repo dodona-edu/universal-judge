@@ -19,7 +19,7 @@ ALL_SPECIFIC_LANGUAGES = all_languages_except("bash")
 COMPILE_LANGUAGES = all_languages_except("javascript", "typescript", "bash")
 
 
-SERIALIZABLE_LANGUAGES = all_languages_except("haskell")
+SERIALIZABLE_LANGUAGES = ALL_LANGUAGES
 
 
 @pytest.mark.parametrize("language", OBJECT_LANGUAGES)

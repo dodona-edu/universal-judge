@@ -1,4 +1,5 @@
 import json
+import re
 from decimal import Decimal
 
 from tested.datatypes import (
@@ -17,6 +18,7 @@ from tested.languages.preparation import (
     PreparedContext,
     PreparedExecutionUnit,
     PreparedFunctionCall,
+    PreparedLanguageLiteral,
     PreparedTestcase,
     PreparedTestcaseStatement,
 )
@@ -84,7 +86,7 @@ def convert_value(value: Value, display=False) -> str:
     elif value.type == BasicBooleanTypes.BOOLEAN:
         return str(value.data)
     elif value.type == BasicNothingTypes.NOTHING:
-        return "Nothing" if display else "Nothing :: Maybe Integer"
+        return "Nothing"
     elif value.type == BasicSequenceTypes.SEQUENCE:
         assert isinstance(value, SequenceType)
         return f"[{convert_arguments(value.data, display)}]"
@@ -160,21 +162,15 @@ def convert_declaration(tp: AllTypes | VariableType) -> str:
     raise AssertionError(f"Unknown type: {tp!r}")
 
 
-def convert_statement(statement: Statement, lifting=False, display=False) -> str:
+def convert_statement(statement: Statement, display=False) -> str:
     if isinstance(statement, Expression):
-        result = ""
-        if lifting:
-            result += "return ("
         if isinstance(statement, Identifier):
-            result += statement
+            return statement
         elif isinstance(statement, FunctionCall):
-            result += convert_function_call(statement, display)
+            return convert_function_call(statement, display)
         else:
             assert isinstance(statement, Value)
-            result += convert_value(statement, display)
-        if lifting:
-            result += ")"
-        return result
+            return convert_value(statement, display)
     else:
         assert isinstance(statement, VariableAssignment)
         expression = convert_statement(statement.expression, display=display)
@@ -183,12 +179,63 @@ def convert_statement(statement: Statement, lifting=False, display=False) -> str
 
 indent = " " * 4
 
-# Number literals are not annotated: this picks their type where GHC can't infer one.
-DEFAULTING = "default (Int, Double)"
+# Keywords can't occur in the pattern of a bind, such as "do x <- getLine; ...".
+KEYWORDS = frozenset(
+    ["case", "class", "data", "do", "else", "if", "import", "in", "let", "module"]
+    + ["newtype", "of", "then", "type", "where"]
+)
+BIND = re.compile(r"\s*([\w'(),\[\]:@~\s]+?)\s*<-")
+
+
+def without_strings_and_comments(code: str) -> str:
+    code = re.sub(r'"(?:\\.|[^"\\\n])*"', '""', code)
+    return re.sub(r"--.*", "", code)
+
+
+def is_let(code: str) -> bool:
+    """
+    A let statement, not a let expression. Each let expression has an "in", so a
+    let statement has one "let" more than it has "in"s.
+    """
+    code = without_strings_and_comments(code)
+    lets = len(re.findall(r"(?<![\w'])let(?![\w'])", code))
+    ins = len(re.findall(r"(?<![\w'])in(?![\w'])", code))
+    return bool(re.match(r"\s*let(?![\w'])", code)) and lets > ins
+
+
+def bind_parts(code: str) -> tuple[str, str] | None:
+    """The pattern and the action of a bind, such as "(a, b) <- action"."""
+    pattern = BIND.match(without_strings_and_comments(code))
+    if pattern is None or set(re.findall(r"[\w']+", pattern.group(1))) & KEYWORDS:
+        return None
+    arrow = code.index("<-")
+    return code[:arrow].strip(), code[arrow + 2 :].strip()
+
+
+def place_code(prefix: str, code: str, column: int = 0) -> str:
+    """
+    Write code after prefix. The first line of the code starts at column in the
+    suite, and its next lines keep their position relative to that column. They
+    move by at least the do-block indentation, so they stay inside the do block.
+    """
+    prefix = prefix.ljust(column + len(indent))
+    return prefix + code.replace("\n", "\n" + " " * (len(prefix) - column))
+
+
+def close_code(code: str, suffix: str) -> str:
+    """Add suffix after code, on a new line if a comment ends the code."""
+    if "--" in code.rsplit("\n", 1)[-1]:
+        return code + "\n" + indent * 2 + suffix
+    return code + suffix
+
+
+# Number literals and empty collections are not annotated: this picks their type
+# where GHC can't infer one.
+DEFAULTING = "default (Int, Double)\ndefault Values.JsonTypeable (Int, Double)"
 
 
 def convert_execution_unit(pu: PreparedExecutionUnit) -> str:
-    result = f"""{{-# LANGUAGE NamedFieldPuns, ExtendedDefaultRules #-}}
+    result = f"""{{-# LANGUAGE NamedFieldPuns, ExtendedDefaultRules, NamedDefaults #-}}
 module {pu.unit.name} where
 
 import System.IO (hPutStr, stderr, stdout, hFlush)
@@ -264,11 +311,11 @@ nonExit e = case fromException e :: Maybe ExitCode of
     for i, ctx in enumerate(pu.contexts):
         result += f"{pu.unit.name.lower()}Context{i} :: IO ()\n"
         result += f"{pu.unit.name.lower()}Context{i} = do\n"
-        result += indent + ctx.before + "\n"
+        result += place_code(indent, ctx.before) + "\n"
 
         # Generate code for each testcase
         tc: PreparedTestcase
-        for tc in ctx.testcases:
+        for j, tc in enumerate(ctx.testcases):
             result += indent + "writeSeparator\n"
 
             if tc.testcase.is_main_testcase():
@@ -285,18 +332,46 @@ nonExit e = case fromException e :: Maybe ExitCode of
                 )
             else:
                 assert isinstance(tc.input, PreparedTestcaseStatement)
-                # In Haskell we do not have statements, so we need to keep them separate.
-                # Additionally, exceptions with "statements" are not supported at this time.
-                if is_statement_strict(tc.input.statement):
+                literal = None
+                if (
+                    isinstance(tc.input.statement, PreparedLanguageLiteral)
+                    and tc.input.statement.is_statement()
+                ):
+                    literal = tc.input.statement.literal
+                # An assignment or a let is a line of the do block. A bind runs its
+                # action like a testcase: an exception goes to the exception channel,
+                # and the bound names throw it when they are used.
+                if is_statement_strict(tc.input.statement) or (
+                    literal is not None and is_let(literal)
+                ):
+                    statement = convert_statement(tc.input.unwrapped_input_statement())
+                    result += place_code(indent, statement) + "\n"
+                elif literal is not None and (bind := bind_parts(literal)):
+                    pattern, action = bind
+                    after_arrow = literal[literal.index("<-") + 2 :]
+                    start = len(literal) - len(after_arrow.lstrip())
+                    column = start - (literal.rfind("\n", 0, start) + 1)
+                    name = f"testedBind{j}"
+                    on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        indent
-                        + convert_statement(tc.input.unwrapped_input_statement())
+                        close_code(
+                            place_code(
+                                f"{indent}{name} <- tryJust nonExit (", action, column
+                            ),
+                            ")",
+                        )
                         + "\n"
                     )
-                else:
-                    action = convert_statement(
-                        tc.input.unwrapped_input_statement(), True
+                    result += (
+                        indent
+                        + f"either (\\e -> let ee = Just e in {on_exception}) (\\_ -> return ()) {name}\n"
                     )
+                    result += (
+                        place_code(indent + "let ", pattern)
+                        + f" = either throw id {name}\n"
+                    )
+                else:
+                    expression = convert_statement(tc.input.unwrapped_input_statement())
                     id_result = tc.input.input_statement("r")
                     if isinstance(id_result, Identifier):
                         on_value = f"sendValue {convert_statement(id_result)}"
@@ -304,10 +379,13 @@ nonExit e = case fromException e :: Maybe ExitCode of
                         on_value = convert_statement(id_result)
                     on_exception = convert_statement(tc.exception_statement("ee"))
                     result += (
-                        indent
-                        + f"runTestcase ({action}) (\\r -> {on_value}) (\\ee -> {on_exception})\n"
+                        close_code(
+                            place_code(indent + "runTestcase (return (", expression),
+                            f")) (\\r -> {on_value}) (\\ee -> {on_exception})",
+                        )
+                        + "\n"
                     )
-        result += indent + ctx.after + "\n"
+        result += place_code(indent, ctx.after) + "\n"
         result += indent + 'putStr ""\n'
 
     result += """
@@ -343,23 +421,8 @@ main = do
     return result
 
 
-def convert_check_function(evaluator: str, function: FunctionCall) -> str:
-    return f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
-module EvaluatorExecutor where
-
-import qualified {evaluator}
-import Values
-import System.IO (stdout)
-
-{DEFAULTING}
-
-main = do x <- return $ {convert_function_call(function)}
-          sendEvaluatedH stdout x
-"""
-
-
 def convert_encoder(values: list[Value]) -> str:
-    result = f"""{{-# LANGUAGE ExtendedDefaultRules #-}}
+    result = f"""{{-# LANGUAGE ExtendedDefaultRules, NamedDefaults #-}}
 module Encode where
 
 import Values

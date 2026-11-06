@@ -1,2 +1,1 @@
 # <exercise>/<language>/<case> <issue URL> [<issue URL> ...]: judged as a strict xfail
-haskell-polymorphic-empty-list/haskell/correct https://github.com/dodona-edu/universal-judge/issues/735
