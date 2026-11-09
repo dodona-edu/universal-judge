@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, NotRequired, Optional, TypedDict
+from typing import TYPE_CHECKING, NotRequired, TypedDict
 
 from tested.datatypes import AllTypes, ExpressionTypes
 from tested.dodona import AnnotateCode, Message, Status
@@ -66,9 +66,9 @@ class Language(ABC):
     want to run for another test suite, you must create a new instance.
     """
 
-    config: Optional["GlobalConfig"]
+    config: GlobalConfig | None
 
-    def __init__(self, config: Optional["GlobalConfig"] = None):
+    def __init__(self, config: GlobalConfig | None = None):
         """
         :param config: If the config is None, only "config" methods will work.
         """
@@ -425,7 +425,7 @@ class Language(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+    def generate_execution_unit(self, execution_unit: PreparedExecutionUnit) -> str:
         """
         Generate code for a prepared execution unit.
 

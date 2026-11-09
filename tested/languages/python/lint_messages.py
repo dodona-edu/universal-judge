@@ -59,7 +59,7 @@ class Messages:
             self._rules[code] = _Rule(rule.get("type", DEFAULT_TYPE), templates)
 
     @classmethod
-    def load(cls, path: Path = MESSAGES_FILE) -> "Messages":
+    def load(cls, path: Path = MESSAGES_FILE) -> Messages:
         with path.open("rb") as file:
             return cls(tomllib.load(file))
 

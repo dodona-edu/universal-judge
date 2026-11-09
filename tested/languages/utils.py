@@ -20,7 +20,7 @@ code_regex = re.compile(r"<code>:(\d+)")
 gcc_gutter_regex = re.compile(r"^( *)(\d+)( \|)")
 
 
-def workdir_sources(lang_config: "Language") -> list[str]:
+def workdir_sources(lang_config: Language) -> list[str]:
     """The top-level workdir files in the language's extension, sorted."""
     assert lang_config.config
     workdir = lang_config.config.dodona.workdir
@@ -28,7 +28,7 @@ def workdir_sources(lang_config: "Language") -> list[str]:
     return sorted(str(f.absolute()) for f in sources if f.is_file())
 
 
-def cleanup_description(lang_config: "Language", description: str) -> str:
+def cleanup_description(lang_config: Language, description: str) -> str:
     return description.replace(rf"{submission_name(lang_config)}.", r"", 1)
 
 
@@ -140,7 +140,7 @@ def haskell_add_module_header(contents: str, name: str) -> tuple[str, bool]:
     return f"{contents[:split]}module {name} where\n{contents[split:]}", True
 
 
-def haskell_solution(lang_config: "Language", solution: Path):
+def haskell_solution(lang_config: Language, solution: Path):
     """Support implicit modules if needed."""
     assert lang_config.config
     if lang_config.config.dodona.config_for().get("implicitModule", True):
@@ -215,18 +215,18 @@ def _replace_code_line_number(offset: int, stacktrace: str) -> str:
 
 @overload
 def convert_stacktrace_to_clickable_feedback(
-    lang: "Language", stacktrace: str
+    lang: Language, stacktrace: str
 ) -> ExtendedMessage: ...
 
 
 @overload
 def convert_stacktrace_to_clickable_feedback(
-    lang: "Language", stacktrace: None
+    lang: Language, stacktrace: None
 ) -> None: ...
 
 
 def convert_stacktrace_to_clickable_feedback(
-    lang: "Language", stacktrace: str | None
+    lang: Language, stacktrace: str | None
 ) -> ExtendedMessage | None:
     """
     Convert a stacktrace to an HTML message with clickable links to the submission.
@@ -261,7 +261,7 @@ def convert_unknown_type(value: StringType) -> str:
     return result
 
 
-def is_special_void_call(input_: PreparedTestcaseStatement, lang: "Language") -> bool:
+def is_special_void_call(input_: PreparedTestcaseStatement, lang: Language) -> bool:
     """
     Check if the given testcase is a call to a special function with a "void" return
     value.

@@ -48,9 +48,7 @@ class ConvertedOracleContext:
     submission_path: str | None
 
     @staticmethod
-    def from_context(
-        bundle: Bundle, context: OracleContext
-    ) -> "ConvertedOracleContext":
+    def from_context(bundle: Bundle, context: OracleContext) -> ConvertedOracleContext:
         return ConvertedOracleContext(
             expected=eval(generate_statement(bundle, context.expected)),
             actual=eval(generate_statement(bundle, context.actual)),
@@ -67,7 +65,7 @@ class ConvertedOracleContext:
 
 
 @contextlib.contextmanager
-def _catch_output() -> Generator[tuple[StringIO, StringIO], None, None]:
+def _catch_output() -> Generator[tuple[StringIO, StringIO]]:
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     stdout = StringIO()

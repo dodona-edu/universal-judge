@@ -47,7 +47,7 @@ def try_as_readable_value(
 ) -> tuple[str | None, Message | None]:
     try:
         actual = parse_value(value)
-    except (ValueError, TypeError, RecursionError):
+    except ValueError, TypeError, RecursionError:
         return None, None
     else:
         return generate_statement(bundle, actual), None

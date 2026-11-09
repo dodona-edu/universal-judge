@@ -203,7 +203,7 @@ def generate_statement(bundle: Bundle, statement: Statement) -> str:
 def generate_execution(
     bundle: Bundle,
     destination: Path,
-    execution_unit: "PlannedExecutionUnit",
+    execution_unit: PlannedExecutionUnit,
 ) -> tuple[str, list[str]]:
     """
     Generate the files related to the execution.

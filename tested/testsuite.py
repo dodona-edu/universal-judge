@@ -93,7 +93,7 @@ class LanguageLiterals(WithFunctions, WithFeatures):
     def is_statement(self) -> bool:
         return self.type == "statement"
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
     def get_used_features(self) -> FeatureSet:

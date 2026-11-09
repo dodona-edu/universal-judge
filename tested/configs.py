@@ -127,7 +127,7 @@ class GlobalConfig:
     dodona: DodonaConfig
     testcase_separator_secret: str
     context_separator_secret: str
-    suite: "Suite"
+    suite: Suite
 
     @property
     def options(self) -> Options:
@@ -138,7 +138,7 @@ class GlobalConfig:
 class Bundle:
     """A bundle of arguments and configs for running everything."""
 
-    language: "Language"
+    language: Language
     global_config: GlobalConfig
     out: IO
 
@@ -147,7 +147,7 @@ class Bundle:
         return self.global_config.dodona
 
     @property
-    def suite(self) -> "Suite":
+    def suite(self) -> Suite:
         return self.global_config.suite
 
     @property

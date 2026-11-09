@@ -249,7 +249,7 @@ class DslContext:
     config: dict[str, dict] = field(factory=dict)
     language: SupportedLanguage | Literal["tested"] = "tested"
 
-    def deepen_context(self, new_level: YamlDict | None) -> "DslContext":
+    def deepen_context(self, new_level: YamlDict | None) -> DslContext:
         """
         Merge certain fields of the new object with the current context, resulting
         in a new context for the new level.

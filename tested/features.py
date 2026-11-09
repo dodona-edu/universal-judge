@@ -95,7 +95,7 @@ class TypeSupport(StrEnum):
 
 
 def fallback_type_support_map(
-    language: "Language",
+    language: Language,
 ) -> dict[ExpressionTypes, TypeSupport]:
     """
     Return a map containing the support for all types.
@@ -144,7 +144,7 @@ def _sorted_repr(items: AbstractSet[Any]) -> str:
     return f"{{{body}}}" if items else "set()"
 
 
-def is_supported(language: "Language") -> list[Message] | None:
+def is_supported(language: Language) -> list[Message] | None:
     """
     Check if the given configuration bundle is supported. This will check if the
     test suite inside the bundle can be executed by the programming language in the
