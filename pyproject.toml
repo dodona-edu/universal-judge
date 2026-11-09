@@ -2,6 +2,12 @@
 target-version = "py315"
 extend-exclude = ["tests/exercises/", "tests/golden/", "tests/descriptions/"]
 
+[tool.ruff.lint]
+extend-select = ["TID254", "TID255"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+require-lazy = ["pygments"]
+
 [tool.ruff.lint.per-file-ignores]
 # These tests check that typing.Union is handled like X | Y
 "tests/test_parsing.py" = ["UP007"]

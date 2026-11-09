@@ -23,6 +23,16 @@ from tested.testsuite import (
     TextBuiltin,
     ValueBuiltin,
 )
+lazy from tested.oracles import (
+    exception,
+    exitcode,
+    ignored,
+    nothing,
+    programmed,
+    specific,
+    text,
+    value,
+)
 
 
 def get_oracle(
@@ -35,17 +45,6 @@ def get_oracle(
     """
     Get the oracle for a given output channel.
     """
-    from ..oracles import (
-        exception,
-        exitcode,
-        ignored,
-        nothing,
-        programmed,
-        specific,
-        text,
-        value,
-    )
-
     currier: Callable[[RawOracle, dict | None], Oracle] = functools.partial(
         _curry_oracle, bundle, context_dir
     )

@@ -7,8 +7,8 @@ import sys
 from typing import IO
 
 from tested.configs import DodonaConfig, create_bundle
-from tested.dsl import parse_dsl
 from tested.testsuite import parse_test_suite
+lazy from tested.dsl import parse_dsl
 
 # It is better to let it crash using memory or time limits
 sys.set_int_max_str_digits(0)
