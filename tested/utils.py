@@ -8,7 +8,7 @@ from collections.abc import Callable, Iterable
 from contextlib import AbstractContextManager
 from itertools import zip_longest
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, TypeGuard
+from typing import IO, TYPE_CHECKING, Any, TypeIs
 from typing import get_args as typing_get_args
 
 if TYPE_CHECKING:
@@ -260,7 +260,7 @@ def sorted_no_duplicates[T, K](
     return no_dup
 
 
-def is_statement_strict(statement: Any) -> TypeGuard[Assignment]:
+def is_statement_strict(statement: Any) -> TypeIs[Assignment]:
     """
     Check that the given value is a strict statement: it must be a statement but
     not an expression.

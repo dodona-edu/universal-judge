@@ -25,7 +25,7 @@ class ContentPathString(str):
 
 type OptionDict = dict[str, int | bool]
 
-type YamlDict = dict[str, "YamlObject"]
+type YamlDict = dict[str, YamlObject]
 
 type YamlObject = (
     YamlDict
