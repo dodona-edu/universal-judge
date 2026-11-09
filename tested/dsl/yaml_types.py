@@ -23,6 +23,13 @@ class ContentPathString(str):
     pass
 
 
+class IgnoredTag:
+    """The value of `!ignored`. Not a str, so no string schema can accept it."""
+
+    def __repr__(self) -> str:
+        return "!ignored"
+
+
 type OptionDict = dict[str, int | bool]
 
 type YamlDict = dict[str, YamlObject]
@@ -38,6 +45,7 @@ type YamlObject = (
     | ExpressionString
     | ReturnOracle
     | ContentPathString
+    | IgnoredTag
 )
 
 

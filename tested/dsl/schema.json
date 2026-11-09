@@ -198,7 +198,7 @@
         },
         "exception" : {
           "description" : "The expected exception message.",
-          "oneOf" : [
+          "anyOf" : [
             {
               "type" : "string",
               "description" : "Message of the expected exception."
@@ -223,6 +223,9 @@
                   }
                 }
               }
+            },
+            {
+              "$ref" : "#/$defs/ignored"
             }
           ]
         },
@@ -263,8 +266,15 @@
           "$ref" : "#/$defs/fileOutputChannel"
         },
         "exit_code" : {
-          "type" : "integer",
-          "description" : "Expected exit code for the context. Only the last testcase of a context may define exit_code."
+          "description" : "Expected exit code for the context. Only the last testcase of a context may define exit_code.",
+          "anyOf" : [
+            {
+              "type" : "integer"
+            },
+            {
+              "$ref" : "#/$defs/ignored"
+            }
+          ]
         }
       }
     },
@@ -373,6 +383,10 @@
         }
       }
     },
+    "ignored" : {
+      "description" : "Don't check this channel.",
+      "format" : "tested-dsl-ignored"
+    },
     "textOutputChannel" : {
       "anyOf" : [
         {
@@ -416,6 +430,9 @@
               }
             }
           ]
+        },
+        {
+          "$ref" : "#/$defs/ignored"
         }
       ]
     },
@@ -526,11 +543,14 @@
               }
             }
           ]
+        },
+        {
+          "$ref" : "#/$defs/ignored"
         }
       ]
     },
     "returnOutputChannel" : {
-      "oneOf" : [
+      "anyOf" : [
         {
           "$ref" : "#/$defs/yamlValueOrPythonExpression"
         },
@@ -630,6 +650,9 @@
               "$ref" : "#/$defs/yamlValueOrPythonExpression"
             }
           }
+        },
+        {
+          "$ref" : "#/$defs/ignored"
         }
       ]
     },

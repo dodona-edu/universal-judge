@@ -1,0 +1,5 @@
+- tab: "My tab"
+  testcases:
+    - expression: 'echo("input")'
+      stdout: !ignored
+      return: !ignored
