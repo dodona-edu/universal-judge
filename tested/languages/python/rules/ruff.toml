@@ -13,7 +13,7 @@
 #
 # target-version can differ between the judges: it must be the Python version that runs the
 # submissions, or ruff reports syntax that version accepts as an error.
-target-version = "py312"
+target-version = "py315"
 
 [lint]
 select = [

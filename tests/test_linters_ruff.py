@@ -311,3 +311,21 @@ def test_ruff_failure_is_reported(
     messages = updates.find_all("append-message")
     assert len(messages) == 2  # Educator and student warning
     assert len(updates.find_all("annotate-code")) == 0
+
+
+def test_ruff_targets_the_python_that_runs_submissions(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Python 3.14 allows an except clause without parentheses.
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "python",
+        tmp_path,
+        "plan.tson",
+        "exceptions",
+        {"options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) == 0
