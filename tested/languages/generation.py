@@ -9,10 +9,6 @@ from collections.abc import Collection
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-lazy from pygments import highlight
-lazy from pygments.formatters.html import HtmlFormatter
-lazy from pygments.lexers import get_lexer_by_name
-
 from tested.configs import Bundle
 from tested.datatypes import AllTypes, BasicObjectTypes
 from tested.dodona import ExtendedMessage
@@ -39,17 +35,6 @@ _logger = logging.getLogger(__name__)
 type NestedTypeDeclaration = (
     AllTypes | tuple[AllTypes, tuple[NestedTypeDeclaration, ...]]
 )
-
-
-def highlight_code(stmt: str, language: str = "console") -> str:
-    """
-    Highlight code for some programming language.
-
-    :param stmt: The code to highlight.
-    :param language: The language of the code.
-    """
-    lexer = get_lexer_by_name(language, stripall=True)
-    return highlight(stmt, lexer, HtmlFormatter(nowrap=True))
 
 
 def generate_execution_unit(
