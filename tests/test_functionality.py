@@ -837,6 +837,24 @@ def test_ignored_return_and_got_some(
     assert updates.find_status_enum() == []  # Empty means correct
 
 
+def test_ignored_channels_are_correct_and_hidden(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # The solution prints on stdout at top level, which would be wrong without !ignored.
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "python",
+        tmp_path,
+        "ignored_channels.yaml",
+        "top-level-output",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == []  # Empty means correct
+    assert not [x for x in updates if x["command"] == "start-test"]
+
+
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
 def test_language_literals_work(
     language: str, tmp_path: Path, pytestconfig: pytest.Config

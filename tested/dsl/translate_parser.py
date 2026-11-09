@@ -38,6 +38,7 @@ from tested.dsl.yaml_types import (
     ContentPathString,
     DslValidationError,
     ExpressionString,
+    IgnoredTag,
     ReturnOracle,
     TestedType,
     YamlDict,
@@ -134,6 +135,12 @@ def _return_path(loader: yaml.Loader, node: yaml.Node) -> ContentPathString:
     return ContentPathString(result)
 
 
+def _ignored_tag(loader: yaml.Loader, node: yaml.Node) -> IgnoredTag:
+    result = _parse_yaml_value(loader, node)
+    assert result == "", f"!ignored takes no value, got {result}"
+    return IgnoredTag()
+
+
 def _parse_yaml(yaml_stream: str) -> YamlObject:
     """
     Parse a string or stream to YAML.
@@ -153,6 +160,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
     yaml.add_constructor("!expression", _expression_string, DslLoader)
     yaml.add_constructor("!oracle", _return_oracle, DslLoader)
     yaml.add_constructor("!path", _return_path, DslLoader)
+    yaml.add_constructor("!ignored", _ignored_tag, DslLoader)
 
     try:
         return yaml.load(yaml_stream, DslLoader)
@@ -228,7 +236,11 @@ def load_schema_validator(dsl_object: YamlObject = None) -> Validator:
 
     @format_checker.checks("tested-dsl-plain-value")
     def _is_plain_value(value: object) -> bool:
-        return not isinstance(value, (ReturnOracle, ExpressionString))
+        return not isinstance(value, (ReturnOracle, ExpressionString, IgnoredTag))
+
+    @format_checker.checks("tested-dsl-ignored")
+    def _is_ignored(value: object) -> bool:
+        return isinstance(value, IgnoredTag)
 
     return original_validator(schema_object, format_checker=format_checker)  # ty: ignore[missing-argument]  # concrete validators default registry
 
@@ -462,7 +474,10 @@ def _convert_language_specific_oracle(stream: dict) -> LanguageSpecificOracle:
 
 def _convert_text_output_channel(
     stream: YamlObject, context: DslContext, config_name: str
-) -> TextOutputChannel:
+) -> TextOutputChannel | IgnoredChannel:
+    if isinstance(stream, IgnoredTag):
+        return IgnoredChannel.IGNORED
+
     # Get the config applicable to this level.
     # Either attempt to get it from an object, or using the inherited options as is.
     if isinstance(stream, dict):
@@ -494,7 +509,9 @@ def _convert_text_output_channel(
 
 def _convert_file_output_channel(
     stream: YamlObject, context: DslContext, *config_names: str
-) -> FileOutputChannel:
+) -> FileOutputChannel | IgnoredChannel:
+    if isinstance(stream, IgnoredTag):
+        return IgnoredChannel.IGNORED
 
     config = context.merge_inheritable_with_specific_config(stream, *config_names)
     if "mode" not in config:
@@ -556,7 +573,12 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
     return value
 
 
-def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputChannel:
+def _convert_advanced_value_output_channel(
+    stream: YamlObject,
+) -> ValueOutputChannel | IgnoredChannel:
+    if isinstance(stream, IgnoredTag):
+        return IgnoredChannel.IGNORED
+
     if isinstance(stream, ReturnOracle):
         return_object = stream
         if "oracle" not in return_object or return_object["oracle"] == "builtin":
@@ -582,6 +604,35 @@ def _convert_advanced_value_output_channel(stream: YamlObject) -> ValueOutputCha
     else:
         yaml_value = _convert_yaml_value(stream)
         return ValueOutputChannel(value=yaml_value)
+
+
+def _convert_exception_output_channel(
+    stream: YamlObject,
+) -> ExceptionOutputChannel | IgnoredChannel:
+    if isinstance(stream, IgnoredTag):
+        return IgnoredChannel.IGNORED
+
+    if isinstance(stream, str):
+        message = stream
+        types = None
+    else:
+        assert isinstance(stream, dict)
+        message = stream.get("message")
+        assert isinstance(message, str)
+        assert isinstance(stream["types"], dict)
+        types = _convert_language_dictionary(cast(dict[str, str], stream["types"]))
+    return ExceptionOutputChannel(
+        exception=ExpectedException(message=message, types=types)
+    )
+
+
+def _convert_exit_code_output_channel(
+    stream: YamlObject,
+) -> ExitCodeOutputChannel | IgnoredChannel:
+    if isinstance(stream, IgnoredTag):
+        return IgnoredChannel.IGNORED
+
+    return ExitCodeOutputChannel(value=cast(int, stream))
 
 
 def _validate_testcase_combinations(testcase: YamlDict):
@@ -777,22 +828,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
     if (stderr := testcase.get("stderr")) is not None:
         output.stderr = _convert_text_output_channel(stderr, context, "stderr")
     if (exception := testcase.get("exception")) is not None:
-        if isinstance(exception, str):
-            message = exception
-            types = None
-        else:
-            assert isinstance(exception, dict)
-            message = exception.get("message")
-            assert isinstance(message, str)
-            assert isinstance(exception["types"], dict)
-            types = _convert_language_dictionary(
-                cast(dict[str, str], exception["types"])
-            )
-        output.exception = ExceptionOutputChannel(
-            exception=ExpectedException(message=message, types=types)
-        )
+        output.exception = _convert_exception_output_channel(exception)
     if (exit_code := testcase.get("exit_code")) is not None:
-        output.exit_code = ExitCodeOutputChannel(value=cast(int, exit_code))
+        output.exit_code = _convert_exit_code_output_channel(exit_code)
     if (result := testcase.get("return")) is not None:
         assert not return_channel
         output.result = _convert_advanced_value_output_channel(result)
