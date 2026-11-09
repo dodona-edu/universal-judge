@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def _as_int(value: str) -> int | None:
     try:
         return int(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return None
 
 

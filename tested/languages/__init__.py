@@ -7,7 +7,7 @@ In short, if it has to do with the templates or is programming language specific
 you will probably find it in this package.
 """
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from tested.languages.bash.config import Bash
 from tested.languages.c.config import C
@@ -39,7 +39,7 @@ LANGUAGES = {
 }
 
 
-def get_language(global_config: Optional["GlobalConfig"], language: str) -> Language:
+def get_language(global_config: GlobalConfig | None, language: str) -> Language:
     """
     Get the configuration for a programming language.
     """

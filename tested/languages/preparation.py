@@ -172,7 +172,7 @@ class PreparedExecutionUnit:
     """
 
     # The planned, original execution unit.
-    unit: "PlannedExecutionUnit"
+    unit: PlannedExecutionUnit
     # A list of prepared contexts.
     contexts: list[PreparedContext]
     # The name of the file for the return channel.
@@ -189,7 +189,7 @@ class PreparedExecutionUnit:
     evaluator_names: set[str]
     # The language module.
     # TODO: this should not go here, but it does.
-    language: "Language"
+    language: Language
 
 
 def prepare_argument(
@@ -530,7 +530,7 @@ def exception_file(bundle: Bundle, directory: Path):
 def prepare_execution_unit(
     bundle: Bundle,
     destination: Path,
-    execution_unit: "PlannedExecutionUnit",
+    execution_unit: PlannedExecutionUnit,
 ) -> PreparedExecutionUnit:
     """
     Prepare an execution unit for code generation.

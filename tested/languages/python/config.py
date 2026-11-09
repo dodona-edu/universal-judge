@@ -217,7 +217,7 @@ class Python(Language):
 
         return generators.convert_statement(statement)
 
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+    def generate_execution_unit(self, execution_unit: PreparedExecutionUnit) -> str:
         from tested.languages.python import generators
 
         return generators.convert_execution_unit(execution_unit)

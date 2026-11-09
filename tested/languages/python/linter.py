@@ -191,7 +191,7 @@ def _syntax_error(config: DodonaConfig) -> AnnotateCode | None:
             text=messages().text(SYNTAX_ERROR, e.msg, config.natural_language),
             type=Severity.ERROR,
         )
-    except (ValueError, OSError, RecursionError, MemoryError):
+    except ValueError, OSError, RecursionError, MemoryError:
         # Unreadable, a null byte, or too deeply nested for the compiler (such
         # as a sum of thousands of terms): ruff reports what it can.
         return None

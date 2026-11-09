@@ -27,7 +27,7 @@ from decimal import Decimal
 from enum import StrEnum, auto, unique
 from functools import reduce, total_ordering
 from types import NoneType
-from typing import Any, Literal, Optional, Self, Union, cast, override
+from typing import Any, Literal, Self, cast, override
 
 from attrs import define, field, resolve_types, validators
 
@@ -66,7 +66,7 @@ logger = logging.getLogger(__name__)
 WrappedAllTypes = AllTypes | tuple["WrappedAllTypes", "WrappedAllTypes"]
 
 
-def _get_type_for(expression: "Expression") -> WrappedAllTypes:
+def _get_type_for(expression: Expression) -> WrappedAllTypes:
     if isinstance(expression, SequenceType):
         return expression.type, expression.get_content_type()
     elif isinstance(expression, ObjectType):
@@ -99,7 +99,7 @@ def _get_combined_types(types: Iterable[WrappedAllTypes]) -> WrappedAllTypes:
     return reduce(combine, iterator, first)
 
 
-def _get_checked_type(expression: "Expression") -> tuple | AllTypes | None:
+def _get_checked_type(expression: Expression) -> tuple | AllTypes | None:
     """
     Like `_get_type_for`, but for the heterogeneity check: collections become
     `(type, *content types)` and `None` means there are no elements to disagree.
@@ -178,7 +178,7 @@ def _get_self_nested_type(data_type: AllTypes) -> NestedTypes:
 
 
 class WithFunctions:
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         raise NotImplementedError
 
 
@@ -223,7 +223,7 @@ class NumberType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
 
@@ -243,7 +243,7 @@ class StringType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
 
@@ -256,7 +256,7 @@ class BooleanType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
 
@@ -265,7 +265,7 @@ class SequenceType(WithFeatures, WithFunctions):
     type: SequenceTypes = field(
         validator=validators.instance_of((BasicSequenceTypes, AdvancedSequenceTypes))
     )
-    data: list["Expression"]
+    data: list[Expression]
     diagnostic: None = None  # Unused in this type.
 
     def get_used_features(self) -> FeatureSet:
@@ -286,14 +286,14 @@ class SequenceType(WithFeatures, WithFunctions):
         """
         return _get_combined_types(_get_type_for(element) for element in self.data)
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.data)
 
 
 @define
 class ObjectKeyValuePair(WithFeatures, WithFunctions):
-    key: "Expression"
-    value: "Expression"
+    key: Expression
+    value: Expression
 
     def get_key_type(self) -> WrappedAllTypes:
         """
@@ -313,7 +313,7 @@ class ObjectKeyValuePair(WithFeatures, WithFunctions):
         nested_features = [self.key.get_used_features(), self.value.get_used_features()]
         return combine_features(nested_features)
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return self.value.get_functions()
 
 
@@ -348,7 +348,7 @@ class ObjectType(WithFeatures, WithFunctions):
             [base_features] + value_nested_features + key_nested_features
         )
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(
             flatten((pair.key.get_functions(), pair.value.get_functions()))
             for pair in self.data
@@ -367,7 +367,7 @@ class NothingType(WithFeatures, WithFunctions):
     def get_used_features(self) -> FeatureSet:
         return FeatureSet(set(), {self.type}, _get_self_nested_type(self.type))
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
 
@@ -390,7 +390,7 @@ class Identifier(str, WithFeatures, WithFunctions):
             set(), set(), {(ComplexExpressionTypes.IDENTIFIERS, frozenset())}
         )
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return []
 
 
@@ -419,7 +419,7 @@ class NamedArgument(WithFeatures, WithFunctions):
     """Represents a named argument for a function."""
 
     name: str
-    value: "Expression"
+    value: Expression
 
     def get_used_features(self) -> FeatureSet:
         this = FeatureSet(
@@ -428,7 +428,7 @@ class NamedArgument(WithFeatures, WithFunctions):
         expression = self.value.get_used_features()
         return combine_features([this, expression])
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return self.value.get_functions()
 
 
@@ -440,8 +440,8 @@ class FunctionCall(WithFeatures, WithFunctions):
 
     type: FunctionType
     name: str
-    namespace: Optional["Expression"] = None
-    arguments: list[Union[NamedArgument, "Expression"]] = field(factory=list)
+    namespace: Expression | None = None
+    arguments: list[NamedArgument | Expression] = field(factory=list)
 
     def __attrs_post_init__(self):
         if self.type == FunctionType.PROPERTY and self.arguments:
@@ -469,7 +469,7 @@ class FunctionCall(WithFeatures, WithFunctions):
 
         return combine_features([base_features] + argument_features)
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         if self.namespace is None:
             namespace_nested = []
         else:
@@ -513,7 +513,7 @@ class AbstractAssignment(WithFeatures, WithFunctions):
 
         return combine_features([base, other])
 
-    def get_functions(self) -> Iterable["FunctionCall"]:
+    def get_functions(self) -> Iterable[FunctionCall]:
         return self.expression.get_functions()
 
     def replace_expression(self, expression: Expression) -> Self:
@@ -536,17 +536,17 @@ class VariableAssignment(AbstractAssignment):
     variable: str
     type: AllTypes | VariableType
 
-    def replace_variable(self, variable: str) -> "VariableAssignment":
+    def replace_variable(self, variable: str) -> VariableAssignment:
         return VariableAssignment(
             variable=variable, expression=self.expression, type=self.type
         )
 
-    def replace_type(self, type_name: AllTypes | VariableType) -> "VariableAssignment":
+    def replace_type(self, type_name: AllTypes | VariableType) -> VariableAssignment:
         return VariableAssignment(
             variable=self.variable, expression=self.expression, type=type_name
         )
 
-    def replace_expression(self, expression: Expression) -> "VariableAssignment":
+    def replace_expression(self, expression: Expression) -> VariableAssignment:
         return VariableAssignment(
             variable=self.variable, expression=expression, type=self.type
         )
@@ -574,10 +574,10 @@ class PropertyAssignment(AbstractAssignment):
 
         return combine_features([base, other])
 
-    def replace_expression(self, expression: Expression) -> "PropertyAssignment":
+    def replace_expression(self, expression: Expression) -> PropertyAssignment:
         return PropertyAssignment(property=self.property, expression=expression)
 
-    def replace_property(self, prop: FunctionCall) -> "PropertyAssignment":
+    def replace_property(self, prop: FunctionCall) -> PropertyAssignment:
         return PropertyAssignment(property=prop, expression=self.expression)
 
 

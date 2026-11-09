@@ -169,7 +169,7 @@ class C(Language):
 
         return generators.convert_statement(statement, full=True)
 
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+    def generate_execution_unit(self, execution_unit: PreparedExecutionUnit) -> str:
         from tested.languages.c import generators
 
         return generators.convert_execution_unit(execution_unit)

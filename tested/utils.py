@@ -260,7 +260,7 @@ def sorted_no_duplicates[T, K](
     return no_dup
 
 
-def is_statement_strict(statement: Any) -> TypeGuard["Assignment"]:
+def is_statement_strict(statement: Any) -> TypeGuard[Assignment]:
     """
     Check that the given value is a strict statement: it must be a statement but
     not an expression.

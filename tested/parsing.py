@@ -109,7 +109,7 @@ def initialise_converter():
     )
 
 
-def parse_json_value(value: str) -> "Value":
+def parse_json_value(value: str) -> Value:
     """
     Parse the json of a value into the relevant data structures.
 
@@ -125,7 +125,7 @@ def parse_json_value(value: str) -> "Value":
     return _suite_converter.loads(value, Value)  # ty: ignore[invalid-argument-type]
 
 
-def parse_json_suite(value: str) -> "Suite":
+def parse_json_suite(value: str) -> Suite:
     """Parse a test suite into the structures."""
     initialise_converter()
     from tested.testsuite import Suite
@@ -133,7 +133,7 @@ def parse_json_suite(value: str) -> "Suite":
     return _suite_converter.loads(value, Suite)
 
 
-def suite_to_json(suite: "Suite") -> str:
+def suite_to_json(suite: Suite) -> str:
     initialise_converter()
     return _suite_converter.dumps(suite)
 

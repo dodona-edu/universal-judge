@@ -334,15 +334,13 @@ _case_mapping: dict[NamingConventions, Callable[[str], str]] = {
 }
 
 
-def _conventionalize(
-    language: "Language", what: Conventionable, identifier: str
-) -> str:
+def _conventionalize(language: Language, what: Conventionable, identifier: str) -> str:
     conventions = language.naming_conventions()
     mapper = _case_mapping[conventions.get(what, "snake_case")]
     return mapper(identifier)
 
 
-def conventionalize_class(language: "Language", class_name: str) -> str:
+def conventionalize_class(language: Language, class_name: str) -> str:
     """
     Conventionalize a class name.
 
@@ -353,7 +351,7 @@ def conventionalize_class(language: "Language", class_name: str) -> str:
     return _conventionalize(language, "class", class_name)
 
 
-def conventionalize_function(language: "Language", function_name: str) -> str:
+def conventionalize_function(language: Language, function_name: str) -> str:
     """
     Conventionalize the name of a function.
 
@@ -364,7 +362,7 @@ def conventionalize_function(language: "Language", function_name: str) -> str:
     return _conventionalize(language, "function", function_name)
 
 
-def conventionalize_identifier(language: "Language", identifier: str) -> str:
+def conventionalize_identifier(language: Language, identifier: str) -> str:
     """
     Conventionalize the name of an identifier.
 
@@ -375,7 +373,7 @@ def conventionalize_identifier(language: "Language", identifier: str) -> str:
     return _conventionalize(language, "identifier", identifier)
 
 
-def conventionalize_global_identifier(language: "Language", identifier: str) -> str:
+def conventionalize_global_identifier(language: Language, identifier: str) -> str:
     """
     Conventionalize the name of a global identifier.
 
@@ -386,7 +384,7 @@ def conventionalize_global_identifier(language: "Language", identifier: str) -> 
     return _conventionalize(language, "global_identifier", identifier)
 
 
-def conventionalize_namespace(language: "Language", namespace: str) -> str:
+def conventionalize_namespace(language: Language, namespace: str) -> str:
     """
     Conventionalize a namespace.
 
@@ -402,7 +400,7 @@ def conventionalize_namespace(language: "Language", namespace: str) -> str:
     return _conventionalize(language, "namespace", namespace)
 
 
-def conventionalize_property(language: "Language", property_name: str) -> str:
+def conventionalize_property(language: Language, property_name: str) -> str:
     """
     Conventionalize the name of a property.
 
@@ -414,7 +412,7 @@ def conventionalize_property(language: "Language", property_name: str) -> str:
     return _conventionalize(language, "property", property_name)
 
 
-def submission_name(language: "Language") -> str:
+def submission_name(language: Language) -> str:
     """
     :return: The name of a submission.
     """
@@ -422,28 +420,28 @@ def submission_name(language: "Language") -> str:
     return conventionalize_namespace(language, language.config.suite.namespace)
 
 
-def submission_file(language: "Language") -> str:
+def submission_file(language: Language) -> str:
     """
     :return: The file name of a submission.
     """
     return language.submission_file()
 
 
-def selector_name(language: "Language") -> str:
+def selector_name(language: Language) -> str:
     """
     :return: The name for the selector, conventionalized.
     """
     return conventionalize_namespace(language, "selector")
 
 
-def selector_file(language: "Language") -> str:
+def selector_file(language: Language) -> str:
     """
     :return: The name for the selector, conventionalized.
     """
     return language.with_extension(selector_name(language))
 
 
-def execution_name(language: "Language", execution_number: int) -> str:
+def execution_name(language: Language, execution_number: int) -> str:
     """
     Get the name of an execution. The name should be unique for the tab and
     execution number combination.

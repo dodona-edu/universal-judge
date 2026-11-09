@@ -226,7 +226,7 @@ class TypeScript(Language):
 
         return generators.convert_statement(statement, internal=True, full=True)
 
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+    def generate_execution_unit(self, execution_unit: PreparedExecutionUnit) -> str:
         from tested.languages.typescript import generators
 
         return generators.convert_execution_unit(execution_unit)

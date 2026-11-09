@@ -184,7 +184,7 @@ class CPP(Language):
     def generate_statement(self, statement: Statement) -> str:
         return self.generator().convert_statement(statement)
 
-    def generate_execution_unit(self, execution_unit: "PreparedExecutionUnit") -> str:
+    def generate_execution_unit(self, execution_unit: PreparedExecutionUnit) -> str:
         return self.generator().convert_execution_unit(execution_unit)
 
     def generate_selector(self, contexts: list[str]) -> str:
