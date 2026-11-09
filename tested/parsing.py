@@ -9,11 +9,10 @@ import logging
 from collections.abc import Callable
 from decimal import Decimal
 from types import NoneType
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Union, cast, get_origin
 
 from cattrs.gen import make_dict_structure_fn
 from cattrs.preconf.json import JsonConverter, make_converter
-from typing_inspect import is_union_type
 
 from tested.utils import get_args
 
@@ -105,7 +104,7 @@ def initialise_converter():
         lambda t: t is None or t is NoneType, structure_none
     )
     _suite_converter.register_structure_hook_factory(
-        lambda t: bool(is_union_type(t)), lambda _: structure_every_union
+        lambda t: get_origin(t) is Union, lambda _: structure_every_union
     )
 
 
