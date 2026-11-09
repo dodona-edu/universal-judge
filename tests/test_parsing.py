@@ -4,8 +4,24 @@ import pytest
 from attrs import define
 from cattrs.errors import ClassValidationError
 
+from tested.datatypes import AdvancedSequenceTypes, BasicNumericTypes
 from tested.dodona import ExtendedMessage, Message
-from tested.parsing import fallback_field, get_converter, ignore_field, try_loads
+from tested.parsing import (
+    fallback_field,
+    get_converter,
+    ignore_field,
+    parse_json_value,
+    try_loads,
+)
+from tested.serialisation import (
+    BooleanType,
+    NothingType,
+    NumberType,
+    ObjectType,
+    OptionalType,
+    SequenceType,
+    StringType,
+)
 
 
 @define
@@ -241,8 +257,11 @@ def test_parse_json_value():
 )
 def test_parse_json_value_accepts_null_in_unused_fields(json_str):
     from tested.parsing import parse_json_value
+    from tested.serialisation import Value
 
-    assert parse_json_value(json_str).diagnostic is None
+    result = parse_json_value(json_str)
+    assert isinstance(result, Value)
+    assert result.diagnostic is None
 
 
 @pytest.mark.parametrize(
@@ -259,6 +278,62 @@ def test_parse_json_value_rejects_values_in_unused_fields(json_str):
 
     with pytest.raises(TypeError):
         parse_json_value(json_str)
+
+
+@pytest.mark.parametrize(
+    "json_str,expected_class",
+    [
+        ('{"type": "integer", "data": 5}', NumberType),
+        ('{"type": "text", "data": "hello"}', StringType),
+        ('{"type": "boolean", "data": true}', BooleanType),
+        ('{"type": "list", "data": [{"type": "integer", "data": 1}]}', SequenceType),
+        ('{"type": "dictionary", "data": []}', ObjectType),
+        ('{"type": "nothing", "data": null}', NothingType),
+    ],
+)
+def test_parse_json_value_parses_plain_values_to_their_class(json_str, expected_class):
+    assert type(parse_json_value(json_str)) is expected_class
+
+
+def test_parse_json_value_parses_a_present_optional():
+    result = parse_json_value(
+        '{"type": "optional", "data": {"type": "integer", "data": 7}}'
+    )
+    assert result == OptionalType(
+        type="optional", data=NumberType(type=BasicNumericTypes.INTEGER, data=7)
+    )
+
+
+def test_parse_json_value_parses_an_absent_optional():
+    result = parse_json_value('{"type": "optional", "data": null}')
+    assert result == OptionalType(type="optional", data=None)
+
+
+def test_parse_json_value_parses_nested_optionals():
+    result = parse_json_value(
+        '{"type": "optional", "data": {"type": "optional", "data": null}}'
+    )
+    assert result == OptionalType(
+        type="optional", data=OptionalType(type="optional", data=None)
+    )
+
+
+def test_parse_json_value_parses_optionals_in_a_list():
+    result = parse_json_value(
+        '{"type": "list", "data": ['
+        '{"type": "optional", "data": {"type": "integer", "data": 2}}, '
+        '{"type": "optional", "data": null}]}'
+    )
+    assert result == SequenceType(
+        type=AdvancedSequenceTypes.LIST,
+        data=[
+            OptionalType(
+                type="optional",
+                data=NumberType(type=BasicNumericTypes.INTEGER, data=2),
+            ),
+            OptionalType(type="optional", data=None),
+        ],
+    )
 
 
 def test_parse_json_suite_and_to_json():

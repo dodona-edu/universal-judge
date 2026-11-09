@@ -149,11 +149,11 @@
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "\"a\""
+  "expected": "Just \"a\""
  },
  {
   "command": "close-test",
-  "generated": "\"a\"",
+  "generated": "Just \"a\"",
   "status": {
    "enum": "correct"
   }
@@ -178,11 +178,11 @@
  {
   "channel": "return",
   "command": "start-test",
-  "expected": "[]"
+  "expected": "Just []"
  },
  {
   "command": "close-test",
-  "generated": "[]",
+  "generated": "Just []",
   "status": {
    "enum": "correct"
   }

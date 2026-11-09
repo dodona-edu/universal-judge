@@ -17,7 +17,7 @@ from cattrs.preconf.json import JsonConverter, make_converter
 from tested.utils import get_args
 
 if TYPE_CHECKING:
-    from tested.serialisation import Value
+    from tested.serialisation import OptionalType, Value
     from tested.testsuite import Suite
 
 _logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ def initialise_converter():
     )
 
 
-def parse_json_value(value: str) -> Value:
+def parse_json_value(value: str) -> Value | OptionalType:
     """
     Parse the json of a value into the relevant data structures.
 
@@ -119,9 +119,9 @@ def parse_json_value(value: str) -> Value:
     :raises RecursionError: If the json is nested too deeply.
     """
     initialise_converter()
-    from tested.serialisation import Value
+    from tested.serialisation import OptionalType, Value
 
-    return _suite_converter.loads(value, Value)  # ty: ignore[invalid-argument-type]
+    return _suite_converter.loads(value, Value | OptionalType)  # ty: ignore[invalid-argument-type]
 
 
 def parse_json_suite(value: str) -> Suite:

@@ -53,6 +53,9 @@ class Construct(StrEnum):
     # Global variables
     GLOBAL_VARIABLES = "global_variables"
 
+    # Only a submission returns optional values: no language supports them in a suite.
+    OPTIONAL_VALUES = "optional_values"
+
 
 @define
 class FeatureSet:
@@ -188,7 +191,10 @@ def is_supported(language: Language) -> list[Message] | None:
 
     assert language.config is not None
     features = language.config.suite.get_suite_features()
-    required_constructs = features.generated_code.constructs
+    # TESTed cannot compare an expected value that holds an optional.
+    required_constructs = features.generated_code.constructs | (
+        features.expected_values.constructs & {Construct.OPTIONAL_VALUES}
+    )
     required_types = features.generated_code.types | features.expected_values.types
     required_nested_types = (
         features.generated_code.nested_types | features.expected_values.nested_types

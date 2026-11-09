@@ -161,8 +161,7 @@ def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> st
             type_ = {
                 (
                     convert_declaration(element, element.type)
-                    if not isinstance(element, Identifier)
-                    and not isinstance(element, FunctionCall)
+                    if isinstance(element, Value)
                     else "id"
                 )
                 for element in expression.data
@@ -184,8 +183,7 @@ def convert_declaration(statement: Statement, tp: AllTypes | VariableType) -> st
             type_ = {
                 (
                     convert_declaration(element, element.type)
-                    if not isinstance(element, Identifier)
-                    and not isinstance(element, FunctionCall)
+                    if isinstance(element, Value)
                     else "id"
                 )
                 for element in expression.data

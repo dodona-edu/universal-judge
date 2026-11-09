@@ -29,6 +29,7 @@ from tested.serialisation import (
     Identifier,
     NamedArgument,
     NumberType,
+    OptionalType,
     SequenceType,
     SpecialNumbers,
     Statement,
@@ -56,7 +57,29 @@ def convert_number(data: SpecialNumbers | float | Decimal) -> str:
     return str(data)
 
 
-def convert_value(value: Value, display=False) -> str:
+def convert_argument(argument: Expression, display=False) -> str:
+    """Convert an expression to apply a function to it, as in `f x` or `Just x`."""
+    converted = convert_statement(argument, display=display)
+    if isinstance(argument, OptionalType):
+        bare = argument.data is None
+    elif isinstance(argument, Value):
+        # GHC can't parse a type annotation or a negative number as a bare argument,
+        # and an unknown value reads as "(Type) value".
+        bare = not (
+            argument.type == BasicStringTypes.UNKNOWN
+            or " :: " in converted
+            or converted.startswith("-")
+        )
+    else:
+        bare = False
+    return converted if bare else f"({converted})"
+
+
+def convert_value(value: Value | OptionalType, display=False) -> str:
+    if isinstance(value, OptionalType):
+        if value.data is None:
+            return "Nothing"
+        return f"Just {convert_argument(value.data, display)}"
     # Handle some advanced types.
     if value.type == AdvancedSequenceTypes.TUPLE:
         assert isinstance(value, SequenceType)
@@ -107,15 +130,7 @@ def convert_function_call(function: FunctionCall, display=False) -> str:
     result += function.name + " "
     for i, argument in enumerate(function.arguments):
         assert not isinstance(argument, NamedArgument)
-        converted = convert_statement(argument, display=display)
-        # GHC can't parse a type annotation or a negative number as a bare argument.
-        if (
-            not isinstance(argument, Value)
-            or " :: " in converted
-            or converted.startswith("-")
-        ):
-            converted = "(" + converted + ")"
-        result += converted
+        result += convert_argument(argument, display)
         if i != len(function.arguments) - 1:
             result += " "
     return result
@@ -169,7 +184,6 @@ def convert_statement(statement: Statement, display=False) -> str:
         elif isinstance(statement, FunctionCall):
             return convert_function_call(statement, display)
         else:
-            assert isinstance(statement, Value)
             return convert_value(statement, display)
     else:
         assert isinstance(statement, VariableAssignment)
