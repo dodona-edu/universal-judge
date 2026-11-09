@@ -9,6 +9,7 @@ from yaml.constructor import ConstructorError
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedSequenceTypes,
+    BasicNothingTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
@@ -2423,3 +2424,36 @@ def test_schema_rejects_invalid_before_after(value: object):
         }
     ]
     assert not load_schema_validator().is_valid(suite)
+
+
+def _parse_return_value(return_yaml: str) -> ValueOutputChannel:
+    yaml_str = f"""
+- tab: 'Test'
+  contexts:
+    - testcases:
+        - expression: 'test()'
+          return: {return_yaml}
+"""
+    suite = parse_test_suite(translate_to_test_suite(yaml_str))
+    result = suite.tabs[0].contexts[0].testcases[0].output.result
+    assert isinstance(result, ValueOutputChannel)
+    return result
+
+
+@pytest.mark.parametrize(
+    "return_yaml",
+    [
+        "null",
+        "~",
+        "",
+        "!oracle {value: null}",
+        "!oracle {oracle: builtin, value: null}",
+        "!oracle {oracle: custom_check, value: null, file: check.py, name: check}",
+    ],
+)
+def test_return_null_expects_nothing(return_yaml: str):
+    result = _parse_return_value(return_yaml)
+    expected = _parse_return_value("!expression 'None'")
+    assert result.value == expected.value
+    assert result.value is not None
+    assert result.value.type == BasicNothingTypes.NOTHING

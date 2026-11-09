@@ -784,6 +784,26 @@ def test_expected_no_return_and_got_none(
     assert updates.find_status_enum() == []
 
 
+@pytest.mark.python
+@pytest.mark.parametrize(
+    "suite,status",
+    [
+        ("expected_none_and_got_none.yaml", ["correct"]),
+        ("expected_none_but_got_some.yaml", ["wrong"]),
+    ],
+)
+def test_return_null_expects_none(
+    suite: str, status: list[str], tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig, "echo-function", "python", tmp_path, suite, "correct"
+    )
+
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == status
+
+
 @pytest.mark.parametrize("language", ALL_SPECIFIC_LANGUAGES)
 def test_expected_return_but_got_none(
     language: str, tmp_path: Path, pytestconfig: pytest.Config

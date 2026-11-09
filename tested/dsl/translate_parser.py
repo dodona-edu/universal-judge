@@ -545,7 +545,9 @@ def _convert_yaml_value(stream: YamlObject) -> Value | None:
     if isinstance(stream, ExpressionString):
         # We have an expression string.
         value = parse_string(stream, is_return=True)
-    elif isinstance(stream, (int, float, bool, TestedType, list, set, str, dict)):
+    elif isinstance(
+        stream, (int, float, bool, TestedType, list, set, str, dict, type(None))
+    ):
         # Simple values where no confusion is possible.
         value = _convert_value(stream)
     else:
@@ -793,9 +795,9 @@ def _convert_testcase(testcase: YamlDict, context: DslContext) -> Testcase:
         )
     if (exit_code := testcase.get("exit_code")) is not None:
         output.exit_code = ExitCodeOutputChannel(value=cast(int, exit_code))
-    if (result := testcase.get("return")) is not None:
+    if "return" in testcase:
         assert not return_channel
-        output.result = _convert_advanced_value_output_channel(result)
+        output.result = _convert_advanced_value_output_channel(testcase["return"])
 
     if (description := testcase.get("description")) is not None:
         if isinstance(description, str):
