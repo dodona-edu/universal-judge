@@ -63,7 +63,7 @@ from tested.utils import flatten, sorted_no_duplicates
 logger = logging.getLogger(__name__)
 
 # (type, content) or (key, value) pairs; combined types can pair any two of them.
-WrappedAllTypes = AllTypes | tuple["WrappedAllTypes", "WrappedAllTypes"]
+type WrappedAllTypes = AllTypes | tuple[WrappedAllTypes, WrappedAllTypes]
 
 
 def _get_type_for(expression: Expression) -> WrappedAllTypes:
@@ -586,7 +586,7 @@ Assignment = VariableAssignment | PropertyAssignment
 # If changing this, also update is_statement_strict in the utils.
 Statement = Assignment | Expression
 
-# Update the forward references, which fixes the schema generation.
+# cattrs needs the forward references resolved to structure nested list and dict values.
 resolve_types(ObjectType)
 resolve_types(SequenceType)
 resolve_types(NamedArgument)
