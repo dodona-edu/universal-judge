@@ -69,6 +69,26 @@ class WithFeatures:
 NOTHING = FeatureSet(constructs=set(), types=set(), nested_types=set())
 
 
+@define
+class SuiteFeatures:
+    """
+    The features a test suite uses, split by what TESTed does with them.
+    """
+
+    generated_code: FeatureSet
+    """
+    Used in the code TESTed generates in the language of the submission: the
+    input and the harness that collects its output. The language has to support
+    all of them.
+    """
+    expected_values: FeatureSet
+    """
+    Used in expected return values. TESTed compares these itself and only shows
+    them in the language of the submission, so the language only has to support
+    their types.
+    """
+
+
 class TypeSupport(StrEnum):
     SUPPORTED = auto()
     """
@@ -134,6 +154,17 @@ def combine_features(iterable: Iterable[FeatureSet]) -> FeatureSet:
     return FeatureSet(constructs=constructs, types=types, nested_types=nexted_types)
 
 
+def combine_suite_features(iterable: Iterable[SuiteFeatures]) -> SuiteFeatures:
+    """
+    Combine multiple suite features into one, keeping the split.
+    """
+    features = list(iterable)
+    return SuiteFeatures(
+        generated_code=combine_features(x.generated_code for x in features),
+        expected_values=combine_features(x.expected_values for x in features),
+    )
+
+
 def _sorted_repr(items: AbstractSet[Any]) -> str:
     """
     Format a set like its repr, but with the elements in a fixed order.
@@ -156,21 +187,26 @@ def is_supported(language: Language) -> list[Message] | None:
     """
 
     assert language.config is not None
-    required = language.config.suite.get_used_features()
+    features = language.config.suite.get_suite_features()
+    required_constructs = features.generated_code.constructs
+    required_types = features.generated_code.types | features.expected_values.types
+    required_nested_types = (
+        features.generated_code.nested_types | features.expected_values.nested_types
+    )
 
     # Check constructs
     available_constructs = language.supported_constructs()
-    if not (required.constructs <= available_constructs):
+    if not (required_constructs <= available_constructs):
         _logger.warning("This test suite is not compatible!")
-        _logger.warning(f"Required constructs are {required.constructs}.")
+        _logger.warning(f"Required constructs are {required_constructs}.")
         _logger.warning(f"The language supports {available_constructs}.")
-        missing = (required.constructs ^ available_constructs) & required.constructs
+        missing = (required_constructs ^ available_constructs) & required_constructs
         _logger.warning(f"Missing features are: {missing}.")
         message_text = f"""
         This test suite is not solvable in {language.__class__.__name__}.
         
         The required language constructs are:
-        {_sorted_repr(required.constructs)}
+        {_sorted_repr(required_constructs)}
         
         The programming language has support for:
         {_sorted_repr(available_constructs)}
@@ -190,7 +226,7 @@ def is_supported(language: Language) -> list[Message] | None:
         ]
 
     mapping = fallback_type_support_map(language)
-    for t in required.types:
+    for t in required_types:
         if mapping[t] == TypeSupport.UNSUPPORTED:
             _logger.warning(f"Test suite requires unsupported type {t}")
             message_text = f"""
@@ -229,7 +265,7 @@ def is_supported(language: Language) -> list[Message] | None:
                     ]
 
     nested_types = []
-    for key, value_types in required.nested_types:
+    for key, value_types in required_nested_types:
         if isinstance(key, ComplexExpressionTypes):
             continue
         basic_key = resolve_to_basic(key)
