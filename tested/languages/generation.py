@@ -9,9 +9,9 @@ from collections.abc import Collection
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from pygments import highlight
-from pygments.formatters.html import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
+lazy from pygments import highlight
+lazy from pygments.formatters.html import HtmlFormatter
+lazy from pygments.lexers import get_lexer_by_name
 
 from tested.configs import Bundle
 from tested.datatypes import AllTypes, BasicObjectTypes
@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     from tested.judge.planning import PlannedExecutionUnit
 
 _logger = logging.getLogger(__name__)
-_html_formatter = HtmlFormatter(nowrap=True)
 
 
 # Alias for type declarations
@@ -50,7 +49,7 @@ def highlight_code(stmt: str, language: str = "console") -> str:
     :param language: The language of the code.
     """
     lexer = get_lexer_by_name(language, stripall=True)
-    return highlight(stmt, lexer, _html_formatter)
+    return highlight(stmt, lexer, HtmlFormatter(nowrap=True))
 
 
 def generate_execution_unit(
