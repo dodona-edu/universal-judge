@@ -12,12 +12,12 @@ jobs:
   dockerfile-matches-image:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/dodona-edu/dodona-tested:latest
+      image: ghcr.io/dodona-edu/dodona-tested:live
       options: --user root
 
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Check the mirror against the published image
+      - name: Check the mirror against the live image
         run: ./devel/dockerfile_delta.sh
