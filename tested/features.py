@@ -5,15 +5,15 @@ Module containing the definitions of the features we can support.
 import logging
 import operator
 from collections import defaultdict
-from collections.abc import Iterable
-from collections.abc import Set as AbstractSet
+from collections.abc import Iterable, Sequence
 from enum import StrEnum, auto, unique
 from functools import reduce
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from attrs import define
 
 from tested.datatypes import (
+    AdvancedSequenceTypes,
     AllTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
@@ -168,14 +168,49 @@ def combine_suite_features(iterable: Iterable[SuiteFeatures]) -> SuiteFeatures:
     )
 
 
-def _sorted_repr(items: AbstractSet[Any]) -> str:
+_CONSTRUCT_DESCRIPTIONS: dict[Construct, str] = {
+    Construct.OBJECTS: "objects: constructors, methods or properties",
+    Construct.EXCEPTIONS: "expected exceptions",
+    Construct.FUNCTION_CALLS: "function calls",
+    Construct.ASSIGNMENTS: "assigning a value to a variable",
+    Construct.HETEROGENEOUS_COLLECTIONS: (
+        'a collection with elements of different types, such as ["a", 1]'
+    ),
+    Construct.DEFAULT_PARAMETERS: (
+        "calling the same function with different numbers of arguments, "
+        "such as f(1) and f(1, 2)"
+    ),
+    Construct.HETEROGENEOUS_ARGUMENTS: (
+        "calling the same function with arguments of different types in the "
+        'same position, such as f(1) and f("a")'
+    ),
+    Construct.NAMED_ARGUMENTS: 'named arguments, such as f(name="a")',
+    Construct.EVALUATION: "programmed evaluation",
+    Construct.GLOBAL_VARIABLES: "reading a global variable",
+    Construct.OPTIONAL_VALUES: "optional values, such as a Haskell Maybe, written in the test suite",
+}
+
+_CONSTRUCT_ADVICE: dict[Construct, str] = {
+    Construct.HETEROGENEOUS_COLLECTIONS: (
+        'If the values form a fixed group, write them as a tuple: ("a", 1).'
+    ),
+    Construct.NAMED_ARGUMENTS: "Pass the arguments by position instead.",
+}
+
+
+def _join(names: Sequence[str]) -> str:
     """
-    Format a set like its repr, but with the elements in a fixed order.
+    Join names as "a", "a and b" or "a, b and c".
     """
-    body = ", ".join(repr(item) for item in sorted(items))
-    if isinstance(items, frozenset):
-        return f"frozenset({{{body}}})" if items else "frozenset()"
-    return f"{{{body}}}" if items else "set()"
+    if len(names) <= 1:
+        return "".join(names)
+    return f"{', '.join(names[:-1])} and {names[-1]}"
+
+
+def _educator_message(*lines: str) -> list[Message]:
+    return [
+        ExtendedMessage(description="\n".join(lines), permission=Permission.EDUCATOR)
+    ]
 
 
 def is_supported(language: Language) -> list[Message] | None:
@@ -186,10 +221,12 @@ def is_supported(language: Language) -> list[Message] | None:
 
     :param language: The configuration bundle.
 
-    :return: True or False
+    :return: None if supported, otherwise a single educator message for the first
+        failing check.
     """
 
     assert language.config is not None
+    name = language.__class__.__name__
     features = language.config.suite.get_suite_features()
     # TESTed cannot compare an expected value that holds an optional.
     required_constructs = features.generated_code.constructs | (
@@ -199,76 +236,70 @@ def is_supported(language: Language) -> list[Message] | None:
     required_nested_types = (
         features.generated_code.nested_types | features.expected_values.nested_types
     )
+    mapping = fallback_type_support_map(language)
 
     # Check constructs
     available_constructs = language.supported_constructs()
     if not (required_constructs <= available_constructs):
-        _logger.warning("This test suite is not compatible!")
-        _logger.warning(f"Required constructs are {required_constructs}.")
-        _logger.warning(f"The language supports {available_constructs}.")
-        missing = (required_constructs ^ available_constructs) & required_constructs
-        _logger.warning(f"Missing features are: {missing}.")
-        message_text = f"""
-        This test suite is not solvable in {language.__class__.__name__}.
-        
-        The required language constructs are:
-        {_sorted_repr(required_constructs)}
-        
-        The programming language has support for:
-        {_sorted_repr(available_constructs)}
-        
-        This means support is lacking for these:
-        {_sorted_repr(missing)}
-        
-        Note that support for certain types means real support, not reduced support.
-        For example, if tuples are required, the language must have a dedicated tuple
-        type.
-        
-        One solution is to use less-specific types, e.g. using a sequence instead of
-        a tuple.
-        """
-        return [
-            ExtendedMessage(description=message_text, permission=Permission.EDUCATOR)
+        missing = required_constructs - available_constructs
+        _logger.warning(f"Test suite requires unsupported constructs {missing}.")
+        lines = [
+            f"This test suite is not solvable in {name}, because {name} does not support:"
         ]
+        for construct in Construct:
+            if construct not in missing:
+                continue
+            lines.append(f"- {_CONSTRUCT_DESCRIPTIONS[construct]}")
+            advice = _CONSTRUCT_ADVICE.get(construct)
+            if (
+                construct == Construct.HETEROGENEOUS_COLLECTIONS
+                and mapping[AdvancedSequenceTypes.TUPLE] != TypeSupport.SUPPORTED
+            ):
+                advice = None
+            if advice is not None:
+                lines.append(f"  {advice}")
+        return _educator_message(*lines)
 
-    mapping = fallback_type_support_map(language)
-    for t in required_types:
-        if mapping[t] == TypeSupport.UNSUPPORTED:
-            _logger.warning(f"Test suite requires unsupported type {t}")
-            message_text = f"""
-            This test suite is not solvable in {language.__class__.__name__}.
-            The test suite requires type {t}, which is not supported.
-            """
-            return [
-                ExtendedMessage(
-                    description=message_text, permission=Permission.EDUCATOR
+    unsupported = sorted(
+        (t for t in required_types if mapping[t] == TypeSupport.UNSUPPORTED), key=str
+    )
+    if unsupported:
+        _logger.warning(f"Test suite requires unsupported types {unsupported}")
+        names = [str(t) for t in unsupported]
+        plural = "types" if len(names) > 1 else "type"
+        lines = [
+            (
+                f"This test suite is not solvable in {name}, because {name} does "
+                f"not support the {plural} {_join(names)}."
+            )
+        ]
+        for t in unsupported:
+            basic = resolve_to_basic(t)
+            if mapping[basic] != TypeSupport.UNSUPPORTED:
+                lines.append(
+                    f"{name} does support the less specific type {basic} instead of {t}."
                 )
-            ]
+        return _educator_message(*lines)
 
     # Check language-specific oracles
+    dodona_language = language.config.dodona.programming_language
     for tab in language.config.suite.tabs:
         assert tab.contexts is not None
         for context in tab.contexts:
             for testcase in context.testcases:
                 languages = testcase.get_specific_languages()
-                if (
-                    languages is not None
-                    and language.config.dodona.programming_language not in languages
-                ):
+                if languages is not None and dodona_language not in languages:
                     _logger.warning(
                         f"Language-specific constructs are available only in "
                         f"{languages}!"
                     )
-                    message_text = f"""
-                        This test suite is not solvable in {language.__class__.__name__}.
-                        The test suite contains language-specific code, but code is only
-                        provided for {languages}.
-                        """
-                    return [
-                        ExtendedMessage(
-                            description=message_text, permission=Permission.EDUCATOR
-                        )
-                    ]
+                    joined = _join(sorted(str(x) for x in languages))
+                    return _educator_message(
+                        f"This test suite is not solvable in {name}, because its "
+                        f"language-specific code exists only for {joined}.",
+                        f"Add a {dodona_language} version to make it solvable in "
+                        f"{name}.",
+                    )
 
     nested_types = []
     for key, value_types in required_nested_types:
@@ -301,36 +332,23 @@ def is_supported(language: Language) -> list[Message] | None:
                 basic_value_types.add(value_type)
 
         if not (basic_value_types <= restrictions):
-            _logger.warning("This test suite is not compatible!")
-            _logger.warning(
-                f"Required {key} types are {value_types} (or {basic_value_types})."
+            missing = sorted(basic_value_types - restrictions, key=str)
+            _logger.warning(f"Required {key} types {missing} are not supported.")
+            if resolve_to_basic(key) == BasicSequenceTypes.SET:
+                kind = f"{key} elements"
+            else:
+                kind = f"{key} keys"
+            missing_names = [str(t) for t in missing]
+            plural = "types" if len(missing_names) > 1 else "type"
+            allowed = sorted(
+                str(t)
+                for t in restrictions
+                if not isinstance(t, ComplexExpressionTypes)
             )
-            _logger.warning(f"The language supports {restrictions}.")
-            missing = (value_types ^ restrictions) & value_types
-            _logger.warning(f"Missing types are: {missing}.")
-            message_text = f"""
-            This test suite is not solvable in {language.__class__.__name__}.
-            
-            The required {key} types are:
-            {_sorted_repr(value_types)}
-            
-            The programming language has support for:
-            {_sorted_repr({str(t) for t in restrictions})}
-            
-            This means support is lacking for these:
-            {_sorted_repr(missing)}
-            
-            Note that support for certain types means real support, not reduced support.
-            For example, if tuples are required, the language must have a dedicated tuple
-            type.
-            
-            One solution is to use less-specific types, e.g. using a sequence instead of
-            a tuple.
-            """
-            return [
-                ExtendedMessage(
-                    description=message_text, permission=Permission.EDUCATOR
-                )
-            ]
+            return _educator_message(
+                f"This test suite is not solvable in {name}, because {name} does "
+                f"not support {kind} of {plural} {_join(missing_names)}.",
+                f"{kind.capitalize()} in {name} can be: {', '.join(allowed)}.",
+            )
 
     return None
