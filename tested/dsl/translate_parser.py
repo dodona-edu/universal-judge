@@ -177,7 +177,7 @@ def _parse_yaml(yaml_stream: str) -> YamlObject:
 
         The YAML parser indicates the problem lies at line {exc.problem_mark.line + 1}, column {exc.problem_mark.column + 1}:
             
-            {lines[exc.problem_mark.line]}
+            {lines[exc.problem_mark.line] if exc.problem_mark.line < len(lines) else ""}
             {" " * exc.problem_mark.column + "^"}
         
         The error message was:

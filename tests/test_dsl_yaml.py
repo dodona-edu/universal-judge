@@ -2519,3 +2519,14 @@ def test_schema_accepts_output_without_format_checker(key: str, value: object):
     validator = Draft202012Validator(load_schema_validator().schema)
     suite = [{"tab": "Tab", "testcases": [{"expression": "f(1)", key: value}]}]
     assert validator.is_valid(suite)
+
+
+def test_yaml_error_at_end_of_input_is_reported(capsys: pytest.CaptureFixture[str]):
+    yaml_str = (
+        '- tab: "Demo"\n  testcases:\n    - expression: "f()"\n      return: [1, 2\n'
+    )
+    with pytest.raises(yaml.MarkedYAMLError):
+        parse_dsl(yaml_str)
+    stderr = capsys.readouterr().err
+    assert "YAML error while parsing test suite" in stderr
+    assert "line 5, column 1" in stderr
