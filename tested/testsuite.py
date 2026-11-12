@@ -21,8 +21,10 @@ from tested.features import (
     NOTHING,
     Construct,
     FeatureSet,
+    SuiteFeatures,
     WithFeatures,
     combine_features,
+    combine_suite_features,
 )
 from tested.parsing import fallback_field, ignore_field
 from tested.serialisation import (
@@ -495,7 +497,7 @@ def _get_text_channel_languages(
 
 
 @define
-class Output(WithFeatures):
+class Output:
     """The output channels for a testcase."""
 
     stdout: TextOutput = EmptyChannel.NONE
@@ -505,15 +507,17 @@ class Output(WithFeatures):
     result: ValueOutput = EmptyChannel.NONE
     exit_code: ExitOutput = IgnoredChannel.IGNORED
 
-    def get_used_features(self) -> FeatureSet:
-        return combine_features(
-            [
-                self.stdout.get_used_features(),
-                self.stderr.get_used_features(),
-                self.file.get_used_features(),
-                self.exception.get_used_features(),
-                self.result.get_used_features(),
-            ]
+    def get_suite_features(self) -> SuiteFeatures:
+        return SuiteFeatures(
+            generated_code=combine_features(
+                [
+                    self.stdout.get_used_features(),
+                    self.stderr.get_used_features(),
+                    self.file.get_used_features(),
+                    self.exception.get_used_features(),
+                ]
+            ),
+            expected_values=self.result.get_used_features(),
         )
 
     def get_specific_languages(self) -> set[SupportedLanguage] | None:
@@ -604,7 +608,7 @@ def _file_url_to_text_data_converter(value: Any, _: Any) -> list[dict]:
 @fallback_field({"link_files": ("input_files", _file_url_to_text_data_converter)})
 @ignore_field("essential")
 @define
-class Testcase(WithFeatures, WithFunctions):
+class Testcase(WithFunctions):
     """
     A testcase is some input statement and a set of tests on the effects of that
     input statement.
@@ -635,9 +639,13 @@ class Testcase(WithFeatures, WithFunctions):
     use_strict_workdir: bool = False
     line_comment: str = ""
 
-    def get_used_features(self) -> FeatureSet:
-        return combine_features(
-            [self.input.get_used_features(), self.output.get_used_features()]
+    def get_suite_features(self) -> SuiteFeatures:
+        output = self.output.get_suite_features()
+        return SuiteFeatures(
+            generated_code=combine_features(
+                [self.input.get_used_features(), output.generated_code]
+            ),
+            expected_values=output.expected_values,
         )
 
     def get_functions(self) -> Iterable[FunctionCall]:
@@ -738,7 +746,7 @@ def _check_testcases(_instance, _attribute, value: list[Testcase]):
 
 @ignore_field("link_files")
 @define
-class Context(WithFeatures, WithFunctions):
+class Context(WithFunctions):
     """
     A context is a set of dependant test cases.
     """
@@ -759,8 +767,8 @@ class Context(WithFeatures, WithFunctions):
         else:
             return ""
 
-    def get_used_features(self) -> FeatureSet:
-        return combine_features(x.get_used_features() for x in self.testcases)
+    def get_suite_features(self) -> SuiteFeatures:
+        return combine_suite_features(x.get_suite_features() for x in self.testcases)
 
     def has_main_testcase(self):
         return isinstance(self.testcases[0].input, MainInput)
@@ -839,16 +847,16 @@ def _check_unique_evaluation_functions(_instance, _attribute, value: list[Contex
 
 @fallback_field({"runs": ("contexts", _runs_to_tab_converter)})
 @define
-class Tab(WithFeatures, WithFunctions):
+class Tab(WithFunctions):
     """Represents a tab on Dodona."""
 
     name: str
     contexts: list[Context] = field(validator=_check_unique_evaluation_functions)
     hidden: bool | None = None
 
-    def get_used_features(self) -> FeatureSet:
+    def get_suite_features(self) -> SuiteFeatures:
         assert self.contexts is not None
-        return combine_features(x.get_used_features() for x in self.contexts)
+        return combine_suite_features(x.get_suite_features() for x in self.contexts)
 
     def get_functions(self) -> Iterable[FunctionCall]:
         assert self.contexts is not None
@@ -870,13 +878,13 @@ class ExecutionMode(StrEnum):
 
 
 @define
-class Suite(WithFeatures, WithFunctions):
+class Suite(WithFunctions):
     """General test suite, which is used to run tests of some code."""
 
     tabs: list[Tab] = field(factory=list)
     namespace: str = "submission"
 
-    def get_used_features(self) -> FeatureSet:
+    def get_suite_features(self) -> SuiteFeatures:
         """
         Get the used features in the test suite.
 
@@ -888,8 +896,13 @@ class Suite(WithFeatures, WithFunctions):
         function call to do this.
         """
         function_features = _resolve_function_calls(self.get_functions())
-        other_features = combine_features(x.get_used_features() for x in self.tabs)
-        return combine_features([function_features, other_features])
+        tab_features = combine_suite_features(x.get_suite_features() for x in self.tabs)
+        return SuiteFeatures(
+            generated_code=combine_features(
+                [function_features, tab_features.generated_code]
+            ),
+            expected_values=tab_features.expected_values,
+        )
 
     def get_functions(self) -> Iterable[FunctionCall]:
         return flatten(x.get_functions() for x in self.tabs)

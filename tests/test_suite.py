@@ -4,7 +4,7 @@ import pytest
 from cattrs import ClassValidationError
 
 from tested.datatypes import BasicNumericTypes
-from tested.dsl import parse_string
+from tested.dsl import parse_dsl, parse_string
 from tested.features import Construct
 from tested.parsing import get_converter
 from tested.serialisation import (
@@ -300,6 +300,29 @@ def test_nested_empty_list_is_not_heterogeneous():
 def test_mixed_list_is_heterogeneous():
     features = parse_string('[1, "a"]').get_used_features()
     assert Construct.HETEROGENEOUS_COLLECTIONS in features.constructs
+
+
+def test_mixed_expected_return_is_not_generated_code():
+    suite = """
+    - tab: "mixed"
+      testcases:
+        - expression: "pair_up(1)"
+          return: ["a", 1]
+    """
+    features = parse_dsl(suite).get_suite_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS not in features.generated_code.constructs
+    assert Construct.HETEROGENEOUS_COLLECTIONS in features.expected_values.constructs
+
+
+def test_mixed_argument_is_generated_code():
+    suite = """
+    - tab: "mixed"
+      testcases:
+        - expression: "f([1, 'a'])"
+          return: 1
+    """
+    features = parse_dsl(suite).get_suite_features()
+    assert Construct.HETEROGENEOUS_COLLECTIONS in features.generated_code.constructs
 
 
 def test_language_literals_require_at_least_one_literal():

@@ -7,7 +7,13 @@ from tested.datatypes import (
     BasicStringTypes,
 )
 from tested.dodona import ExtendedMessage
-from tested.features import Construct, FeatureSet, is_supported
+from tested.features import (
+    NOTHING,
+    Construct,
+    FeatureSet,
+    SuiteFeatures,
+    is_supported,
+)
 
 
 class StubLanguage:
@@ -16,9 +22,15 @@ class StubLanguage:
         required: FeatureSet,
         supported: set[Construct],
         restrictions: dict | None = None,
+        expected_values: FeatureSet = NOTHING,
     ):
         self.config = SimpleNamespace(
-            suite=SimpleNamespace(get_used_features=lambda: required, tabs=[])
+            suite=SimpleNamespace(
+                get_suite_features=lambda: SuiteFeatures(
+                    generated_code=required, expected_values=expected_values
+                ),
+                tabs=[],
+            )
         )
         self._supported = supported
         self._restrictions = restrictions or {}
@@ -39,6 +51,10 @@ def message_lines(language) -> list[str]:
     message = messages[0]
     assert isinstance(message, ExtendedMessage)
     return [line.strip() for line in message.description.splitlines()]
+
+
+def is_solvable(language) -> bool:
+    return is_supported(language) is None
 
 
 def test_unsupported_constructs_are_listed_sorted():
@@ -110,3 +126,33 @@ def test_unsupported_collection_types_are_listed_sorted():
         "<BasicNumericTypes.REAL: 'real'>, "
         "<BasicStringTypes.TEXT: 'text'>})"
     ) in lines
+
+
+def test_constructs_of_expected_values_are_not_required():
+    language = StubLanguage(
+        NOTHING,
+        set(),
+        expected_values=FeatureSet(
+            constructs={Construct.HETEROGENEOUS_COLLECTIONS},
+            types=set(),
+            nested_types=set(),
+        ),
+    )
+
+    assert is_solvable(language)
+
+
+def test_types_of_expected_values_are_required():
+    language = StubLanguage(
+        NOTHING,
+        set(),
+        expected_values=FeatureSet(
+            constructs=set(),
+            types={BasicNumericTypes.REAL},
+            nested_types=set(),
+        ),
+    )
+
+    lines = message_lines(language)
+
+    assert "The test suite requires type real, which is not supported." in lines

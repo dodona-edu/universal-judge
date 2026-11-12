@@ -513,6 +513,23 @@ def test_haskell_whole_real_stays_real(tmp_path: Path, pytestconfig: pytest.Conf
     assert testcase["description"]["description"] == "echo 5.0"
 
 
+@pytest.mark.haskell
+def test_haskell_tuple_matches_mixed_expected_list(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        "haskell",
+        tmp_path,
+        "haskell-mixed-tuples.yaml",
+        "correct-tuples",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 2
+
+
 HASKELL_COMMENT_BEFORE_PRAGMA = """\
 -- Greeting program
 {-# LANGUAGE LambdaCase #-}
