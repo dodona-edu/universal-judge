@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from jsonschema import Draft202012Validator
 from yaml.constructor import ConstructorError
 
 from tested.datatypes import (
@@ -39,6 +40,7 @@ from tested.testsuite import (
     FileOutputChannel,
     GenericTextOracle,
     GenericValueOracle,
+    IgnoredChannel,
     LanguageLiterals,
     LanguageSpecificOracle,
     MainInput,
@@ -2423,3 +2425,97 @@ def test_schema_rejects_invalid_before_after(value: object):
         }
     ]
     assert not load_schema_validator().is_valid(suite)
+
+
+def _parse_testcase_output(testcase_lines: str):
+    yaml_str = f"""
+- tab: "Ignored"
+  testcases:
+    - expression: "f(1)"
+{testcase_lines}
+"""
+    return parse_dsl(yaml_str).tabs[0].contexts[0].testcases[0].output
+
+
+@pytest.mark.parametrize(
+    "key, attribute",
+    [
+        ("stdout", "stdout"),
+        ("stderr", "stderr"),
+        ("exception", "exception"),
+        ("return", "result"),
+        ("file", "file"),
+        ("output_files", "file"),
+        ("exit_code", "exit_code"),
+    ],
+)
+def test_ignored_tag_ignores_channel(key: str, attribute: str):
+    output = _parse_testcase_output(f"      {key}: !ignored")
+    assert getattr(output, attribute) is IgnoredChannel.IGNORED
+
+
+def test_ignored_tag_wins_over_inherited_config():
+    yaml_str = """
+- tab: "Ignored"
+  config:
+    stdout:
+      ignoreWhitespace: true
+  testcases:
+    - expression: "f(1)"
+      stdout: !ignored
+"""
+    output = parse_dsl(yaml_str).tabs[0].contexts[0].testcases[0].output
+    assert output.stdout is IgnoredChannel.IGNORED
+
+
+def test_ignored_word_is_still_text():
+    output = _parse_testcase_output('      stdout: "ignored"')
+    assert isinstance(output.stdout, TextOutputChannel)
+    assert output.stdout.content == "ignored\n"
+
+
+def test_ignored_tag_takes_no_value():
+    with pytest.raises(AssertionError, match="!ignored takes no value"):
+        _parse_testcase_output("      stdout: !ignored foo")
+
+
+def test_ignored_tag_in_return_list_is_rejected():
+    with pytest.raises(ValueError, match="Unknown type for value !ignored"):
+        _parse_testcase_output("      return:\n        - !ignored")
+
+
+@pytest.mark.parametrize(
+    "testcase_lines",
+    [
+        "stdin: !ignored",
+        "arguments:\n        - !ignored",
+        "stdout:\n        data: !ignored",
+    ],
+)
+def test_ignored_tag_outside_output_channels_is_rejected(testcase_lines: str):
+    yaml_str = f"""
+- tab: "Ignored"
+  testcases:
+    - {testcase_lines}
+"""
+    with pytest.raises(ExceptionGroup):
+        parse_dsl(yaml_str)
+
+
+@pytest.mark.parametrize(
+    "key, value",
+    [
+        ("stdout", "text"),
+        ("stderr", "text"),
+        ("exception", "Boom"),
+        ("return", 5),
+        ("file", {"content": "expected.txt", "location": "actual.txt"}),
+        ("output_files", [{"path": "actual.txt", "content": "text"}]),
+        ("exit_code", 1),
+    ],
+)
+def test_schema_accepts_output_without_format_checker(key: str, value: object):
+    # An editor validates against the schema without knowing TESTed's formats.
+    validator = Draft202012Validator(load_schema_validator().schema)
+    suite = [{"tab": "Tab", "testcases": [{"expression": "f(1)", key: value}]}]
+    assert validator.is_valid(suite)
