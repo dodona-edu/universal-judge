@@ -388,7 +388,7 @@ def test_batch_compilation(
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
-def test_batch_compilation_fallback(
+def test_batch_compilation_fallback_skipped_for_main_only_suite(
     language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
     config_ = {"options": {"allow_fallback": True}}
@@ -401,6 +401,30 @@ def test_batch_compilation_fallback(
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
     assert updates.find_status_enum() == ["compilation error"] * 2
+    assert spy.call_count == 1
+
+
+@pytest.mark.parametrize("language", ALL_LANGUAGES)
+def test_batch_compilation_fallback(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config_ = {"options": {"allow_fallback": True}}
+    lang_class = LANGUAGES[language]
+    spy = mocker.spy(lang_class, "compilation")
+    conf = configuration(
+        pytestconfig,
+        "echo-function",
+        language,
+        tmp_path,
+        "two-tabs.yaml",
+        "comp-error",
+        config_,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("start-testcase")) == 2
+    assert updates.find_status_enum() == ["compilation error"] * 2
+    # The precompilation plus one compilation per tab.
     assert spy.call_count == 3
 
 
@@ -419,6 +443,19 @@ def test_batch_compilation_no_fallback(
     assert len(updates.find_all("start-tab")) == 1
     assert updates.find_status_enum() == ["compilation error"] * 2
     assert spy.call_count == 1
+
+
+def test_csharp_compilation_error_in_generated_code_is_shown(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config_ = {"options": {"allow_fallback": False}}
+    conf = configuration(
+        pytestconfig, "echo", "csharp", tmp_path, "two.tson", "private-main", config_
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert "CS0122" in result
 
 
 @pytest.mark.parametrize("language", ALL_LANGUAGES)

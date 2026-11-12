@@ -43,6 +43,7 @@ from tested.judge.planning import (
     PlannedContext,
     PlannedExecutionUnit,
     PlanStrategy,
+    has_only_main_calls,
     plan_test_suite,
 )
 from tested.judge.utils import copy_from_paths_to_path
@@ -62,6 +63,18 @@ def _is_fatal_compilation_error(compilation_results: CompilationResult) -> bool:
     return compilation_results.status in (
         Status.TIME_LIMIT_EXCEEDED,
         Status.MEMORY_LIMIT_EXCEEDED,
+    )
+
+
+def _should_fall_back_to_unit_compilation(
+    bundle: Bundle,
+    compilation_results: CompilationResult,
+    units: list[PlannedExecutionUnit],
+) -> bool:
+    return (
+        compilation_results.status != Status.CORRECT
+        and bundle.config.options.allow_fallback
+        and not has_only_main_calls(units)
     )
 
 
@@ -166,9 +179,8 @@ def judge(bundle: Bundle):
         return
 
     # If the compilation failed, but we can fall back, do that.
-    if (
-        compilation_results.status != Status.CORRECT
-        and bundle.config.options.allow_fallback
+    if _should_fall_back_to_unit_compilation(
+        bundle, compilation_results, planned_units
     ):
         _logger.warning("Precompilation failed. Falling back to unit compilation.")
         planned_units = plan_test_suite(bundle, strategy=PlanStrategy.TAB)
