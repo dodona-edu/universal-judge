@@ -8,6 +8,7 @@ from tested.judge.planning import (
     PlannedContext,
     PlannedExecutionUnit,
     PlanStrategy,
+    has_only_main_calls,
     plan_test_suite,
 )
 from tested.testsuite import (
@@ -775,3 +776,39 @@ def test_planning_conflict_lax_different_dynamic_paths(
     units = plan_test_suite(bundle, PlanStrategy.OPTIMAL)
 
     assert len(units) == 2
+
+
+def _unit(*contexts: Context) -> PlannedExecutionUnit:
+    planned = [
+        PlannedContext(c, tab_index=0, context_index=i) for i, c in enumerate(contexts)
+    ]
+    return PlannedExecutionUnit(contexts=planned, name="unit", index=0)
+
+
+def _main(exit_code: bool = False) -> SuiteTestcase:
+    output = Output(exit_code=ExitCodeOutputChannel(value=0)) if exit_code else Output()
+    return SuiteTestcase(input=MainInput(), output=output)
+
+
+def _call() -> SuiteTestcase:
+    return SuiteTestcase(
+        input=LanguageLiterals(literals={SupportedLanguage.PYTHON: "5"})
+    )
+
+
+def test_has_only_main_calls_for_main_contexts():
+    units = [
+        _unit(Context(testcases=[_main()]), Context(testcases=[_main(exit_code=True)]))
+    ]
+    assert has_only_main_calls(units)
+
+
+def test_has_only_main_calls_false_for_function_context():
+    assert not has_only_main_calls([_unit(Context(testcases=[_call()]))])
+
+
+def test_has_only_main_calls_false_for_main_followed_by_call():
+    context = Context(testcases=[_main(), _call()])
+    assert not has_only_main_calls(
+        [_unit(Context(testcases=[_main()])), _unit(context)]
+    )

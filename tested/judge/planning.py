@@ -194,6 +194,19 @@ def _flattened_contexts_to_units(
     return contexts_per_unit
 
 
+def has_only_main_calls(units: list[PlannedExecutionUnit]) -> bool:
+    """
+    Check if every testcase in the plan is the main call. Every unit then compiles
+    the same submission code, so splitting cannot isolate an error in it.
+    """
+    return all(
+        testcase.is_main_testcase()
+        for unit in units
+        for planned in unit.contexts
+        for testcase in planned.context.testcases
+    )
+
+
 def plan_test_suite(
     bundle: Bundle, strategy: PlanStrategy
 ) -> list[PlannedExecutionUnit]:
