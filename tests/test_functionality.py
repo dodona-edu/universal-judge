@@ -421,6 +421,19 @@ def test_batch_compilation_no_fallback(
     assert spy.call_count == 1
 
 
+def test_csharp_compilation_error_in_generated_code_is_shown(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config_ = {"options": {"allow_fallback": False}}
+    conf = configuration(
+        pytestconfig, "echo", "csharp", tmp_path, "two.tson", "private-main", config_
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert "CS0122" in result
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_no_fallback_runtime(
     language: str, tmp_path: Path, pytestconfig: pytest.Config

@@ -320,7 +320,7 @@ class {class_name}
         assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
-            rf"{self.config.dodona.tested_directory}/common/{execution}[0-9]+.cs"
+            rf"{self.config.dodona.tested_directory}/common/{execution}[0-9]+\.cs:line "
         )
         tested_directory = re.escape(str(self.config.dodona.tested_directory.resolve()))
         subdir = rf"(?:common|{execution}[_0-9]+)"
@@ -338,7 +338,8 @@ class {class_name}
 
         resulting_lines = ""
         for line in stacktrace.splitlines(keepends=True):
-            # If we encounter an execution location, we are done.
+            # A runtime frame in the generated code ends the trace; compile errors
+            # located there (`Execution0.cs(69,21): error`) stay.
             if re.search(execution_submission_location_regex, line):
                 break
 
