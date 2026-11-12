@@ -13,7 +13,15 @@ from tested.configs import Bundle
 from tested.dodona import AnnotateCode, Message, Status
 from tested.languages.conventionalize import execution_name
 from tested.languages.language import FileFilter
-from tested.testsuite import ContentPath, Context, EmptyChannel, MainInput
+from tested.testsuite import (
+    ContentPath,
+    Context,
+    EmptyChannel,
+    ExceptionOutputChannel,
+    LanguageSpecificOracle,
+    MainInput,
+    SupportedLanguage,
+)
 
 
 @define
@@ -194,17 +202,29 @@ def _flattened_contexts_to_units(
     return contexts_per_unit
 
 
-def has_only_main_calls(units: list[PlannedExecutionUnit]) -> bool:
+def all_units_compile_same_code(
+    units: list[PlannedExecutionUnit], language: SupportedLanguage
+) -> bool:
     """
-    Check if every testcase in the plan is the main call. Every unit then compiles
-    the same submission code, so splitting cannot isolate an error in it.
+    Check if splitting the units cannot isolate an error in the submission: every
+    testcase is the main call and no context has `before` or `after` code or a
+    language-specific exception oracle for the language. The units then differ only
+    in teacher data (the main-call arguments).
     """
-    return all(
-        testcase.is_main_testcase()
-        for unit in units
-        for planned in unit.contexts
-        for testcase in planned.context.testcases
-    )
+    for unit in units:
+        for planned in unit.contexts:
+            context = planned.context
+            if language in context.before or language in context.after:
+                return False
+            for testcase in context.testcases:
+                if not testcase.is_main_testcase():
+                    return False
+                exception = testcase.output.exception
+                if isinstance(exception, ExceptionOutputChannel) and isinstance(
+                    exception.oracle, LanguageSpecificOracle
+                ):
+                    return False
+    return True
 
 
 def plan_test_suite(

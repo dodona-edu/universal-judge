@@ -404,6 +404,46 @@ def test_batch_compilation_fallback_skipped_for_main_only_suite(
     assert spy.call_count == 1
 
 
+def test_context_after_code_suite_passes_with_correct_solution(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "c",
+        tmp_path,
+        "three-contexts-after.yaml",
+        "global-total",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == ["correct"] * 3
+
+
+def test_batch_compilation_fallback_taken_for_main_only_suite_with_after_code(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
+    config_ = {"options": {"allow_fallback": True}}
+    spy = mocker.spy(LANGUAGES["c"], "compilation")
+    conf = configuration(
+        pytestconfig,
+        "echo",
+        "c",
+        tmp_path,
+        "three-contexts-after.yaml",
+        "global-misnamed",
+        config_,
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum() == [
+        "correct",
+        "compilation error",
+        "correct",
+    ]
+    assert spy.call_count == 4
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_fallback(
     language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture

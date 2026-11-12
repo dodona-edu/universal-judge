@@ -1,0 +1,13 @@
+- tab: "Echo"
+  contexts:
+    - testcases:
+        - stdin: "one\n"
+          stdout: "one\n"
+    - after:
+        c: 'printf("%d\n", total);'
+      testcases:
+        - stdin: "two\n"
+          stdout: "two\n4\n"
+    - testcases:
+        - stdin: "three\n"
+          stdout: "three\n"

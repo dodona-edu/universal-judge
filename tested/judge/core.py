@@ -43,7 +43,7 @@ from tested.judge.planning import (
     PlannedContext,
     PlannedExecutionUnit,
     PlanStrategy,
-    has_only_main_calls,
+    all_units_compile_same_code,
     plan_test_suite,
 )
 from tested.judge.utils import copy_from_paths_to_path
@@ -74,7 +74,7 @@ def _should_fall_back_to_unit_compilation(
     return (
         compilation_results.status != Status.CORRECT
         and bundle.config.options.allow_fallback
-        and not has_only_main_calls(units)
+        and not all_units_compile_same_code(units, bundle.config.programming_language)
     )
 
 
