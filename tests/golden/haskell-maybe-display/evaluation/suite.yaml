@@ -1,0 +1,26 @@
+- tab: "first_even"
+  testcases:
+    - expression: "first_even([1, 3])"
+      return: !expression "None"
+    - expression: "first_even([1, 4])"
+      return: 4
+    - expression: "first_even([-3, -2])"
+      return: -2
+    - expression: "first_even([6, 1])"
+      return: 6
+- tab: "evens"
+  testcases:
+    - expression: "evens([1, 2, 4])"
+      return: [2, 4]
+- tab: "nested"
+  testcases:
+    - expression: "nested(0)"
+      return: !expression "None"
+    - expression: "nested(3)"
+      return: 3
+- tab: "first_even_io"
+  testcases:
+    - expression: "first_even_io([1, 3])"
+      return: !expression "None"
+    - expression: "first_even_io([1, 4])"
+      return: 4

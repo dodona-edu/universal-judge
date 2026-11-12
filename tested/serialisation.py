@@ -375,6 +375,29 @@ class NothingType(WithFeatures, WithFunctions):
 Value = NumberType | StringType | BooleanType | SequenceType | ObjectType | NothingType
 
 
+@define
+class OptionalType(WithFeatures, WithFunctions):
+    """
+    A value of an optional type, like Haskell's `Maybe`.
+
+    `data` is `None` for an absent value.
+    """
+
+    type: Literal["optional"]
+    data: Value | OptionalType | None
+
+    def get_used_features(self) -> FeatureSet:
+        this = FeatureSet({Construct.OPTIONAL_VALUES}, set(), set())
+        if self.data is None:
+            return this
+        return combine_features([this, self.data.get_used_features()])
+
+    def get_functions(self) -> Iterable[FunctionCall]:
+        if self.data is None:
+            return []
+        return self.data.get_functions()
+
+
 class Identifier(str, WithFeatures, WithFunctions):
     """Represents an variable name."""
 
@@ -489,7 +512,7 @@ class VariableType:
     type: Literal["custom"] = "custom"
 
 
-Expression = Identifier | Value | FunctionCall
+Expression = Identifier | Value | FunctionCall | OptionalType
 
 
 @define
@@ -592,6 +615,37 @@ resolve_types(SequenceType)
 resolve_types(NamedArgument)
 resolve_types(FunctionCall)
 resolve_types(ObjectKeyValuePair)
+resolve_types(OptionalType)
+
+
+def without_optionals(value: Value | OptionalType) -> Value:
+    """
+    The value with each optional replaced by its content, or by nothing when absent.
+    """
+    if isinstance(value, OptionalType):
+        return NothingType() if value.data is None else without_optionals(value.data)
+    if isinstance(value, SequenceType):
+        return SequenceType(
+            type=value.type, data=[_element_without_optionals(x) for x in value.data]
+        )
+    if isinstance(value, ObjectType):
+        return ObjectType(
+            type=value.type,
+            data=[
+                ObjectKeyValuePair(
+                    key=_element_without_optionals(pair.key),
+                    value=_element_without_optionals(pair.value),
+                )
+                for pair in value.data
+            ],
+        )
+    return value
+
+
+def _element_without_optionals(element: Expression) -> Expression:
+    if isinstance(element, Identifier | FunctionCall):
+        return element
+    return without_optionals(element)
 
 
 def as_basic_type(value: Value) -> Value:
@@ -602,7 +656,7 @@ def as_basic_type(value: Value) -> Value:
     return cp
 
 
-def parse_value(value: str) -> Value:
+def parse_value(value: str) -> Value | OptionalType:
     """
     Parse the json of a value into the relevant data structures.
 

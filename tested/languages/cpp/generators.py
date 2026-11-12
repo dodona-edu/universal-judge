@@ -57,7 +57,7 @@ class CPPGenerator:
         )
 
     def convert_type(self, value: Expression) -> str:
-        if isinstance(value, (Identifier, FunctionCall)):
+        if not isinstance(value, Value):
             return "std::any"
         else:
             return self.convert_declaration(value.type, value)

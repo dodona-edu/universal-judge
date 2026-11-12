@@ -1,5 +1,10 @@
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
+from tested.configs import create_bundle
 from tested.datatypes import (
     BasicBooleanTypes,
     BasicNumericTypes,
@@ -14,6 +19,8 @@ from tested.features import (
     SuiteFeatures,
     is_supported,
 )
+from tested.parsing import parse_json_suite
+from tests.manual_utils import configuration
 
 
 class StubLanguage:
@@ -156,3 +163,47 @@ def test_types_of_expected_values_are_required():
     lines = message_lines(language)
 
     assert "The test suite requires type real, which is not supported." in lines
+
+
+SUITE_WITH_AN_OPTIONAL = """
+{
+  "tabs": [{
+    "name": "optional",
+    "contexts": [{
+      "testcases": [{
+        "input": {
+          "type": "function",
+          "name": "echo",
+          "arguments": [ARGUMENT]
+        },
+        "output": {"result": {"value": VALUE}}
+      }]
+    }]
+  }]
+}
+"""
+INTEGER = '{"type": "integer", "data": 5}'
+OPTIONAL = f'{{"type": "optional", "data": {INTEGER}}}'
+SUITES = {
+    "argument": SUITE_WITH_AN_OPTIONAL.replace("ARGUMENT", OPTIONAL).replace(
+        "VALUE", INTEGER
+    ),
+    "expected-value": SUITE_WITH_AN_OPTIONAL.replace("ARGUMENT", INTEGER).replace(
+        "VALUE", f'{{"type": "list", "data": [{OPTIONAL}]}}'
+    ),
+}
+
+
+@pytest.mark.parametrize("suite_text", SUITES.values(), ids=SUITES.keys())
+@pytest.mark.parametrize("language", ["haskell", "python"])
+def test_a_suite_with_an_optional_value_is_not_supported(
+    suite_text: str, language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    suite = parse_json_suite(suite_text)
+    conf = configuration(pytestconfig, "", language, tmp_path)
+    bundle = create_bundle(conf, sys.stdout, suite)
+
+    lines = message_lines(bundle.language)
+
+    missing = lines[lines.index("This means support is lacking for these:") + 1]
+    assert "<Construct.OPTIONAL_VALUES: 'optional_values'>" in missing

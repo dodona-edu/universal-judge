@@ -51,6 +51,7 @@ from tested.serialisation import (
     NumberType,
     ObjectKeyValuePair,
     ObjectType,
+    OptionalType,
     SequenceType,
     SpecialNumbers,
     StringType,
@@ -58,6 +59,7 @@ from tested.serialisation import (
     WrappedAllTypes,
     parse_value,
     to_python_comparable,
+    without_optionals,
 )
 from tested.testsuite import Suite
 from tested.utils import get_args
@@ -237,7 +239,7 @@ def test_basic_types(language, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        actual = parse_value(result)
+        actual = without_optionals(parse_value(result))
         type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
@@ -265,7 +267,7 @@ def test_advanced_types(language, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        actual = parse_value(result)
+        actual = without_optionals(parse_value(result))
         type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected, expected=True)
@@ -320,7 +322,7 @@ def test_special_numbers(language, tmp_path: Path, pytestconfig: pytest.Config):
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        actual = parse_value(result)
+        actual = without_optionals(parse_value(result))
         type_check, _ = _check_simple_type(bundle, expected, actual)
         assert type_check, f"type check failure {expected} != {actual}"
         py_expected = to_python_comparable(expected)
@@ -357,7 +359,7 @@ def test_floats_keep_full_precision(
     assert len(results) == len(types)
 
     for result, expected in zip(results, types):
-        actual = parse_value(result)
+        actual = without_optionals(parse_value(result))
         assert to_python_comparable(expected) == to_python_comparable(actual), result
 
 
@@ -518,3 +520,50 @@ def test_combined_types_do_not_depend_on_hash_seed(seed: str):
     assert result.returncode == 0, result.stderr
     expected = "".join(f"{case_type!r}\n" for _, case_type in COMBINED_TYPE_CASES)
     assert result.stdout == expected
+
+
+def _integer(data: int) -> NumberType:
+    return NumberType(type=BasicNumericTypes.INTEGER, data=data)
+
+
+def _optional(data: Value | OptionalType | None) -> OptionalType:
+    return OptionalType(type="optional", data=data)
+
+
+def test_without_optionals_keeps_the_content_of_a_present_optional():
+    assert without_optionals(_optional(_integer(7))) == _integer(7)
+
+
+def test_without_optionals_makes_an_absent_optional_nothing():
+    assert without_optionals(_optional(None)) == NothingType()
+
+
+def test_without_optionals_reduces_nested_optionals():
+    assert without_optionals(_optional(_optional(_integer(3)))) == _integer(3)
+    assert without_optionals(_optional(_optional(None))) == NothingType()
+
+
+def test_without_optionals_reduces_sequence_elements():
+    value = SequenceType(
+        type=AdvancedSequenceTypes.LIST,
+        data=[_optional(_integer(2)), _optional(None)],
+    )
+    assert without_optionals(value) == SequenceType(
+        type=AdvancedSequenceTypes.LIST, data=[_integer(2), NothingType()]
+    )
+
+
+def test_without_optionals_reduces_object_pairs():
+    value = ObjectType(
+        type=BasicObjectTypes.MAP,
+        data=[ObjectKeyValuePair(key=_optional(_integer(1)), value=_optional(None))],
+    )
+    assert without_optionals(value) == ObjectType(
+        type=BasicObjectTypes.MAP,
+        data=[ObjectKeyValuePair(key=_integer(1), value=NothingType())],
+    )
+
+
+@pytest.mark.parametrize("value", BASIC_VALUES + ADVANCED_VALUES)
+def test_without_optionals_keeps_a_value_without_optionals(value: Value):
+    assert without_optionals(value) == value

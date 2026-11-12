@@ -34,13 +34,11 @@ class JsonTypeable a where
     listToJson :: [a] -> Value
     listToJson l = toJSON (map toObject l)
 
--- We support maybe as the null value
+-- An optional holds its content as a typed value, or null for Nothing.
 instance (JsonTypeable a) => JsonTypeable (Maybe a) where
-    toType m = case m of
-        Just n -> toType n
-        Nothing -> "nothing"
+    toType _ = "optional"
     toJson m = case m of
-        Just n -> toJson n
+        Just n -> toObject n
         Nothing -> Null
 
 instance (JsonTypeable a) => JsonTypeable (IO a) where

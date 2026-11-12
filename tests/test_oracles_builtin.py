@@ -9,6 +9,7 @@ import tested.oracles.file
 from tested.configs import create_bundle
 from tested.datatypes import (
     AdvancedNumericTypes,
+    AdvancedSequenceTypes,
     BasicNumericTypes,
     BasicObjectTypes,
     BasicSequenceTypes,
@@ -25,9 +26,11 @@ from tested.oracles.value import evaluate as evaluate_value
 from tested.parsing import get_converter
 from tested.serialisation import (
     ExceptionValue,
+    NothingType,
     NumberType,
     ObjectKeyValuePair,
     ObjectType,
+    OptionalType,
     SequenceType,
     SpecialNumbers,
     StringType,
@@ -1358,3 +1361,89 @@ def test_nothing_oracle_shows_an_exception_readably(
     result = evaluate_nothing_others(config, actual)
     assert result.result.enum == Status.WRONG
     assert result.readable_actual == "ValueError: boom"
+
+
+def _integer(data: int) -> NumberType:
+    return NumberType(type=BasicNumericTypes.INTEGER, data=data)
+
+
+def _optional(data: Value | OptionalType | None) -> OptionalType:
+    return OptionalType(type="optional", data=data)
+
+
+@pytest.mark.parametrize(
+    "expected,returned,status,readable_expected,readable_actual",
+    [
+        (_integer(4), _optional(_integer(4)), Status.CORRECT, "Just 4", "Just 4"),
+        (NothingType(), _optional(_integer(7)), Status.WRONG, "Nothing", "Just 7"),
+        (_integer(6), _optional(None), Status.WRONG, "Just 6", "Nothing"),
+        (
+            _integer(4),
+            _optional(_optional(_integer(4))),
+            Status.CORRECT,
+            "Just (Just 4)",
+            "Just (Just 4)",
+        ),
+        (
+            SequenceType(
+                type=BasicSequenceTypes.SEQUENCE, data=[_integer(2), _integer(4)]
+            ),
+            SequenceType(
+                type=AdvancedSequenceTypes.LIST,
+                data=[
+                    _optional(_integer(2)),
+                    _optional(_integer(4)),
+                    _optional(None),
+                ],
+            ),
+            Status.WRONG,
+            "[Just 2, Just 4]",
+            "[Just 2, Just 4, Nothing]",
+        ),
+        (
+            SequenceType(
+                type=BasicSequenceTypes.SEQUENCE, data=[NothingType(), _integer(4)]
+            ),
+            SequenceType(
+                type=AdvancedSequenceTypes.LIST,
+                data=[_optional(None), _optional(_integer(4))],
+            ),
+            Status.CORRECT,
+            "[Nothing, Just 4]",
+            "[Nothing, Just 4]",
+        ),
+        (_integer(4), _integer(4), Status.CORRECT, "4", "4"),
+    ],
+)
+def test_value_oracle_shows_the_expected_value_in_the_returned_type(
+    expected: Value,
+    returned: Value | OptionalType,
+    status: Status,
+    readable_expected: str,
+    readable_actual: str,
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+):
+    config = oracle_config(tmp_path, pytestconfig, language="haskell")
+    channel = ValueOutputChannel(value=expected)
+    result = evaluate_value(config, channel, get_converter().dumps(returned))
+    assert result.result.enum == status
+    assert result.readable_expected == readable_expected
+    assert result.readable_actual == readable_actual
+
+
+def test_no_return_oracle_accepts_an_absent_optional(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig, language="haskell")
+    result = evaluate_no_return(config, get_converter().dumps(_optional(None)))
+    assert result.result.enum == Status.CORRECT
+
+
+def test_no_return_oracle_shows_a_present_optional_as_returned(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    config = oracle_config(tmp_path, pytestconfig, language="haskell")
+    result = evaluate_no_return(config, get_converter().dumps(_optional(_integer(5))))
+    assert result.result.enum == Status.WRONG
+    assert result.readable_actual == "Just 5"

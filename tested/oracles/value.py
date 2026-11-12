@@ -21,14 +21,17 @@ from tested.oracles.common import OracleConfig, OracleResult
 from tested.parsing import try_loads
 from tested.serialisation import (
     Expression,
+    NothingType,
     ObjectKeyValuePair,
     ObjectType,
+    OptionalType,
     SequenceType,
     StringType,
     Value,
     as_basic_type,
     parse_value,
     to_python_comparable,
+    without_optionals,
 )
 from tested.testsuite import (
     FileOutputChannel,
@@ -119,7 +122,7 @@ def _get_value_value(
     # A crash here indicates a problem with one of the language implementations,
     # or a student is trying to cheat.
     try:
-        actual_value = parse_value(actual_str)
+        returned = parse_value(actual_str)
     except (ValueError, TypeError, RecursionError) as e:
         raw_message = f"Received {actual_str}, which caused {e} for get_values."
         message = ExtendedMessage(
@@ -133,8 +136,42 @@ def _get_value_value(
             messages=[message],
         )
 
-    readable_actual = generate_statement(bundle, actual_value)
-    return expected_value, readable_expected, actual_value, readable_actual
+    readable_actual = generate_statement(bundle, returned)
+    readable_expected = generate_statement(
+        bundle, as_returned(expected_value, returned)
+    )
+    return (
+        expected_value,
+        readable_expected,
+        without_optionals(returned),
+        readable_actual,
+    )
+
+
+def as_returned(
+    expected: Value, returned: Value | OptionalType
+) -> Value | OptionalType:
+    """
+    The expected value in the type the submission returned, because a test suite
+    cannot say that a value is optional.
+    """
+    if isinstance(returned, OptionalType):
+        if isinstance(expected, NothingType):
+            return OptionalType(type="optional", data=None)
+        if returned.data is None:
+            return OptionalType(type="optional", data=expected)
+        return OptionalType(type="optional", data=as_returned(expected, returned.data))
+    if isinstance(expected, SequenceType) and isinstance(returned, SequenceType):
+        shaped = [
+            as_returned(e, r)
+            if isinstance(e, Value) and isinstance(r, Value | OptionalType)
+            else e
+            for e, r in zip(expected.data, returned.data)
+        ]
+        return SequenceType(
+            type=expected.type, data=shaped + expected.data[len(shaped) :]
+        )
+    return expected
 
 
 def _prepare_value_for_type_check(value: Value) -> Value:

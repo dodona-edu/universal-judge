@@ -6,7 +6,12 @@ from tested.languages.generation import generate_statement
 from tested.oracles.common import OracleConfig, OracleResult, try_outputs
 from tested.oracles.exception import try_as_readable_exception
 from tested.oracles.value import compare_values, try_as_readable_value
-from tested.serialisation import Expression, NothingType, parse_value
+from tested.serialisation import (
+    Expression,
+    NothingType,
+    parse_value,
+    without_optionals,
+)
 from tested.testsuite import EmptyChannel, OutputChannel, Testcase
 
 
@@ -58,7 +63,9 @@ def evaluate_no_return(
             messages=[message],
         )
 
-    type_check, _, content_check = compare_values(config, value, expected)
+    type_check, _, content_check = compare_values(
+        config, without_optionals(value), expected
+    )
     if type_check and content_check:
         return OracleResult(
             result=StatusMessage(enum=Status.CORRECT),
