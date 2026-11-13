@@ -8,14 +8,14 @@
   Checkstyle configuration that checks the sun coding conventions from:
 
     - the Java Language Specification at
-      https://docs.oracle.com/javase/specs/jls/se11/html/index.html
+      https://docs.oracle.com/javase/specs/jls/se21/html/index.html
 
     - the Sun Code Conventions at https://www.oracle.com/java/technologies/javase/codeconventions-contents.html
 
     - the Javadoc guidelines at
       https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html
 
-    - the JDK Api documentation https://docs.oracle.com/en/java/javase/11/
+    - the JDK Api documentation https://docs.oracle.com/en/java/javase/21/
 
     - some best practices
 
@@ -31,6 +31,8 @@
 
 -->
 
+<!-- checkstyle 14.4.0 sun_checks.xml; TESTed changes: severity info, Javadoc checks and DesignForExtension disabled -->
+
 <module name="Checker">
   <!--
       If you set the basedir property below, then all reported file
@@ -39,17 +41,17 @@
 
       <property name="basedir" value="${basedir}"/>
   -->
-  <property name="severity" value="error"/>
+  <property name="severity" value="info"/>
 
   <property name="fileExtensions" value="java, properties, xml"/>
 
   <!-- Excludes all 'module-info.java' files              -->
-  <!-- See https://checkstyle.org/config_filefilters.html -->
+  <!-- See https://checkstyle.org/filefilters/index.html -->
   <module name="BeforeExecutionExclusionFileFilter">
     <property name="fileNamePattern" value="module\-info\.java$"/>
   </module>
 
-  <!-- https://checkstyle.org/config_filters.html#SuppressionFilter -->
+  <!-- https://checkstyle.org/filters/suppressionfilter.html -->
   <module name="SuppressionFilter">
     <property name="file" value="${org.checkstyle.sun.suppressionfilter.config}"
               default="checkstyle-suppressions.xml" />
@@ -57,30 +59,30 @@
   </module>
 
   <!-- Checks that a package-info.java file exists for each package.     -->
-  <!-- See https://checkstyle.org/config_javadoc.html#JavadocPackage -->
+  <!-- See https://checkstyle.org/checks/javadoc/javadocpackage.html#JavadocPackage -->
   <!-- <module name="JavadocPackage"/> -->
 
   <!-- Checks whether files end with a new line.                        -->
-  <!-- See https://checkstyle.org/config_misc.html#NewlineAtEndOfFile -->
+  <!-- See https://checkstyle.org/checks/misc/newlineatendoffile.html -->
   <module name="NewlineAtEndOfFile"/>
 
   <!-- Checks that property files contain the same keys.         -->
-  <!-- See https://checkstyle.org/config_misc.html#Translation -->
+  <!-- See https://checkstyle.org/checks/misc/translation.html -->
   <module name="Translation"/>
 
   <!-- Checks for Size Violations.                    -->
-  <!-- See https://checkstyle.org/config_sizes.html -->
+  <!-- See https://checkstyle.org/checks/sizes/index.html -->
   <module name="FileLength"/>
   <module name="LineLength">
     <property name="fileExtensions" value="java"/>
   </module>
 
   <!-- Checks for whitespace                               -->
-  <!-- See https://checkstyle.org/config_whitespace.html -->
+  <!-- See https://checkstyle.org/checks/whitespace/index.html -->
   <module name="FileTabCharacter"/>
 
   <!-- Miscellaneous other checks.                   -->
-  <!-- See https://checkstyle.org/config_misc.html -->
+  <!-- See https://checkstyle.org/checks/misc/index.html -->
   <module name="RegexpSingleline">
     <property name="format" value="\s+$"/>
     <property name="minimum" value="0"/>
@@ -89,25 +91,34 @@
   </module>
 
   <!-- Checks for Headers                                -->
-  <!-- See https://checkstyle.org/config_header.html   -->
+  <!-- See https://checkstyle.org/checks/header/index.html   -->
   <!-- <module name="Header"> -->
   <!--   <property name="headerFile" value="${checkstyle.header.file}"/> -->
   <!--   <property name="fileExtensions" value="java"/> -->
   <!-- </module> -->
 
+  <!-- Checks that a file begins with a c-style comment that lists the  -->
+  <!-- class name, version information, date and copyright notice.     -->
+  <!-- See https://checkstyle.org/checks/header/multifileregexpheader.html -->
+  <module name="MultiFileRegexpHeader">
+    <property name="fileExtensions" value="java"/>
+    <property name="headerFiles"
+              value="${org.checkstyle.sun.header.files}"
+              default="/com/puppycrawl/tools/checkstyle/any.header"/>
+  </module>
+
   <module name="TreeWalker">
 
     <!-- Checks for Javadoc comments.                     -->
-    <!-- See https://checkstyle.org/config_javadoc.html -->
+    <!-- See https://checkstyle.org/checks/javadoc/index.html -->
     <!-- <module name="InvalidJavadocPosition"/>
     <module name="JavadocMethod"/>
     <module name="JavadocType"/>
     <module name="JavadocVariable"/>
-    <module name="JavadocStyle"/>
     <module name="MissingJavadocMethod"/> -->
 
     <!-- Checks for Naming Conventions.                  -->
-    <!-- See https://checkstyle.org/config_naming.html -->
+    <!-- See https://checkstyle.org/checks/naming/index.html -->
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
     <module name="LocalVariableName"/>
@@ -119,7 +130,7 @@
     <module name="TypeName"/>
 
     <!-- Checks for imports                              -->
-    <!-- See https://checkstyle.org/config_imports.html -->
+    <!-- See https://checkstyle.org/checks/imports/index.html -->
     <module name="AvoidStarImport"/>
     <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
     <module name="RedundantImport"/>
@@ -128,12 +139,12 @@
     </module>
 
     <!-- Checks for Size Violations.                    -->
-    <!-- See https://checkstyle.org/config_sizes.html -->
+    <!-- See https://checkstyle.org/checks/sizes/index.html -->
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
 
     <!-- Checks for whitespace                               -->
-    <!-- See https://checkstyle.org/config_whitespace.html -->
+    <!-- See https://checkstyle.org/checks/whitespace/index.html -->
     <module name="EmptyForIteratorPad"/>
     <module name="GenericWhitespace"/>
     <module name="MethodParamPad"/>
@@ -141,17 +152,26 @@
     <module name="NoWhitespaceBefore"/>
     <module name="OperatorWrap"/>
     <module name="ParenPad"/>
+    <module name="SeparatorWrap">
+      <property name="tokens" value="COMMA"/>
+      <property name="option" value="EOL"/>
+    </module>
     <module name="TypecastParenPad"/>
-    <module name="WhitespaceAfter"/>
+    <module name="WhitespaceAfter">
+      <!-- Explicit token list to avoid duplication with WhitespaceAround.
+       All other default tokens are covered by WhitespaceAround. -->
+      <property name="tokens"
+                value="COMMA, SEMI, TYPECAST, LITERAL_YIELD, ELLIPSIS, LITERAL_CASE"/>
+    </module>
     <module name="WhitespaceAround"/>
 
     <!-- Modifier Checks                                    -->
-    <!-- See https://checkstyle.org/config_modifiers.html -->
+    <!-- See https://checkstyle.org/checks/modifier/index.html -->
     <module name="ModifierOrder"/>
     <module name="RedundantModifier"/>
 
     <!-- Checks for blocks. You know, those {}'s         -->
-    <!-- See https://checkstyle.org/config_blocks.html -->
+    <!-- See https://checkstyle.org/checks/blocks/index.html -->
     <module name="AvoidNestedBlocks"/>
     <module name="EmptyBlock"/>
     <module name="LeftCurly"/>
@@ -159,41 +179,54 @@
     <module name="RightCurly"/>
 
     <!-- Checks for common coding problems               -->
-    <!-- See https://checkstyle.org/config_coding.html -->
+    <!-- See https://checkstyle.org/checks/coding/index.html -->
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
+    <module name="FallThrough"/>
     <module name="HiddenField"/>
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MagicNumber"/>
     <module name="MissingSwitchDefault"/>
     <module name="MultipleVariableDeclarations"/>
+    <module name="OneStatementPerLine"/>
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
 
     <!-- Checks for class design                         -->
-    <!-- See https://checkstyle.org/config_design.html -->
+    <!-- See https://checkstyle.org/checks/design/index.html -->
     <!-- <module name="DesignForExtension"/> -->
+    <module name="DeclarationOrder"/>
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
     <module name="InterfaceIsType"/>
     <module name="VisibilityModifier"/>
 
     <!-- Miscellaneous other checks.                   -->
-    <!-- See https://checkstyle.org/config_misc.html -->
+    <!-- See https://checkstyle.org/checks/misc/index.html -->
     <module name="ArrayTypeStyle"/>
+    <module name="DescendantToken">
+      <!-- At most three variables in the initialization or update clause
+       of a for statement. -->
+      <property name="id" value="ForClauseMaxVariables"/>
+      <property name="tokens" value="FOR_INIT, FOR_ITERATOR"/>
+      <property name="limitedTokens" value="COMMA"/>
+      <property name="maximumDepth" value="2"/>
+      <property name="maximumNumber" value="2"/>
+      <property name="maximumMessage"
+                value="Avoid using more than three variables in the for clause."/>
+    </module>
     <module name="FinalParameters"/>
+    <module name="Indentation"/>
     <module name="TodoComment"/>
     <module name="UpperEll"/>
 
-    <!-- https://checkstyle.org/config_filters.html#SuppressionXpathFilter -->
+    <!-- https://checkstyle.org/filters/suppressionxpathfilter.html -->
     <module name="SuppressionXpathFilter">
       <property name="file" value="${org.checkstyle.sun.suppressionxpathfilter.config}"
                 default="checkstyle-xpath-suppressions.xml" />
       <property name="optional" value="true"/>
     </module>
-    
-    <module name="Indentation"/>
 
   </module>
 
