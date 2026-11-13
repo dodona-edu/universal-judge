@@ -1,2 +1,3 @@
 [*.{kt,kts}]
 ktlint_standard_filename=disabled
+ktlint_standard_no-unused-imports=enabled

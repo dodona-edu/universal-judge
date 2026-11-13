@@ -24,6 +24,23 @@ def test_ktlint_correct(tmp_path: Path, pytestconfig: pytest.Config):
     assert len(updates.find_all("annotate-code")) == 0
 
 
+def test_ktlint_unused_import(tmp_path: Path, pytestconfig: pytest.Config):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "kotlin",
+        tmp_path,
+        "plan.tson",
+        "unused-import",
+        {"options": {"linter": True}},
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    annotations = updates.find_all("annotate-code")
+    assert len(annotations) == 1
+    assert annotations[0]["externalUrl"].endswith("#no-unused-imports")
+
+
 def test_ktlint_bad_output(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
