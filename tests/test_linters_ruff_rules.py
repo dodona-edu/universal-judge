@@ -9,7 +9,6 @@ import re
 import subprocess
 import tomllib
 from functools import cache
-from pathlib import Path
 
 import pytest
 
@@ -22,9 +21,8 @@ from tested.languages.python.linter import RULES, SYNTAX_ERROR
 
 pytestmark = pytest.mark.python
 
-DOCKERFILE = (
-    Path(__file__).resolve().parents[1] / ".devcontainer" / "dodona-tested.dockerfile"
-)
+# Add a new ruff version here before docker-images bumps it; drop the old one after.
+SUPPORTED_RUFF_VERSIONS = {"0.17.0"}
 PLACEHOLDER = re.compile(r"\{(\w*)\}")
 TYPES = {"error", "warning", "info"}
 
@@ -81,13 +79,15 @@ def test_every_rule_has_a_dodona_annotation_type():
     } == {}
 
 
-def test_the_installed_ruff_is_the_version_in_the_dockerfile():
-    pinned = re.search(r"\bruff==(\S+)", DOCKERFILE.read_text())
-    assert pinned is not None
+def test_the_installed_ruff_is_a_supported_version():
     version = subprocess.run(
         ["ruff", "--version"], capture_output=True, text=True, check=True
     )
-    assert version.stdout.split() == ["ruff", pinned[1]]
+    name, installed = version.stdout.split()
+    assert name == "ruff"
+    assert installed in SUPPORTED_RUFF_VERSIONS, (
+        f"ruff {installed} is installed, supported: {sorted(SUPPORTED_RUFF_VERSIONS)}"
+    )
 
 
 def known(template: str, formats: list[str]) -> bool:
