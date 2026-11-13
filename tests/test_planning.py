@@ -8,16 +8,19 @@ from tested.judge.planning import (
     PlannedContext,
     PlannedExecutionUnit,
     PlanStrategy,
-    has_only_main_calls,
+    all_units_compile_same_code,
     plan_test_suite,
 )
 from tested.testsuite import (
     ContentPath,
     Context,
     EmptyChannel,
+    EvaluationFunction,
+    ExceptionOutputChannel,
     ExitCodeOutputChannel,
     FileOutputChannel,
     LanguageLiterals,
+    LanguageSpecificOracle,
     MainInput,
     Output,
     Suite,
@@ -796,19 +799,59 @@ def _call() -> SuiteTestcase:
     )
 
 
-def test_has_only_main_calls_for_main_contexts():
+def test_all_units_compile_same_code_for_main_contexts():
     units = [
         _unit(Context(testcases=[_main()]), Context(testcases=[_main(exit_code=True)]))
     ]
-    assert has_only_main_calls(units)
+    assert all_units_compile_same_code(units, SupportedLanguage.C)
 
 
-def test_has_only_main_calls_false_for_function_context():
-    assert not has_only_main_calls([_unit(Context(testcases=[_call()]))])
+def test_all_units_compile_same_code_false_for_function_context():
+    units = [_unit(Context(testcases=[_call()]))]
+    assert not all_units_compile_same_code(units, SupportedLanguage.C)
 
 
-def test_has_only_main_calls_false_for_main_followed_by_call():
+def test_all_units_compile_same_code_false_for_main_followed_by_call():
     context = Context(testcases=[_main(), _call()])
-    assert not has_only_main_calls(
-        [_unit(Context(testcases=[_main()])), _unit(context)]
+    units = [_unit(Context(testcases=[_main()])), _unit(context)]
+    assert not all_units_compile_same_code(units, SupportedLanguage.C)
+
+
+def _code(language: SupportedLanguage) -> dict[str, TextData]:
+    return {language.value: TextData(content="total++;")}
+
+
+def test_all_units_compile_same_code_false_for_before_code():
+    context = Context(testcases=[_main()], before=_code(SupportedLanguage.C))
+    units = [_unit(Context(testcases=[_main()])), _unit(context)]
+    assert not all_units_compile_same_code(units, SupportedLanguage.C)
+
+
+def test_all_units_compile_same_code_false_for_after_code():
+    context = Context(testcases=[_main()], after=_code(SupportedLanguage.C))
+    units = [_unit(Context(testcases=[_main()])), _unit(context)]
+    assert not all_units_compile_same_code(units, SupportedLanguage.C)
+
+
+def test_all_units_compile_same_code_ignores_code_for_other_languages():
+    context = Context(
+        testcases=[_main()],
+        before=_code(SupportedLanguage.PYTHON),
+        after=_code(SupportedLanguage.PYTHON),
     )
+    units = [_unit(Context(testcases=[_main()])), _unit(context)]
+    assert all_units_compile_same_code(units, SupportedLanguage.C)
+
+
+def _main_with_exception_oracle(language: SupportedLanguage) -> SuiteTestcase:
+    oracle = LanguageSpecificOracle(
+        functions={language: EvaluationFunction(file=Path("oracle.c"))}
+    )
+    output = Output(exception=ExceptionOutputChannel(oracle=oracle))
+    return SuiteTestcase(input=MainInput(), output=output)
+
+
+def test_all_units_compile_same_code_false_for_language_specific_oracle():
+    context = Context(testcases=[_main_with_exception_oracle(SupportedLanguage.C)])
+    units = [_unit(Context(testcases=[_main()])), _unit(context)]
+    assert not all_units_compile_same_code(units, SupportedLanguage.C)
