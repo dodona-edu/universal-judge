@@ -87,8 +87,9 @@ def test_eslint_typescript_bad_output(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     messages = updates.find_all("append-message")
-    # There are 2 linter error messages and 1 compilation error message because of the mock
-    assert len(messages) == 3
+    # The mock also breaks the compilation: 2 linter messages, 1 compiler message
+    # and 1 "not executed" message.
+    assert len(messages) == 4
 
 
 def test_eslint_typescript_multiline(tmp_path: Path, pytestconfig: pytest.Config):

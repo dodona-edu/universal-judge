@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from pytest_mock import MockerFixture
 
+from tested.cli import CommandDict
 from tested.configs import create_bundle
 from tested.dodona import Status
 from tested.features import Construct
@@ -387,6 +388,20 @@ def test_batch_compilation(
     assert spy.call_count == 1
 
 
+def assert_precompilation_error_reported_once(updates: CommandDict, contexts: int):
+    first_tab = updates.index(updates.find_next("start-tab"))
+    before_tabs = CommandDict(updates[:first_tab])
+    in_tabs = CommandDict(updates[first_tab:])
+    assert before_tabs.find_all("append-message")
+    assert before_tabs.find_status_enum() == ["compilation error"]
+    assert "compilation error" not in in_tabs.find_status_enum()
+    not_executed = get_i18n_string("judge.evaluation.not-executed")
+    assert [m["message"] for m in in_tabs.find_all("append-message")] == [
+        not_executed
+    ] * contexts
+    assert len(in_tabs.find_all("start-context")) == contexts
+
+
 @pytest.mark.parametrize("language", ALL_LANGUAGES)
 def test_batch_compilation_fallback_skipped_for_main_only_suite(
     language: str, tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
@@ -400,7 +415,8 @@ def test_batch_compilation_fallback_skipped_for_main_only_suite(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-testcase")) == 2
-    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert updates.find_status_enum() == ["compilation error", "wrong", "wrong"]
+    assert_precompilation_error_reported_once(updates, contexts=2)
     assert spy.call_count == 1
 
 
@@ -481,7 +497,8 @@ def test_batch_compilation_no_fallback(
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert len(updates.find_all("start-tab")) == 1
-    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert updates.find_status_enum() == ["compilation error", "wrong", "wrong"]
+    assert_precompilation_error_reported_once(updates, contexts=2)
     assert spy.call_count == 1
 
 
@@ -494,7 +511,8 @@ def test_csharp_compilation_error_in_generated_code_is_shown(
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["compilation error"] * 2
+    assert updates.find_status_enum() == ["compilation error", "wrong", "wrong"]
+    assert_precompilation_error_reported_once(updates, contexts=2)
     assert "CS0122" in result
 
 

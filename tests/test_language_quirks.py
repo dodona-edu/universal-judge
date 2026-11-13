@@ -150,7 +150,7 @@ def test_c_compilation_error_message_with_dots(
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["compilation error"]
+    assert updates.find_status_enum() == ["compilation error", "wrong"]
     messages = [
         m if isinstance(m, str) else m["description"]
         for m in (x["message"] for x in updates.find_all("append-message"))
@@ -165,9 +165,9 @@ def test_cpp_error_outside_submission_has_message(
     conf = configuration(pytestconfig, "echo", "cpp", tmp_path, "one.tson", "no-main")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == ["compilation error"]
-    messages = updates.find_all("append-message")
-    descriptions = [m["message"]["description"] for m in messages]
+    assert updates.find_status_enum() == ["compilation error", "wrong"]
+    messages = [m["message"] for m in updates.find_all("append-message")]
+    descriptions = [m["description"] for m in messages if isinstance(m, dict)]
     assert any("error:" in d for d in descriptions)
     assert "<div class='code'></div>" not in descriptions
 
@@ -610,16 +610,18 @@ def test_haskell_module_header_is_renamed(contents: str, expected: str):
     "contents, expected",
     [
         pytest.param(
-            HASKELL_COMMENT_BEFORE_PRAGMA, "correct", id="comment-before-pragma"
+            HASKELL_COMMENT_BEFORE_PRAGMA, ["correct"], id="comment-before-pragma"
         ),
-        pytest.param(HASKELL_MULTILINE_PRAGMA, "correct", id="multiline-pragma"),
-        pytest.param(HASKELL_OWN_MAIN_HEADER, "correct", id="main-header"),
-        pytest.param(HASKELL_OWN_SUBMISSION_HEADER, "correct", id="own-header"),
-        pytest.param(HASKELL_ONLY_PRAGMA, "compilation error", id="only-pragma"),
+        pytest.param(HASKELL_MULTILINE_PRAGMA, ["correct"], id="multiline-pragma"),
+        pytest.param(HASKELL_OWN_MAIN_HEADER, ["correct"], id="main-header"),
+        pytest.param(HASKELL_OWN_SUBMISSION_HEADER, ["correct"], id="own-header"),
+        pytest.param(
+            HASKELL_ONLY_PRAGMA, ["compilation error", "wrong"], id="only-pragma"
+        ),
     ],
 )
 def test_haskell_submission_header(
-    contents: str, expected: str, tmp_path: Path, pytestconfig: pytest.Config
+    contents: str, expected: list[str], tmp_path: Path, pytestconfig: pytest.Config
 ):
     resources = tmp_path / "resources"
     resources.mkdir()
@@ -640,7 +642,7 @@ def test_haskell_submission_header(
     )
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
-    assert updates.find_status_enum() == [expected]
+    assert updates.find_status_enum() == expected
 
 
 @pytest.mark.haskell
