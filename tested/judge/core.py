@@ -59,13 +59,6 @@ from tested.testsuite import LanguageLiterals, MainInput, TextData
 _logger = logging.getLogger(__name__)
 
 
-def _is_fatal_compilation_error(compilation_results: CompilationResult) -> bool:
-    return compilation_results.status in (
-        Status.TIME_LIMIT_EXCEEDED,
-        Status.MEMORY_LIMIT_EXCEEDED,
-    )
-
-
 def _should_fall_back_to_unit_compilation(
     bundle: Bundle,
     compilation_results: CompilationResult,
@@ -78,10 +71,25 @@ def _should_fall_back_to_unit_compilation(
     )
 
 
-def _handle_time_or_memory_compilation(
+def _should_stop_after_precompilation(
+    bundle: Bundle,
+    compilation_results: CompilationResult,
+    units: list[PlannedExecutionUnit],
+) -> bool:
+    if compilation_results.status == Status.CORRECT:
+        return False
+    if compilation_results.status in (
+        Status.TIME_LIMIT_EXCEEDED,
+        Status.MEMORY_LIMIT_EXCEEDED,
+    ):
+        return True
+    return not _should_fall_back_to_unit_compilation(bundle, compilation_results, units)
+
+
+def _report_failed_precompilation(
     bundle: Bundle, collector: OutputManager, results: CompilationResult
 ):
-    assert _is_fatal_compilation_error(results)
+    assert results.status != Status.CORRECT
     collector.add_messages(results.messages)
     collector.add_compiler_annotations(results.annotations)
     terminate(
@@ -104,11 +112,12 @@ def judge(bundle: Bundle):
 
     1. Convert all contexts into as little units as possible.
     2. Attempt to precompile everything.
-       a. If this fails, go to 3.
-       b. If this succeeds, go to 4.
+       a. If this succeeds, go to 4.
+       b. If this fails and compiling per unit can help, go to 3.
+       c. Otherwise, report the compiler output once and stop.
     3. Convert contexts into "tab-level" units.
     4. For each execution unit:
-       a. Compile if necessary (only if 2 failed)
+       a. Compile if necessary (only after 3)
        b. Execute the unit.
        c. Process the results.
 
@@ -173,12 +182,10 @@ def judge(bundle: Bundle):
     _logger.debug("Attempting precompilation")
     compilation_results = precompile(bundle, plan)
 
-    # If something went horribly wrong, and the compilation itself caused a timeout or memory issue, bail now.
-    if _is_fatal_compilation_error(compilation_results):
-        _handle_time_or_memory_compilation(bundle, collector, compilation_results)
+    if _should_stop_after_precompilation(bundle, compilation_results, planned_units):
+        _report_failed_precompilation(bundle, collector, compilation_results)
         return
 
-    # If the compilation failed, but we can fall back, do that.
     if _should_fall_back_to_unit_compilation(
         bundle, compilation_results, planned_units
     ):

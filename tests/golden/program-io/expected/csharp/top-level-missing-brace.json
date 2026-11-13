@@ -3,11 +3,30 @@
   "command": "start-judgement"
  },
  {
+  "command": "append-message",
+  "message": {
+   "description": "<div class='code'>&lt;code&gt;: error CS1513: } expected</div>",
+   "format": "html",
+   "permission": "student"
+  }
+ },
+ {
+  "command": "escalate-status",
+  "status": {
+   "enum": "compilation error",
+   "human": "Invalid source code"
+  }
+ },
+ {
   "command": "start-tab",
   "title": "Program"
  },
  {
   "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
  },
  {
   "command": "start-testcase",
@@ -17,17 +36,16 @@
   }
  },
  {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>&lt;code&gt;: error CS1513: } expected</div>",
-   "format": "html",
-   "permission": "student"
-  }
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hello: Alice\nHello: Bob\n"
  },
  {
-  "command": "escalate-status",
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
   "status": {
-   "enum": "compilation error"
+   "enum": "wrong"
   }
  },
  {
@@ -35,11 +53,15 @@
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
  },
  {
   "command": "start-testcase",
@@ -49,17 +71,16 @@
   }
  },
  {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>&lt;code&gt;: error CS1513: } expected</div>",
-   "format": "html",
-   "permission": "student"
-  }
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Welcome: Dodona\n"
  },
  {
-  "command": "escalate-status",
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
   "status": {
-   "enum": "compilation error"
+   "enum": "wrong"
   }
  },
  {
@@ -67,11 +88,15 @@
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
  },
  {
   "command": "start-testcase",
@@ -81,17 +106,16 @@
   }
  },
  {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>&lt;code&gt;: error CS1513: } expected</div>",
-   "format": "html",
-   "permission": "student"
-  }
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": "Hi: TESTed\nHi: Judge\n"
  },
  {
-  "command": "escalate-status",
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
   "status": {
-   "enum": "compilation error"
+   "enum": "wrong"
   }
  },
  {
@@ -99,11 +123,15 @@
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "start-context"
+ },
+ {
+  "command": "append-message",
+  "message": "These test(s) were not executed"
  },
  {
   "command": "start-testcase",
@@ -113,17 +141,29 @@
   }
  },
  {
-  "command": "append-message",
-  "message": {
-   "description": "<div class='code'>&lt;code&gt;: error CS1513: } expected</div>",
-   "format": "html",
-   "permission": "student"
+  "channel": "stdout",
+  "command": "start-test",
+  "expected": ""
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
+  "status": {
+   "enum": "wrong"
   }
  },
  {
-  "command": "escalate-status",
+  "channel": "exit code",
+  "command": "start-test",
+  "expected": "1"
+ },
+ {
+  "accepted": false,
+  "command": "close-test",
+  "generated": "",
   "status": {
-   "enum": "compilation error"
+   "enum": "wrong"
   }
  },
  {
@@ -131,8 +171,8 @@
   "command": "close-testcase"
  },
  {
-  "command": "close-context",
-  "data": {}
+  "accepted": false,
+  "command": "close-context"
  },
  {
   "command": "close-tab"
