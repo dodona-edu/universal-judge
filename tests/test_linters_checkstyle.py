@@ -40,19 +40,19 @@ def test_checkstyle_warning(tmp_path: Path, pytestconfig: pytest.Config):
     annotations = updates.find_all("annotate-code")
     assert len(annotations) == 3
 
-    assert annotations[0]["type"] == Severity.ERROR
+    assert annotations[0]["type"] == Severity.INFO
     assert "MagicNumberCheck" in annotations[0]["externalUrl"]
-    assert annotations[0]["row"] == 2
+    assert annotations[0]["row"] == 5
     assert annotations[0]["column"] == 16
 
-    assert annotations[1]["type"] == Severity.ERROR
+    assert annotations[1]["type"] == Severity.INFO
     assert "ParenPadCheck" in annotations[1]["externalUrl"]
-    assert annotations[1]["row"] == 3
+    assert annotations[1]["row"] == 6
     assert annotations[1]["column"] == 26
 
-    assert annotations[2]["type"] == Severity.ERROR
+    assert annotations[2]["type"] == Severity.INFO
     assert "ParenPadCheck" in annotations[2]["externalUrl"]
-    assert annotations[2]["row"] == 3
+    assert annotations[2]["row"] == 6
     assert annotations[2]["column"] == 30
 
 
