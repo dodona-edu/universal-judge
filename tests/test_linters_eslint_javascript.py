@@ -5,7 +5,6 @@ import pytest
 from pytest_mock import MockerFixture
 
 from tested.dodona import Severity
-from tested.judge.linter import eslint_major_version
 from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -132,9 +131,6 @@ def test_eslint_extensionless_submission(tmp_path: Path, pytestconfig: pytest.Co
     assert len(updates.find_all("annotate-code")) == 2
 
 
-@pytest.mark.skipif(
-    (eslint_major_version() or 0) < 9, reason="a flat config needs ESLint 9 or later"
-)
 def test_eslint_exercise_flat_config_replaces_default(
     tmp_path: Path, pytestconfig: pytest.Config
 ):
