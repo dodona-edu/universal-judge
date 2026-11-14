@@ -1,9 +1,11 @@
+import shutil
 from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
 
 from tested.dodona import Severity
+from tested.judge.linter import eslint_major_version
 from tested.judge.utils import BaseExecutionResult
 from tests.manual_utils import assert_valid_output, configuration, execute_config
 
@@ -109,3 +111,53 @@ def test_eslint_multiline(tmp_path: Path, pytestconfig: pytest.Config):
     assert annotations[1]["rows"] == 2
     assert annotations[1]["column"] == 3
     assert annotations[1]["columns"] == 0
+
+
+def test_eslint_extensionless_submission(tmp_path: Path, pytestconfig: pytest.Config):
+    # Dodona stores the submission as `source`, without an extension.
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "javascript",
+        tmp_path,
+        "plan.tson",
+        "warning",
+        {"options": {"linter": True}},
+    )
+    source = tmp_path / "source"
+    shutil.copy(conf.source, source)
+    conf.source = source
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) == 2
+
+
+@pytest.mark.skipif(
+    (eslint_major_version() or 0) < 9, reason="a flat config needs ESLint 9 or later"
+)
+def test_eslint_exercise_flat_config_replaces_default(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "javascript",
+        tmp_path,
+        "plan.tson",
+        "eqeqeq",
+        {
+            "options": {
+                "language": {
+                    "javascript": {
+                        "linter": True,
+                        "eslint_config": "eslint_eqeqeq.config.mjs",
+                    }
+                }
+            }
+        },
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    urls = [a["externalUrl"] for a in updates.find_all("annotate-code")]
+    assert any(url.endswith("/eqeqeq") for url in urls)
+    assert not any(url.endswith("/no-var") for url in urls)
