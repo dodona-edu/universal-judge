@@ -5,11 +5,7 @@ from pathlib import Path
 from tested.configs import DodonaConfig
 from tested.dodona import AnnotateCode, ExtendedMessage, Message, Permission, Severity
 from tested.internationalization import get_i18n_string
-from tested.judge.linter import (
-    annotation_from_position,
-    default_eslint_config,
-    get_linter_position,
-)
+from tested.judge.linter import annotation_from_position, get_linter_position
 from tested.judge.utils import run_command
 
 logger = logging.getLogger(__name__)
@@ -30,9 +26,7 @@ def run_eslint(
         config_path = config.resources / path
     else:
         # Use the default file.
-        config_path = default_eslint_config(
-            config.judge / "tested/languages/javascript"
-        )
+        config_path = config.judge / "tested/languages/javascript/eslint.config.mjs"
     config_path = str(config_path.absolute())
 
     execution_results = run_command(
