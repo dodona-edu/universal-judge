@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pytest
@@ -121,3 +122,24 @@ def test_eslint_typescript_multiline(tmp_path: Path, pytestconfig: pytest.Config
     assert annotations[1]["rows"] == 1
     assert annotations[1]["column"] == 4
     assert annotations[1]["columns"] == 1
+
+
+def test_eslint_typescript_extensionless_submission(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    # Dodona stores the submission as `source`, without an extension.
+    conf = configuration(
+        pytestconfig,
+        "linter",
+        "typescript",
+        tmp_path,
+        "plan.tson",
+        "warning",
+        {"options": {"linter": True}},
+    )
+    source = tmp_path / "source"
+    shutil.copy(conf.source, source)
+    conf.source = source
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert len(updates.find_all("annotate-code")) > 0
