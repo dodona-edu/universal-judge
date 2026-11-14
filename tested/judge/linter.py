@@ -1,4 +1,7 @@
+import json
 import logging
+import shutil
+from pathlib import Path
 from typing import Literal
 
 from attrs import define
@@ -137,3 +140,35 @@ def annotation_from_position(
         type=type,
         format=format,
     )
+
+
+def eslint_major_version() -> int | None:
+    """
+    Read the major version of the installed ESLint, without running it.
+
+    :return: The major version, or None if it cannot be determined.
+    """
+    executable = shutil.which("eslint")
+    if executable is None:
+        return None
+    # The executable symlinks to <prefix>/node_modules/eslint/bin/eslint.js.
+    package_json = Path(executable).resolve().parent.parent / "package.json"
+    try:
+        version = json.loads(package_json.read_text())["version"]
+        return int(str(version).split(".")[0])
+    except OSError, ValueError, KeyError, TypeError:
+        _logger.warning("Could not determine the ESLint version.", exc_info=True)
+        return None
+
+
+def default_eslint_config(language_directory: Path) -> Path:
+    """
+    Get the default ESLint config for the installed ESLint: flat config from
+    ESLint 9 on, legacy eslintrc before that.
+
+    :param language_directory: The directory with the language's default configs.
+    """
+    major = eslint_major_version()
+    if major is not None and major >= 9:
+        return language_directory / "eslint.config.mjs"
+    return language_directory / "eslintrc.yml"
