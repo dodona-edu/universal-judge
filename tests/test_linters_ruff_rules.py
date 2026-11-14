@@ -22,7 +22,7 @@ from tested.languages.python.linter import RULES, SYNTAX_ERROR
 pytestmark = pytest.mark.python
 
 # Add a new ruff version here before docker-images bumps it; drop the old one after.
-SUPPORTED_RUFF_VERSIONS = {"0.17.0"}
+SUPPORTED_RUFF_VERSIONS = {"0.17.0", "0.17.4"}
 PLACEHOLDER = re.compile(r"\{(\w*)\}")
 TYPES = {"error", "warning", "info"}
 
