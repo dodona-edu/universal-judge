@@ -7,24 +7,41 @@
 
 FROM python:3.15.2-slim-trixie
 
+ARG GCC_MAJOR=14
+ARG CPPCHECK_VERSION=2.17
+
 # Set up the environment
+
+ARG SHELLCHECK_VERSION=0.11.0
 
 # Kotlin
 ENV SDKMAN_DIR=/usr/local/sdkman
 ENV PATH=$SDKMAN_DIR/candidates/kotlin/current/bin:$PATH
 ENV PATH=$SDKMAN_DIR/candidates/java/current/bin:$PATH
+ARG TEMURIN_VERSION=25.0.5.0+8-tem
+ARG KOTLIN_VERSION=2.4.21
+ARG KTLINT_VERSION=1.8.0
+ARG CHECKSTYLE_VERSION=14.4.0
 # Haskell
 ENV HASKELL_DIR=/usr/local/ghcupdir
 ENV PATH=$HASKELL_DIR/ghc/bin:$PATH
 ENV PATH=$HASKELL_DIR/cabal:$PATH
+ARG GHC_VERSION=9.14.1
+ARG CABAL_VERSION=3.18.2.0
+ARG AESON_VERSION=2.3.2.0
+ARG HLINT_VERSION=3.10
 # Node
 ENV NODE_PATH=/usr/lib/node_modules
+ARG NODE_MAJOR=26
 
 # .NET: every submission runs in a fresh container, so each dotnet call is a first run
 ENV DOTNET_NOLOGO=1
 ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
 ENV DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ARG DOTNET_SDK_CHANNEL=10.0
+
+COPY dodona-tested/ /requirements/
 
 # Install dependencies
 # hadolint ignore=DL3013,DL3016
@@ -59,21 +76,17 @@ CFG
         libc6-dev \
         libyaml-dev
     # Without a wheel, fail the build instead of silently building PyYAML without libyaml
-    PYYAML_FORCE_LIBYAML=1 pip install --no-cache-dir --upgrade \
-        psutil==5.9.8 \
-        attrs==26.1.0 \
-        cattrs==26.2.1 \
-        jsonschema==4.22.0 \
-        typing_inspect==0.9.0 \
-        pyyaml==6.0.3 \
-        Pygments==2.18.0 \
-        python-i18n==0.3.9 \
-        ruff==0.17.0
+    PYYAML_FORCE_LIBYAML=1 pip install --no-cache-dir --upgrade -r /requirements/tested.txt
 
     # C/C++ dependencies
     apt-get install -y --no-install-recommends \
         gcc \
+        g++ \
         cppcheck
+    # Debian owns these versions: fail the build when a release changes them
+    [ "$(gcc -dumpversion)" = "$GCC_MAJOR" ] || { echo "gcc is $(gcc -dumpversion), expected $GCC_MAJOR" >&2; exit 1; }
+    [ "$(g++ -dumpversion)" = "$GCC_MAJOR" ] || { echo "g++ is $(g++ -dumpversion), expected $GCC_MAJOR" >&2; exit 1; }
+    case "$(cppcheck --version)" in "Cppcheck $CPPCHECK_VERSION"*) ;; *) echo "$(cppcheck --version), expected Cppcheck $CPPCHECK_VERSION" >&2; exit 1 ;; esac
 
     # Bash dependencies
     apt-get install -y --no-install-recommends \
@@ -88,32 +101,34 @@ CFG
         tree \
         vim \
         xxd \
-        shellcheck
+        xz-utils
+    bash -c 'set -o pipefail && curl -fsSL "https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz" | tar -xJ --strip-components=1 -C /usr/local/bin "shellcheck-v${SHELLCHECK_VERSION}/shellcheck"'
 
     # JavaScript dependencies
-    bash -c 'set -o pipefail && curl -fsSL https://deb.nodesource.com/setup_22.x | bash -'
+    bash -c 'set -o pipefail && curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash -'
     apt-get install -y --no-install-recommends nodejs
-    npm install -g eslint@8.57 abstract-syntax-tree@2.22
-
-    # TypeScript dependencies
+    apt-get install -y --no-install-recommends jq
     # TypeScript 7 (the Go port) has no JavaScript API: TESTed parses
     # submissions with TypeScript 6's, installed alongside as tsc6.
-    npm install -g typescript@7.0.2 @typescript/typescript6@6.0.2 tsx@4.19.2
-    npm install -g @types/node @typescript-eslint/parser @typescript-eslint/eslint-plugin
+    # package.json only declares the versions for Dependabot; global install, not npm ci, as TESTed resolves modules through NODE_PATH.
+    # shellcheck disable=SC2046
+    npm install -g $(jq -r '.dependencies | to_entries | map("\(.key)@\(.value)") | join(" ")' /requirements/package.json)
 
     # Haskell dependencies
     apt-get install -y --no-install-recommends \
-        hlint \
         lld \
         autoconf \
         build-essential \
         zlib1g-dev \
         libgmp-dev
+    mkdir -p /usr/local/lib/hlint
+    bash -c 'set -o pipefail && curl -fsSL "https://github.com/ndmitchell/hlint/releases/download/v${HLINT_VERSION}/hlint-${HLINT_VERSION}-x86_64-linux.tar.gz" | tar -xz --strip-components=1 -C /usr/local/lib/hlint'
+    ln -s /usr/local/lib/hlint/hlint /usr/local/bin/hlint
     bash -c "set -o pipefail && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_MINIMAL=1 sh"
-    bash -c "source /root/.ghcup/env && ghcup install ghc 9.12.4 --isolate $HASKELL_DIR/ghc"
-    bash -c "source /root/.ghcup/env && ghcup install cabal --isolate $HASKELL_DIR/cabal"
+    bash -c "source /root/.ghcup/env && ghcup install ghc ${GHC_VERSION} --isolate $HASKELL_DIR/ghc"
+    bash -c "source /root/.ghcup/env && ghcup install cabal ${CABAL_VERSION} --isolate $HASKELL_DIR/cabal"
     cabal update
-    cabal v1-install --global aeson
+    cabal v1-install --global aeson-${AESON_VERSION}
 
     # GHC: drop profiling libs/interfaces, haddock/HTML docs, and debug symbols (unused at runtime)
     find "$HASKELL_DIR/ghc" -type f \( -name '*_p.a' -o -name '*.p_o' -o -name '*.p_hi' \) -delete
@@ -126,26 +141,25 @@ CFG
     dpkg -i packages-microsoft-prod.deb
     rm packages-microsoft-prod.deb
     apt-get update
-    apt-get install -y --no-install-recommends dotnet-sdk-10.0
+    apt-get install -y --no-install-recommends dotnet-sdk-${DOTNET_SDK_CHANNEL}
 
     # Java and Kotlin dependencies
     bash -c 'set -o pipefail && curl -s "https://get.sdkman.io?rcupdate=false" | bash'
     chmod a+x "$SDKMAN_DIR/bin/sdkman-init.sh"
-    bash -c "source \"$SDKMAN_DIR/bin/sdkman-init.sh\" && sdk install java 21.0.3-tem && sdk install kotlin"
-    curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.2.1/ktlint
+    bash -c "source \"$SDKMAN_DIR/bin/sdkman-init.sh\" && sdk install java ${TEMURIN_VERSION} && sdk install kotlin ${KOTLIN_VERSION}"
+    curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
     chmod a+x ktlint
     mv ktlint /usr/local/bin
 
     # Java specific dependencies
-    apt-get install -y --no-install-recommends checkstyle
+    mkdir -p /usr/local/share/checkstyle
+    curl -fsSL -o "/usr/local/share/checkstyle/checkstyle-${CHECKSTYLE_VERSION}-all.jar" \
+        "https://github.com/checkstyle/checkstyle/releases/download/checkstyle-${CHECKSTYLE_VERSION}/checkstyle-${CHECKSTYLE_VERSION}-all.jar"
+    printf '#!/bin/sh\nexec java -jar /usr/local/share/checkstyle/checkstyle-%s-all.jar "$@"\n' "$CHECKSTYLE_VERSION" > /usr/local/bin/checkstyle
+    chmod 755 /usr/local/bin/checkstyle
 
     # Exercise dependencies
-    pip install --no-cache-dir --upgrade \
-      numpy==2.5.4 \
-      pandas==3.1.0 \
-      openpyxl==3.1.5 \
-      matplotlib==3.11.2 \
-      lxml==6.1.3
+    pip install --no-cache-dir --upgrade -r /requirements/exercises.txt
 
     # Clean up caches
     apt-get clean
