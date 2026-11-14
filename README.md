@@ -21,7 +21,7 @@ This means that you can use the provided `.devcontainer/devcontainer.json` to op
 
 Modern IDEs like [Visual Studio Code](https://code.visualstudio.com/) and [PyCharm](https://www.jetbrains.com/pycharm/) support devcontainers out of the box.
 
-If you prefer installing all dependencies on your local machine, you can find the installed dependencies in the [dockerfile](./.devcontainer/dodona-tested.dockerfile).
+If you prefer installing all dependencies on your local machine, you can find the installed dependencies in the [dockerfile](./.devcontainer/dodona-tested.dockerfile) and the [requirement files](./.devcontainer/dodona-tested/) next to it.
 The extra development dependencies are installed by [dev-dependencies.sh](./.devcontainer/dev-dependencies.sh), and listed in [requirements-dev.txt](./requirements-dev.txt).
 
 ## Running TESTed

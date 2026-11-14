@@ -1,5 +1,5 @@
 -r requirements-test.txt
 
-# Same ruff as the student linter in the dodona-tested image (.devcontainer/dodona-tested.dockerfile)
+# Same ruff as the student linter in the dodona-tested image (tested.txt in docker-images dodona-tested/, mirrored in .devcontainer/dodona-tested/)
 ruff==0.17.0
 ty==0.0.95
