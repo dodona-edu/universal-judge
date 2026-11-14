@@ -242,7 +242,7 @@ def load_schema_validator(dsl_object: YamlObject = None) -> Validator:
     def _is_ignored(value: object) -> bool:
         return isinstance(value, IgnoredTag)
 
-    return original_validator(schema_object, format_checker=format_checker)  # ty: ignore[missing-argument]  # concrete validators default registry
+    return original_validator(schema_object, format_checker=format_checker)
 
 
 @define(frozen=True)
