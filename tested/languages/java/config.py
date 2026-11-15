@@ -41,6 +41,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# The dodona-tested image (docker-images, dodona-tested.dockerfile) builds this
+# cache with the same JVM flags and classpath as compilation(): change them together.
+JAVAC_AOT_CACHE = Path("/usr/local/share/tested/java/javac.aot")
+
 
 class Java(Language):
     def initial_dependencies(self) -> list[str]:
@@ -144,11 +148,19 @@ class Java(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
+        # A damaged cache must not print JVM log lines into the compiler output.
+        aot = (
+            [f"-J-XX:AOTCache={JAVAC_AOT_CACHE}", "-J-Xlog:aot*=off"]
+            if JAVAC_AOT_CACHE.is_file()
+            else []
+        )
         # javac runs once in a fresh JVM, so the time C2 spends optimising the
         # compiler never pays off. Stopping at C1 saves CPU.
         return [
             "javac",
             "-J-XX:TieredStopAtLevel=1",
+            "-J-XX:+UseSerialGC",
+            *aot,
             "-cp",
             ".",
             *others,

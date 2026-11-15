@@ -1,6 +1,8 @@
+import functools
 import logging
 import os
 import re
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -53,6 +55,21 @@ def get_executable(name):
 # Both the compiler and the submission run once in a fresh JVM, so the time C2
 # spends optimising hot code never pays off. Stopping at C1 saves CPU.
 JIT_FLAGS = ["-XX:TieredStopAtLevel=1"]
+
+# The dodona-tested image (docker-images, dodona-tested.dockerfile) builds this
+# cache with the same JVM flags and classpath as compilation(): change them together.
+KOTLINC_AOT_CACHE = Path("/usr/local/share/tested/kotlin/kotlinc.aot")
+
+
+@functools.cache
+def _kotlin_home() -> Path | None:
+    kotlinc = shutil.which(get_executable("kotlinc"))
+    if kotlinc is None:
+        return None
+    home = Path(kotlinc).resolve().parent.parent
+    if (home / "lib" / "kotlin-compiler.jar").is_file():
+        return home
+    return None
 
 
 def _rename_first_outside(
@@ -172,10 +189,37 @@ class Kotlin(Language):
             return file.suffix == ".class"
 
         others = [x for x in files if not x.endswith(".jar")]
+        home = _kotlin_home()
+        if home is None:
+            return [
+                get_executable("kotlinc"),
+                "-J-Xmx192M",
+                *(f"-J{flag}" for flag in JIT_FLAGS),
+                "-nowarn",
+                "-jvm-target",
+                "11",
+                "-cp",
+                ".",
+                *others,
+            ], file_filter
+        # A damaged cache must not print JVM log lines into the compiler output.
+        aot = (
+            [f"-XX:AOTCache={KOTLINC_AOT_CACHE}", "-Xlog:aot*=off"]
+            if KOTLINC_AOT_CACHE.is_file()
+            else []
+        )
         return [
-            get_executable("kotlinc"),
-            "-J-Xmx192M",
-            *(f"-J{flag}" for flag in JIT_FLAGS),
+            "java",
+            "-Xmx192M",
+            *JIT_FLAGS,
+            "-XX:+UseSerialGC",
+            "--enable-native-access=ALL-UNNAMED",
+            "--sun-misc-unsafe-memory-access=allow",
+            *aot,
+            f"-Dkotlin.home={home}",
+            "-cp",
+            str(home / "lib" / "kotlin-compiler.jar"),
+            "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
             "-nowarn",
             "-jvm-target",
             "11",
@@ -187,6 +231,24 @@ class Kotlin(Language):
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         assert self.config
         limit = jvm_memory_limit(self.config)
+        home = _kotlin_home()
+        if home is not None:
+            classpath = os.pathsep.join(
+                [
+                    ".",
+                    str(home / "lib" / "kotlin-stdlib.jar"),
+                    str(home / "lib" / "kotlin-reflect.jar"),
+                ]
+            )
+            return [
+                "java",
+                f"-Xmx{limit}",
+                *JIT_FLAGS,
+                "-cp",
+                classpath,
+                Path(file).stem,
+                *arguments,
+            ]
         return [
             get_executable("kotlin"),
             f"-J-Xmx{limit}",
