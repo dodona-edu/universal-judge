@@ -39,7 +39,10 @@ def run_ktlint(
     command.append(str(submission.relative_to(submission.parent)))
 
     execution_results = run_command(
-        directory=submission.parent, timeout=remaining, command=command
+        directory=submission.parent,
+        timeout=remaining,
+        command=command,
+        as_student=False,
     )
 
     if execution_results is None:

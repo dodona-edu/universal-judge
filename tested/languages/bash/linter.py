@@ -36,6 +36,7 @@ def run_shellcheck(
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
+        as_student=False,
         command=[
             "shellcheck",
             "-f",

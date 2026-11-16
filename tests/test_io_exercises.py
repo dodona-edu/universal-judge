@@ -297,6 +297,25 @@ def test_workdir_helper_sources_with_relative_workdir(
     assert updates.find_status_enum() == ["correct"]
 
 
+@pytest.mark.parametrize("language", ["c", "cpp"])
+def test_workdir_helper_sources_in_strict_unit_compilation(
+    language: str, tmp_path: Path, pytestconfig: pytest.Config
+):
+    # The broken tab fails the precompilation; the helper tab then compiles on its
+    # own in a strict workdir that holds helper.h but not helper.c.
+    conf = configuration(
+        pytestconfig,
+        "helper-sources",
+        language,
+        tmp_path,
+        "strict-fallback.yaml",
+        "correct",
+    )
+    result = execute_config(conf)
+    updates = assert_valid_output(result, pytestconfig)
+    assert updates.find_status_enum()[0] == "correct"
+
+
 def test_csharp_compiles_source_files_in_workdir_subdirectories(
     tmp_path: Path, pytestconfig: pytest.Config
 ):

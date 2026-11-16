@@ -1,0 +1,8 @@
+# The test replaces <resources> with the directory of the run.
+- tab: "Linked output"
+  testcases:
+    - statement: 'link_file("<resources>/secret.txt", "result.txt")'
+      file:
+        content: "expected.txt"
+        location: "result.txt"
+        oracle: builtin

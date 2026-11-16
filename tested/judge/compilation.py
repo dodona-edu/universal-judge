@@ -63,7 +63,7 @@ def run_compilation(
     _logger.debug(
         "Generating files with command %s in directory %s", command, directory
     )
-    result = run_command(directory, remaining, command)
+    result = run_command(directory, remaining, command, as_student=True)
     _logger.debug("Compilation dependencies are: %s", files)
     return result, files
 

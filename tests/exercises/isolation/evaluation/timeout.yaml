@@ -1,0 +1,4 @@
+- tab: "Timeout"
+  testcases:
+    - expression: "sleep(600)"
+      return: "awake"

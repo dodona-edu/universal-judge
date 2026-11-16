@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, overload
 
-from tested.configs import GlobalConfig
+from tested.configs import GlobalConfig, runs_as_student
 from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
@@ -24,8 +24,14 @@ def workdir_sources(lang_config: Language) -> list[str]:
     """The top-level workdir files in the language's extension, sorted."""
     assert lang_config.config
     workdir = lang_config.config.dodona.workdir
-    sources = workdir.glob(f"*.{lang_config.file_extension()}")
-    return sorted(str(f.absolute()) for f in sources if f.is_file())
+    sources = sorted(
+        f for f in workdir.glob(f"*.{lang_config.file_extension()}") if f.is_file()
+    )
+    if runs_as_student():
+        # student cannot read the workdir: compile the judge's copies in common.
+        common = lang_config.config.tested_directory / "common"
+        return [str(common / f.name) for f in sources]
+    return [str(f.absolute()) for f in sources]
 
 
 def cleanup_description(lang_config: Language, description: str) -> str:
