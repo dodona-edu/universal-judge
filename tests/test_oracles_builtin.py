@@ -63,6 +63,29 @@ def oracle_config(
     return OracleConfig(bundle=bundle, options=options, context_dir=tmp_path)
 
 
+def file_oracle_config(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+    options: dict,
+    expected: dict[str, str],
+    actual: dict[str, str],
+) -> OracleConfig:
+    """Expected files in the resources, actual files in a unit's directory of the run."""
+    resources = tmp_path / "resources"
+    resources.mkdir()
+    for name, content in expected.items():
+        (resources / name).write_text(content)
+    conf = configuration(
+        pytestconfig, "", "python", tmp_path, options={"resources": resources}
+    )
+    bundle = create_bundle(conf, sys.stdout, Suite())
+    context_dir = bundle.global_config.tested_directory / "execution"
+    context_dir.mkdir(parents=True)
+    for name, content in actual.items():
+        (context_dir / name).write_text(content)
+    return OracleConfig(bundle=bundle, options=options, context_dir=context_dir)
+
+
 def test_text_oracle(tmp_path: Path, pytestconfig: pytest.Config):
     config = oracle_config(tmp_path, pytestconfig, {"ignoreWhitespace": False})
     channel = TextOutputChannel(content="expected")
@@ -169,15 +192,14 @@ def test_text_oracle_try_floating_point_text_expected(
 def test_file_oracle_full_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "full"},
+        expected={"expected.txt": "expected\nexpected"},
+        actual={"expected.txt": "actual\nactual"},
+    )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected", "actual\nactual"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
@@ -193,15 +215,14 @@ def test_file_oracle_full_wrong(
 def test_file_oracle_full_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "full"},
+        expected={"expected.txt": "expected\nexpected"},
+        actual={"expected.txt": "expected\nexpected"},
+    )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected", "expected\nexpected"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
@@ -218,17 +239,14 @@ def test_file_oracle_full_correct(
 def test_file_oracle_line_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(
-        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "line", "stripNewlines": True},
+        expected={"expected.txt": "expected\nexpected2"},
+        actual={"expected.txt": "actual\nactual2"},
     )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected2", "actual\nactual2"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))],
     )
@@ -247,17 +265,14 @@ def test_file_oracle_line_wrong(
 def test_file_oracle_line_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(
-        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "line", "stripNewlines": True},
+        expected={"expected.txt": "expected\nexpected2"},
+        actual={"expected.txt": "expected\nexpected2"},
     )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected2", "expected\nexpected2"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
@@ -276,17 +291,14 @@ def test_file_oracle_line_correct(
 def test_file_oracle_strip_lines_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(
-        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": True}
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "line", "stripNewlines": True},
+        expected={"expected.txt": "expected\nexpected2\n"},
+        actual={"expected.txt": "expected\nexpected2"},
     )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected2\n", "expected\nexpected2"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
@@ -305,17 +317,14 @@ def test_file_oracle_strip_lines_correct(
 def test_file_oracle_dont_strip_lines_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(
-        tmp_path, pytestconfig, {"mode": "line", "stripNewlines": False}
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "line", "stripNewlines": False},
+        expected={"expected.txt": "expected\nexpected2\n"},
+        actual={"expected.txt": "expected\nexpected2\n"},
     )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in ["expected\nexpected2\n", "expected\nexpected2\n"]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
@@ -334,20 +343,20 @@ def test_file_oracle_dont_strip_lines_correct(
 def test_file_oracle_multiple_files_correct(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "full"},
+        expected={
+            "expected.txt": "expected\nexpected2\n",
+            "another_path.txt": "expected\nexpected4\n",
+        },
+        actual={
+            "expected.txt": "expected\nexpected2\n",
+            "another_file.txt": "expected\nexpected4\n",
+        },
+    )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in [
-            "expected\nexpected2\n",
-            "expected\nexpected2\n",
-            "expected\nexpected4\n",
-            "expected\nexpected4\n",
-        ]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[
             TextData(path="expected.txt", content=ContentPath(path="expected.txt")),
@@ -375,20 +384,20 @@ def test_file_oracle_multiple_files_correct(
 def test_file_oracle_multiple_files_one_wrong(
     tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
 ):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "full"},
+        expected={
+            "expected.txt": "expected\nexpected2\n",
+            "another_path.txt": "expected\nexpected4\n",
+        },
+        actual={
+            "expected.txt": "expected\nexpected2\n",
+            "another_file.txt": "expected\nexpected3\n",
+        },
+    )
     s = mocker.spy(tested.oracles.file, name="compare_text")
-    mock_files = [
-        mocker.mock_open(read_data=content).return_value
-        for content in [
-            "expected\nexpected2\n",
-            "expected\nexpected2\n",
-            "expected\nexpected4\n",
-            "expected\nexpected3\n",
-        ]
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
     channel = FileOutputChannel(
         files=[
             TextData(path="expected.txt", content=ContentPath(path="expected.txt")),
@@ -1188,17 +1197,14 @@ def test_file_oracle_unexpected_stdout(tmp_path: Path, pytestconfig: pytest.Conf
     assert result.readable_actual == "unexpected output"
 
 
-def test_file_oracle_missing_actual_file(
-    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
-):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    mock_files = [
-        mocker.mock_open(read_data="expected content").return_value,
-        FileNotFoundError(),
-    ]
-    mock_opener = mocker.mock_open()
-    mock_opener.side_effect = mock_files
-    mocker.patch("builtins.open", mock_opener)
+def test_file_oracle_missing_actual_file(tmp_path: Path, pytestconfig: pytest.Config):
+    config = file_oracle_config(
+        tmp_path,
+        pytestconfig,
+        {"mode": "full"},
+        expected={"expected.txt": "expected content"},
+        actual={},
+    )
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
@@ -1229,10 +1235,11 @@ def test_file_oracle_directory_instead_of_file(
 
 
 def test_file_oracle_missing_expected_resource(
-    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+    tmp_path: Path, pytestconfig: pytest.Config
 ):
-    config = oracle_config(tmp_path, pytestconfig, {"mode": "full"})
-    mocker.patch("builtins.open", side_effect=FileNotFoundError)
+    config = file_oracle_config(
+        tmp_path, pytestconfig, {"mode": "full"}, expected={}, actual={}
+    )
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content=ContentPath(path="expected.txt"))]
     )
@@ -1244,8 +1251,9 @@ def test_file_oracle_missing_expected_resource(
 
 
 def test_file_oracle_default_mode(tmp_path: Path, pytestconfig: pytest.Config):
-    config = oracle_config(tmp_path, pytestconfig, {})
-    (tmp_path / "expected.txt").write_text("hello world")
+    config = file_oracle_config(
+        tmp_path, pytestconfig, {}, expected={}, actual={"expected.txt": "hello world"}
+    )
     channel = FileOutputChannel(
         files=[TextData(path="expected.txt", content="hello world")]
     )

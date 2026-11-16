@@ -138,6 +138,7 @@ class JavaScript(Language):
             timeout=None,
             command=["node", parse_file, str(solution.absolute())],
             check=True,
+            as_student=False,
         )
         assert output, "Missing output from JavaScript's modify_solution"
         namings = output.stdout.strip()

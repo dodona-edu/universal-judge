@@ -43,6 +43,7 @@ def test_javascript_ast_parse():
         demo_file.parent,
         timeout=None,
         command=["node", str(parse_file), str(demo_file.absolute())],
+        as_student=False,
     )
     assert output
     namings = frozenset(output.stdout.strip().split(", "))
@@ -75,6 +76,7 @@ def test_typescript_ast_parse():
         demo_file.parent,
         timeout=None,
         command=["tsx", str(parse_file), str(demo_file.absolute())],
+        as_student=False,
     )
     assert output
     namings = frozenset(output.stdout.strip().split(", "))

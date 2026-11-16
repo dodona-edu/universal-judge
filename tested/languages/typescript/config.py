@@ -163,6 +163,7 @@ class TypeScript(Language):
             timeout=None,
             command=["tsx", parse_file, str(solution.absolute())],
             check=True,
+            as_student=False,
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
