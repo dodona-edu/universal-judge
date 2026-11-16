@@ -12,6 +12,7 @@ and Python doesn't have explicit support for e.g. int32, int64.
 """
 
 import itertools
+import json
 import math
 import os
 import subprocess
@@ -567,3 +568,94 @@ def test_without_optionals_reduces_object_pairs():
 @pytest.mark.parametrize("value", BASIC_VALUES + ADVANCED_VALUES)
 def test_without_optionals_keeps_a_value_without_optionals(value: Value):
     assert without_optionals(value) == value
+
+
+def _identifier_payload() -> dict:
+    return {"type": "sequence", "data": ['__import__("os").getpid()']}
+
+
+def _function_payload() -> dict:
+    return {"type": "function", "name": "exit", "arguments": []}
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        _identifier_payload(),
+        {"type": "sequence", "data": [_function_payload()]},
+        {
+            "type": "map",
+            "data": [{"key": "name", "value": {"type": "integer", "data": 1}}],
+        },
+        {
+            "type": "map",
+            "data": [{"key": {"type": "integer", "data": 1}, "value": "name"}],
+        },
+        {
+            "type": "map",
+            "data": [
+                {"key": {"type": "integer", "data": 1}, "value": _function_payload()}
+            ],
+        },
+        {
+            "type": "sequence",
+            "data": [{"type": "sequence", "data": [_identifier_payload()]}],
+        },
+        {"type": "optional", "data": _identifier_payload()},
+    ],
+    ids=[
+        "identifier-in-sequence",
+        "function-in-sequence",
+        "identifier-as-key",
+        "identifier-as-value",
+        "function-as-value",
+        "identifier-nested",
+        "identifier-in-optional",
+    ],
+)
+def test_parse_value_rejects_identifiers_and_function_calls(payload: dict):
+    with pytest.raises(TypeError):
+        parse_value(json.dumps(payload))
+
+
+def test_parse_value_accepts_nested_values():
+    text = json.dumps(
+        {
+            "type": "sequence",
+            "data": [
+                {"type": "integer", "data": 1},
+                {"type": "text", "data": "__import__('os')"},
+                {
+                    "type": "map",
+                    "data": [
+                        {
+                            "key": {"type": "text", "data": "a"},
+                            "value": {
+                                "type": "list",
+                                "data": [{"type": "optional", "data": None}],
+                            },
+                        }
+                    ],
+                },
+            ],
+        }
+    )
+    assert parse_value(text) == SequenceType(
+        type=BasicSequenceTypes.SEQUENCE,
+        data=[
+            NumberType(type=BasicNumericTypes.INTEGER, data=1),
+            StringType(type=BasicStringTypes.TEXT, data="__import__('os')"),
+            ObjectType(
+                type=BasicObjectTypes.MAP,
+                data=[
+                    ObjectKeyValuePair(
+                        key=StringType(type=BasicStringTypes.TEXT, data="a"),
+                        value=SequenceType(
+                            type=AdvancedSequenceTypes.LIST,
+                            data=[OptionalType(type="optional", data=None)],
+                        ),
+                    )
+                ],
+            ),
+        ],
+    )
