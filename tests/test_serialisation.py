@@ -186,8 +186,9 @@ def run_encoder(bundle: Bundle, values: list[Value]) -> list[str]:
     # Copy dependencies.
     dependency_paths = bundle.language.path_to_dependencies()
     dependencies = bundle.language.initial_dependencies()
-    dest = bundle.config.workdir / "encoder"
-    dest.mkdir()
+    # The judge's layout: C# runs with the runtimeconfig in "common".
+    dest = bundle.global_config.tested_directory / "common"
+    dest.mkdir(parents=True)
     copy_from_paths_to_path(dependency_paths, dependencies, dest)
 
     name = conventionalize_namespace(bundle.language, "encode")

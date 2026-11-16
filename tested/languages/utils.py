@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, overload
 
-from tested.configs import DodonaConfig, GlobalConfig
+from tested.configs import GlobalConfig
 from tested.datatypes import BasicStringTypes
 from tested.dodona import ExtendedMessage, Permission
 from tested.languages.conventionalize import submission_name
@@ -197,9 +197,8 @@ def _convert_stacktrace_to_html(stacktrace: str) -> ExtendedMessage:
     )
 
 
-def _strip_tested_directory(config: DodonaConfig, stacktrace: str) -> str:
+def _strip_tested_directory(tested_directory: Path, stacktrace: str) -> str:
     """Make paths relative to the unit's folder, so TESTed's own folders stay hidden."""
-    tested_directory = config.tested_directory
     directories = {str(tested_directory), str(tested_directory.resolve())}
     prefixes = "|".join(re.escape(directory) for directory in directories)
     return re.sub(rf"(?:{prefixes})/[^/\s]+/", "", stacktrace)
@@ -243,7 +242,9 @@ def convert_stacktrace_to_clickable_feedback(
         return None
     cleaned_stacktrace = lang.cleanup_stacktrace(stacktrace)
     assert lang.config
-    cleaned_stacktrace = _strip_tested_directory(lang.config.dodona, cleaned_stacktrace)
+    cleaned_stacktrace = _strip_tested_directory(
+        lang.config.tested_directory, cleaned_stacktrace
+    )
     updated_stacktrace = _replace_code_line_number(
         lang.config.dodona.source_offset, cleaned_stacktrace
     )
