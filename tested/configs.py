@@ -96,11 +96,6 @@ class DodonaConfig:
     # Sometimes, we need to offset the source code.
     source_offset: int = 0
 
-    @property
-    def tested_directory(self) -> Path:
-        """Where TESTed puts its own files, apart from the exercise's workdir files."""
-        return self.workdir / TESTED_DIRECTORY
-
     def config_for(self) -> dict[str, Any]:
         return self.options.language.get(self.programming_language, {})
 
@@ -128,6 +123,8 @@ class GlobalConfig:
     testcase_separator_secret: str
     context_separator_secret: str
     suite: Suite
+    tested_directory: Path
+    """Where TESTed puts its own files, apart from the exercise's workdir files."""
 
     @property
     def options(self) -> Options:
@@ -246,6 +243,7 @@ def create_bundle(
         testcase_separator_secret=get_identifier(),
         context_separator_secret=get_identifier(),
         suite=suite,
+        tested_directory=adjusted_config.workdir / TESTED_DIRECTORY,
     )
     lang_config = langs.get_language(global_config, language)
     return Bundle(language=lang_config, global_config=global_config, out=output)

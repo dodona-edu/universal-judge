@@ -159,7 +159,7 @@ def set_up_unit(
 ) -> tuple[Path, list[Path]]:
     unit = plan.units[which_unit]
     # Create a working directory for the execution.
-    execution_dir = bundle.config.tested_directory / unit.name
+    execution_dir = bundle.global_config.tested_directory / unit.name
     execution_dir.mkdir()
 
     _logger.info(f"Preparing {unit.name} in {execution_dir}")
