@@ -363,6 +363,89 @@ def test_floats_keep_full_precision(
         assert to_python_comparable(expected) == to_python_comparable(actual), result
 
 
+def assert_haskell_strings_round_trip(
+    tmp_path: Path, pytestconfig: pytest.Config, texts: list[str]
+):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    plan = Suite()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    types: list[Value] = [StringType(type=BasicStringTypes.TEXT, data=t) for t in texts]
+
+    results = run_encoder(bundle, types)
+    assert len(results) == len(types)
+
+    for result, expected in zip(results, types):
+        actual = without_optionals(parse_value(result))
+        assert actual.data == expected.data, result
+
+
+@pytest.mark.haskell
+def test_haskell_strings_survive_escaping(tmp_path: Path, pytestconfig: pytest.Config):
+    assert_haskell_strings_round_trip(
+        tmp_path,
+        pytestconfig,
+        ['a "quoted" word', "back\\slash", "line\nbreak", "tab\there", ""],
+    )
+
+
+# The generator writes strings with json.dumps, whose \u escapes are not valid Haskell.
+@pytest.mark.haskell
+@pytest.mark.xfail(strict=True, reason="Haskell string literals have no \\u escapes")
+def test_haskell_control_and_non_ascii_strings_survive(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    assert_haskell_strings_round_trip(
+        tmp_path,
+        pytestconfig,
+        ["bell\x07 and unit separator\x1f", "caf\u00e9", "emoji \U0001f600"],
+    )
+
+
+@pytest.mark.haskell
+def test_haskell_numbers_and_sequences_survive_encoding(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", "haskell", tmp_path)
+    plan = Suite()
+    bundle = create_bundle(conf, sys.stdout, plan)
+    type_map = fallback_type_support_map(bundle.language)
+
+    def integer(data: int) -> Value:
+        return NumberType(type=BasicNumericTypes.INTEGER, data=data)
+
+    types: list[Value] = []
+    for t, numbers in [
+        (BasicNumericTypes.INTEGER, [2**53 + 1, -(2**53) - 1]),
+        (AdvancedNumericTypes.INT_64, [-(2**63), 2**63 - 1]),
+        (AdvancedNumericTypes.BIG_INT, [2**64, -(2**64) - 1]),
+        (BasicNumericTypes.REAL, [1e22, 3.0, -0.0]),
+        (AdvancedNumericTypes.DOUBLE_PRECISION, [1e22]),
+    ]:
+        if type_map[t] == TypeSupport.SUPPORTED:
+            types.extend(NumberType(type=t, data=n) for n in numbers)
+
+    types.append(SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[]))
+    types.append(
+        SequenceType(
+            type=BasicSequenceTypes.SEQUENCE,
+            data=[
+                SequenceType(
+                    type=BasicSequenceTypes.SEQUENCE, data=[integer(1), integer(2)]
+                ),
+                SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[]),
+                SequenceType(type=BasicSequenceTypes.SEQUENCE, data=[integer(3)]),
+            ],
+        )
+    )
+
+    results = run_encoder(bundle, types)
+    assert len(results) == len(types)
+
+    for result, expected in zip(results, types):
+        actual = without_optionals(parse_value(result))
+        assert to_python_comparable(expected) == to_python_comparable(actual), result
+
+
 @pytest.mark.parametrize(
     "type_",
     [

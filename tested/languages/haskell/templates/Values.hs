@@ -2,8 +2,12 @@
 
 module Values where
 
-import Data.Aeson
 import Data.Text (Text)
+import qualified Data.Text as T
+import Data.Text.Encoding (encodeUtf8Builder)
+import Data.ByteString.Builder
+import Data.Char (ord)
+import Numeric (floatToDigits)
 import Data.Word as W
 import Data.Int as I
 import Control.Exception
@@ -15,6 +19,70 @@ import EvaluationUtils
 import System.IO (Handle)
 import System.IO.Unsafe (unsafePerformIO)
 import Data.Typeable
+
+
+-- A JSON encoder with the names of aeson that this module uses.
+data Value = Null | Bool Bool | Number Builder | String Text | Array [Value] | Object [(Text, Value)]
+
+class ToJSON a where
+    toJSON :: a -> Value
+    toJSONList :: [a] -> Value
+    toJSONList = Array . map toJSON
+
+instance ToJSON a => ToJSON [a] where toJSON = toJSONList
+instance ToJSON a => ToJSON (Maybe a) where toJSON = maybe Null toJSON
+instance ToJSON Value where toJSON = id
+instance ToJSON Bool where toJSON = Bool
+instance ToJSON Text where toJSON = String
+instance ToJSON Char where
+    toJSON c = String (T.singleton c)
+    toJSONList = String . T.pack
+instance ToJSON Int where toJSON = Number . intDec
+instance ToJSON I.Int8 where toJSON = Number . int8Dec
+instance ToJSON I.Int16 where toJSON = Number . int16Dec
+instance ToJSON I.Int32 where toJSON = Number . int32Dec
+instance ToJSON I.Int64 where toJSON = Number . int64Dec
+instance ToJSON W.Word8 where toJSON = Number . word8Dec
+instance ToJSON W.Word16 where toJSON = Number . word16Dec
+instance ToJSON W.Word32 where toJSON = Number . word32Dec
+instance ToJSON W.Word64 where toJSON = Number . word64Dec
+instance ToJSON Integer where toJSON = Number . integerDec
+instance ToJSON Float where toJSON = Number . realDec
+instance ToJSON Double where toJSON = Number . realDec
+
+-- As aeson: a whole number is written without fraction or exponent, so 1.0e22 as 10000000000000000000000.
+realDec :: (RealFloat a, Show a) => a -> Builder
+realDec x
+    | x < 0 = char7 '-' <> realDec (negate x)
+    | x == 0 = char7 '0'
+    | e >= length ds = integerDec (foldl (\n d -> 10 * n + toInteger d) 0 ds * 10 ^ (e - length ds))
+    | otherwise = string7 (show x)
+    where (ds, e) = floatToDigits 10 x
+
+(.=) :: ToJSON a => Text -> a -> (Text, Value)
+key .= value = (key, toJSON value)
+
+object :: [(Text, Value)] -> Value
+object = Object
+
+encode :: Value -> LBS.ByteString
+encode = toLazyByteString . build
+  where
+    build Null = string7 "null"
+    build (Bool b) = string7 (if b then "true" else "false")
+    build (Number n) = n
+    build (String s) = char7 '"' <> escape s <> char7 '"'
+    build (Array vs) = char7 '[' <> commas (map build vs) <> char7 ']'
+    build (Object kvs) = char7 '{' <> commas [build (String k) <> char7 ':' <> build v | (k, v) <- kvs] <> char7 '}'
+    commas [] = mempty
+    commas (b : bs) = b <> mconcat [char7 ',' <> b' | b' <- bs]
+    escape s = case T.break special s of
+        (clean, rest) -> encodeUtf8Builder clean <> maybe mempty (\(c, more) -> escapeChar c <> escape more) (T.uncons rest)
+    special c = c == '"' || c == '\\' || c < ' '
+    escapeChar '"' = string7 "\\\""
+    escapeChar '\\' = string7 "\\\\"
+    escapeChar '\n' = string7 "\\n"
+    escapeChar c = string7 "\\u00" <> word8HexFixed (fromIntegral (ord c))
 
 
 -- JsonTypeable things are convertible to our format
