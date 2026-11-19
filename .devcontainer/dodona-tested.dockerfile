@@ -133,6 +133,9 @@ CFG
     # GHC: drop profiling libs/interfaces, haddock/HTML docs, and debug symbols (unused at runtime)
     find "$HASKELL_DIR/ghc" -type f \( -name '*_p.a' -o -name '*.p_o' -o -name '*.p_hi' \) -delete
     rm -rf "$HASKELL_DIR/ghc/share/doc" "$HASKELL_DIR/ghc"/lib/*/doc
+    # GHC: the compiler API (package ghc) and Cabal. Their .so files stay: the ghc binaries link against them.
+    ghc-pkg unregister --global --force haddock-api ghc Cabal Cabal-syntax
+    rm -rf "$HASKELL_DIR"/ghc/lib/*/lib/*/ghc-[0-9]* "$HASKELL_DIR"/ghc/lib/*/lib/*/Cabal-* "$HASKELL_DIR"/ghc/lib/*/lib/*/haddock-api-*
     find "$HASKELL_DIR/ghc" -type f -name '*.so*' -exec strip --strip-unneeded {} + 2>/dev/null || true
     find "$HASKELL_DIR/ghc/bin" -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
 
@@ -169,8 +172,13 @@ CFG
     rm -rf /usr/local/sdkman/tmp
     # Haskell: downloaded Hackage tarballs and ghcup download cache (aeson lives in GHC's global db)
     rm -rf /root/.cabal/packages /root/.cabal/logs /root/.ghcup/cache /root/.ghcup/tmp
-    # .NET: NuGet/dotnet download and first-run caches (SDK itself untouched)
+    # .NET: NuGet/dotnet download and first-run caches
     rm -rf /root/.nuget /root/.dotnet /tmp/NuGet* /tmp/.dotnet "${HOME}/.local/share/NuGet"
+    # .NET: TESTed runs csc.dll and the runtime directly; drop what only MSBuild, F#, ASP.NET and test hosts use
+    rm -rf /usr/share/dotnet/sdk/*/DotnetTools /usr/share/dotnet/sdk/*/Sdks /usr/share/dotnet/sdk/*/FSharp \
+        /usr/share/dotnet/sdk/*/TestHostNetFramework /usr/share/dotnet/templates \
+        /usr/share/dotnet/packs/Microsoft.AspNetCore.App.Ref /usr/share/dotnet/packs/Microsoft.NETCore.App.Host.* \
+        /usr/share/dotnet/shared/Microsoft.AspNetCore.App
     # sdkman: extracted JDK/Kotlin zips, plus JDK sources and man pages (not needed to compile/run)
     rm -rf "$SDKMAN_DIR/archives/"* "$SDKMAN_DIR/tmp/"*
     rm -f  "$SDKMAN_DIR"/candidates/java/*/src.zip
