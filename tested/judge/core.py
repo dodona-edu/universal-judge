@@ -293,8 +293,8 @@ def _prepare_common_directory(bundle: Bundle) -> tuple[Path, list[str]]:
     submission into it.
     """
     dependencies = bundle.language.initial_dependencies()
-    bundle.config.tested_directory.mkdir()
-    common_dir = bundle.config.tested_directory / "common"
+    bundle.global_config.tested_directory.mkdir()
+    common_dir = bundle.global_config.tested_directory / "common"
     common_dir.mkdir()
 
     _logger.debug("Preparing common directory %s", common_dir)

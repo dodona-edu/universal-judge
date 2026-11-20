@@ -13,6 +13,7 @@ from tested.judge.utils import (
     BaseExecutionResult,
     copy_workdir_files,
     filter_files,
+    read_submission_file,
     run_command,
 )
 from tested.languages.conventionalize import selector_name
@@ -139,7 +140,7 @@ def execute_file(
     )
     _logger.debug("Executing %s in directory %s", command, working_directory)
 
-    result = run_command(working_directory, remaining, command, stdin)
+    result = run_command(working_directory, remaining, command, stdin, as_student=True)
 
     assert result is not None
     return result
@@ -147,8 +148,7 @@ def execute_file(
 
 def _get_contents_or_empty(file_path: Path) -> str:
     try:
-        with open(file_path, "r") as f:
-            return f.read()
+        return read_submission_file(file_path)
     except FileNotFoundError:
         _logger.warning(f"File not found, looked in {file_path}")
         return ""
@@ -159,7 +159,7 @@ def set_up_unit(
 ) -> tuple[Path, list[Path]]:
     unit = plan.units[which_unit]
     # Create a working directory for the execution.
-    execution_dir = bundle.config.tested_directory / unit.name
+    execution_dir = bundle.global_config.tested_directory / unit.name
     execution_dir.mkdir()
 
     _logger.info(f"Preparing {unit.name} in {execution_dir}")

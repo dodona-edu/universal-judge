@@ -39,6 +39,7 @@ def run_checkstyle(
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
+        as_student=False,
         command=["checkstyle", "-f", "xml", "-c", config_path, submission.name],
     )
 

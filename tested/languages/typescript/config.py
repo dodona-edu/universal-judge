@@ -163,6 +163,7 @@ class TypeScript(Language):
             timeout=None,
             command=["tsx", parse_file, str(solution.absolute())],
             check=True,
+            as_student=False,
         )
         assert output, "Missing output from TypesScript's modify_solution"
         namings = output.stdout.strip()
@@ -191,12 +192,12 @@ class TypeScript(Language):
         # 1a. While inside the submission code, replace all references to the location with <code>
         # 1b. Remove any "submission.SOMETHING" -> "SOMETHING"
         # 2. Once we encounter a line with the execution location, skip all lines.
-        execution_submission_location_regex = f"{self.config.dodona.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
+        execution_submission_location_regex = f"{self.config.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{submission_file(self)}"
         submission_location = (
-            self.config.dodona.tested_directory / "common" / submission_file(self)
+            self.config.tested_directory / "common" / submission_file(self)
         )
         compilation_submission_location = str(submission_location.resolve())
-        execution_location_regex = f"{self.config.dodona.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.ts"
+        execution_location_regex = f"{self.config.tested_directory}/{EXECUTION_PREFIX}[_0-9]+/{EXECUTION_PREFIX}[_0-9]+.ts"
         submission_namespace = f"{submission_name(self)}."
         # tsc reports compile errors as "submission.ts(LINE,COL)".
         tsc_location_regex = rf"{re.escape(submission_file(self))}\((\d+),(\d+)\)"

@@ -20,6 +20,15 @@ _logger = logging.getLogger(__name__)
 
 TESTED_DIRECTORY = ".tested"
 
+RUN_AS_STUDENT = Path("/usr/local/bin/run-as-student")
+# The container's own filesystem, never one of Dodona's mounts.
+STUDENT_DIRECTORY_ROOT = Path("/tmp")
+
+
+def runs_as_student() -> bool:
+    """Whether the submission compiles and runs as the user student, through the image's helper."""
+    return RUN_AS_STUDENT.exists()
+
 
 @define(frozen=True)
 class Options:
@@ -96,11 +105,6 @@ class DodonaConfig:
     # Sometimes, we need to offset the source code.
     source_offset: int = 0
 
-    @property
-    def tested_directory(self) -> Path:
-        """Where TESTed puts its own files, apart from the exercise's workdir files."""
-        return self.workdir / TESTED_DIRECTORY
-
     def config_for(self) -> dict[str, Any]:
         return self.options.language.get(self.programming_language, {})
 
@@ -128,6 +132,8 @@ class GlobalConfig:
     testcase_separator_secret: str
     context_separator_secret: str
     suite: Suite
+    tested_directory: Path
+    """Where TESTed puts its own files, apart from the exercise's workdir files."""
 
     @property
     def options(self) -> Options:
@@ -218,6 +224,13 @@ def _get_language(config: DodonaConfig) -> tuple[SupportedLanguage, int]:
         return config.programming_language, offset
 
 
+def _tested_directory(config: DodonaConfig) -> Path:
+    if runs_as_student():
+        # The host removes the workdir as runner, which files owned by student could prevent.
+        return STUDENT_DIRECTORY_ROOT / f"tested-{get_identifier()}"
+    return config.workdir / TESTED_DIRECTORY
+
+
 def create_bundle(
     config: DodonaConfig,
     output: IO,
@@ -246,6 +259,7 @@ def create_bundle(
         testcase_separator_secret=get_identifier(),
         context_separator_secret=get_identifier(),
         suite=suite,
+        tested_directory=_tested_directory(adjusted_config),
     )
     lang_config = langs.get_language(global_config, language)
     return Bundle(language=lang_config, global_config=global_config, out=output)

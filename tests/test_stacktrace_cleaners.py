@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tested.configs import DodonaConfig, GlobalConfig, Options
+from tested.configs import TESTED_DIRECTORY, DodonaConfig, GlobalConfig, Options
 from tested.dodona import AnnotateCode, Severity
 from tested.languages import Language
 from tested.languages import get_language as upstream_get_language
@@ -33,6 +33,7 @@ def get_language(workdir: str, language: str) -> Language:
         testcase_separator_secret="",
         context_separator_secret="",
         suite=Suite(tabs=[]),
+        tested_directory=dodona_config.workdir / TESTED_DIRECTORY,
     )
     return upstream_get_language(global_config, language)
 

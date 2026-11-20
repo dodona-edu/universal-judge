@@ -55,6 +55,7 @@ def run_ruff(
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
+        as_student=False,
         command=[
             "ruff",
             "check",

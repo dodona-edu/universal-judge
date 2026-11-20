@@ -32,6 +32,7 @@ def run_eslint(
     execution_results = run_command(
         directory=submission.parent,
         timeout=remaining,
+        as_student=False,
         command=[
             "eslint",
             "-f",

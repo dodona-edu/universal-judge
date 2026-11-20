@@ -5,6 +5,7 @@ from tested.internationalization import get_i18n_string
 from tested.oracles.common import OracleConfig, OracleResult
 from tested.oracles.text import compare_text
 from tested.testsuite import ContentPath, FileOutputChannel, OutputChannel, TextData
+lazy from tested.judge.utils import read_submission_file
 
 
 def _file_defaults(config: OracleConfig) -> dict:
@@ -90,8 +91,7 @@ def compare_file(
     actual_path = config.context_dir / file.path
 
     try:
-        with open(str(actual_path), "r") as f:
-            actual = f.read()
+        actual = read_submission_file(actual_path)
     except FileNotFoundError:
         return OracleResult(
             result=StatusMessage(
