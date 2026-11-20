@@ -1,3 +1,4 @@
+import functools
 import re
 from pathlib import Path
 
@@ -37,16 +38,64 @@ from tested.languages.utils import (
 )
 from tested.serialisation import Statement, Value
 
+TEMPLATE_FILES = [
+    "values.h",
+    "values.cpp",
+    "values.tpp",
+    "evaluation_result.h",
+    "evaluation_result.cpp",
+]
+OBJECT_FILES = ["values.o", "evaluation_result.o"]
+TEMPLATES_DIRECTORY = Path(__file__).parent / "templates"
+
+HELPER_FLAGS = ["-std=c++20", "-Wall", "-O0"]
+
+# The dodona-tested image (docker-images, dodona-tested.dockerfile) compiles the helpers
+# and records its flags in `flags`; the judge ignores them when sources or flags differ.
+PRECOMPILED_DIRECTORY = Path("/usr/local/share/tested/cpp/static")
+
+
+@functools.cache
+def precompiled_helpers() -> Path | None:
+    """
+    Find the precompiled helper objects of the image, if it has them.
+
+    They are only used if they were built from the same sources (headers included) and
+    with the same flags as this judge uses.
+    """
+    directory = PRECOMPILED_DIRECTORY
+    flags = directory / "flags"
+    if not flags.is_file() or flags.read_text().strip() != " ".join(HELPER_FLAGS):
+        return None
+    if not all((directory / name).is_file() for name in OBJECT_FILES):
+        return None
+    for name in TEMPLATE_FILES:
+        source = directory / name
+        template = TEMPLATES_DIRECTORY / name
+        if not source.is_file() or source.read_bytes() != template.read_bytes():
+            return None
+    return directory
+
 
 class CPP(Language):
+    def _precompiled_helpers(self) -> Path | None:
+        assert self.config
+        # The image compiles them with -O0.
+        if self.config.options.compiler_optimizations:
+            return None
+        return precompiled_helpers()
+
     def initial_dependencies(self) -> list[str]:
-        return [
-            "values.h",
-            "values.cpp",
-            "values.tpp",
-            "evaluation_result.h",
-            "evaluation_result.cpp",
-        ]
+        if self._precompiled_helpers():
+            sources = [name for name in TEMPLATE_FILES if not name.endswith(".cpp")]
+            return sources + OBJECT_FILES
+        return list(TEMPLATE_FILES)
+
+    def path_to_dependencies(self) -> list[Path]:
+        paths = super().path_to_dependencies()
+        if directory := self._precompiled_helpers():
+            paths.insert(0, directory)
+        return paths
 
     def needs_selector(self):
         return True
@@ -114,14 +163,19 @@ class CPP(Language):
         exec_file = Path(main_file).stem
         result = executable_name(exec_file)
         assert self.config
+        if self._precompiled_helpers():
+            helpers = ["evaluation_result.o", "values.o"]
+        else:
+            helpers = ["evaluation_result.cpp", "values.cpp"]
+        if self.config.options.compiler_optimizations:
+            flags = ["-std=c++20", "-Wall", "-O3"]
+        else:
+            flags = HELPER_FLAGS
         return (
             [
                 "g++",
-                "-std=c++20",
-                "-Wall",
-                "-O3" if self.config.options.compiler_optimizations else "-O0",
-                "evaluation_result.cpp",
-                "values.cpp",
+                *flags,
+                *helpers,
                 *workdir_sources(self),
                 main_file,
                 "-Wl,--wrap=main",
