@@ -663,11 +663,30 @@ def parse_value(value: str) -> Value | OptionalType:
     :param value: The json to be parsed.
     :return: The parsed data.
     :raises ValueError: If ``value`` is not valid json.
-    :raises TypeError: If the json is not a value.
+    :raises TypeError: If the json is not a value, or contains an identifier or
+        function call.
     :raises RecursionError: If the json is nested too deeply.
     """
 
-    return parse_json_value(value)
+    parsed = parse_json_value(value)
+    # The json comes from the submission's process, so it may only hold data.
+    _reject_code(parsed)
+    return parsed
+
+
+def _reject_code(element: Expression | OptionalType) -> None:
+    if isinstance(element, Identifier | FunctionCall):
+        raise TypeError(f"A value cannot contain code, got {element!r}.")
+    if isinstance(element, OptionalType):
+        if element.data is not None:
+            _reject_code(element.data)
+    elif isinstance(element, SequenceType):
+        for item in element.data:
+            _reject_code(item)
+    elif isinstance(element, ObjectType):
+        for pair in element.data:
+            _reject_code(pair.key)
+            _reject_code(pair.value)
 
 
 class PrintingDecimal:
