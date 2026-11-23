@@ -147,7 +147,12 @@ def _compiler_and_references() -> tuple[Path, TargetFramework, list[Path]]:
 
 class CSharp(Language):
     def initial_dependencies(self) -> list[str]:
-        return ["GlobalUsings.cs", "Values.cs", "EvaluationResult.cs"]
+        return [
+            "GlobalUsings.cs",
+            "Values.cs",
+            "EvaluationResult.cs",
+            *(framework.runtimeconfig for framework in TARGET_FRAMEWORKS),
+        ]
 
     def needs_selector(self):
         return True
@@ -252,12 +257,13 @@ class CSharp(Language):
     def execution(self, cwd: Path, file: str, arguments: list[str]) -> Command:
         # csc does not write the runtimeconfig.json that `dotnet build` does.
         _, framework, _ = _compiler_and_references()
-        runtime_config = self.path_to_dependencies()[0] / framework.runtimeconfig
+        assert self.config
+        common = self.config.tested_directory.absolute() / "common"
         return [
             "dotnet",
             "exec",
             "--runtimeconfig",
-            str(runtime_config),
+            str(common / framework.runtimeconfig),
             file,
             *arguments,
         ]
@@ -320,9 +326,9 @@ class {class_name}
         assert self.config
         execution = conventionalize_namespace(self, EXECUTION_PREFIX)
         execution_submission_location_regex = (
-            rf"{self.config.dodona.tested_directory}/common/{execution}[0-9]+\.cs:line "
+            rf"{self.config.tested_directory}/common/{execution}[0-9]+\.cs:line "
         )
-        tested_directory = re.escape(str(self.config.dodona.tested_directory.resolve()))
+        tested_directory = re.escape(str(self.config.tested_directory.resolve()))
         subdir = rf"(?:common|{execution}[_0-9]+)"
         sub = re.escape(submission_file(self))
         submission_location_regex = rf"{tested_directory}/{subdir}/{sub}:line ([0-9]+)"

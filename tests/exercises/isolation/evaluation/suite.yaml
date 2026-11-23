@@ -1,0 +1,27 @@
+# The test replaces <resources> and <judge> with the directories of the run.
+- tab: "Judge output"
+  testcases:
+    - expression: 'open_output("parent")'
+      return: "denied"
+    - expression: 'open_output("grandparent")'
+      return: "denied"
+    - expression: 'open_output("init")'
+      return: "denied"
+- tab: "Signals"
+  testcases:
+    - expression: 'send_signal("parent")'
+      return: "denied"
+    - expression: 'send_signal("grandparent")'
+      return: "denied"
+- tab: "Judge files"
+  testcases:
+    - expression: 'list_directory("<resources>")'
+      return: "denied"
+    - expression: 'read_file("<resources>/suite.yaml")'
+      return: "denied"
+    - expression: 'write_file("<judge>/tested/probe.txt")'
+      return: "denied"
+- tab: "Own files"
+  testcases:
+    - expression: 'write_file("probe.txt")'
+      return: "allowed"

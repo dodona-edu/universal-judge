@@ -1,7 +1,7 @@
 import io
 from pathlib import Path
 
-from tested.configs import Bundle, DodonaConfig, GlobalConfig
+from tested.configs import TESTED_DIRECTORY, Bundle, DodonaConfig, GlobalConfig
 from tested.descriptions.converters import (
     convert_templated_problem,
     convert_tested_markdown,
@@ -28,6 +28,7 @@ def process_problem_statement(
         context_separator_secret="",
         testcase_separator_secret="",
         suite=Suite(tabs=[]),
+        tested_directory=Path(TESTED_DIRECTORY),
     )
 
     language = get_language(global_config, global_config.dodona.programming_language)

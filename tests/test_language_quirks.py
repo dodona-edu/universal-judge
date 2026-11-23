@@ -10,7 +10,9 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
+import tested.main
 from tested.configs import create_bundle
 from tested.datatypes import (
     AdvancedSequenceTypes,
@@ -709,10 +711,13 @@ def test_haskell_precompiled_helpers_must_match_templates(
     haskell_config.precompiled_helpers() is None,
     reason="The image has no precompiled Haskell helpers",
 )
-def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.Config):
+def test_haskell_uses_precompiled_helpers(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker: MockerFixture
+):
     conf = configuration(
         pytestconfig, "echo-function", "haskell", tmp_path, "one.tson", "correct"
     )
+    create_bundle_spy = mocker.spy(tested.main, "create_bundle")
     result = execute_config(conf)
     updates = assert_valid_output(result, pytestconfig)
     assert updates.find_status_enum() == ["correct"]
@@ -721,9 +726,10 @@ def test_haskell_uses_precompiled_helpers(tmp_path: Path, pytestconfig: pytest.C
     # helpers. Their contents don't tell: GHC would write the same bytes again.
     precompiled = haskell_config.precompiled_helpers()
     assert precompiled
+    tested_directory = create_bundle_spy.spy_return.global_config.tested_directory
     for module in haskell_config.HELPER_MODULES:
         for ext in ("hi", "o"):
-            used = conf.tested_directory / "common" / f"{module}.{ext}"
+            used = tested_directory / "common" / f"{module}.{ext}"
             shipped = precompiled / f"{module}.{ext}"
             assert used.stat().st_mtime_ns == shipped.stat().st_mtime_ns
 

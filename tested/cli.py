@@ -12,7 +12,7 @@ from argparse import ArgumentParser, ArgumentTypeError
 from io import StringIO
 from pathlib import Path
 
-from tested.configs import DodonaConfig, GlobalConfig
+from tested.configs import TESTED_DIRECTORY, DodonaConfig, GlobalConfig
 from tested.languages import get_language
 from tested.main import run
 from tested.testsuite import Suite, SupportedLanguage
@@ -46,6 +46,7 @@ def find_submission() -> Path:
         testcase_separator_secret="",
         context_separator_secret="",
         suite=Suite(),
+        tested_directory=Path(TESTED_DIRECTORY),
     )
     language = get_language(global_config, programming_language)
     solution_folder = exercise_path / "solution"

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from attrs import define
 
-from tested.configs import DodonaConfig, GlobalConfig, create_bundle
+from tested.configs import TESTED_DIRECTORY, DodonaConfig, GlobalConfig, create_bundle
 from tested.datatypes import (
     AdvancedNumericTypes,
     AdvancedObjectTypes,
@@ -83,6 +83,7 @@ def make_language(
         suite=FeatureSuite(
             tabs=tabs or [], features=features, expected_values=expected_values
         ),
+        tested_directory=dodona.workdir / TESTED_DIRECTORY,
     )
     return language_class(config)
 
