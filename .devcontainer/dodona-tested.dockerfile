@@ -28,7 +28,7 @@ ENV PATH=$HASKELL_DIR/ghc/bin:$PATH
 ENV PATH=$HASKELL_DIR/cabal:$PATH
 ARG GHC_VERSION=9.14.1
 ARG CABAL_VERSION=3.18.2.0
-ARG AESON_VERSION=2.3.2.0
+ARG RANDOM_VERSION=1.3.1
 ARG HLINT_VERSION=3.10
 # Node
 ENV NODE_PATH=/usr/lib/node_modules
@@ -128,10 +128,10 @@ CFG
     bash -c "source /root/.ghcup/env && ghcup install ghc ${GHC_VERSION} --isolate $HASKELL_DIR/ghc"
     bash -c "source /root/.ghcup/env && ghcup install cabal ${CABAL_VERSION} --isolate $HASKELL_DIR/cabal"
     cabal update
-    cabal v1-install --global aeson-${AESON_VERSION}
+    cabal v1-install --global random-${RANDOM_VERSION}
 
     # GHC: drop profiling libs/interfaces, haddock/HTML docs, and debug symbols (unused at runtime)
-    find "$HASKELL_DIR/ghc" -type f \( -name '*_p.a' -o -name '*.p_o' -o -name '*.p_hi' \) -delete
+    find "$HASKELL_DIR/ghc" -type f \( -name '*_p.a' -o -name '*_p.so' -o -name '*_p-ghc*.so' -o -name '*.p_o' -o -name '*.p_hi' -o -name '*.p_dyn_hi' -o -name 'ghc-iserv-prof*' \) -delete
     rm -rf "$HASKELL_DIR/ghc/share/doc" "$HASKELL_DIR/ghc"/lib/*/doc
     # GHC: the compiler API (package ghc) and Cabal. Their .so files stay: the ghc binaries link against them.
     ghc-pkg unregister --global --force haddock-api ghc Cabal Cabal-syntax
@@ -170,7 +170,7 @@ CFG
     rm -rf /root/.cache
     rm -rf /root/.npm
     rm -rf /usr/local/sdkman/tmp
-    # Haskell: downloaded Hackage tarballs and ghcup download cache (aeson lives in GHC's global db)
+    # Haskell: downloaded Hackage tarballs and ghcup download cache (random lives in GHC's global db)
     rm -rf /root/.cabal/packages /root/.cabal/logs /root/.ghcup/cache /root/.ghcup/tmp
     # .NET: NuGet/dotnet download and first-run caches
     rm -rf /root/.nuget /root/.dotnet /tmp/NuGet* /tmp/.dotnet "${HOME}/.local/share/NuGet"
@@ -181,7 +181,7 @@ CFG
         /usr/share/dotnet/shared/Microsoft.AspNetCore.App
     # sdkman: extracted JDK/Kotlin zips, plus JDK sources and man pages (not needed to compile/run)
     rm -rf "$SDKMAN_DIR/archives/"* "$SDKMAN_DIR/tmp/"*
-    rm -f  "$SDKMAN_DIR"/candidates/java/*/src.zip
+    rm -f  "$SDKMAN_DIR"/candidates/java/*/lib/src.zip
     rm -rf "$SDKMAN_DIR"/candidates/java/*/man "$SDKMAN_DIR"/candidates/kotlin/*/licenses
 
     # Setup permissions and user
@@ -206,6 +206,48 @@ RUN <<EOF
     set -eux
     chmod 644 /usr/local/share/tested/haskell/static/*.hs
     bash -c "cd /usr/local/share/tested/haskell/static && ghc -no-link -fno-cse -fno-full-laziness -O0 EvaluationUtils.hs Values.hs"
+EOF
+
+# Precompile TESTed's C++ helpers with the flags of CPP.compilation in
+# tested/languages/cpp/config.py, and record those flags next to the objects.
+# TESTed only links them if the sources and the flags match its own, and compiles
+# the sources itself otherwise. ADD keys the build cache on the downloaded content.
+ARG TESTED_CPP_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/cpp/templates
+# hadolint ignore=DL3020
+ADD ${TESTED_CPP_TEMPLATES}/values.h ${TESTED_CPP_TEMPLATES}/values.cpp ${TESTED_CPP_TEMPLATES}/values.tpp ${TESTED_CPP_TEMPLATES}/evaluation_result.h ${TESTED_CPP_TEMPLATES}/evaluation_result.cpp /usr/local/share/tested/cpp/static/
+RUN <<EOF
+    set -eux
+    chmod 644 /usr/local/share/tested/cpp/static/*
+    bash -c 'cd /usr/local/share/tested/cpp/static && flags="-std=c++20 -Wall -O0" && g++ $flags -c values.cpp evaluation_result.cpp && echo "$flags" > flags'
+EOF
+
+# AOT caches that cut the start-up of TESTed's Kotlin and Java compilers. They are
+# built with the JVM flags and classpath of Kotlin.compilation and Java.compilation
+# in tested/languages/{kotlin,java}/config.py of universal-judge, so the two must
+# change together; its tests/test_jvm_commands.py fails when the judge cannot use them.
+# ADD keys the build cache on the template contents.
+ARG TESTED_KOTLIN_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/kotlin/templates
+ARG TESTED_JAVA_TEMPLATES=https://raw.githubusercontent.com/dodona-edu/universal-judge/master/tested/languages/java/templates
+# DL3020: hadolint does not see that these ARGs are URLs.
+# hadolint ignore=DL3020
+ADD ${TESTED_KOTLIN_TEMPLATES}/EvaluationResult.kt ${TESTED_KOTLIN_TEMPLATES}/Values.kt /tmp/tested-aot/kotlin/
+# hadolint ignore=DL3020
+ADD ${TESTED_JAVA_TEMPLATES}/EvaluationResult.java ${TESTED_JAVA_TEMPLATES}/Values.java /tmp/tested-aot/java/
+# DL3003: the compilers run from the directories holding the templates.
+# hadolint ignore=DL3003
+RUN <<EOF
+    set -eux
+    KOTLIN_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v kotlinc)")")")"
+    mkdir -p /usr/local/share/tested/kotlin /usr/local/share/tested/java /tmp/tested-aot/out
+    cd /tmp/tested-aot/kotlin
+    java -XX:AOTCacheOutput=/usr/local/share/tested/kotlin/kotlinc.aot -Xmx192M -XX:TieredStopAtLevel=1 -XX:+UseSerialGC --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow "-Dkotlin.home=$KOTLIN_HOME" -cp "$KOTLIN_HOME/lib/kotlin-compiler.jar" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler -nowarn -jvm-target 11 -cp . -d /tmp/tested-aot/out EvaluationResult.kt Values.kt > /dev/null
+    test -s /usr/local/share/tested/kotlin/kotlinc.aot
+    cd /tmp/tested-aot/java
+    javac -J-XX:AOTCacheOutput=/usr/local/share/tested/java/javac.aot -J-XX:TieredStopAtLevel=1 -J-XX:+UseSerialGC -cp . -d /tmp/tested-aot/out EvaluationResult.java Values.java > /dev/null
+    test -s /usr/local/share/tested/java/javac.aot
+    chmod 644 /usr/local/share/tested/kotlin/kotlinc.aot /usr/local/share/tested/java/javac.aot
+    cd /
+    rm -rf /tmp/tested-aot
 EOF
 
 USER runner
