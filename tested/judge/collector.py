@@ -151,7 +151,8 @@ class OutputManager:
             elif open_level == "judgement":
                 if until in ("tab", "context", "testcase"):
                     return
-                self.add(CloseJudgement())
+                accepted = None if status.enum == Status.CORRECT else False
+                self.add(CloseJudgement(accepted=accepted))
                 self.finalized = True
 
 
