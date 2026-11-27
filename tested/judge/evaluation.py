@@ -632,7 +632,9 @@ def add_not_executed_context(
     collector.add(CloseContext(accepted=False), context_index)
 
 
-def complete_evaluation(bundle: Bundle, collector: OutputManager):
+def complete_evaluation(
+    bundle: Bundle, collector: OutputManager, accepted: bool | None
+):
     # We assume we have at least an open judgement.
     if collector.finalized:
         return
@@ -654,7 +656,7 @@ def complete_evaluation(bundle: Bundle, collector: OutputManager):
             testcase_start = 0  # For the next context, start at the beginning
         collector.add(CloseTab())
         context_start = 0  # For the next tab, start from the beginning.
-    collector.add(CloseJudgement())
+    collector.add(CloseJudgement(accepted=accepted))
 
 
 def terminate(
@@ -680,4 +682,9 @@ def terminate(
         until = "testcase"
 
     collector.terminate(status_if_unclosed=status_if_unclosed, until=until)
-    complete_evaluation(bundle, collector)
+    if isinstance(status_if_unclosed, StatusMessage):
+        status_enum = status_if_unclosed.enum
+    else:
+        status_enum = status_if_unclosed
+    accepted = None if status_enum == Status.CORRECT else False
+    complete_evaluation(bundle, collector, accepted)

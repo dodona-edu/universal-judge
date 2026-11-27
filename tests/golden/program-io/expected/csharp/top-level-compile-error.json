@@ -186,6 +186,7 @@
   "command": "close-tab"
  },
  {
+  "accepted": false,
   "command": "close-judgement"
  }
 ]

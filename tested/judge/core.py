@@ -133,6 +133,7 @@ def judge(bundle: Bundle):
         report_update(
             bundle.out,
             CloseJudgement(
+                accepted=False,
                 status=StatusMessage(
                     enum=Status.INTERNAL_ERROR,
                     human=get_i18n_string("judge.core.unsupported.language"),

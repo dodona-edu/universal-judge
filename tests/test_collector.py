@@ -19,6 +19,7 @@ from tested.dodona import (
     StatusMessage,
 )
 from tested.judge.collector import OutputManager
+from tested.judge.core import judge
 from tested.judge.evaluation import terminate
 from tested.serialisation import FunctionCall, FunctionType
 from tested.testsuite import (
@@ -199,6 +200,118 @@ def test_mid_tab_is_completed(tmp_path: Path, pytestconfig: pytest.Config):
         "wrong",
         "wrong",
     ]
+
+
+def _add_passed_first_tab(collector: OutputManager):
+    collector.add(StartJudgement())
+    collector.add(StartTab(TEST_SUITE.tabs[0].name))
+    collector.add(StartContext())
+    collector.add(StartTestcase(description="test 1"))
+    collector.add(StartTest(expected="test 1.1"))
+    collector.add(
+        CloseTest(generated="test 1.2", status=StatusMessage(enum=Status.CORRECT))
+    )
+    collector.add(CloseTestcase(), 0)
+    collector.add(StartTestcase(description="test 2"))
+    collector.add(StartTest(expected="test 2.1"))
+    collector.add(
+        CloseTest(generated="test 2.2", status=StatusMessage(enum=Status.CORRECT))
+    )
+    collector.add(CloseTestcase(), 1)
+    collector.add(CloseContext(), 0)
+    collector.add(StartContext())
+    collector.add(StartTestcase(description="test 22"))
+    collector.add(StartTest(expected="test 1.1"))
+    collector.add(
+        CloseTest(generated="test 1.2", status=StatusMessage(enum=Status.CORRECT))
+    )
+    collector.add(CloseTestcase(), 0)
+    collector.add(CloseContext(), 1)
+    collector.add(CloseTab(), 0)
+
+
+def _add_passed_second_tab(collector: OutputManager):
+    collector.add(StartTab(TEST_SUITE.tabs[1].name))
+    collector.add(StartContext())
+    collector.add(StartTestcase(description="test 2.1"))
+    collector.add(StartTest(expected="test 2.1.1"))
+    collector.add(
+        CloseTest(generated="test 2.1.2", status=StatusMessage(enum=Status.CORRECT))
+    )
+    collector.add(CloseTestcase(), 0)
+    collector.add(CloseContext(), 0)
+    collector.add(CloseTab(), 1)
+
+
+def test_time_limit_closes_judgement_not_accepted(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
+    result = StringIO()
+    bundle = create_bundle(conf, result, TEST_SUITE)
+    collector = OutputManager(out=result)
+
+    # Every context that ran passed; the second tab never ran.
+    _add_passed_first_tab(collector)
+    terminate(bundle, collector, status_if_unclosed=Status.TIME_LIMIT_EXCEEDED)
+
+    updates = assert_valid_output(result.getvalue(), pytestconfig)
+
+    close = updates.find_next("close-judgement")
+    assert close["accepted"] is False
+
+
+def test_time_limit_in_last_tab_closes_judgement_not_accepted(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
+    result = StringIO()
+    bundle = create_bundle(conf, result, TEST_SUITE)
+    collector = OutputManager(out=result)
+
+    # Every context that ran passed, and the last tab is open when time runs out.
+    _add_passed_first_tab(collector)
+    _add_passed_second_tab(collector)
+    terminate(bundle, collector, status_if_unclosed=Status.TIME_LIMIT_EXCEEDED)
+
+    updates = assert_valid_output(result.getvalue(), pytestconfig)
+
+    close = updates.find_next("close-judgement")
+    assert close["accepted"] is False
+
+
+def test_correct_termination_leaves_accepted_to_dodona(
+    tmp_path: Path, pytestconfig: pytest.Config
+):
+    conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
+    result = StringIO()
+    bundle = create_bundle(conf, result, TEST_SUITE)
+    collector = OutputManager(out=result)
+
+    _add_passed_first_tab(collector)
+    _add_passed_second_tab(collector)
+    terminate(bundle, collector, status_if_unclosed=Status.CORRECT)
+
+    updates = assert_valid_output(result.getvalue(), pytestconfig)
+
+    assert "accepted" not in updates.find_next("close-judgement")
+
+
+def test_unsupported_language_closes_judgement_not_accepted(
+    tmp_path: Path, pytestconfig: pytest.Config, mocker
+):
+    conf = configuration(pytestconfig, "", SupportedLanguage.JAVASCRIPT, tmp_path)
+    result = StringIO()
+    bundle = create_bundle(conf, result, TEST_SUITE)
+    mocker.patch("tested.judge.core.is_supported", return_value=["Unsupported."])
+
+    judge(bundle)
+
+    updates = assert_valid_output(result.getvalue(), pytestconfig)
+
+    close = updates.find_next("close-judgement")
+    assert close["status"]["enum"] == "internal error"
+    assert close["accepted"] is False
 
 
 FILE_OUTPUT_SUITE = Suite(
